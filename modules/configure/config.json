@@ -1,0 +1,35 @@
+{
+    "name": "config",
+    "description": "Built in configuration manager.",
+    "active": true,
+    "namespace": "config",
+    "content": [
+        "config.json"
+    ],
+    "tables": [
+        {
+            "name": "tableName",
+            "tables": [
+                {
+                    "name": "user",
+                    "columns": [
+                    ],
+                    "indexes": [
+                    ]
+                }
+            ]
+        }
+    ],
+    "databases": [
+        {
+            "type": "postgres",
+            "host": "hostname",
+            "username": "",
+            "password": "",
+            "tables": [
+                "table1",
+                "table2"
+            ]
+        }
+    ]
+}

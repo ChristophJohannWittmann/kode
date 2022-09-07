@@ -1,0 +1,11 @@
+{
+  "name": "pg",
+  "version": "1.0.0",
+  "description": "High performance interface for PostgreSQL.",
+  "private": true,
+  "dependencies": {
+  },
+  "scripts": {
+  },
+  "gypfile": true
+}
