@@ -22,6 +22,7 @@
 
 
 /*****
+ * Need to comment this function.
 *****/
 register(class Module {
     constructor(path) {
