@@ -1,39 +1,28 @@
 {
-    "workers": 0,
+    "workers": 1,
     "debug": false,
-    "caching": true,
-    "certificateAuthorities": {
-        "letsEncrypt": {
-            "name": "Let's Encrypt",
-            "acme": "v2",
-            "url": "https://letsencrypt.com/apiv2"
-        }
-    },
-    "network": {
-        "public": {
-            "address": "127.0.0.1",
-            "domain": "",
-            "hostname": "localhost",
-            "tls": {
-                "enabled": false,
-                "live": false,
-                "ca": "letsEncrypt",
-                "publicKey": { "#NULL": 0 },
-                "privateKey": { "#NULL": 0 },
-                "certificate": { "#NULL": 0 },
-                "expiration": { "#NULL": 0 }
-            }
-        }
-    },
-    "daemons": [
-    ],
-    "servers": [
+    "cache": false,
+    "logging": "console",
+    "network": [
         {
-            "name": "http",
-            "interface": "public"
+            "public": {
+                "active": true,
+                "address": "127.0.0.1",
+                "domain": "localhost.com",
+                "hostname": "localhost.com",
+                "tls": {
+                    "ca": "letsEncrypt",
+                    "url": "https//letsencrypt.com/apiv2:",
+                    "account": "",
+                    "publicKey": { "#NULL": 0 },
+                    "privateKey": { "#NULL": 0 },
+                    "certificate": { "#NULL": 0 },
+                    "expiration": { "#NULL": 0 }
+                }
+            }
         }
     ],
     "userModules": [
-        "/Users/cwittmann/Documents/somepath"
+        "/Users/cwittmann/Documents/connoisseurClubx"
     ]
 }

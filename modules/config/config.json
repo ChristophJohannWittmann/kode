@@ -1,0 +1,22 @@
+{
+    "name": "config",
+    "url": "/config",
+    "description": "JSON Configuration Editor.",
+    "active": true,
+    "content": [
+        { "path": "", "include": true }
+    ],
+    "dbms": [
+        {
+            "type": "postgres",
+            "host": "myschema-host",
+            "username": "",
+            "password": "",
+            "keypath": "",
+            "keypem": "" ,
+            "schemas": [
+                "blabla"
+            ]
+        }
+    ]
+}

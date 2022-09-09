@@ -23,17 +23,25 @@
 
 /*****
 *****/
-register(async function log(...args) {
-    for (let arg of args) {
-        console.log(arg);
+register(class Addon {
+    constructor(path) {
+        this.path = path;
+        this.status = '';
+        this.error = '';
     }
-});
 
+    error() {
+        return 'error';
+    }
 
-/*****
-*****/
-register(async function logPrimary(...args) {
-    if (CLUSTER.isPrimary) {
-        await log(...args);
+    info() {
+        return `addon ${this.path}`;
+    }
+    
+    async load() {
+    }
+
+    status() {
+        return this.status;
     }
 });

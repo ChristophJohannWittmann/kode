@@ -25,47 +25,109 @@
 *****/
 register(class Module {
     constructor(path) {
-        return new Promise(async (ok, fail) => {
-            this.status = 'new';
-            this.path = path;
-            
-            if (FS.existsSync(this.path)) {
-                let stats = await FILES.stat(this.path);
-     
-                if (stats.isDirectory()) {
-                    this.config = await Config.loadModule(`${this.path}/config.json`);
-                    
-                    if (!this.config.active) {
-                        this.status = 'module-set-inactive';
-                    }
-                    else {
-                        this.status = 'ok';
-                    }
-                }
-                else {
-                    this.status = 'path-is-not-directory';
-                }
-            }
-            else {
-                this.status = 'directory-not-found';
-            }
-            
-            ok(this);
-        });
+        this.path = path;
+        this.status = 'ok';
+        this.prefix = '(loaded  )';
+        this.error = '';
+    }
+
+    info() {
+        return `${this.prefix} Module ${this.path}`;
     }
     
     async load() {
-        namespace(this.config.name);
-        
-        for (let directoryEntry of await FILES.readdir(this.path)) {
-            console.log('\nModule.load()');
-            console.log(directoryEntry);
-            console.log('');
+        if (FS.existsSync(this.path)) {
+            let stats = await FILES.stat(this.path);
+
+            if (stats.isDirectory()) {
+                let configPath = `${this.path}/config.json`;
+
+                if (FS.existsSync(configPath)) {
+                    stats = await FILES.stat(configPath);
+
+                    if (stats.isFile()) {
+                        try {                    
+                            this.config = fromJson((await FILES.readFile(configPath)).toString());
+
+                            for (let methodName of ['validate', 'scanContent', 'scanDirectory', 'upgradeSchema']) {
+                                await this[methodName]();
+
+                                if (this.status != 'ok') {
+                                    break;
+                                }
+                            }
+
+                            if (this.status == 'ok') {
+                                Config.moduleMap[this.config.name] = this;
+                                Config.moduleArray.push(this);
+                                Config.moduleUrlMap[this.config.url] = this;
+                            }
+                        }
+                        catch (e) {
+                            this.error = e;
+                            this.status = 'error';
+                            this.prefix = '(error   )';
+                            log(`\n${this.error.stack.toString()}`);
+                        }
+                    }
+                    else {
+                        this.status = 'fail';
+                        this.prefix = '(config  )';
+                    }
+                }
+                else {
+                    this.status = 'fail';
+                    this.prefix = '(path    )';
+                }
+            }
+            else {
+                this.status = 'fail';
+                this.prefix = '(dir     )';
+            }
         }
-        
+    }
+
+    async scanContent() {
+    }
+
+    async scanDirectory() {
+        namespace(this.config.name);
         namespace();
     }
-    
+
     async upgradeSchema() {
+        if (CLUSTER.isPrimary) {
+        }
+    }
+
+    async validate() {
+        if (this.status == 'ok' && 'name' in this.config) {
+            if (this.config.name in Config.moduleMap) {
+                this.status = 'dupname';
+                this.prefix = '(dupname )';
+            }
+        }
+        else {
+            this.status = 'noname';
+            this.prefix = '(noname  )';
+        }
+
+        if (this.status == 'ok' && 'url' in this.config) {
+            if (this.config.url in Config.moduleUrlMap) {
+                this.status = 'dupurl';
+                this.prefix = '(dupurl  )';
+            }
+        }
+        else {
+            this.status = 'nourl';
+            this.prefix = '(nourl   )';
+        }
+
+        if (this.status == 'ok' && 'active' in this.config && typeof this.config.active == 'boolean') {
+            if (!this.config.active) {
+                this.status = 'inactive';
+                this.prefix = '(inactive)';
+            }
+        }
     }
 });

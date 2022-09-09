@@ -78,10 +78,13 @@ global.env = {
     memory:     ({ free: OS.freemem(), total: OS.totalmem() }),
     kodepath:   PATH.join(__dirname, '..'),
     modpath:    PATH.join(__dirname, '../modules'),
+    addonpath:  PATH.join(__dirname, '../addons'),
 };
 
 
 /*****
+ * Include the code in the /server project directory.  Like other kode code,
+ * each nodejs module will place the appropriate names into the global namespace.
 *****/
 require('./config.js');
 require('./buffer.js');
@@ -89,48 +92,14 @@ require('./cluster.js');
 require('./content.js');
 require('./crypto.js');
 require('./daemon.js');
-//require('../dbms/dbClient.js');
-//require('../dbms/dbSchema.js');
-//require('../dbms/dbObject.js');
-//require('../dbms/dbSchemaAnalyzer.js');
 require('./ipc.js');
 require('./logging.js');
-require('./module.js');
 require('./pool.js');
 require('./sentinel.js');
 require('./server.js');
 require('./utility.js');
-
-
-/*****
-*****/
-async function loadAddons() {
-}
-
-
-/*****
-*****/
-async function loadModule(path) {
-    let filename = PATH.basename(path);
-    
-    if (!filename.startsWith('.')) {
-        let module = await mkModule(path);
-
-        if (module.status == 'ok') {
-            if (module.config && module.config.active) {
-                try {
-                    await module.load();
-                }
-                catch (e) {
-                    log(`Module at ${module.path} failed while loading.`, e);
-                }
-            }
-        }
-        else {
-            log(`Module at ${module.path} failed while making with status "${module.status}".`);
-        }
-    }
-}
+require('./addon.js');
+require('./module.js');
 
 
 /*****
@@ -150,36 +119,43 @@ async function startServers() {
 
 
 /*****
+ * Start the server workers as specified in the server's config.json file.  If
+ * a valid numeric value is provided on the configuration file, start that worker
+ * count.  If that setting is missing or somehow invalid, just start as many
+ * workers as we have.  The beauty of this code is that the primary will await
+ * the promise to be fulfilled until all of the workers are ready and signalled
+ * the primary that they are ready.
 *****/
 function startWorkers() {
     return new Promise((ok, fail) => {
         if (CLUSTER.isPrimary) {
-            if (Config.workers > 0) {
-                let workers;
-                let started = 0;
-                
-                if (typeof Config.workers == 'number' && Config.workers >= 0) {
-                    workers = Config.workers <= env.cpus ? Config.workers : env.cpus;
-                }
-                else {
-                    workers = env.cpus;
-                }
-                
-                Ipc.on('#WorkerStarted', message => {
-                    started++;
-                    console.log(`Worker started ${started}`);
-                    
-                    if (started == workers) {
-                        ok();
-                    }
-                });
+            let workers;
+            let started = 0;
             
-                for (let i = 0; i < workers; i++) {
-                    CLUSTER.fork();
-                }
+            if (typeof Config.workers == 'number' && Config.workers > 0 && Config.workers <= env.cpus) {
+                workers = Config.workers <= env.cpus ? Config.workers : env.cpus;
             }
             else {
-                ok();
+                workers = env.cpus;
+            }
+            
+            Ipc.on('#WorkerStarted', message => {
+                started++;
+                
+                if (started == workers) {
+                    if (started > 1) {
+                        log(`[ ${started} Workers Started ]`);
+                    }
+                    else {
+                        log('[ Worker Started ]');
+                    }
+
+                    ok();
+                }
+            });
+        
+            for (let i = 0; i < workers; i++) {
+                CLUSTER.fork();
             }
         }
         else {
@@ -191,40 +167,68 @@ function startWorkers() {
 
 
 /*****
- * If we're running on the server using NodeJS, this is how we load and start
- * the application.  It's all right here. There's a different approach to
- * downloading and and initizing the client framework.  Please note that only
- * loads the framework.  The application object is responsible for the
- * application and other modules.
+ * This is the code that bootstraps the server and this is the entry point into
+ * the kode application server.  The kode framework is NOT an application.  It's
+ * a framework that loads in modules.  A module represents a namespace and some
+ * code.  The module's code is automatically integrated into the running server
+ * by responding to HTTP, websocker requests, and other server-bases requests.
+ * 
+ * Here's what happens in order:
+ *     (1)  Load and import addons, build if necessary
+ *     (2)  Load and import builtin modules
+ *     (3)  Load and import user modules
+ *     (4)  Start workers (primary only)
+ *     (5)  Start daemons (primary only)
+ *     (6)  Start servers (primary only)
+ * 
+ * Once this function is exited, the application will continue to execute until
+ * instructed to stop with a system-wide #Stop message.
 *****/
 (async () => {
+    logPrimary(`\n[ Booting Server at ${(new Date()).toISOString()} ]`);
     await onSingletons();
     await Config.loadSystem(env.kodepath);
-    await loadAddons();
+
+    logPrimary('[ Loading Addons ]');
+    Config.addonMap = {};
+    Config.addonArray = [];
  
+    for (let entry of await FILES.readdir(env.addonpath)) {
+        if (!entry.startsWith('.') && !entry.startsWith('apiV')) {
+            let addonPath = `${env.addonpath}/${entry}`;
+            let addon = mkAddon(addonPath);
+            await addon.load();
+            logPrimary(`    ${addon.info()}`);
+        }
+    }
+ 
+    logPrimary('[ Loading Modules ]');
     Config.moduleMap = {};
     Config.moduleArray = [];
+    Config.moduleUrlMap = {};
  
     for (let entry of await FILES.readdir(env.modpath)) {
-        let modulePath = `${env.modpath}/${entry}`;
-        await loadModule(modulePath);
+        if (!entry.startsWith('.')) {
+            let modulePath = `${env.modpath}/${entry}`;
+            let module = mkModule(modulePath);
+            await module.load();
+            logPrimary(`    ${module.info()}`);
+        }
     }
 
-    for (let userModule of Config.userModules) {
-        await loadModule(userModule);
+    for (let entry of Config.userModules) {
+        if (!entry.startsWith('.')) {
+            let modulePath = `${env.modpath}/${entry}`;
+            let module = mkModule(modulePath);
+            await module.load();
+            logPrimary(`    ${module.info()}`);
+        }
     }
  
     Config.sealOff();
     await onSingletons();
- 
     await startWorkers();
     await startDaemons();
     await startServers();
- 
-    for (let module of Config.moduleArray) {
-        if (module.status == 'ok') {
-            await module.upgradeSchema();
-            await module.load();
-        }
-    }
+    logPrimary('[ Kode Application Server Ready ]\n');
 })();

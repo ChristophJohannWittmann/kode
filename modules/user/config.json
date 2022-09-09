@@ -1,0 +1,16 @@
+{
+    "name": "Deployment Application",
+    "description": "Built in configuration manager.",
+    "active": false,
+    "namespace": "deployApp",
+    "schemas": [
+        {
+            "dbms": "postgres",
+            "host": "",
+            "username": "",
+            "password": "",
+            "keypath": "",
+            "tables": []
+        }
+    ]
+}

@@ -43,7 +43,7 @@ singleton(class ContentManager {
         this.modules = {};
     }
     
-    async get(moduleName, path) {
+    async get(url, path) {
     }
     
     async register(url, path) {
