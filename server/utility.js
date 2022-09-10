@@ -27,18 +27,49 @@
  * and its subdirectory tree.  The directory and subdirectory are not included
  * in the returned result.
 *****/
-register(async function recurseFiles(...args) {
-    let files = [];
-    let stack = [await PATH().resolve(PATH().resolve(...args))];
+register(async function recurseDirectories(...args) {
+    let dirs = [];
+    let stack = [await PATH.resolve(PATH.resolve(...args))];
 
     while (stack.length) {
         let path = stack.pop();
   
         try {
-            let stats = await FILES().stat(path);
+            let stats = await FILES.stat(path);
   
             if (stats.isDirectory()) {
-                (await FILES().readdir(path)).forEach(fileName => {
+                dirs.push(path);
+
+                (await FILES.readdir(path)).forEach(fileName => {
+                    stack.push(`${path}/${fileName}`);
+                });
+            }
+        } catch (e) {}
+    }
+  
+    dirs.shift();
+    return dirs;
+});
+
+
+/*****
+ * For each of the passed relative or absolute paths, recurse each directory
+ * to generate an array of the absolute paths to all files in the directory
+ * and its subdirectory tree.  The directory and subdirectory are not included
+ * in the returned result.
+*****/
+register(async function recurseFiles(...args) {
+    let files = [];
+    let stack = [await PATH.resolve(PATH.resolve(...args))];
+
+    while (stack.length) {
+        let path = stack.pop();
+  
+        try {
+            let stats = await FILES.stat(path);
+  
+            if (stats.isDirectory()) {
+                (await FILES.readdir(path)).forEach(fileName => {
                     stack.push(`${path}/${fileName}`);
                 });
             }

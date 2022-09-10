@@ -25,5 +25,19 @@
 *****/
 register(class EventDaemon extends Daemon {
     constructor() {
+        super(
+            'CancelEvent',
+            'RescheduleEvent',
+            'ScheduleEvent',
+        );
+    }
+
+    async onCancelEvent(message) {
+    }
+
+    async onRescheduleEvent(message) {
+    }
+
+    async onScheduleEvent(message) {
     }
 });

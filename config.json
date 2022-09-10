@@ -1,28 +1,34 @@
 {
-    "workers": 1,
     "debug": false,
     "cache": false,
     "logging": "console",
-    "network": [
-        {
-            "public": {
-                "active": true,
-                "address": "127.0.0.1",
-                "domain": "localhost.com",
-                "hostname": "localhost.com",
-                "tls": {
-                    "ca": "letsEncrypt",
-                    "url": "https//letsencrypt.com/apiv2:",
-                    "account": "",
-                    "publicKey": { "#NULL": 0 },
-                    "privateKey": { "#NULL": 0 },
-                    "certificate": { "#NULL": 0 },
-                    "expiration": { "#NULL": 0 }
-                }
+    "network": {
+        "public": {
+            "active": true,
+            "address": "127.0.0.1",
+            "domain": "somedomain.com",
+            "hostname": "somedomain.com",
+            "tls": {
+                "ca": "letsEncrypt",
+                "url": "https//letsencrypt.com/apiv2:",
+                "account": "",
+                "publicKey": { "#NULL": 0 },
+                "privateKey": { "#NULL": 0 },
+                "cert": { "#NULL": 0 },
+                "ca": { "#NULL": 0 },
+                "expiration": { "#NULL": 0 }
             }
+        }
+    },
+    "servers": [
+        {
+            "type": "HttpServer",
+            "name": "website",
+            "network": "public"
+            "workers": 5
         }
     ],
     "userModules": [
-        "/Users/cwittmann/Documents/connoisseurClubx"
+        "/Users/cwittmann/Documents/connoisseurClub"
     ]
 }

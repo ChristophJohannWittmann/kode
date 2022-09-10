@@ -84,10 +84,17 @@
             if (func.toString().startsWith('class')) {
                 if (func.name.match(/^[A-Z]/)) {
                     nsObject[`${func.name}`] = func;
- 
-                    nsObject[`mk${func.name}`] = (...args) => {
-                        return Reflect.construct(func, args);
-                    };
+
+                    let makerName = `mk${func.name}`;
+                    let makerFunc = (...args) => Reflect.construct(func, args);
+                    nsObject[makerName] = makerFunc;
+
+                    if (func.toString().match(/extends +Server/m)) {
+                        Server.makers[func.name] = makerFunc;
+                    }
+                    else if (func.toString().match(/extends +Daemon/m)) {
+                        Daemon.makers[func.name] = makerFunc;
+                    }
                 }
                 else {
                     throw new Error(`register(), class name must start with an upper-case letter: ${func.name}`);

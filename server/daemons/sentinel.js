@@ -23,7 +23,29 @@
 
 /*****
 *****/
-register(class EventDaemon extends Daemon {
+register(class SentinelDaemon extends Daemon {
     constructor() {
+        super(
+            'Authenticate',
+            'Authorize',
+            'CloseSession',
+            'CreateSession',
+            'TouchSession',
+        );
+    }
+
+    async onAuthenticate(message) {
+    }
+
+    async onAuthorize(message) {
+    }
+
+    async onCloseSession(message) {
+    }
+
+    async onCreateSession(message) {
+    }
+
+    async onTouchSession(message) {
     }
 });

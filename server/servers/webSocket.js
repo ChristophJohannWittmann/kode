@@ -22,28 +22,9 @@
 
 
 /*****
- * A daemon is by definition a service that runs in its own child process or
- * worker and centralizes a specific service or funtionality for the server.
- * For instance, managing user sessions is done centrally to ensure a single
- * definitive location 
 *****/
-register(class Daemon {
-    static makers = {};
-    static daemons = [];
-    static isDaemon = true;
-
-    constructor(...messageNames) {
-        Ipc.on('#DaemonPause', message => this.onPause(message));
-        Ipc.on('#DaemonStart', message => this.onStart(message));
-
-        for (let messageName of messageNames) {
-            Ipc.on(messageName, message => this[`on${messageName}`](message));
-        }
-    }
-
-    async onStart() {
-    }
-
-    async onPause() {
+register(class WebSocketServer extends Server {
+    constructor(config) {
+        super(config);
     }
 });

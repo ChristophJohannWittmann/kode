@@ -23,96 +23,62 @@
 
 /*****
 *****/
-register(class Server {
-    static servers = {};
+register(class Server extends Emitter {
+    static makers = {};
+    static servers = [];
+    static isServer = true;
 
     constructor(config) {
+        super();
         this.config = config;
-        this.addr = Config.interfaces[this.config.interface].address;
-        Server.servers[this.config.name] = this;
+        this.network = Config.network[this.config.network];
+        Server.servers.push(this);
     }
-  
-    handleRequest(socket) {
-        console.log('$handleRequest(socket) -- implement!')
+
+    addr() {
+        return this.network.address ? this.network.address : '0.0.0.0';
     }
-  
-    crypto() {
-        let iface = $Config.interfaces[this.config.interface];
-  
-        if (iface.pemPublic) {
-            if (iface.pemPrivate) {
-                if (iface.pemCert) {
-                    if (iface.pemCA) {
-                        return {
-                            pemPublic: iface.pemPublic,
-                            pemPrivate: iface.pemPrivate,
-                            pemCert: iface.pemCert,
-                            pemCA: iface.pemCA,
-                            expires: iface.expires
-                        };
-                    }
-                }
-            }
-        }
+
+    port() {
+        return this.network.port ? this.network.port : 0;
     }
-  
-    static getServer(serverName) {
-        return $Server.servers[serverName];
+
+    async shutdown() {
     }
-  
-    static getServers(type) {
-        if (type) {
-            return Object.values($Server.servers).filter(server => server.config.type == type);
+
+    async start() {
+        if (CLUSTER.isPrimary) {
         }
         else {
-            return Object.values($Server.servers);
         }
     }
-  
-    interface() {
-        return $Config.interfaces[this.config.interface];
-    }
-  
-    name() {
-        return this.config.name;
-    }
-  
-    port() {
-        return this.config.port;
-    }
-  
-    property(name) {
-        return this.config[name];
-    }
-  
-    async startPrimary() {
-        console.log('$Server.startPrimary() -- implement!');
-    }
-  
-    async startWorker() {
-        console.log('$Server.startWorker() -- $on() to listen for work to do!');
-    }
-  
+
     async stop() {
+        if (CLUSTER.isPrimary) {
+        }
+        else {
+        }
     }
   
     tls() {
-        let iface = $Config.interfaces[this.config.interface];
-  
-        if (iface.pemPublic) {
-            if (iface.pemPrivate) {
-                if (iface.pemCert) {
-                    if (iface.pemCA) {
-                        return true;
+        const tls = this.config.network.tls;
+
+        if (tls) {
+            if (tls.publicKey) {
+                if (tls.privateKey) {
+                    if (tls.cert) {
+                        if (tls.ca) {
+                            return {
+                                pemPublic: iface.pemPublic,
+                                pemPrivate: iface.pemPrivate,
+                                pemCert: iface.pemCert,
+                                pemCA: iface.pemCA,
+                                expires: iface.expires
+                            };
+                        }
                     }
                 }
             }
         }
-  
-        return false;
     }
-  
-    type() {
-        return this.config.type;
-    }
-});
+}); 

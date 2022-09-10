@@ -76,9 +76,11 @@ global.env = {
     hostname:   OS.hostname(),
     network:    OS.networkInterfaces(),
     memory:     ({ free: OS.freemem(), total: OS.totalmem() }),
-    kodepath:   PATH.join(__dirname, '..'),
-    modpath:    PATH.join(__dirname, '../modules'),
-    addonpath:  PATH.join(__dirname, '../addons'),
+    kodePath:   PATH.join(__dirname, '..'),
+    addonPath:  PATH.join(__dirname, '../addons'),
+    modulePath: PATH.join(__dirname, '../modules'),
+    daemonPath: PATH.join(__dirname, './daemons'),
+    serverPath: PATH.join(__dirname, './servers'),
 };
 
 
@@ -87,6 +89,7 @@ global.env = {
  * each nodejs module will place the appropriate names into the global namespace.
 *****/
 require('./config.js');
+require('./addon.js');
 require('./buffer.js');
 require('./cluster.js');
 require('./content.js');
@@ -94,75 +97,46 @@ require('./crypto.js');
 require('./daemon.js');
 require('./ipc.js');
 require('./logging.js');
+require('./module.js');
 require('./pool.js');
-require('./sentinel.js');
 require('./server.js');
 require('./utility.js');
-require('./addon.js');
-require('./module.js');
+require('./worker.js');
 
 
 /*****
+ * Helper function whose primary purpose is to search a directory subtree, called
+ * root and find two groups of files: (a) javascript files in the root of the
+ * subtree, and (b) javascript files located in subdirectorys of root.  Group (b)
+ * will be required first, while group (a) are required second.  The reason is
+ * that group (a) may have dependencies on group (b) files for compilation.
 *****/
-async function startDaemons() {
-    if (CLUSTER.isPrimary) {
-    }
-}
+async function load(root) {
+    for (let name of await FILES.readdir(root)) {
+        if (!name.startsWith('.')) {
+            let path = PATH.join(root, name);
+            let stats = await FILES.stat(path);
 
-
-/*****
-*****/
-async function startServers() {
-    if (CLUSTER.isPrimary) {
-    }
-}
-
-
-/*****
- * Start the server workers as specified in the server's config.json file.  If
- * a valid numeric value is provided on the configuration file, start that worker
- * count.  If that setting is missing or somehow invalid, just start as many
- * workers as we have.  The beauty of this code is that the primary will await
- * the promise to be fulfilled until all of the workers are ready and signalled
- * the primary that they are ready.
-*****/
-function startWorkers() {
-    return new Promise((ok, fail) => {
-        if (CLUSTER.isPrimary) {
-            let workers;
-            let started = 0;
-            
-            if (typeof Config.workers == 'number' && Config.workers > 0 && Config.workers <= env.cpus) {
-                workers = Config.workers <= env.cpus ? Config.workers : env.cpus;
-            }
-            else {
-                workers = env.cpus;
-            }
-            
-            Ipc.on('#WorkerStarted', message => {
-                started++;
-                
-                if (started == workers) {
-                    if (started > 1) {
-                        log(`[ ${started} Workers Started ]`);
+            if (stats.isDirectory()) {
+                for (let file of await recurseFiles(path)) {
+                    if (file.endsWith('.js')) {
+                        require(file);
                     }
-                    else {
-                        log('[ Worker Started ]');
-                    }
-
-                    ok();
                 }
-            });
-        
-            for (let i = 0; i < workers; i++) {
-                CLUSTER.fork();
             }
         }
-        else {
-            Ipc.sendPrimary({ messageName: '#WorkerStarted' });
-            ok();
+    }
+
+    for (let name of await FILES.readdir(root)) {
+        if (!name.startsWith('.') && name.endsWith('.js')) {
+            let path = PATH.join(root, name);
+            let stats = await FILES.stat(path);
+
+            if (stats.isFile()) {
+                require(path);
+            }
         }
-    });
+    }
 }
 
 
@@ -187,29 +161,34 @@ function startWorkers() {
 (async () => {
     logPrimary(`\n[ Booting Server at ${(new Date()).toISOString()} ]`);
     await onSingletons();
-    await Config.loadSystem(env.kodepath);
+    await Config.loadSystem(env.kodePath);
 
     logPrimary('[ Loading Addons ]');
     Config.addonMap = {};
     Config.addonArray = [];
  
-    for (let entry of await FILES.readdir(env.addonpath)) {
+    for (let entry of await FILES.readdir(env.addonPath)) {
         if (!entry.startsWith('.') && !entry.startsWith('apiV')) {
-            let addonPath = `${env.addonpath}/${entry}`;
+            let addonPath = `${env.addonPath}/${entry}`;
             let addon = mkAddon(addonPath);
             await addon.load();
             logPrimary(`    ${addon.info()}`);
         }
     }
+
+    await onSingletons();
+    await load(env.daemonPath);
+    await load(env.serverPath);
+    namespace();
  
     logPrimary('[ Loading Modules ]');
     Config.moduleMap = {};
     Config.moduleArray = [];
     Config.moduleUrlMap = {};
  
-    for (let entry of await FILES.readdir(env.modpath)) {
+    for (let entry of await FILES.readdir(env.modulePath)) {
         if (!entry.startsWith('.')) {
-            let modulePath = `${env.modpath}/${entry}`;
+            let modulePath = `${env.modulePath}/${entry}`;
             let module = mkModule(modulePath);
             await module.load();
             logPrimary(`    ${module.info()}`);
@@ -218,7 +197,7 @@ function startWorkers() {
 
     for (let entry of Config.userModules) {
         if (!entry.startsWith('.')) {
-            let modulePath = `${env.modpath}/${entry}`;
+            let modulePath = `${env.modulePath}/${entry}`;
             let module = mkModule(modulePath);
             await module.load();
             logPrimary(`    ${module.info()}`);
@@ -227,8 +206,29 @@ function startWorkers() {
  
     Config.sealOff();
     await onSingletons();
-    await startWorkers();
-    await startDaemons();
-    await startServers();
-    logPrimary('[ Kode Application Server Ready ]\n');
+
+    /*
+    logPrimary('[ Starting Daemons ]');
+    for (let maker of Object.values(Daemon.makers)) {
+        let daemon = maker();
+        Daemon.daemons.push(daemon);
+        await daemon.start();
+    }
+    */
+
+    if (CLUSTER.isPrimary) {
+        //logPrimary('[ Starting Workers ]');
+        //await Workers.start(Config.workers > 0 ? Config.workers : 1);
+        //logPrimary('[ Kode Application Server Ready ]\n');
+        /*
+        for (let config of Config.servers) {
+            if (config.type in Server.makers) {
+                let server = global[`mk${config.type}`](config);
+                Server.servers.push(server);
+                await server.start();
+                await Ipc.queryWorkers({ messageName: '#StartServer', config: config });
+            }
+        }
+        */
+    }
 })();
