@@ -1,7 +1,0 @@
-{
-    "name": "config",
-    "host": "*",
-    "path": "/config",
-    "active": true,
-    "database": "system"
-}
