@@ -23,8 +23,54 @@
 
 /*****
 *****/
-register(class WebSocketServer extends Server {
-    constructor(config) {
-        super(config);
+register(class HtmlDocumentBuilder(symbols) {
+    constructor() {
+        this.dict = {
+            session: '${session}',
+            sockets: '${sockets}',
+        };
+
+        this.stylesheets = [];
     }
+
+    render() {
+    }
+
+    stylesheet(css) {
+    }
+
+    symbol(symbol, value) {
+        if (typeof value == 'undefined') {
+            return this.dict[symbol];
+        }
+        else {
+            this.dict[symbol] = value.toString();
+        }
+    }
+
+    symbols() {
+        return Object.keys(this.symbols);
+    }
+
+    renderTemplate() {
+return `<!DOCTYPE html>
+<html class="html">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="STYLE?SESSION=${sessionId}">
+        <script src="FRAMEWORK?SESSION=${sessionId}"></script>
+        <script>
+           let SESSION = '${this.dict.SESSION}';
+           let SOCKETS = ${$toJson(sockets)};
+           function $client() {
+               $.classPrefix  = 'Clss';
+               $query('head').append($script($attr('src', 'APPLICATION')));
+           }
+    </script>
+    </head>
+    <body class="body colors" onload="$client()">
+    </body>
+</html>
+`;
+}
 });

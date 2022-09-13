@@ -67,7 +67,9 @@ if (CLUSTER.isPrimary) {
                 worker = CLUSTER.workers[worker];
             }
 
-            worker.send(toJson(message));
+            let socket = message['#Socket'];
+            delete message['#Socket'];
+            worker.send(toJson(message), socket);
         }
 
         sendWorkers(message) {
@@ -139,9 +141,13 @@ else {
      * primary vs a worker, is that the remote endpoint is reachable with
      * differently named methods.
     *****/
-    CLUSTER.worker.on('message', async jsonMessage => {
+    CLUSTER.worker.on('message', async (jsonMessage, socket) => {
         let message = fromJson(jsonMessage);
-        
+
+        if (socket) {
+            message['#Socket'] = socket;
+        }
+
         if ('#IpcReply' in message) {
             delete message['#Worker'];
             delete message['#IpcReply'];

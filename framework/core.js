@@ -39,6 +39,7 @@
     *****/
     nsName = 'GLOBAL';
     nsObject = global[nsName] = global;
+
     const jsonables = {};
     eval(`jsonables[nsName] = class Jsonable { NAMESPACE() { return 'GLOBAL'; }}`);
     global.Jsonable = jsonables[nsName];
@@ -88,13 +89,6 @@
                     let makerName = `mk${func.name}`;
                     let makerFunc = (...args) => Reflect.construct(func, args);
                     nsObject[makerName] = makerFunc;
-
-                    if (func.toString().match(/extends +Server/m)) {
-                        Server.makers[func.name] = makerFunc;
-                    }
-                    else if (func.toString().match(/extends +Daemon/m)) {
-                        Daemon.makers[func.name] = makerFunc;
-                    }
                 }
                 else {
                     throw new Error(`register(), class name must start with an upper-case letter: ${func.name}`);

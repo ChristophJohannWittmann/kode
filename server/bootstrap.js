@@ -88,56 +88,29 @@ global.env = {
  * Include the code in the /server project directory.  Like other kode code,
  * each nodejs module will place the appropriate names into the global namespace.
 *****/
+require('./lib/auth.js');
+require('./lib/buffer.js');
+require('./lib/content.js');
+require('./lib/crypto.js');
+require('./lib/pool.js');
+require('./lib/utility.js');
+require('./lib/webSocket.js');
+
 require('./config.js');
 require('./addon.js');
-require('./buffer.js');
 require('./cluster.js');
-require('./content.js');
-require('./crypto.js');
-require('./daemon.js');
 require('./ipc.js');
 require('./logging.js');
 require('./module.js');
-require('./pool.js');
 require('./server.js');
-require('./utility.js');
-require('./worker.js');
 
-
-/*****
- * Helper function whose primary purpose is to search a directory subtree, called
- * root and find two groups of files: (a) javascript files in the root of the
- * subtree, and (b) javascript files located in subdirectorys of root.  Group (b)
- * will be required first, while group (a) are required second.  The reason is
- * that group (a) may have dependencies on group (b) files for compilation.
-*****/
-async function load(root) {
-    for (let name of await FILES.readdir(root)) {
-        if (!name.startsWith('.')) {
-            let path = PATH.join(root, name);
-            let stats = await FILES.stat(path);
-
-            if (stats.isDirectory()) {
-                for (let file of await recurseFiles(path)) {
-                    if (file.endsWith('.js')) {
-                        require(file);
-                    }
-                }
-            }
-        }
-    }
-
-    for (let name of await FILES.readdir(root)) {
-        if (!name.startsWith('.') && name.endsWith('.js')) {
-            let path = PATH.join(root, name);
-            let stats = await FILES.stat(path);
-
-            if (stats.isFile()) {
-                require(path);
-            }
-        }
-    }
+if (CLUSTER.isPrimary) {
+    require('./daemon.js');
+    require('./daemons/events.js');
+    require('./daemons/sentinel.js');
 }
+
+require('./servers/http.js');
 
 
 /*****
@@ -177,8 +150,6 @@ async function load(root) {
     }
 
     await onSingletons();
-    await load(env.daemonPath);
-    await load(env.serverPath);
     namespace();
  
     logPrimary('[ Loading Modules ]');
@@ -195,7 +166,7 @@ async function load(root) {
         }
     }
 
-    for (let entry of Config.userModules) {
+    for (let entry of Config.modules) {
         if (!entry.startsWith('.')) {
             let modulePath = `${env.modulePath}/${entry}`;
             let module = mkModule(modulePath);
@@ -204,31 +175,28 @@ async function load(root) {
         }
     }
  
-    Config.sealOff();
     await onSingletons();
-
-    /*
-    logPrimary('[ Starting Daemons ]');
-    for (let maker of Object.values(Daemon.makers)) {
-        let daemon = maker();
-        Daemon.daemons.push(daemon);
-        await daemon.start();
-    }
-    */
+    Config.sealOff();
 
     if (CLUSTER.isPrimary) {
-        //logPrimary('[ Starting Workers ]');
-        //await Workers.start(Config.workers > 0 ? Config.workers : 1);
-        //logPrimary('[ Kode Application Server Ready ]\n');
-        /*
-        for (let config of Config.servers) {
-            if (config.type in Server.makers) {
-                let server = global[`mk${config.type}`](config);
-                Server.servers.push(server);
-                await server.start();
-                await Ipc.queryWorkers({ messageName: '#StartServer', config: config });
-            }
+        logPrimary('[ Starting Servers ]');
+
+        for (let serverName in Config.servers) {
+            let server;
+            let config = Config.servers[serverName];
+            eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
+            await server.start();
         }
-        */
+
+        logPrimary('[ Kode Application Server Ready ]\n');
+    }
+    else {
+        const serverName = PROC.env.KODE_SERVER_NAME;
+
+        if (serverName) {
+            let server;
+            let config = Config.servers[serverName];
+            eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
+        }
     }
 })();

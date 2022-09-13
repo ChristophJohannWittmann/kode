@@ -31,7 +31,7 @@
 *****/
 register(class Buffer {
     constructor(value, encoding) {
-        if (value instanceof builtIn.buffer) {
+        if (value instanceof BUFFER) {
             this.jsBuffer = value;
         }
         else {
@@ -176,19 +176,19 @@ register(class Buffer {
             switch (encoding) {
                 case 'hex':
                 case 'base64':
-                    this.jsBuffer = builtIn.buffer.from(value, encoding);
+                    this.jsBuffer = BUFFER.from(value, encoding);
                     break;
     
                 case 'b64':
-                    this.jsBuffer = builtIn.buffer.from(value, 'base64');
+                    this.jsBuffer = BUFFER.from(value, 'base64');
                     break;
 
                 default:
-                    this.jsBuffer = builtIn.buffer.from(value);
+                    this.jsBuffer = BUFFER.from(value);
             }
         }
         else {
-            this.jsBuffer = builtIn.buffer.alloc(value);
+            this.jsBuffer = BUFFER.alloc(value);
         }
     }
   
@@ -265,7 +265,7 @@ register(class Buffer {
         }
     }
 
-    str(encoding) {
+    toString(encoding) {
         switch (encoding) {
             case 'hex':
             case 'base64':

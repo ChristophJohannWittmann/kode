@@ -22,24 +22,16 @@
 
 
 /*****
- * A daemon is by definition a service that runs in the application's primary
- * process.  A daemon must extend class Daemon and must be defined as a single
- * class.  The daemon is automatically loaded as part of the based server load.
- * A daemon can also be defined in a module if the preceeding rules are observed.
- * When the Daemon-based single instance is created, all properties from the
- * object instance that (a) begin with "on" and (b) are javascript functions
- * will be integrated into the Daemon by registering message handlers for each
- * of those functions.
- * 
 *****/
-register(class Daemon {
+const permissions = mkSet(
+    'auth',
+    'sys',
+);
+
+
+/*****
+*****/
+register(class Auth {
     constructor() {
-        for (let propertyName of Object.getOwnPropertyNames(Reflect.getPrototypeOf(this))) {
-            if (propertyName.startsWith('on') && typeof this[propertyName] == 'function') {
-                let messageName = `#${propertyName.substr(2)}`;
-                Ipc.on(messageName, async message => await this[propertyName](message));
-                on(messageName, async message => await this[propertyName](message));
-            }
-        }
     }
 });

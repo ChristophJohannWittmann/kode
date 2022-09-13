@@ -23,15 +23,9 @@
 
 /*****
 *****/
-register(class SentinelDaemon extends Daemon {
+singleton(class Sentinel extends Daemon {
     constructor() {
-        super(
-            'Authenticate',
-            'Authorize',
-            'CloseSession',
-            'CreateSession',
-            'TouchSession',
-        );
+        super();
     }
 
     async onAuthenticate(message) {

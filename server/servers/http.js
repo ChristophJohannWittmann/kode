@@ -23,60 +23,78 @@
 
 /*****
 *****/
-register(class HttpServer extends Server {
-    constructor(config) {
-        super(config);
-    }
-
-    async start() {
-        if (CLUSTER.isPrimary) {
+if (CLUSTER.isPrimary) {
+    register(class HttpServer extends Server {
+        constructor(config, serverName) {
+            super(config, serverName);
         }
-        else {
-            console.log('** START SERVER **');
-            console.log(this.config);
-            /*
-            let crypto = this.crypto();
-      
-            if (crypto) {
-                this._nodeHttpServer = Https.createServer({
+
+        listen() {
+        }
+    });
+}
+
+
+/*****
+*****/
+if (CLUSTER.isWorker) {
+    register(class HttpServer extends Server {
+        constructor(config, serverName) {
+            super(config, serverName);
+            this.handlers = {};
+
+            if (this.tls()) {
+                this.nodeHttpServer = HTTPS.createServer({
                     key: crypto.pemPrivate,
                     cert: crypto.pemCert,
                     ca: crypto.pemCA,
-                }, (req, rsp) => this.handleRequest(req, rsp));
+                }, (httpReq, httpRsp) => this.handle(httpReq, httpRsp));
             }
             else {
-                this._nodeHttpServer = Http.createServer((req, rsp) => this.handleRequest(req, rsp));
+                this.nodeHttpServer = HTTP.createServer((httpReq, httpRsp) => this.handleRequest(httpReq, httpRsp));
             }
       
-            this._nodeHttpServer.listen(this.port(), this.addr());
-      
-            this._nodeHttpServer.on('upgrade', async (req, socket, headPacket) => {
-                let secureKey = req.headers['sec-websocket-key'];
-                let hash = await Cls$Crypto.digest('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
-                let webSocket = $WebSocket(socket, req.headers['sec-websocket-extensions'], headPacket);
-                
-                let headers = [
-                    'HTTP/1.1 101 Switching Protocols',
-                    'Upgrade: websocket',
-                    'Connection: upgrade',
-                    `Sec-WebSocket-Accept: ${hash}`,
-                    '\r\n'
-                ];
-      
-                if (webSocket.secWebSocketExtensions()) {
-                    headers.append(`Sec-WebSocket-Extensions: ${webSocket.secWebSocketExtensions()}`);
-                }
+            this.nodeHttpServer.listen(this.port(), this.addr());
             
-                socket.write(headers.join('\r\n'));
+            /*
+            this.nodeHttpServer.on('upgrade', async (req, socket, headPacket) => {
+                if (this.config.websocket) {
+                    let secureKey = req.headers['sec-websocket-key'];
+                    let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
+                    let webSocket = $WebSocket(socket, req.headers['sec-websocket-extensions'], headPacket);
+                    
+                    let headers = [
+                        'HTTP/1.1 101 Switching Protocols',
+                        'Upgrade: websocket',
+                        'Connection: upgrade',
+                        `Sec-WebSocket-Accept: ${hash}`,
+                        '\r\n'
+                    ];
+          
+                    if (webSocket.secWebSocketExtensions()) {
+                        headers.append(`Sec-WebSocket-Extensions: ${webSocket.secWebSocketExtensions()}`);
+                    }
+                
+                    socket.write(headers.join('\r\n'));
+                }
             });
             */
         }
-    }
 
-    async stop() {
-        if (CLUSTER.isPrimary) {
+        clearHandler(handler, criteria) {
         }
-        else {
+
+        async handleRequest(httpReq, httpRsp) {
+            console.log(httpReq.headers.host);
+
+            httpRsp.end('Hello Plain Text', 'utf-8');
         }
-    }
-});
+
+        port() {
+            return this.tls() ? 443 : 80;
+        }
+
+        setHandler(handler, criteria) {
+        }
+    });
+}

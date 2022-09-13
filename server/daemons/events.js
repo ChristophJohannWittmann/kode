@@ -23,21 +23,17 @@
 
 /*****
 *****/
-register(class EventDaemon extends Daemon {
+singleton(class Events extends Daemon {
     constructor() {
-        super(
-            'CancelEvent',
-            'RescheduleEvent',
-            'ScheduleEvent',
-        );
+        super();
     }
 
-    async onCancelEvent(message) {
+    async onCancel(message) {
     }
 
-    async onRescheduleEvent(message) {
+    async onReschedule(message) {
     }
 
-    async onScheduleEvent(message) {
+    async onSchedule(message) {
     }
 });
