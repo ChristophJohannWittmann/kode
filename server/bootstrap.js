@@ -96,6 +96,13 @@ require('./lib/pool.js');
 require('./lib/utility.js');
 require('./lib/webSocket.js');
 
+require('./dbms/dbClient.js');
+require('./dbms/pgClient.js');
+require('./dbms/dbSchema.js');
+require('./dbms/dbObject.js');
+require('./dbms/dbSchemaAnalyzer.js');
+require('./dbms/fmwkSchema.js');
+
 require('./config.js');
 require('./addon.js');
 require('./cluster.js');
@@ -142,7 +149,7 @@ require('./servers/http.js');
  
     for (let entry of await FILES.readdir(env.addonPath)) {
         if (!entry.startsWith('.') && !entry.startsWith('apiV')) {
-            let addonPath = `${env.addonPath}/${entry}`;
+            let addonPath = PATH.join(env.addonPath, entry);
             let addon = mkAddon(addonPath);
             await addon.load();
             logPrimary(`    ${addon.info()}`);
@@ -155,7 +162,6 @@ require('./servers/http.js');
     logPrimary('[ Loading Modules ]');
     Config.moduleMap = {};
     Config.moduleArray = [];
-    Config.moduleUrlMap = {};
  
     for (let entry of await FILES.readdir(env.modulePath)) {
         if (!entry.startsWith('.')) {
@@ -166,6 +172,8 @@ require('./servers/http.js');
         }
     }
 
+    await onSingletons();
+
     for (let entry of Config.modules) {
         if (!entry.startsWith('.')) {
             let modulePath = `${env.modulePath}/${entry}`;
@@ -174,9 +182,14 @@ require('./servers/http.js');
             logPrimary(`    ${module.info()}`);
         }
     }
- 
+
     await onSingletons();
-    Config.sealOff();
+    logPrimary('[ Checking DBMS Schema ]');
+
+    if (CLUSTER.isPrimary) {
+        console.log('    loop through modules to get more schema');
+        console.log('.   loop through all tables on all databases to check/upgrade schema');
+    }
 
     if (CLUSTER.isPrimary) {
         logPrimary('[ Starting Servers ]');
@@ -199,4 +212,7 @@ require('./servers/http.js');
             eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
         }
     }
+
+    await onSingletons();
+    Config.sealOff();
 })();

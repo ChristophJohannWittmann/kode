@@ -27,33 +27,19 @@
  * across all applications.  Hence, things such as authentication, user mgmt,
  * and session management are required by this schema.
 *****/
-exports = module.exports = opts => `[
-    {
-        name: 'lock',
-        columns: [
-            { name: 'orgOid',     type: dbInt64          },
-            { name: 'userOid',    type: dbInt64          },
-            { name: 'objectType', type: dbText, size: 50 },
-            { name: 'objectOid',  type: dbInt64         },
-        ],
-        indexes: [
-            'orgOid:asc',
-            'userOid:asc',
-            'objectOid:asc',
-        ]
-    },
+DbSchema.defineTables(
     {
         name: 'user',
         columns: [
             { name: 'orgOid',    type: dbInt64           },
             { name: 'userName',  type: dbText, size: 100 },
-            { name: 'title',     type: dbText, size:  50 },
             { name: 'firstName', type: dbText, size: 100 },
             { name: 'lastName',  type: dbText, size: 100 },
-            { name: 'suffix',    type: dbText, size:  50 },
-            { name: 'emailOid',  type: dbInt64           },
+            { name: 'title',     type: dbText, size:  20 },
+            { name: 'suffix',    type: dbText, size:  20 },
         ],
         indexes: [
+            'orgOid:asc',
             'userName:asc',
             'lastName:asc',
             'firstName:asc',
@@ -63,40 +49,91 @@ exports = module.exports = opts => `[
     {
         name: 'credentials',
         columns: [
-            { name: 'ownerType',  type: dbText, size:   50 },
-            { name: 'ownerOid',   type: dbInt64            },
-            { name: 'account',    type: dbText, size:  100 },
-            { name: 'password',   type: dbText, size: 1000 },
-            { name: 'salt',       type: dbInt64            },
-            { name: 'key',        type: dbText, size:  100 },
-            { name: 'expiration', type: dbTime             },
+            { name: 'userOid',    type: dbInt64            },
+            { name: 'crypto',     type: dbText, size: 1000 },
+            { name: 'expires',    type: dbTime             },
         ],
         indexes: [
-            'ownerType:asc',
+            'userOid:asc',
+        ]
+    },
+    {
+        name: 'auth',
+        columns: [
+            { name: 'userOid',    type: dbInt64 },
+            { name: 'grants',     type: dbJson  },
+            { name: 'denies',     type: dbJson  },
+        ],
+        indexes: [
+            'userOid:asc',
         ]
     },
     {
         name: 'organization',
         columns: [
-            { name: 'name', type: dbText, size: 50 },
-            { name: 'type', type: dbText, size: 20 },
+            { name: 'name',        type: dbText, size: 50 },
+            { name: 'description', type: dbText, size:100 },
         ],
         indexes: [
-            'name:asc, type:asc',
+            'name:asc',
+        ]
+    },
+    {
+        name: 'phone',
+        columns: [
+            { name: 'ownerType',   type: dbText, size:   20 },
+            { name: 'ownerOid',    type: dbInt64            },
+            { name: 'country',     type: dbText, size:   10 },
+            { name: 'region',      type: dbText, size:   20 },
+            { name: 'number',      type: dbText, size:  200 },
+            { name: 'unformatted', type: dbText, size:  200 },
+            { name: 'formatted',   type: dbText, size:  200 },
+        ],
+        indexes: [
+            'ownerType:asc, ownerOid:asc',
+            'unformatted:asc',
+        ]
+    },
+    {
+        name: 'dnsDomain',
+        columns: [
+            { name: 'domain',       type: dbText, size: 200 },
+            { name: 'tld',          type: dbText, size:  20 },
+            { name: 'isVerified',   type: dbBool            },
+            { name: 'lastVerified', type: dbTime            },
+        ],
+        indexes: [
+            'domain:asc',
+            'tld:asc',
+        ]
+    },
+    {
+        name: 'smtpAddr',
+        columns: [
+            { name: 'domainOid',    type: dbInt64           },
+            { name: 'addr',         type: dbText, size: 200 },
+            { name: 'verified',     type: dbBool            },
+            { name: 'lastVerified', type: dbTime            },
+        ],
+        indexes: [
+            'domainOid:asc',
+            'addr:asc',
         ]
     },
     {
         name: 'uri',
         columns: [
-            { name: 'ownerType', type: dbText, size:   20 },
-            { name: 'ownerOid',  type: dbInt64            },
-            { name: 'scheme',    type: dbText, size:   10 },
-            { name: 'uri',       type: dbText, size:  200 },
-            { name: 'host',      type: dbText, size:   20 },
-            { name: 'user',      type: dbText, size:  200 },
-            { name: 'domainOid', type: dbInt64            },
-            { name: 'query',     type: dbText, size: 1000 },
-            { name: 'fragment',  type: dbText, size: 1000 },
+            { name: 'ownerType',    type: dbText, size:   20 },
+            { name: 'ownerOid',     type: dbInt64            },
+            { name: 'scheme',       type: dbText, size:   10 },
+            { name: 'host',         type: dbText, size:   20 },
+            { name: 'user',         type: dbText, size:  200 },
+            { name: 'domainOid',    type: dbInt64            },
+            { name: 'query',        type: dbText, size: 1000 },
+            { name: 'fragment',     type: dbText, size: 1000 },
+            { name: 'uri',          type: dbText, size:  200 },
+            { name: 'verified',     type: dbBool             },
+            { name: 'lastVerified', type: dbTime             },
         ],
         indexes: [
             'ownerType:asc, ownerOid:asc',
@@ -105,19 +142,21 @@ exports = module.exports = opts => `[
     {
         name: 'address',
         columns: [
-            { name: 'ownerType',   type: dbText, size:  20 },
-            { name: 'ownerOid',    type: dbInt64           },
-            { name: 'street',      type: dbText, size: 100 },
-            { name: 'building',    type: dbText, size:  50 },
-            { name: 'poBox',       type: dbText, size:  20 },
-            { name: 'city',        type: dbText, size: 100 },
-            { name: 'region',      type: dbText, size: 100 },
-            { name: 'postalCode',  type: dbText, size:  20 },
-            { name: 'countryCode', type: dbText, size:   6 },
-            { name: 'geo',         type: dbJson            },
+            { name: 'ownerType',    type: dbText, size:  20 },
+            { name: 'ownerOid',     type: dbInt64           },
+            { name: 'street',       type: dbText, size: 100 },
+            { name: 'building',     type: dbText, size:  50 },
+            { name: 'suite',        type: dbText, size:  50 },
+            { name: 'poBox',        type: dbText, size:  20 },
+            { name: 'city',         type: dbText, size: 100 },
+            { name: 'region',       type: dbText, size: 100 },
+            { name: 'postalCode',   type: dbText, size:  20 },
+            { name: 'countryCode',  type: dbText, size:   6 },
+            { name: 'verified',     type: dbBool            },
+            { name: 'lastVerified', type: dbTime            },
         ],
         indexes: [
             'ownerType:asc, ownerOid:asc',
         ]
     },
-]`;
+);

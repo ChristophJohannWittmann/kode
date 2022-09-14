@@ -23,14 +23,6 @@
 
 /*****
 *****/
-const permissions = mkSet(
-    'auth',
-    'sys',
-);
-
-
-/*****
-*****/
 register(class Auth {
     constructor() {
     }

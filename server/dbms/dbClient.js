@@ -39,7 +39,7 @@
      * all database types.  It's a wrapper that provides state-management
      * features.  The dbClient needs to be passed the client class for the
      * specific DBMS server when constructed.  This happens when the DBMS-
-     * specific softare is required, during which time that software calls the
+     * specific software is required, during which time that software calls the
      * registerDbClient() to register in the clients object.  Hence, the API
      * is exactly the same for all DBMS client software.
     *****/
@@ -145,7 +145,7 @@
     
     /*****
      * Create a DBMS connection using the configuration settings based on the
-     * passed "config" argument.  If the config argument is a string, we'l
+     * passed "config" argument.  If the config argument is a string, we'll
      * fetch the configuration data from the loaded configuration.  If an
      * object is passed, that object will be used.  That object must match
      * the layout of the settings in the application configuration JSON.

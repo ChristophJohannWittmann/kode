@@ -22,15 +22,6 @@
 
 
 /*****
- * The PG addon is what makes PostgreSQL available for the kode application
- * framework.  The PG addon is written using the standard kode addon
- * application framework.  Once required (loaded), connections are created
- * by calling the addon's conncect() function.
-*****/
-const addon = require('../addons/pg/build/Release/pg.node');
-
-
-/*****
  * Each native DBMS client must implement an entry in its own types object to
  * to help generate SQL that's specific to that DBMS application.  pgTypes
  * implements both encode() and type().  type() returns the PostgreSQL type
@@ -290,7 +281,8 @@ class PgClient {
     }
     
     async connect() {
-        this.dbConn = await addon.connect(this.settings);
+        //this.dbConn = await addon.connect(this.settings);
+        this.dbConn = await Config.modules['postgrees'].connect(this.settings);
     }
     
     async dbNames() {

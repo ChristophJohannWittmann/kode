@@ -22,6 +22,23 @@
 
 
 /*****
+ * Wrap the Promise-based function from the child_process builtin module to make
+ * it ready as an asynchronous or async call: await execShell('ls -l');
+*****/
+register(function execShell(script) {
+    return new Promise((ok, fail) => {
+        CHILDPROC.exec(script, (error, stdout, stderr) => {
+            ok({
+                error: error,
+                stdout: stdout,
+                stderr: stderr,
+            });
+        });        
+    });
+});
+
+
+/*****
  * For each of the passed relative or absolute paths, recurse each directory
  * to generate an array of the absolute paths to all files in the directory
  * and its subdirectory tree.  The directory and subdirectory are not included

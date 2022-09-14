@@ -20,12 +20,12 @@
             }
         }
     },
-    "databases": {
+    "dbms": {
         "system": {
             "type": "postgres",
             "host": "localhost",
-            "username": "",
-            "password": "",
+            "username": "postgres",
+            "password": "postgres",
             "keyPath": "",
             "keyPem": "" 
         }

@@ -152,48 +152,40 @@ global.dbTimeArray = {
  * platforms.  This representation will be used for managing DBMS schemas on
  * all supported DBMS platforms and is used for analyzing existing schemas.
 *****/
-register(class DbSchema {
-    constructor(name, tableDefs) {
-        this.name = name;
-        this.tableMap = {};
-        this.tableArray = [];
+singleton(class DbSchema {
+    constructor() {
+        this.loaded = {};
+        this.defined = {};
+    }
   
+    defineTables(...tableDefs) {
         tableDefs.forEach(tableDef => {
-            if (tableDef.name in this.tableMap) {
-                throw new Error(`Duplicate table name: schema: "${this.name}" table: "${tableDef.name}"`);
+            if (tableDef.name in this.defined) {
+                throw new Error(`Duplicate table name: schema: table: "${tableDef.name}"`);
             }
 
-            let loaded = tableDef.columns[0].name == 'oid';
-            let schemaTable = new DbSchemaTable(this, tableDef, loaded);
-            this.tableArray.push(schemaTable);
-            this.tableMap[schemaTable.name] = schemaTable;
-            
-            if (!loaded) {
-                defineDboType(schemaTable);
-            }
+            tableDef.columns.unshift({ name: 'updated', type: dbTime });
+            tableDef.columns.unshift({ name: 'created', type: dbTime });
+            tableDef.columns.unshift({ name: 'oid',     type: dbKey  });
+            tableDef.indexes.unshift('oid:asc');
+
+            let schemaTable = new DbSchemaTable(tableDef);
+            this.defined[schemaTable.name] = schemaTable;
         });
     }
 });
 
-class DbSchemaTable {
-    constructor(schema, tableDef, loaded) {
-        this.schema = schema;
+register(class DbSchemaTable {
+    constructor(tableDef) {
         this.name = tableDef.name;
         this.columnMap = {};
         this.columnArray = [];
         this.indexMap = {};
         this.indexArray = [];
-        
-        if (!loaded) {
-            tableDef.columns.unshift({ name: 'updated', type: dbTime });
-            tableDef.columns.unshift({ name: 'created', type: dbTime });
-            tableDef.columns.unshift({ name: 'oid',     type: dbKey  });
-            tableDef.indexes.unshift('oid:asc');
-        }
   
         tableDef.columns.forEach(columnDef => {
             if (columnDef.name in this.columnMap) {
-                throw new Error(`Duplicate column name: schema: "${this.schema.name}" table: "${this.name}" column: "${columnDef.name}"`);
+                throw new Error(`Duplicate column name: schema: "table: "${this.name}" column: "${columnDef.name}"`);
             }
             else {
                 let schemaColumn = new DbSchemaColumn(this, columnDef);
@@ -206,7 +198,7 @@ class DbSchemaTable {
             let schemaIndex = new DbSchemaIndex(this, IndexDef);
             
             if (schemaIndex.name in this.indexMap) {
-                throw new Error(`Duplicate index name: schema: "${this.table.schema.name}" table: "${this.name}" index: "${schemaIndex.name}"`);
+                throw new Error(`Duplicate index name: schema: table: "${this.name}" index: "${schemaIndex.name}"`);
             }
             else {
                 this.indexArray.push(schemaIndex);
@@ -214,7 +206,7 @@ class DbSchemaTable {
             }
         });
     }
-}
+});
 
 class DbSchemaColumn {
     constructor(table, columnDef) {
@@ -237,10 +229,10 @@ class DbSchemaIndex {
             direction = direction.trim();
             
             if (!(columnName in this.table.columnMap)) {
-                throw new Error(`Undefined column name for index: schema: "${this.table.schema.name}" table: "${this.table.name}" column: "${columnName}"\n`);
+                throw new Error(`Undefined column name for index: schema: "table: "${this.table.name}" column: "${columnName}"\n`);
             }
             else if (columnName in this.columnMap) {
-                throw new Error(`Duplicate column name for index: schema: "${this.table.schema.name}" table: "${this.table.name}" column: "${columnName}"\n`);
+                throw new Error(`Duplicate column name for index: schema: "table: "${this.table.name}" column: "${columnName}"\n`);
             }
             else {
                 let indexColumn = {

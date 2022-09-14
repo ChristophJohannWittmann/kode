@@ -1,3 +1,5 @@
 ## GIT IGNORE
 .DS_STORE
+build
+.built
 config.json

@@ -26,6 +26,10 @@
 singleton(class Sentinel extends Daemon {
     constructor() {
         super();
+        this.permissions = mkSet(
+            'sys',
+            'user',
+        );
     }
 
     async onAuthenticate(message) {
@@ -38,6 +42,9 @@ singleton(class Sentinel extends Daemon {
     }
 
     async onCreateSession(message) {
+    }
+
+    async onRegisterPermission(message) {
     }
 
     async onTouchSession(message) {

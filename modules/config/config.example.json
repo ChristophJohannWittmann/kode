@@ -3,5 +3,7 @@
     "host": "*",
     "path": "/config",
     "active": true,
-    "database": "system"
+    "database": "system",
+    "content": [
+    ]
 }

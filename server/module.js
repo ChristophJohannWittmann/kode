@@ -49,7 +49,12 @@ register(class Module {
                         try {                    
                             this.config = fromJson((await FILES.readFile(configPath)).toString());
 
-                            for (let methodName of ['validate', 'scanContent', 'scanDirectory', 'upgradeSchema']) {
+                            for (let methodName of [
+                                'validate',
+                                'loadSchema',
+                                'loadContent',
+                                'loadHandlers',
+                            ]) {
                                 await this[methodName]();
 
                                 if (this.status != 'ok') {
@@ -87,17 +92,10 @@ register(class Module {
         }
     }
 
-    async scanContent() {
+    async loadContent() {
     }
 
-    async scanDirectory() {
-        namespace(this.config.name);
-        namespace();
-    }
-
-    async upgradeSchema() {
-        if (CLUSTER.isPrimary) {
-        }
+    async loadSchema() {
     }
 
     async validate() {

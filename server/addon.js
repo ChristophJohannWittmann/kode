@@ -22,26 +22,82 @@
 
 
 /*****
+ * This is a functional wrapper for a binary (C++) addon project.  Each addon
+ * project uses on of the provided C++ wrapper API provided by kode, the first
+ * of which resides in modules/apiV1.  Updated APIs will increment the number
+ * such as modules/apiV2, modules/apiV3 and so on.  If the module is already
+ * built, just load it.  If the module isn't built, go ahead on build it first.
+ * Please note that all of the overhead associated with the system reflection
+ * of the current build status only happens in the primary proceess.
 *****/
 register(class Addon {
     constructor(path) {
         this.path = path;
-        this.status = '';
+        this.status = 'ok';
+        this.prefix = '(loaded  )';
         this.error = '';
+        this.module = null;
     }
 
-    error() {
-        return 'error';
+    async build() {
+        try {
+            if (FS.existsSync(this.builtPath)) {
+                await FILES.rm(this.builtPath);
+            }
+
+            await execShell(`cd ${this.path}; node-gyp configure`);
+            await execShell(`cd ${this.path}; node-gyp build`);
+            await FILES.writeFile(this.builtPath, '');
+        }
+        catch (e) {
+            this.error = e;
+            this.prefix = '(failed  )';
+        }
+    }
+
+    async built() {
+        this.buildPath = PATH.join(this.path, 'build');
+        this.builtPath = PATH.join(this.path, '.built');
+
+        if (!FS.existsSync(this.buildPath)) {
+            return false;
+        }
+
+        if (!FS.existsSync(this.builtPath)) {
+            return false;
+        }
+
+        const builtStats = await FILES.stat(this.builtPath);
+        const builtMs = builtStats.ctime.valueOf();
+
+        for (let path of await recurseFiles(this.path)) {
+            if (!path.startsWith(this.buildPath)) {
+                let stats = await FILES.stat(path);
+
+                if (stats.ctime.valueOf() > builtMs) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     info() {
-        return `addon ${this.path}`;
+        return `${this.prefix} Addon ${this.path}`;
     }
     
     async load() {
-    }
+        if (CLUSTER.isPrimary && !await this.built()) {
+            await this.build();
+        }
 
-    status() {
-        return this.status;
+        try {
+            this.module = require(PATH.join(this.path, 'build/Release/addon.node'));
+        }
+        catch (e) {
+            this.error = e;
+            this.prefix = '(unloaded)';
+        }
     }
 });
