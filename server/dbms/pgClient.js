@@ -281,8 +281,14 @@ class PgClient {
     }
     
     async connect() {
-        //this.dbConn = await addon.connect(this.settings);
-        this.dbConn = await Config.modules['postgrees'].connect(this.settings);
+        console.log(Config.addonMap.postgres);
+        /*
+        this.dbConn = await addon.connect(this.settings);
+        //await this.dbConn.connect(this.settings);
+        */
+        return new Promise(()=>{});
+        this.dbConn = await Config.modules['postgres'].connect(this.settings);
+        console.log(this.dbConn);
     }
     
     async dbNames() {

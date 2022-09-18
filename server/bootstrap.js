@@ -202,6 +202,11 @@ require('./servers/http.js');
         }
 
         logPrimary('[ Kode Application Server Ready ]\n');
+
+        // ************************************************************
+        // TEST CODE
+        // ************************************************************
+        let dbc = await dbConnect('system')
     }
     else {
         const serverName = PROC.env.KODE_SERVER_NAME;

@@ -3,7 +3,9 @@
     "host": "*",
     "path": "/config",
     "active": true,
-    "database": "system",
-    "content": [
-    ]
+    "dbms": {
+        "": "system"
+    },
+    "content": {
+    }
 }

@@ -93,7 +93,9 @@ register(class Addon {
         }
 
         try {
-            this.module = require(PATH.join(this.path, 'build/Release/addon.node'));
+            let addon = require(PATH.join(this.path, 'build/Release/addon.node'));
+            Config.addonArray.push(addon);
+            Config.addonMap[addon.name] = addon;
         }
         catch (e) {
             this.error = e;

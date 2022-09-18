@@ -27,7 +27,7 @@
  * across all applications.  Hence, things such as authentication, user mgmt,
  * and session management are required by this schema.
 *****/
-DbSchema.defineTables(
+mkDbSchema('', true, 
     {
         name: 'user',
         columns: [

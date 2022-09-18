@@ -316,6 +316,7 @@ napi_value connect(napi_env env, napi_callback_info callbackInfo) {
 static napi_value Init(napi_env env, napi_value napi_exports) {
     Kode kode(env);
     auto exports = from(&kode, napi_exports)->toNapiObject();
+    exports->set("name", new NapiString(&kode, "postgres"));
     exports->set("connect", new NapiFunction(&kode, "connect", connect));
     return exports->napi();
 }

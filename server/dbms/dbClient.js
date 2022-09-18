@@ -152,29 +152,34 @@
     *****/
     register(async function dbConnect(config, ...switches) {
         if (typeof config == 'string') {
-            config = Application.databases[config].config;
+            this.config = Config.dbms[config];
         }
-        else if (typeof config != 'object') {
+        else if (typeof config == 'object') {
+            this.config = config;
+        }
+        else {
             throw new Error(`Invalid DBMS configurtion: ${config}`);
         }
-        
+
         let switchSet = mkSet(switches);
 
         let settings = {
             switches: switchSet,
-            client: config.client,
-            hostname: config.hostname ? config.hostname : 'localhost',
-            database: config.database ? config.database : '',
-            username: config.username ? config.username : '',
-            password: config.password ? config.password : '',
-            port: config.port ? config.port : 0,
-            libPath: config.libPath ? config.libPath : '',
+            dbms: this.config.dbms,
+            hostname: this.config.hostname ? this.config.hostname : 'localhost',
+            database: this.config.database ? this.config.database : '',
+            username: this.config.username ? this.config.username : '',
+            password: this.config.password ? this.config.password : '',
+            privateKey: this.config.privateKey ? this.config.privateKey : '',
+            privatePath: this.config.privatePath ? this.config.privatePath : '',
+            port: this.config.port ? this.config.port : 0,
+            libPath: this.config.libPath ? this.config.libPath : '',
         };
-        
-        const poolKey = `${config.client}_${settings.hostname}_${settings.database}`;
+
+        const poolKey = `${settings.dbms}_${settings.hostname}_${settings.database}`;
         
         if (!(poolKey in pools)) {
-            pools[poolKey] = mkPool((settings) => new DbClient(clients[config.client], settings), idle);
+            pools[poolKey] = mkPool(settings => new DbClient(clients[this.config.dbms], settings), idle);
         }
         
         if (switchSet.has('notran')) {
