@@ -269,7 +269,9 @@ class PgClient {
         this.dbConn = null;
         this.settings = settings;
         this.settings.binaryMode = false;
-        this.settings.database ? this.settings.database : 'postgres';
+        this.settings.port ? true : this.settings.port = 5433;
+        this.settings.database ? true : this.settings.database = 'postgres';
+        this.settings.switches.has('dba') ? this.settings.database = 'postgres' : false;
     }
 
     async cancel() {
@@ -281,14 +283,7 @@ class PgClient {
     }
     
     async connect() {
-        console.log(Config.addonMap.postgres);
-        /*
-        this.dbConn = await addon.connect(this.settings);
-        //await this.dbConn.connect(this.settings);
-        */
-        return new Promise(()=>{});
-        this.dbConn = await Config.modules['postgres'].connect(this.settings);
-        console.log(this.dbConn);
+        this.dbConn = await Config.addonMap['postgres'].connect(this.settings);
     }
     
     async dbNames() {

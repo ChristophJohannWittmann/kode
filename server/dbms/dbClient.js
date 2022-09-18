@@ -111,7 +111,7 @@
                     let result = await this.client.query(sql, opts);
                     
                     if (!result.ok) {
-                        throw new Error(`Query Error --\nDBMS: "${this.settings.client}"\nSQL:  "${sql}"\n`);
+                        throw new Error(`Query Error --\nDBMS: "${this.settings.dbms}"\nSQL:  "${sql}"\n`);
                     }
                     
                     this.querying = false;

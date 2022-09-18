@@ -27,7 +27,6 @@ register(class Module {
     constructor(path) {
         this.path = path;
         this.status = 'ok';
-        this.prefix = '(loaded  )';
         this.error = '';
     }
 
@@ -96,6 +95,7 @@ register(class Module {
     }
 
     async loadSchema() {
+        //let dbc = await dbConnect('system', 'dba');
     }
 
     async validate() {

@@ -77,8 +77,8 @@ global.env = {
     network:    OS.networkInterfaces(),
     memory:     ({ free: OS.freemem(), total: OS.totalmem() }),
     kodePath:   PATH.join(__dirname, '..'),
-    addonPath:  PATH.join(__dirname, '../addons'),
-    modulePath: PATH.join(__dirname, '../modules'),
+    addonPath:  PATH.join(__dirname, './addons'),
+    modulePath: PATH.join(__dirname, './modules'),
     daemonPath: PATH.join(__dirname, './daemons'),
     serverPath: PATH.join(__dirname, './servers'),
 };
@@ -202,11 +202,6 @@ require('./servers/http.js');
         }
 
         logPrimary('[ Kode Application Server Ready ]\n');
-
-        // ************************************************************
-        // TEST CODE
-        // ************************************************************
-        let dbc = await dbConnect('system')
     }
     else {
         const serverName = PROC.env.KODE_SERVER_NAME;
