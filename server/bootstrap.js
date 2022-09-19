@@ -188,8 +188,8 @@ require('./servers/http.js');
     logPrimary('[ Analyzing DBMS Schemas ]');
 
     if (CLUSTER.isPrimary) {
-        for (let module of Config.moduleArray) {
-            await module.upgradeSchemas();
+        for (let schema of Object.values(DbSchema.schemas)) {
+            console.log(schema.name);
         }
     }
 

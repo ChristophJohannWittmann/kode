@@ -100,19 +100,19 @@ register(class Module {
     }
 
     async loadClient() {
-        if (FS.exists(PATH.join(this.path, 'client'))) {
+        if (FS.existsSync(PATH.join(this.path, 'client'))) {
             // *** TBD ***
         }
     }
 
     async loadContent() {
-        if (FS.exists(PATH.join(this.path, 'content'))) {
+        if (FS.existsSync(PATH.join(this.path, 'content'))) {
             await ContentManager.registerModule(this);
         }
     }
 
     async loadSchemas() {
-        if (FS.exists(PATH.join(this.path, 'schemas.js'))) {
+        if (FS.existsSync(PATH.join(this.path, 'schemas.js'))) {
             // *** TBD ***
         }
         /*
@@ -130,13 +130,9 @@ register(class Module {
     }
 
     async loadServer() {
-        if (FS.exists(PATH.join(this.path, 'server'))) {
+        if (FS.existsSync(PATH.join(this.path, 'server'))) {
             // *** TBD ***
         }
-    }
-
-    async upgradeSchemas() {
-        // *** TBD ***
     }
 
     async validate() {
