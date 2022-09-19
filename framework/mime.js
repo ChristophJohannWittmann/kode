@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
  * code names.  The code name is something like text/html.  Some of them, like
  * .xlsx for instance, have disguistingly long MIME type codes.
 *****/
-register(class Mime {
+singleton(class Mime {
     static byMimeCode = {};
     static byExtension = {};
   
@@ -115,7 +115,7 @@ register(class Mime {
         });
     })();
   
-    static fromMimeCode(code) {
+    fromMimeCode(code) {
         if (code in Mime.byMimeCode) {
             return Mime.byMimeCode[code];
         }
@@ -123,8 +123,10 @@ register(class Mime {
         return Mime.byMimeCode['application/octet-stream'];
     }
 
-    static fromExtension(extension) {
-        if (extension in Mime.byExtension) {
+    fromExtension(extension) {
+        let ext = extension.startsWith('.') ? extension.substr(1) : extension;
+
+        if (ext in Mime.byExtension) {
             return Mime.byExtension[extension];
         }
 

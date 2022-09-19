@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,9 +45,6 @@ register(class DbDbmsDiff {
     }
 });
 
-
-/*****
-*****/
 register(class DbTableDiff {
     constructor(config, schemaTable, missing) {
         this.type = 'table';
@@ -71,9 +68,6 @@ register(class DbTableDiff {
     }
 });
 
-
-/*****
-*****/
 register(class DbColumnDiff {
     constructor(config, schemaColumn, missing) {
         this.type = 'column';
@@ -97,9 +91,6 @@ register(class DbColumnDiff {
     }
 });
 
-
-/*****
-*****/
 register(class DbIndexDiff {
     constructor(config, schemaIndex, missing) {
         this.type = 'index';
@@ -127,18 +118,13 @@ register(class DbIndexDiff {
 /*****
 *****/
 register(class DbSchemaAnalysis {
-    constructor(opts) {
-        return new Promise(async (ok, fail) => {
-            this.meta = opts.meta;
-            this.real = opts.real;
-            this._diffs = [];
-            //await this.analyzeSchemas();
-            //console.log($toJson(this, true));
-            ok(this);
-        });
+    constructor(meta, real) {
+        this.meta = meta;
+        this.real = real;
+        this.diffs = [];
     }
   
-    async analyzeSchemas() {
+    async analyzeSchema(dbc) {
         for (let database of Object.values(this._databases)) {
             console.log(database);
         }
@@ -146,25 +132,12 @@ register(class DbSchemaAnalysis {
   
     async analyzeTable() {
     }
-  
-    analyzeColumns()  {
-    }
-  
-    analyzeIndexes() {
-    }
-  
-    diffs() {
-        return this._diffs;
-    }
 });
-
-
 /*****
-*****/
+*****
 register(class DbDbAnalysis {
     constructor() {
         return new Promise(async (ok, fail) => {
-            /*
             this._hosts = {};
             this._databases = {};
 
@@ -217,145 +190,9 @@ register(class DbDbAnalysis {
                     }
                 }
             }
-            */
             
             ok(this);
         });
     }
 });
-/*
-class PgAdmin {
-    constructor(settings) {
-        this.settings = settings;
-        this.database = settings.database;
-    }
- 
-    async create() {
-        this.settings.database = 'postgres';
-        let dbc = await dbConnect(this.settings, 'notran');
-        await dbc.query(`CREATE DATABASE ${this.database}`);
-        await dbc.free();
-    }
- 
-    async createColumn(tableName, columnName, dbType) {
-        let table = `_${toSnakeCase(tableName)}`;
-        let column = `_${toSnakeCase(columnName)}`;
-        let pgType = pgTypes[dbType.name()];
-        let value = pgType.encode(dbType.init());
- 
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
- 
-        await dbc.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${pgType.type()}`);
-        await dbc.query(`UPDATE ${table} SET ${column}=${value}`);
- 
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async createIndex(tableName, indexColumns) {
-        let table = `_${toSnakeCase(tableName)}`;
- 
-        let columns = indexColumns.map(indexColumn => {
-            return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
-        }).join(', ');
- 
-        let name = table + indexColumns.map(indexColumn => {
-            return `_${toSnakeCase(indexColumn.columnName)}`;
-        }).join('');
- 
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(`CREATE INDEX ${name} on ${table} (${columns})`);
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async createTable(schemaTable) {
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
- 
-        let columns = schemaTable.columnArray.map(schemaColumn => {
-            let name = `_${toSnakeCase(schemaColumn.name)}`;
-            let type = pgTypes[schemaColumn.type.name()].type();
-            return `${name} ${type}`;
-        }).join(', ');
- 
-        await dbc.query(`CREATE TABLE _${schemaTable.name} (${columns});`);
- 
-        for (let schemaIndex of schemaTable.indexArray) {
-            let indexColumns = schemaIndex.columnArray.map(indexColumn => {
-                return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
-            }).join(', ');
- 
-            await dbc.query(`CREATE INDEX _${toSnakeCase(schemaIndex.name)} on _${schemaTable.name} (${indexColumns})`);
-        }
- 
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async drop() {
-        this.settings.database = 'postgres';
-        let dbc = await dbConnect(this.settings, 'notran');
-        await dbc.query(`DROP DATABASE ${this.database}`);
-        await dbc.free();
-    }
- 
-    async dropColumn(tableName, columnName) {
-        let table = `_${toSnakeCase(tableName)}`;
-        let column = `_${toSnakeCase(columnName)}`;
-        let sql = `ALTER TABLE ${table} DROP COLUMN ${column}`;
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(sql);
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async dropIndex(indexName) {
-        let sql = `DROP INDEX _${toSnakeCase(indexName)}`;
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(sql);
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async dropTable(tableName) {
-        let sql = `DROP TABLE _${toSnakeCase(tableName)}`;
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(sql);
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async exists() {
-        this.settings.database = 'postgres';
-        let dbc = await dbConnect(this.settings);
-        let result = await dbc.query(`SELECT datname FROM pg_database WHERE datname not in ('postgres', 'template0', 'template1')`);
-        await dbc.rollback();
-        await dbc.free();
-        return mkSet(result.rows.map(row => row.datname)).has(this.database);
-    }
- 
-    async listDatabases() {
-        this.settings.database = 'postgres';
-        let dbc = await dbConnect(this.settings);
-        let result = await dbc.query(`SELECT datname FROM pg_database WHERE datname not in ('postgres', 'template0', 'template1')`);
-        await dbc.rollback();
-        await dbc.free();
-        return mkSet(result.rows.map(row => row.datname));
-    }
- 
-    async loadSchemaDef() {
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        let schema = await (new PgSchemaDef(dbc, this.database));
-        await dbc.rollback();
-        await dbc.free();
-        return schema;
-    }
-}
 */

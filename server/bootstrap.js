@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -88,6 +88,8 @@ global.env = {
  * Include the code in the /server project directory.  Like other kode code,
  * each nodejs module will place the appropriate names into the global namespace.
 *****/
+require('./config.js');
+
 require('./lib/auth.js');
 require('./lib/buffer.js');
 require('./lib/content.js');
@@ -103,7 +105,6 @@ require('./dbms/dbObject.js');
 require('./dbms/dbSchemaAnalyzer.js');
 require('./dbms/fmwkSchema.js');
 
-require('./config.js');
 require('./addon.js');
 require('./cluster.js');
 require('./ipc.js');
@@ -184,11 +185,12 @@ require('./servers/http.js');
     }
 
     await onSingletons();
-    logPrimary('[ Checking DBMS Schema ]');
+    logPrimary('[ Analyzing DBMS Schemas ]');
 
     if (CLUSTER.isPrimary) {
-        console.log('    loop through modules to get more schema');
-        console.log('.   loop through all tables on all databases to check/upgrade schema');
+        for (let module of Config.moduleArray) {
+            await module.upgradeSchemas();
+        }
     }
 
     if (CLUSTER.isPrimary) {

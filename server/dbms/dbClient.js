@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -86,22 +86,18 @@
                 this.connected = true;
             }
         }
-        
-        async dbNames() {
-            if (this.connected && !this.querying) {
-                this.querying = true;
-                let names = this.client.dbNames();
-                this.querying = false;
-                return names;
-            }
+    
+        dbAdmin() {
+            return this.client.dbAdmin();
+        }
+    
+        async dbSchema() {
+            let builder = this.client.dbSchema();
+            return await builder.load();
         }
         
         async free() {
             Pool.free(this);
-        }
-    
-        async loadDbSchema() {
-            return await this.client.loadDbSchema(this.settings.database);
         }
         
         async query(sql, opts) {

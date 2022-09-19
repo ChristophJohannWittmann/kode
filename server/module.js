@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,12 @@ register(class Module {
         this.path = path;
         this.status = 'ok';
         this.error = '';
+        this.prefix = '(ok      )';
+        this.schemas = [];
+        this.configPath = PATH.join(this.path, 'config.json');
+        this.serverPath = PATH.join(this.path, 'server');
+        this.clientPath = PATH.join(this.path, 'client');
+        this.contentPath = PATH.join(this.path, 'content');
     }
 
     info() {
@@ -39,20 +45,19 @@ register(class Module {
             let stats = await FILES.stat(this.path);
 
             if (stats.isDirectory()) {
-                let configPath = `${this.path}/config.json`;
-
-                if (FS.existsSync(configPath)) {
-                    stats = await FILES.stat(configPath);
+                if (FS.existsSync(this.configPath)) {
+                    stats = await FILES.stat(this.configPath);
 
                     if (stats.isFile()) {
                         try {                    
-                            this.config = fromJson((await FILES.readFile(configPath)).toString());
+                            this.config = fromJson((await FILES.readFile(this.configPath)).toString());
 
                             for (let methodName of [
                                 'validate',
-                                'loadSchema',
+                                'loadServer',
+                                'loadClient',
                                 'loadContent',
-                                'loadHandlers',
+                                'loadSchemas',
                             ]) {
                                 await this[methodName]();
 
@@ -62,9 +67,8 @@ register(class Module {
                             }
 
                             if (this.status == 'ok') {
-                                Config.moduleMap[this.config.name] = this;
+                                Config.moduleMap[this.config.namespace] = this;
                                 Config.moduleArray.push(this);
-                                Config.moduleUrlMap[this.config.url] = this;
                             }
                         }
                         catch (e) {
@@ -89,18 +93,55 @@ register(class Module {
                 this.prefix = '(dir     )';
             }
         }
+        else {
+            this.status = 'fail';
+            this.prefix = '(notfound)';
+        }
+    }
+
+    async loadClient() {
+        if (FS.exists(PATH.join(this.path, 'client'))) {
+            // *** TBD ***
+        }
     }
 
     async loadContent() {
+        if (FS.exists(PATH.join(this.path, 'content'))) {
+            await ContentManager.registerModule(this);
+        }
     }
 
-    async loadSchema() {
-        //let dbc = await dbConnect('system', 'dba');
+    async loadSchemas() {
+        if (FS.exists(PATH.join(this.path, 'schemas.js'))) {
+            // *** TBD ***
+        }
+        /*
+        // *** TBD ***
+        return;
+        if ('schemas' in this.config) {
+            for (let schemaName in this.config.schemas) {
+                if (!(schemaName in DbSchema.schemas)) {
+                    console.log(schemaName);
+                }
+            }
+            //let dbc = await dbConnect('system', 'dba');
+        }
+        */
+    }
+
+    async loadServer() {
+        if (FS.exists(PATH.join(this.path, 'server'))) {
+            // *** TBD ***
+        }
+    }
+
+    async upgradeSchemas() {
+        // *** TBD ***
     }
 
     async validate() {
-        if (this.status == 'ok' && 'name' in this.config) {
-            if (this.config.name in Config.moduleMap) {
+        if (this.status == 'ok' && 'namespace' in this.config) {
+            if (this.config.namespace in Config.moduleMap) {
                 this.status = 'dupname';
                 this.prefix = '(dupname )';
             }
@@ -108,17 +149,6 @@ register(class Module {
         else {
             this.status = 'noname';
             this.prefix = '(noname  )';
-        }
-
-        if (this.status == 'ok' && 'url' in this.config) {
-            if (this.config.url in Config.moduleUrlMap) {
-                this.status = 'dupurl';
-                this.prefix = '(dupurl  )';
-            }
-        }
-        else {
-            this.status = 'nourl';
-            this.prefix = '(nourl   )';
         }
 
         if (this.status == 'ok' && 'active' in this.config && typeof this.config.active == 'boolean') {

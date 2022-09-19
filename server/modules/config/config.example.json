@@ -1,11 +1,11 @@
 {
-    "name": "config",
-    "host": "*",
-    "path": "/config",
     "active": true,
-    "dbms": {
-        "": "system"
-    },
-    "content": {
+    "host": "*",
+    "namespace": "config",
+    "clientOrder": [
+    ],
+    "schemas": {
+        "": "system",
+        "test": "system"
     }
 }

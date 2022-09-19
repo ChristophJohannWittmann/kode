@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -189,36 +189,164 @@ const pgReverseMap = {
 
 
 /*****
+*****/
+class PgAdmin {
+    constructor(pg) {
+        this.pg = pg;
+    }
+ 
+    async createColumn(tableName, columnName, dbType) {
+        let table = `_${toSnakeCase(tableName)}`;
+        let column = `_${toSnakeCase(columnName)}`;
+        let pgType = pgTypes[dbType.name()];
+        let value = pgType.encode(dbType.init());
+ 
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+ 
+        await dbc.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${pgType.type()}`);
+        await dbc.query(`UPDATE ${table} SET ${column}=${value}`);
+ 
+        await dbc.commit();
+        await dbc.free();
+    }
+ 
+    async createDatabase() {
+        this.settings.database = 'postgres';
+        let dbc = await dbConnect(this.settings, 'notran');
+        await dbc.query(`CREATE DATABASE ${this.database}`);
+        await dbc.free();
+    }
+ 
+    async createIndex(tableName, indexColumns) {
+        let table = `_${toSnakeCase(tableName)}`;
+ 
+        let columns = indexColumns.map(indexColumn => {
+            return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
+        }).join(', ');
+ 
+        let name = table + indexColumns.map(indexColumn => {
+            return `_${toSnakeCase(indexColumn.columnName)}`;
+        }).join('');
+ 
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+        await dbc.query(`CREATE INDEX ${name} on ${table} (${columns})`);
+        await dbc.commit();
+        await dbc.free();
+    }
+ 
+    async createTable(schemaTable) {
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+ 
+        let columns = schemaTable.columnArray.map(schemaColumn => {
+            let name = `_${toSnakeCase(schemaColumn.name)}`;
+            let type = pgTypes[schemaColumn.type.name()].type();
+            return `${name} ${type}`;
+        }).join(', ');
+ 
+        await dbc.query(`CREATE TABLE _${schemaTable.name} (${columns});`);
+ 
+        for (let schemaIndex of schemaTable.indexArray) {
+            let indexColumns = schemaIndex.columnArray.map(indexColumn => {
+                return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
+            }).join(', ');
+ 
+            await dbc.query(`CREATE INDEX _${toSnakeCase(schemaIndex.name)} on _${schemaTable.name} (${indexColumns})`);
+        }
+ 
+        await dbc.commit();
+        await dbc.free();
+    }
+ 
+    async doesDatabaseExist() {
+        this.settings.database = 'postgres';
+        let dbc = await dbConnect(this.settings);
+        let result = await dbc.query(`SELECT datname FROM pg_database WHERE datname not in ('postgres', 'template0', 'template1')`);
+        await dbc.rollback();
+        await dbc.free();
+        return mkSet(result.rows.map(row => row.datname)).has(this.database);
+    }
+ 
+    async dropColumn(tableName, columnName) {
+        let table = `_${toSnakeCase(tableName)}`;
+        let column = `_${toSnakeCase(columnName)}`;
+        let sql = `ALTER TABLE ${table} DROP COLUMN ${column}`;
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+        await dbc.query(sql);
+        await dbc.commit();
+        await dbc.free();
+    }
+ 
+    async dropDatabase() {
+        this.settings.database = 'postgres';
+        let dbc = await dbConnect(this.settings, 'notran');
+        await dbc.query(`DROP DATABASE ${this.database}`);
+        await dbc.free();
+    }
+ 
+    async dropIndex(indexName) {
+        let sql = `DROP INDEX _${toSnakeCase(indexName)}`;
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+        await dbc.query(sql);
+        await dbc.commit();
+        await dbc.free();
+    }
+ 
+    async dropTable(tableName) {
+        let sql = `DROP TABLE _${toSnakeCase(tableName)}`;
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+        await dbc.query(sql);
+        await dbc.commit();
+        await dbc.free();
+    }
+ 
+    async listDatabases() {
+        this.settings.database = 'postgres';
+        let dbc = await dbConnect(this.settings);
+        let result = await dbc.query(`SELECT datname FROM pg_database WHERE datname not in ('postgres', 'template0', 'template1')`);
+        await dbc.rollback();
+        await dbc.free();
+        return mkSet(result.rows.map(row => row.datname));
+    }
+}
+
+
+/*****
  * This is the PostgreSQL specific function that analyzes the meta data to to
  * build a schema definition, which is then the input to the DbSchema class.
  * We're using our best practices and previous learning to write the queries
  * and code to generate the schema definition.  The tricky to figure out query
  * was that for indexes.
 *****/
-class PgSchemaDef {
-    constructor(dbConn, dbName) {
-        return new Promise(async (ok, fail) => {
-            this.tableDefs = [];
-            this.dbName = dbName;
-            
-            let result = await dbConn.query(`SELECT table_name FROM information_schema.TABLES WHERE table_schema='public' AND table_catalog='${dbName}'`);
-            
-            for (let table of result.rows) {
-                await this.tableDef(dbConn, table.table_name);
-            }
-            
-            ok(this.tableDefs);
-        });
+class PgSchema {
+    constructor(pg) {
+        this.pg = pg;
+        this.tableDefs = [];
+    }
+
+    async load() {
+        let result = await this.pg.query(`SELECT table_name FROM information_schema.TABLES WHERE table_schema='public' AND table_catalog='${dbName}'`);
+        
+        for (let table of result.rows) {
+            await this.tableDef(table.table_name);
+        }
+
+        return this.tableDefs;
     }
     
-    async tableDef(dbConn, tableName) {
+    async tableDef(tableName) {
         let tableDef = {
             name: toCamelCase(tableName),
             columns: [],
             indexes: []
         };
         
-        let result = await dbConn.query(`SELECT table_catalog, table_name, column_name, ordinal_position, udt_name FROM information_schema.COLUMNS WHERE table_catalog='${this.dbName}' AND table_name='${tableName}' ORDER BY ordinal_position`);
+        let result = await this.pg.query(`SELECT table_catalog, table_name, column_name, ordinal_position, udt_name FROM information_schema.COLUMNS WHERE table_catalog='${this.dbName}' AND table_name='${tableName}' ORDER BY ordinal_position`);
         
         for (let column of result.rows) {
             let columnName = toCamelCase(column.column_name);
@@ -228,7 +356,7 @@ class PgSchemaDef {
                 tableDef.columns.push({ name: columnName, type: fmwkType });
             }
             else {
-                var fmwkType = pgReverseMap[column.udt_name].fmwk();
+                var fmwkType = this.pgReverseMap[column.udt_name].fmwk();
                 
                 if (fmwkType.name() == 'dbText') {
                     tableDef.columns.push({ name: columnName, type: fmwkType, size: -1 });
@@ -239,7 +367,7 @@ class PgSchemaDef {
             }
         }
         
-        result = await dbConn.query(`SELECT X.indexname, I.indnatts, I.indisunique, I.indisprimary, I.indkey, I.indoption FROM pg_indexes AS X JOIN pg_class AS C ON C.relname=X.indexname JOIN pg_index AS I ON I.indexrelid=C.oid WHERE X.tablename='${tableName}'`);
+        result = await this.pg.query(`SELECT X.indexname, I.indnatts, I.indisunique, I.indisprimary, I.indkey, I.indoption FROM pg_indexes AS X JOIN pg_class AS C ON C.relname=X.indexname JOIN pg_index AS I ON I.indexrelid=C.oid WHERE X.tablename='${tableName}'`);
         
         for (let row of result.rows) {
             let index = [];
@@ -285,14 +413,13 @@ class PgClient {
     async connect() {
         this.dbConn = await Config.addonMap['postgres'].connect(this.settings);
     }
-    
-    async dbNames() {
-        let result = await this.dbConn.query('SELECT datname from pg_database order by datname');
-        return result.rows.map(row => row.datname);
+
+    dbAdmin() {
+        return new PgAdmin(this);
     }
     
-    async loadDbSchema(dbName) {
-        return await (new PgSchemaDef(this.dbConn, dbName));
+    dbSchema() {
+        return new PgSchema(this);
     }
     
     async query(sql, opts) {

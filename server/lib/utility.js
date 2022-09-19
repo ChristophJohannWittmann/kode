@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
  * Wrap the Promise-based function from the child_process builtin module to make
  * it ready as an asynchronous or async call: await execShell('ls -l');
 *****/
-register(function execShell(script) {
+register(async function execShell(script) {
     return new Promise((ok, fail) => {
         CHILDPROC.exec(script, (error, stdout, stderr) => {
             ok({

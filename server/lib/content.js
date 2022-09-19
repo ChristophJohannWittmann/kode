@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,146 +22,103 @@
 
 
 /*****
+ * A class that encapsulates a single content object, which must be located at
+ * a unique URL.  It's primary purpose is to support the HTTP server by serving
+ * as an instance of data that can be fed via the HTTP server.  Each content
+ * object contains additional meta data to facilitate content management.
 *****/
 class Content {
-    constructor(mime, content) {
-        this.mime = mime;
-        this.content = content;
-    }
-}
-
-
-/*****
-*****/
-singleton(class ContentManager {
     static formatters = {
         binary: buffer => buffer,
         string: buffer => buffer.toString(),
     };
 
-    constructor() {
-        this.modules = {};
+    constructor(module, path) {
+        this.exists = false;
+        this.absPath = path;
+        this.dirPath = PATH.join(module.path, 'content', PATH.sep);
+        this.relPath = this.absPath.substr(this.dirPath.length);
+        this.baseName = PATH.basename(this.absPath);
+        this.extName = PATH.extname(this.absPath);
+        this.mime = Mime.fromExtension(this.extName);
+        this.url = PATH.join(module.config.namespace, this.relPath);
+        this.content = '';
     }
-    
-    async get(url, path) {
-    }
-    
-    async register(url, path) {
-        console.log(url, path);
-    }
-});
-/*
-    static get = async (path) => {
-        if (path in $Content._lib) {
-            let entry = $Content._lib[path];
 
-            if (!entry.dir) {
-                if ('data' in entry) {
-                    return {mime: entry.mime, data: entry.data};
-                }
-                else {
-                    let rawContent = await Files.readFile(entry.abs);
-                    let mime = $Mime.fromExtension(Path.extname(entry.abs));
-                    let content = $Content._formatters[mime.type](rawContent);
+    async analyze() {
+        if (this.mime) {
+            if (FS.existsSync(this.absPath)) {
+                let stats = await FILES.stat(this.absPath);
 
-                    if ($Config.cacheFlag) {
-                        entry.mime = mime.code;
-                        entry.data = content;
-                    }
-
-                    return {mime: mime, data: content};
+                if (stats.isFile()) {
+                    this.exists = true;
                 }
             }
         }
-        else {
-            let pathPart = Path.dirname(path);
+    }
 
-            if (pathPart in $Content._lib) {
-                let entry = $Content._lib[pathPart];
-
-                if (entry.dir) {
-                    let abs = `${entry.abs}/${Path.basename(path)}`;
-                    let rawContent = await Files.readFile(abs);
-                    let mime = $Mime.fromExtension(Path.extname(path));
-                    let content = $Content._formatters[mime.type](rawContent);
-
-                    if ($Config.cacheFlag) {
-                        $Content._lib[path] = {
-                            rel: path,
-                            abs: abs,
-                            dir: false,
-                            data: content,
-                            mime: mime.code
-                        };
-                    }
-
-                    return {mime: mime.code, data: content};
-                }
-            }
-        }
-
-        return {mime: '', data: null};
-    };
-
-    static include = async (path, content, mimeCode) => {
-        if (path in $Content._lib) {
-            throw new Error(`class: $Content, method: include(), Duplicate Path: ${path}`);
-        }
-
-        if (content) {
-            $Content._lib[path] = {
-                rel: path,
-                abs: '',
-                dir: false,
-                data: content,
-                mime: mimeCode
+    async get() {
+        if (this.content) {
+            return {
+                mime: this.mime,
+                content: this.content,
             };
-
-            return;
-        }
-
-        let abs = Path.join($Config.applicationPath, path);
-
-        if (FS.existsSync(abs)) {
-            let stat = await Files.stat(abs);
-
-            if (stat.isFile()) {
-                $Content._lib[path] = {
-                    rel: path,
-                    abs: abs,
-                    dir: false,
-                };
-            }
-            else if (stat.isDirectory()) {
-                let stack = [{path: path, abs: abs}];
-
-                while (stack.length) {
-                    let {path: path, abs: abs} = stack.pop();
-                    let entries = await Files.readdir(abs);
-
-                    for (let i = 0; i < entries.length; i++) {
-                        let abs1 = `${abs}/${entries[i]}`;
-                        let path1 = `${path}/${entries[i]}`;
- 
-                        if ((await Files.stat(abs1)).isDirectory()) {
-                            $Content._lib[path1] = {
-                                rel: path1,
-                                abs: abs1,
-                                dir: true,
-                            };
-
-                            stack.push({path: path1, abs: abs1});
-                        }
-                    }
-                }
-            }
-            else {
-                throw new Error(`class: $Content, method: include(), Invalid filetype: ${path}`);
-            }
         }
         else {
-            throw new Error(`class: $Content, method: include(), Nonexistent path: ${path}`);
+            let content;
+
+            try {
+                let raw = await FILES.readFile(this.absPath);
+                content = Content.formatters[this.mime.type](raw);
+
+                if (Config.cache) {
+                    this.content = content;
+                }
+            } 
+            catch (e) {
+                this.content = `ERROR: ${this.absPath}`;
+                this.mime = Mime.fromMimeCode('text/plain');
+                log(`Error occured while reading conent file: ${this.absPath}`, e);
+            }
+
+            return {
+                mime: this.mime,
+                content: content,
+            };
         }
-    };
+    }
+}
+
+
+/*****
+ * Each process gets it's own singleton content object, which may be used by the
+ * HTTP or any other server that needs to refer to content.  Each content item
+ * has a unique URL.  On the aggregate level, the content from each module is
+ * segregated to ensure unique URLs for each register content file.
+*****/
+singleton(class ContentManager {
+    constructor() {
+        this.urls = {};
+        this.cache = Config.cache;
+    }
+
+    deregister(url) {
+        if (url in this.urls) {
+            delete this.urls[url];
+        }
+    }
+    
+    async get(url) {
+        if (url in this.urls) {
+            return this.urls[url].get();
+        }
+    }
+    
+    async registerModule(module) {
+        for (let path of await recurseFiles(module.contentPath)) {
+            let content = new Content(module, path);
+            await content.analyze();
+            this.urls[content.url] = content;
+        }
+    }
 });
-*/

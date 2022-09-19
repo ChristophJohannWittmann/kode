@@ -1,5 +1,5 @@
 {
-    "caching": false,
+    "cache": false,
     "logging": "console",
     "database": "system",
     "network": {
@@ -22,12 +22,12 @@
     },
     "dbms": {
         "system": {
-            "type": "postgres",
+            "dbms": "postgres",
+            "libPath": "/Library/postgreSQL/12",
             "host": "localhost",
+            "database": "test",
             "username": "postgres",
-            "password": "postgres",
-            "keyPath": "",
-            "keyPem": "" 
+            "password": "postgres"
         }
     },
     "modules": [

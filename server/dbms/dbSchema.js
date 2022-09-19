@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -162,11 +162,13 @@ register(class DbSchema {
         this.defined = defined;
         this.prefix = this.name ? `${name[0].toLowerCase()}${name.substr(1)}` : '';
 
-        if (this.name in DbSchema.schemas) {
-            throw new Error(`Duplicate schema name: "${this.name}"`);
-        }
-        else {
-            DbSchema.schemas[this.name] = this;
+        if (this.defined) {
+            if (this.name in DbSchema.schemas) {
+                throw new Error(`Duplicate schema name: "${this.name}"`);
+            }
+            else {
+                DbSchema.schemas[this.name] = this;
+            }
         }
 
         this.addTables(...tableDefs);
