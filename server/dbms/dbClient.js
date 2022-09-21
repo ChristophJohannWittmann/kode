@@ -51,12 +51,6 @@
             this.querying = false;
             this.transaction = false;
         }
-        
-        async cancel() {
-            if (this.connected && this.querying) {
-                await this.client.cancel();
-            }
-        }
 
         async close() {
             if (this.connected) {
@@ -84,31 +78,6 @@
             if (!this.connected) {
                 await this.client.connect();
                 this.connected = true;
-            }
-        }
-
-        async createDatabase(dbName) {
-            return await this.client.createDatabase(dbName);
-        }
-
-        async createTable(tableDef) {
-            return await this.client.createTable(tableDef);
-        }
-
-        async dropDatabase(dbName) {
-            return await this.client.dropDatabase(dbName);
-        }
-
-        async dropTable(tableName) {
-            return await this.client.dropTable(tableName);
-        }
-
-        async existsDatabase(dbName) {
-            if (this.settings.switches.has('dba')) {
-                return await this.client.existsDatabase(dbName);
-            }
-            else {
-                return false;
             }
         }
         
@@ -191,7 +160,7 @@
         let settings = {
             switches: switchSet,
             dbms: this.config.dbms,
-            hostname: this.config.hostname ? this.config.hostname : 'localhost',
+            host: this.config.host ? this.config.host : 'localhost',
             database: this.config.database ? this.config.database : '',
             username: this.config.username ? this.config.username : '',
             password: this.config.password ? this.config.password : '',

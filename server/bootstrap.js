@@ -44,19 +44,19 @@ require('../framework/utility.js');
  * required modules using all caps to signify that the required modules is a
  * NodeJS builtin module.
 *****/
-global.BUFFER    = require('buffer').Buffer,
-global.CHILDPROC = require('child_process'),
-global.CLUSTER   = require('cluster'),
-global.CRYPTO    = require('crypto'),
-global.FILES     = require('fs').promises,
-global.FS        = require('fs'),
-global.HTTP      = require('http'),
-global.HTTPS     = require('https'),
-global.NET       = require('net'),
-global.OS        = require('os'),
-global.PATH      = require('path'),
-global.PROC      = require('process'),
-global.URL       = require('url'),
+global.BUFFER    = require('buffer').Buffer;
+global.CHILDPROC = require('child_process');
+global.CLUSTER   = require('cluster');
+global.CRYPTO    = require('crypto');
+global.FILES     = require('fs').promises;
+global.FS        = require('fs');
+global.HTTP      = require('http');
+global.HTTPS     = require('https');
+global.NET       = require('net');
+global.OS        = require('os');
+global.PATH      = require('path');
+global.PROC      = require('process');
+global.URL       = require('url');
 
 
 /*****
@@ -91,7 +91,7 @@ global.env = {
 require('./config.js');
 
 require('./lib/auth.js');
-require('./lib/buffer.js');
+require('./lib/binary.js');
 require('./lib/content.js');
 require('./lib/crypto.js');
 require('./lib/pool.js');
@@ -104,7 +104,6 @@ require('./dbms/dbSchema.js');
 require('./dbms/dbSchemaAnalyzer.js');
 require('./dbms/dbObject.js');
 
-require('./addon.js');
 require('./cluster.js');
 require('./ipc.js');
 require('./logging.js');
@@ -142,19 +141,6 @@ require('./servers/http.js');
     logPrimary(`\n[ Booting Server at ${(new Date()).toISOString()} ]`);
     await onSingletons();
     await Config.loadSystem(env.kodePath);
-
-    logPrimary('[ Loading Addons ]');
-    Config.addonMap = {};
-    Config.addonArray = [];
- 
-    for (let entry of await FILES.readdir(env.addonPath)) {
-        if (!entry.startsWith('.') && !entry.startsWith('apiV')) {
-            let addonPath = PATH.join(env.addonPath, entry);
-            let addon = mkAddon(addonPath);
-            await addon.load();
-            logPrimary(`    ${addon.info()}`);
-        }
-    }
 
     Config.schemas = {};
     require('./dbms/builtinSchema.js');

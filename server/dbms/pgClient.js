@@ -263,7 +263,7 @@ class PgSchema {
  * admin object, which is used for performing DBA tasks for the application
  * server.  Features inclucde database management, column management, index
  * management, and database reflection.
-*****/
+*****
 class PgAdmin {
     constructor(pg) {
         this.pg = pg;
@@ -323,6 +323,7 @@ class PgAdmin {
         await dbc.free();
     }
 }
+*/
 
 
 /*****
@@ -333,6 +334,8 @@ class PgAdmin {
  * query() function.
 *****/
 class PgClient {
+    //static PG = require('pg');
+
     constructor(settings) {
         this.dbConn = null;
         this.settings = settings;
@@ -351,7 +354,8 @@ class PgClient {
     }
     
     async connect() {
-        this.dbConn = await Config.addonMap['postgres'].connect(this.settings);
+        this.dbConn = await PgClient.connect(this.settings);
+        console.log(dbConn);
     }
 
     async createDatabase(dbName) {
@@ -372,7 +376,6 @@ class PgClient {
                 return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
             }).join(', ');
  
-            console.log(`CREATE INDEX _${toSnakeCase(indexDef.name)} on _${toSnakeCase(tableDef.name)} (${indexColumns});`);
             await this.query(`CREATE INDEX _${toSnakeCase(indexDef.name)} on _${toSnakeCase(tableDef.name)} (${indexColumns});`);
         }
     }

@@ -29,7 +29,7 @@
  * framework buffer is JSON transferable so that buffers can be easily sent
  * between processes, cluster hosts, and the application clients.
 *****/
-register(class Buffer {
+register(class Binary {
     constructor(value, encoding) {
         if (value instanceof BUFFER) {
             this.jsBuffer = value;
