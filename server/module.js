@@ -24,16 +24,13 @@
 /*****
 *****/
 register(class Module {
-    constructor(path) {
+    constructor(path, builtin) {
         this.path = path;
         this.status = 'ok';
         this.error = '';
+        this.schemas = {};
         this.prefix = '(ok      )';
-        this.schemas = [];
         this.configPath = PATH.join(this.path, 'config.json');
-        this.serverPath = PATH.join(this.path, 'server');
-        this.clientPath = PATH.join(this.path, 'client');
-        this.contentPath = PATH.join(this.path, 'content');
     }
 
     info() {
@@ -67,7 +64,7 @@ register(class Module {
                             }
 
                             if (this.status == 'ok') {
-                                Config.moduleMap[this.config.namespace] = this;
+                                Config.moduleMap[this.namespace] = this;
                                 Config.moduleArray.push(this);
                             }
                         }
@@ -112,21 +109,24 @@ register(class Module {
     }
 
     async loadSchemas() {
-        if (FS.existsSync(PATH.join(this.path, 'schemas.js'))) {
-            // *** TBD ***
-        }
-        /*
-        // *** TBD ***
-        return;
-        if ('schemas' in this.config) {
-            for (let schemaName in this.config.schemas) {
-                if (!(schemaName in DbSchema.schemas)) {
-                    console.log(schemaName);
+        let dbSchemasPath = PATH.join(this.path, 'dbmsSchemas.js');
+
+        if (FS.existsSync(dbSchemasPath)) {
+            let dbSchemas;
+            let buffer = await FILES.readFile(dbSchemasPath);
+            eval(`dbSchemas = ${buffer.toString()};`);
+
+            for (let schemaName in dbSchemas) {
+                let schema = mkDbSchema(true, ...dbSchemas[schemaName]);
+
+                if (schemaName in Config.schemas) {
+                    throw new Error(`Duplicate Schema Name: ${schemaName}`);
+                }
+                else {
+                    Config.schemas[schemaName] = schema;
                 }
             }
-            //let dbc = await dbConnect('system', 'dba');
         }
-        */
     }
 
     async loadServer() {
@@ -135,11 +135,46 @@ register(class Module {
         }
     }
 
+    async upgradeSchemas() {
+        let prefix = '(ok.     )';
+
+        for (let schemaName in this.config.schemas) {
+            if (schemaName in Config.schemas) {
+                let config = this.config.schemas[schemaName];
+
+                if (config.database in Config.databases) {
+                    let analyzer = mkDbSchemaAnalyzer(Config.schemas[schemaName], config.database, config.prefix);
+                    await analyzer.analyze();
+
+                    if (analyzer.message) {
+                        logPrimary(`Error ${analyzer.message} while analyzing database ${config.database}.`);
+                    }
+                    else {
+                        for (let diff of analyzer.diffs) {
+                            console.log(`\n${diff.toString()}`);
+                            await diff.upgrade();
+                        }
+                        break;
+                    }
+                }
+                else {
+                    throw new Error(`Database Name Not Found: ${config.database}.`);
+                }
+            }
+            else {
+                throw new Error(`Dbms Schema Not Found: ${schemaName}.`);
+            }
+        }
+    }
+
     async validate() {
         if (this.status == 'ok' && 'namespace' in this.config) {
             if (this.config.namespace in Config.moduleMap) {
                 this.status = 'dupname';
                 this.prefix = '(dupname )';
+            }
+            else {
+                this.namespace = this.config.namespace;
             }
         }
         else {

@@ -22,53 +22,124 @@
 
 
 /*****
+ * Diffs are objects used for describing a difference that wes discovered between
+ * a schema design also called a "meta" and the actualy database schema.  One of
+ * the cool features regarding Diffs is that they are self executing.
 *****/
-register(class DbDbmsDiff {
-    constructor(config, missing) {
-        this.type = 'dbms';
-        this.config = config;
-        this.missing = missing;
+class DbDiff {
+    constructor(settings, isUpgrade, isDba) {
+        this.settings = settings;
+        this.isUpgrade = isUpgrade;
+        this.isDba = isDba
+    }
+
+    async close() {
+        if ('dbc' in this) {
+            try {
+                await this.dbc.close();
+                await this.dbc.free();
+                delete this.dbc;
+            }
+            catch (e) {}
+        }
+    }
+
+    async connect() {
+        try {
+            if (this.isDba) {
+                this.dbc = await dbConnect(this.settings, 'dba');
+            }
+            else {
+                this.dbc = await dbConnect(this.settings, 'notran');                
+            }
+        }
+        catch (e) {
+            log(`Error while connecting to database.`, this.settings.database);
+        }
     }
     
     async downgrade() {
-        if (!this.missing) {
+        try {
+            if (!this.isUpgrade) {
+                await this.connect();
+                await this.downgradeDiff();
+                await this.close();
+            }
         }
+        catch (e) {
+            log(`Error while downgrading database schema.`, e);
+        }
+    }
+
+    type() {
+        return Reflect.getPrototypeOf(this).constructor.name;
     }
     
     async upgrade() {
-        if (this.missing) {
+        try {
+            if (this.isUpgrade) {
+                await this.connect();
+                await this.upgradeDiff();
+                await this.close();
+            }
         }
+        catch (e) {
+            log(`Error while upgrading database schema.`, e);
+        }
+    }
+}
+
+class DbDatabaseDiff extends DbDiff {
+    constructor(settings, isUpgrade) {
+        super(settings, isUpgrade, true);
+    }
+    
+    async downgradeDiff() {
+        this.dbc.dropDatabase(this.settings.database);
     }
     
     toString() {
-        return `type: ${this.type}  dbName: ${this.config.database}  state: ${this.missing ? 'missing' : 'extra'}`;
+        return `type: ${this.type()}  database: ${this.settings.database}  info: ${this.isUpgrade ? 'missing' : 'extra'}`;
     }
-});
+    
+    async upgradeDiff() {
+        this.dbc.createDatabase(this.settings.database);
+    }
+}
 
-register(class DbTableDiff {
-    constructor(config, schemaTable, missing) {
-        this.type = 'table';
-        this.config = config;
-        this.schemaTable = schemaTable;
-        this.missing = missing;
+class DbTableDiff extends DbDiff{
+    constructor(settings, isUpgrade, tableInfo) {
+        super(settings, isUpgrade, false);
+        this.tableInfo = tableInfo;
     }
     
-    async downgrade() {
-        if (!this.missing) {
-        }
-    }
-    
-    async upgrade() {
-        if (this.missing) {
-        }
+    async downgradeDiff() {
+        this.dbc.dropTable(this.tableInfo);
     }
     
     toString() {
-        return `type: ${this.type}  dbName: ${this.config.database}  table: ${this.schemaTable.name}  state: ${this.missing ? 'missing' : 'extra'}`;
+        let tableName = this.isUpgrade ? this.tableInfo.name : this.tableInfo;
+        return `type: ${this.type()}  database: ${this.settings.database}  table:  ${tableName}  info: ${this.isUpgrade ? 'missing' : 'extra'}`;
     }
-});
+    
+    async upgradeDiff() {
+        this.dbc.createTable(this.tableInfo);
+    }
+}
 
-register(class DbColumnDiff {
+/*
+class DbColumnDiff extends DbDiff{
+    constructor(settings, isUpgrade) {
+        super(settings, isUpgrade, false);
+    }
+    
+    async downgradeDiff() {
+    }
+    
+    async upgradeDiff() {
+    }
+}
+class DbColumnDiff {
     constructor(config, schemaColumn, missing) {
         this.type = 'column';
         this.config = config;
@@ -89,9 +160,20 @@ register(class DbColumnDiff {
     toString() {
         return `type: ${this.type}  dbName: ${this.config.database}  table: ${this.schemaColumn.table.name}  column: ${this.schemaColumn.name}  state: ${this.missing ? 'missing' : 'extra'}`;
     }
-});
+}
 
-register(class DbIndexDiff {
+class DbIndexDiff extends DbDiff{
+    constructor(settings, isUpgrade) {
+        super(settings, isUpgrade, false);
+    }
+    
+    async downgradeDiff() {
+    }
+    
+    async upgradeDiff() {
+    }
+}
+class DbIndexDiff {
     constructor(config, schemaIndex, missing) {
         this.type = 'index';
         this.config = config;
@@ -112,87 +194,41 @@ register(class DbIndexDiff {
     toString() {
         return `type: ${this.type}  dbName: ${this.config.database}  table: ${this.schemaIndex.table.name}  index: ${this.schemaIndex.name}  state: ${this.missing ? 'missing' : 'extra'}`;
     }
-});
+}
+*/
 
 
 /*****
 *****/
-register(class DbSchemaAnalysis {
-    constructor(meta, real) {
-        this.meta = meta;
-        this.real = real;
+register(class DbSchemaAnalyzer {
+    constructor(schema, configDbName, prefix) {
+        this.schema = schema;
+        this.prefix = prefix;
+        this.settings = Config.databases[configDbName];
         this.diffs = [];
+        this.message = '';
     }
-  
-    async analyzeSchema(dbc) {
-        for (let database of Object.values(this._databases)) {
-            console.log(database);
+
+    async analyze() {
+        try {
+            let dbc = await dbConnect(this.settings, 'dba');
+
+            if (!(await dbc.existsDatabase(this.settings.database))) {
+                this.diffs.push(new DbDatabaseDiff(this.settings, true));
+
+                for (let tableDef of this.schema.tableArray) {
+                    this.diffs.push(new DbTableDiff(this.settings, true, tableDef));
+                }
+            }
+
+            await dbc.close();
+            await dbc.free();
+
+            if (!this.diffs.length) {
+            }
+        }
+        catch (e) {
+            this.message = e.stack;
         }
     }
-  
-    async analyzeTable() {
-    }
 });
-/*****
-*****
-register(class DbDbAnalysis {
-    constructor() {
-        return new Promise(async (ok, fail) => {
-            this._hosts = {};
-            this._databases = {};
-
-            for (let settings of Cls$DbClient.settingsArray()) {
-                let database;
-                let hostKey = `${settings.hostname}-${settings.client}`;
-                let databaseKey = `${settings.hostname}-${settings.client}-${settings.dbname}`;
-
-                if (databaseKey in this._databases) {
-                    throw new Error(`Duplicate database configures: ${databaseKey}`);
-                }
-                else {
-                    database = { key: databaseKey, hostKey: hostKey, exists: false, settings: settings };
-                    this._databases[databaseKey] = database;
-                }
-      
-                if (hostKey in this._hosts) {
-                    this._hosts[hostKey].databases.set(databaseKey);
-                }
-                else {
-                    this._hosts[hostKey] = {
-                        key: hostKey,
-                        hostname: settings.hostname,
-                        settings: settings,
-                        databases: $Set(databaseKey),
-                    };
-                }
-            }
-      
-            for (let host of Object.values(this._hosts)) {
-                let client = Cls$DbClient.client(host.settings);
-                let reflected = await client.helper.dbNames(host.settings);
-                let databaseMap = {};
-      
-                for (let databaseKey of host.databases.list()) {
-                    let database = this._databases[databaseKey];
-                    databaseMap[database.dbname] = database;
-      
-                    if (!(database.dbname in reflected)) {
-                        this._diffs.push($DbDiff('missing', database.settings.dbname, database.settings));
-                    }
-                    else {
-                        database.exists = true;
-                    }
-                }
-      
-                for (let dbName of reflected.list()) {
-                    if (!(dbName in databaseMap)) {
-                        this._diffs.push($DbDiff('extra', dbName, host.settings));
-                    }
-                }
-            }
-            
-            ok(this);
-        });
-    }
-});
-*/

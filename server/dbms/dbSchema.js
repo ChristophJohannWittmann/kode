@@ -153,44 +153,25 @@ global.dbTimeArray = {
  * all supported DBMS platforms and is used for analyzing existing schemas.
 *****/
 register(class DbSchema {
-    static schemas = {};
-
-    constructor(name, defined, ...tableDefs) {
+    constructor(defined, ...tableDefs) {
         this.tableMap = {};
         this.tableArray = [];
-        this.name = name;
         this.defined = defined;
-        this.prefix = this.name ? `${name[0].toLowerCase()}${name.substr(1)}` : '';
-
-        if (this.defined) {
-            if (this.name in DbSchema.schemas) {
-                throw new Error(`Duplicate schema name: "${this.name}"`);
-            }
-            else {
-                DbSchema.schemas[this.name] = this;
-            }
-        }
-
         this.addTables(...tableDefs);
     }
 
     addTables(...tableDefs) {
-        tableDefs.forEach(tableDef => {
-            if (tableDef.name in this.tableMap) {
-                throw new Error(`Duplicate table name: schema: "${this.name}" table: "${tableDef.name}"`);
-            }
-
-            let schemaTable = new DbSchemaTable(this, tableDef);
+        for (let tableDef of tableDefs) {
+            let schemaTable = new DbSchemaTable(tableDef);
             this.tableArray.push(schemaTable);
             this.tableMap[schemaTable.name] = schemaTable;
-        });
+        }
     }
 });
 
 class DbSchemaTable {
-    constructor(schema, tableDef) {
-        this.schema = schema;
-        this.name = `${schema.prefix}${tableDef.name}`;
+    constructor(tableDef) {
+        this.name = tableDef.name;
         this.columnMap = {};
         this.columnArray = [];
         this.indexMap = {};
@@ -205,7 +186,7 @@ class DbSchemaTable {
   
         tableDef.columns.forEach(columnDef => {
             if (columnDef.name in this.columnMap) {
-                throw new Error(`Duplicate column name: schema: "${this.schema.name}" table: "${this.name}" column: "${columnDef.name}"`);
+                throw new Error(`Duplicate column name: table: "${this.name}" column: "${columnDef.name}"`);
             }
             else {
                 let schemaColumn = new DbSchemaColumn(this, columnDef);
@@ -218,7 +199,7 @@ class DbSchemaTable {
             let schemaIndex = new DbSchemaIndex(this, IndexDef);
             
             if (schemaIndex.name in this.indexMap) {
-                throw new Error(`Duplicate index name: schema: "${this.table.schema.name}" table: "${this.name}" index: "${schemaIndex.name}"`);
+                throw new Error(`Duplicate index name: table: "${this.name}" index: "${schemaIndex.name}"`);
             }
             else {
                 this.indexArray.push(schemaIndex);
@@ -249,10 +230,10 @@ class DbSchemaIndex {
             direction = direction.trim();
             
             if (!(columnName in this.table.columnMap)) {
-                throw new Error(`Undefined column name for index: schema: "${this.table.schema.name}" table: "${this.table.name}" column: "${columnName}"\n`);
+                throw new Error(`Undefined column name for index: table: "${this.table.name}" column: "${columnName}"\n`);
             }
             else if (columnName in this.columnMap) {
-                throw new Error(`Duplicate column name for index: schema: "${this.table.schema.name}" table: "${this.table.name}" column: "${columnName}"\n`);
+                throw new Error(`Duplicate column name for index: table: "${this.table.name}" column: "${columnName}"\n`);
             }
             else {
                 let indexColumn = {

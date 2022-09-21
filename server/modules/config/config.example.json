@@ -1,11 +1,15 @@
 {
     "active": true,
     "host": "*",
+    "url": "",
     "namespace": "config",
-    "clientOrder": [
+    "client": [
+    ],
+    "server": [
+    ],
+    "content": [
     ],
     "schemas": {
-        "": "system",
-        "test": "system"
+        "builtin": "system"
     }
 }

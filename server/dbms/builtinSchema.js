@@ -27,7 +27,8 @@
  * across all applications.  Hence, things such as authentication, user mgmt,
  * and session management are required by this schema.
 *****/
-mkDbSchema('', true, 
+Config.schemas['builtin'] = mkDbSchema(
+    true,
     {
         name: 'user',
         columns: [

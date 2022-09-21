@@ -101,9 +101,8 @@ require('./lib/webSocket.js');
 require('./dbms/dbClient.js');
 require('./dbms/pgClient.js');
 require('./dbms/dbSchema.js');
-require('./dbms/dbObject.js');
 require('./dbms/dbSchemaAnalyzer.js');
-require('./dbms/fmwkSchema.js');
+require('./dbms/dbObject.js');
 
 require('./addon.js');
 require('./cluster.js');
@@ -157,6 +156,9 @@ require('./servers/http.js');
         }
     }
 
+    Config.schemas = {};
+    require('./dbms/builtinSchema.js');
+
     await onSingletons();
     namespace();
  
@@ -166,30 +168,27 @@ require('./servers/http.js');
  
     for (let entry of await FILES.readdir(env.modulePath)) {
         if (!entry.startsWith('.')) {
-            let modulePath = `${env.modulePath}/${entry}`;
+            let modulePath = PATH.join(env.modulePath, entry);
             let module = mkModule(modulePath);
             await module.load();
             logPrimary(`    ${module.info()}`);
         }
     }
 
-    await onSingletons();
+    await onSingletons(); 
 
-    for (let entry of Config.modules) {
-        if (!entry.startsWith('.')) {
-            let modulePath = `${env.modulePath}/${entry}`;
-            let module = mkModule(modulePath);
-            await module.load();
-            logPrimary(`    ${module.info()}`);
-        }
+    for (let modulePath of Config.modules) {
+        let module = mkModule(modulePath);
+        await module.load();
+        logPrimary(`    ${module.info()}`);
     }
 
     await onSingletons();
     logPrimary('[ Analyzing DBMS Schemas ]');
 
     if (CLUSTER.isPrimary) {
-        for (let schema of Object.values(DbSchema.schemas)) {
-            console.log(schema.name);
+        for (let module of Config.moduleArray) {
+            await module.upgradeSchemas();
         }
     }
 

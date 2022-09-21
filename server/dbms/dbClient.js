@@ -86,18 +86,47 @@
                 this.connected = true;
             }
         }
-    
-        dbAdmin() {
-            return this.client.dbAdmin();
+
+        async createDatabase(dbName) {
+            return await this.client.createDatabase(dbName);
         }
-    
-        async dbSchema() {
-            let builder = this.client.dbSchema();
-            return await builder.load();
+
+        async createTable(tableDef) {
+            return await this.client.createTable(tableDef);
+        }
+
+        async dropDatabase(dbName) {
+            return await this.client.dropDatabase(dbName);
+        }
+
+        async dropTable(tableName) {
+            return await this.client.dropTable(tableName);
+        }
+
+        async existsDatabase(dbName) {
+            if (this.settings.switches.has('dba')) {
+                return await this.client.existsDatabase(dbName);
+            }
+            else {
+                return false;
+            }
         }
         
         async free() {
             Pool.free(this);
+        }
+
+        async listDatabases() {
+            if (this.settings.switches.has('dba')) {
+                return await this.client.listDatabases();
+            }
+            else {
+                return [];
+            }
+        }
+    
+        async loadSchema(schema) {
+            return await this.client.loadSchema(schema);
         }
         
         async query(sql, opts) {
@@ -148,7 +177,7 @@
     *****/
     register(async function dbConnect(config, ...switches) {
         if (typeof config == 'string') {
-            this.config = Config.dbms[config];
+            this.config = Config.databases[config];
         }
         else if (typeof config == 'object') {
             this.config = config;
@@ -178,7 +207,7 @@
             pools[poolKey] = mkPool(settings => new DbClient(clients[this.config.dbms], settings), idle);
         }
         
-        if (switchSet.has('notran')) {
+        if (switchSet.has('notran') || switchSet.has('dba')) {
             let dbClient = await pools[poolKey].create(settings);
             await dbClient.connect();
             return dbClient;

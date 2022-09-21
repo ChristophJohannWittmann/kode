@@ -189,139 +189,12 @@ const pgReverseMap = {
 
 
 /*****
-*****/
-class PgAdmin {
-    constructor(pg) {
-        this.pg = pg;
-    }
- 
-    async createColumn(tableName, columnName, dbType) {
-        let table = `_${toSnakeCase(tableName)}`;
-        let column = `_${toSnakeCase(columnName)}`;
-        let pgType = pgTypes[dbType.name()];
-        let value = pgType.encode(dbType.init());
- 
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
- 
-        await dbc.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${pgType.type()}`);
-        await dbc.query(`UPDATE ${table} SET ${column}=${value}`);
- 
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async createDatabase() {
-        this.settings.database = 'postgres';
-        let dbc = await dbConnect(this.settings, 'notran');
-        await dbc.query(`CREATE DATABASE ${this.database}`);
-        await dbc.free();
-    }
- 
-    async createIndex(tableName, indexColumns) {
-        let table = `_${toSnakeCase(tableName)}`;
- 
-        let columns = indexColumns.map(indexColumn => {
-            return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
-        }).join(', ');
- 
-        let name = table + indexColumns.map(indexColumn => {
-            return `_${toSnakeCase(indexColumn.columnName)}`;
-        }).join('');
- 
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(`CREATE INDEX ${name} on ${table} (${columns})`);
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async createTable(schemaTable) {
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
- 
-        let columns = schemaTable.columnArray.map(schemaColumn => {
-            let name = `_${toSnakeCase(schemaColumn.name)}`;
-            let type = pgTypes[schemaColumn.type.name()].type();
-            return `${name} ${type}`;
-        }).join(', ');
- 
-        await dbc.query(`CREATE TABLE _${schemaTable.name} (${columns});`);
- 
-        for (let schemaIndex of schemaTable.indexArray) {
-            let indexColumns = schemaIndex.columnArray.map(indexColumn => {
-                return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
-            }).join(', ');
- 
-            await dbc.query(`CREATE INDEX _${toSnakeCase(schemaIndex.name)} on _${schemaTable.name} (${indexColumns})`);
-        }
- 
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async doesDatabaseExist() {
-        this.settings.database = 'postgres';
-        let dbc = await dbConnect(this.settings);
-        let result = await dbc.query(`SELECT datname FROM pg_database WHERE datname not in ('postgres', 'template0', 'template1')`);
-        await dbc.rollback();
-        await dbc.free();
-        return mkSet(result.rows.map(row => row.datname)).has(this.database);
-    }
- 
-    async dropColumn(tableName, columnName) {
-        let table = `_${toSnakeCase(tableName)}`;
-        let column = `_${toSnakeCase(columnName)}`;
-        let sql = `ALTER TABLE ${table} DROP COLUMN ${column}`;
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(sql);
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async dropDatabase() {
-        this.settings.database = 'postgres';
-        let dbc = await dbConnect(this.settings, 'notran');
-        await dbc.query(`DROP DATABASE ${this.database}`);
-        await dbc.free();
-    }
- 
-    async dropIndex(indexName) {
-        let sql = `DROP INDEX _${toSnakeCase(indexName)}`;
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(sql);
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async dropTable(tableName) {
-        let sql = `DROP TABLE _${toSnakeCase(tableName)}`;
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(sql);
-        await dbc.commit();
-        await dbc.free();
-    }
- 
-    async listDatabases() {
-        this.settings.database = 'postgres';
-        let dbc = await dbConnect(this.settings);
-        let result = await dbc.query(`SELECT datname FROM pg_database WHERE datname not in ('postgres', 'template0', 'template1')`);
-        await dbc.rollback();
-        await dbc.free();
-        return mkSet(result.rows.map(row => row.datname));
-    }
-}
-
-
-/*****
- * This is the PostgreSQL specific function that analyzes the meta data to to
- * build a schema definition, which is then the input to the DbSchema class.
- * We're using our best practices and previous learning to write the queries
- * and code to generate the schema definition.  The tricky to figure out query
- * was that for indexes.
+ * Each DBMS client supported by this framework must be able to load a complete
+ * schema definition in the standard form.  The standard form means it matches
+ * the schema that's built with the original schema definition.  The primary need
+ * for this class is to be able to compare the definition of a schema with what's
+ * implemented on the server. The output of such a comparison is used for applying
+ * modifications to the implemented schema on the server.
 *****/
 class PgSchema {
     constructor(pg) {
@@ -386,6 +259,73 @@ class PgSchema {
 
 
 /*****
+ * Each DBMS client supported by this framework must be able to return a new DB
+ * admin object, which is used for performing DBA tasks for the application
+ * server.  Features inclucde database management, column management, index
+ * management, and database reflection.
+*****/
+class PgAdmin {
+    constructor(pg) {
+        this.pg = pg;
+    }
+ 
+    async createColumn(tableName, columnName, dbType) {
+        let table = `_${toSnakeCase(tableName)}`;
+        let column = `_${toSnakeCase(columnName)}`;
+        let pgType = pgTypes[dbType.name()];
+        let value = pgType.encode(dbType.init());
+ 
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+ 
+        await dbc.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${pgType.type()}`);
+        await dbc.query(`UPDATE ${table} SET ${column}=${value}`);
+ 
+        await dbc.commit();
+        await dbc.free();
+    }
+
+    async createIndex(tableName, indexColumns) {
+        let table = `_${toSnakeCase(tableName)}`;
+ 
+        let columns = indexColumns.map(indexColumn => {
+            return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
+        }).join(', ');
+ 
+        let name = table + indexColumns.map(indexColumn => {
+            return `_${toSnakeCase(indexColumn.columnName)}`;
+        }).join('');
+ 
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+        await dbc.query(`CREATE INDEX ${name} on ${table} (${columns})`);
+        await dbc.commit();
+        await dbc.free();
+    }
+
+    async dropColumn(tableName, columnName) {
+        let table = `_${toSnakeCase(tableName)}`;
+        let column = `_${toSnakeCase(columnName)}`;
+        let sql = `ALTER TABLE ${table} DROP COLUMN ${column}`;
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+        await dbc.query(sql);
+        await dbc.commit();
+        await dbc.free();
+    }
+
+    async dropIndex(indexName) {
+        let sql = `DROP INDEX _${toSnakeCase(indexName)}`;
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+        await dbc.query(sql);
+        await dbc.commit();
+        await dbc.free();
+    }
+}
+
+
+/*****
  * The PgClient class wraps the PG addon with a full set of the required
  * functions for a native DBMS client.  All of the methods are pretty much
  * just there to call the native addon class.  In some cases, like commit(),
@@ -414,12 +354,52 @@ class PgClient {
         this.dbConn = await Config.addonMap['postgres'].connect(this.settings);
     }
 
-    dbAdmin() {
-        return new PgAdmin(this);
+    async createDatabase(dbName) {
+        await this.query(`CREATE DATABASE ${toSnakeCase(dbName)}`);
+    }
+
+    async createTable(tableDef) {
+        let columns = tableDef.columnArray.map(columnDef => {
+            let name = `_${toSnakeCase(columnDef.name)}`;
+            let type = pgTypes[columnDef.type.name()].type();
+            return `${name} ${type}`;
+        }).join(', ');
+ 
+        await this.query(`CREATE TABLE _${toSnakeCase(tableDef.name)} (${columns});`);
+ 
+        for (let indexDef of tableDef.indexArray) {
+            let indexColumns = indexDef.columnArray.map(indexColumn => {
+                return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
+            }).join(', ');
+ 
+            console.log(`CREATE INDEX _${toSnakeCase(indexDef.name)} on _${toSnakeCase(tableDef.name)} (${indexColumns});`);
+            await this.query(`CREATE INDEX _${toSnakeCase(indexDef.name)} on _${toSnakeCase(tableDef.name)} (${indexColumns});`);
+        }
+    }
+
+    async dropDatabase(dbName) {
+        await this.query(`DROP DATABASE ${toSnakeCase(dbName)}`);
+    }
+
+    async dropTable(tableName) {
+        await this.query(`DROP TABLE _${toSnakeCase(tableName)}`);
+    }
+
+    async existsDatabase(dbName) {
+        let result = await this.query(`SELECT datname FROM pg_database`);
+        let set = mkSet(result.rows.map(row => row.datname));
+        return set.has(dbName);
+    }
+ 
+    async listDatabases() {
+        let result = await this.query(`SELECT datname FROM pg_database WHERE datname not in ('postgres', 'template0', 'template1')`);
+        return mkSet(result.rows.map(row => row.datname));
     }
     
-    dbSchema() {
-        return new PgSchema(this);
+    async loadSchema(schema) {
+        let pgSchema = new PgSchema(this);
+        await pgSchema.load();
+        return pgSchema;
     }
     
     async query(sql, opts) {
