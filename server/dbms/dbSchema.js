@@ -145,6 +145,68 @@ global.dbTimeArray = {
 
 
 /*****
+ * The schema container provides a complex storage mechanism for keepting track
+ * of all schemas and schema instances.  A schema instance is essentially a map
+ * of each use of a schema.  Each scheme use or instance needs to have an assigned
+ * database (in the configuration) and a table-name prefix, if any.  Instances
+ * can be looked up both by schemaName and by DBMS configuration name.
+*****/
+singleton(class DbSchemaContainer {
+    constructor() {
+        this.schemas = {};
+        this.instancesBySchema = {};
+        this.instancesByConfig = {};
+    }
+
+    async setInstance(schemaName, configName, prefix) {
+        if (!(schemaName in this.schemas)) {
+            throw new Error(`Unknown Schema: ${schemaName}`);
+        }
+
+        if (!(configName in Config.databases)) {
+            throw new Error(`Unknown Database Configuration: ${configName}`);
+        }
+
+        if (!(schemaName in this.instancesBySchema)) {
+            this.instancesBySchema[schemaName] = { schemaName: schemaName, configs: {} };
+        }
+
+        let instance = this.instancesBySchema[schemaName];
+
+        if (configName in instance.configs) {
+            instance.configs[configName].set(prefix);
+        }
+        else {
+            instance.configs[configName] = mkSet(prefix);
+        }
+
+        if (!(configName in this.instancesByConfig)) {
+            this.instancesByConfig[configName] = { configName: configName, schemas: {} };
+        }
+
+        instance = this.instancesByConfig[configName];
+
+        if (schemaName in instance.schemas) {
+            instance.schemas[schemaName].set(prefix);
+        }
+        else {
+            instance.schemas[schemaName] = mkSet(prefix);
+        }
+    }
+
+    setSchema(schema) {
+        if (!(schema.name in this.schemas)) {
+            this.schemas[schema.name] = schema;
+        }
+        else {
+            let stored = this.schemas[schema.name];
+            stored.addTables(schema.tableArray);
+        }
+    }
+});
+
+
+/*****
  * This is a DBMS independent representation of a DBMS schema.  In effect, it's
  * a type of compiler.  It accepts a schema name and table definitions to
  * generate the generic representation of a schema.  As such, it defines a
@@ -153,7 +215,8 @@ global.dbTimeArray = {
  * all supported DBMS platforms and is used for analyzing existing schemas.
 *****/
 register(class DbSchema {
-    constructor(defined, ...tableDefs) {
+    constructor(name, defined, ...tableDefs) {
+        this.name = name;
         this.tableMap = {};
         this.tableArray = [];
         this.defined = defined;
@@ -162,7 +225,7 @@ register(class DbSchema {
 
     addTables(...tableDefs) {
         for (let tableDef of tableDefs) {
-            let schemaTable = new DbSchemaTable(tableDef);
+            let schemaTable = new DbSchemaTable(this, tableDef);
             this.tableArray.push(schemaTable);
             this.tableMap[schemaTable.name] = schemaTable;
         }
@@ -170,7 +233,8 @@ register(class DbSchema {
 });
 
 class DbSchemaTable {
-    constructor(tableDef) {
+    constructor(schema, tableDef) {
+        this.schema = schema;
         this.name = tableDef.name;
         this.columnMap = {};
         this.columnArray = [];
@@ -186,7 +250,7 @@ class DbSchemaTable {
   
         tableDef.columns.forEach(columnDef => {
             if (columnDef.name in this.columnMap) {
-                throw new Error(`Duplicate column name: table: "${this.name}" column: "${columnDef.name}"`);
+                throw new Error(`Duplicate column name: schema: ${this.schema.name} table: "${this.name}" column: "${columnDef.name}"`);
             }
             else {
                 let schemaColumn = new DbSchemaColumn(this, columnDef);
@@ -199,7 +263,7 @@ class DbSchemaTable {
             let schemaIndex = new DbSchemaIndex(this, IndexDef);
             
             if (schemaIndex.name in this.indexMap) {
-                throw new Error(`Duplicate index name: table: "${this.name}" index: "${schemaIndex.name}"`);
+                throw new Error(`Duplicate index name: schema: ${this.schema.name} table: "${this.name}" index: "${schemaIndex.name}"`);
             }
             else {
                 this.indexArray.push(schemaIndex);
@@ -230,10 +294,10 @@ class DbSchemaIndex {
             direction = direction.trim();
             
             if (!(columnName in this.table.columnMap)) {
-                throw new Error(`Undefined column name for index: table: "${this.table.name}" column: "${columnName}"\n`);
+                throw new Error(`Undefined column name for index: schema: ${this.table.schema.name} table: "${this.table.name}" column: "${columnName}"\n`);
             }
             else if (columnName in this.columnMap) {
-                throw new Error(`Duplicate column name for index: table: "${this.table.name}" column: "${columnName}"\n`);
+                throw new Error(`Duplicate column name for index: schema: ${this.table.schema.name} table: "${this.table.name}" column: "${columnName}"\n`);
             }
             else {
                 let indexColumn = {

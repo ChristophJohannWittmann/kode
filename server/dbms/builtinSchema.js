@@ -27,7 +27,8 @@
  * across all applications.  Hence, things such as authentication, user mgmt,
  * and session management are required by this schema.
 *****/
-Config.schemas['builtin'] = mkDbSchema(
+DbSchemaContainer.setSchema(mkDbSchema(
+    'builtin',
     true,
     {
         name: 'user',
@@ -160,4 +161,4 @@ Config.schemas['builtin'] = mkDbSchema(
             'ownerType:asc, ownerOid:asc',
         ]
     },
-);
+));

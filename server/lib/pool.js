@@ -30,7 +30,13 @@
  * and system resources are freed up.  To use a pool, an object MUST provide
  * a ctor and have a close() member.  Everything else is up to the pool class.
 *****/
-register(class Pool extends Emitter {
+register(class Pool {
+    static expireKey = Symbol('#Expire');
+
+    constructor() {
+    }
+});
+register(class PoolX extends Emitter {
     static lookAhead = 600;
     static id = 1;
     static idKey = Symbol('#Id');
@@ -159,6 +165,9 @@ register(class Pool extends Emitter {
                 }
             }
         }
+    }
+
+    static async remove(resource) {
     }
     
     freedCount() {

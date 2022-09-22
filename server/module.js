@@ -117,14 +117,8 @@ register(class Module {
             eval(`dbSchemas = ${buffer.toString()};`);
 
             for (let schemaName in dbSchemas) {
-                let schema = mkDbSchema(true, ...dbSchemas[schemaName]);
-
-                if (schemaName in Config.schemas) {
-                    throw new Error(`Duplicate Schema Name: ${schemaName}`);
-                }
-                else {
-                    Config.schemas[schemaName] = schema;
-                }
+                let schema = mkDbSchema(schemaName, true, ...dbSchemas[schemaName]);
+                DbSchemaContainer.setSchema(schema);
             }
         }
     }
@@ -139,30 +133,25 @@ register(class Module {
         let prefix = '(ok.     )';
 
         for (let schemaName in this.config.schemas) {
-            if (schemaName in Config.schemas) {
-                let config = this.config.schemas[schemaName];
+            let config = this.config.schemas[schemaName];
+            DbSchemaContainer.setInstance(schemaName, config.database, config.prefix);
+        }
 
-                if (config.database in Config.databases) {
-                    let analyzer = mkDbSchemaAnalyzer(Config.schemas[schemaName], config.database, config.prefix);
-                    await analyzer.analyze();
+        for (let configName in DbSchemaContainer.instancesByConfig) {
+            let instance = DbSchemaContainer.instancesByConfig[configName];
 
-                    if (analyzer.message) {
-                        logPrimary(`Error ${analyzer.message} while analyzing database ${config.database}.`);
-                    }
-                    else {
-                        for (let diff of analyzer.diffs) {
-                            console.log(`\n${diff.toString()}`);
-                            await diff.upgrade();
-                        }
-                        break;
-                    }
+            let schemas = Object.entries(instance.schemas).map(entry => {
+                let [ schemaName, prefixes ] = entry;
+                return { schemaName: schemaName, prefixes: prefixes.array() };
+            });
+
+            let analysis = await mkDbSchemaAnalyzer(configName, schemas);
+
+            for (let diff of analysis.diffs) {
+                if (diff.isUpgrade) {
+                    logPrimary(`    ${diff.toString()}`);
+                    await diff.upgrade();
                 }
-                else {
-                    throw new Error(`Database Name Not Found: ${config.database}.`);
-                }
-            }
-            else {
-                throw new Error(`Dbms Schema Not Found: ${schemaName}.`);
             }
         }
     }

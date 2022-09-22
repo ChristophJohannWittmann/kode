@@ -22,213 +22,256 @@
 
 
 /*****
- * Diffs are objects used for describing a difference that wes discovered between
- * a schema design also called a "meta" and the actualy database schema.  One of
- * the cool features regarding Diffs is that they are self executing.
 *****/
-class DbDiff {
-    constructor(settings, isUpgrade, isDba) {
+class DbDatabaseDiff {
+    constructor(settings, isUpgrade) {
         this.settings = settings;
         this.isUpgrade = isUpgrade;
-        this.isDba = isDba
-    }
-
-    async close() {
-        if ('dbc' in this) {
-            try {
-                await this.dbc.close();
-                await this.dbc.free();
-                delete this.dbc;
-            }
-            catch (e) {}
-        }
-    }
-
-    async connect() {
-        try {
-            if (this.isDba) {
-                this.dbc = await dbConnect(this.settings, 'dba');
-            }
-            else {
-                this.dbc = await dbConnect(this.settings, 'notran');                
-            }
-        }
-        catch (e) {
-            log(`Error while connecting to database.`, this.settings.database);
-        }
     }
     
     async downgrade() {
-        try {
-            if (!this.isUpgrade) {
-                await this.connect();
-                await this.downgradeDiff();
-                await this.close();
-            }
-        }
-        catch (e) {
-            log(`Error while downgrading database schema.`, e);
+        if (!this.isUpgrade) {
+            await dbDrop(this.settings, this.settings.database);
         }
     }
-
-    type() {
-        return Reflect.getPrototypeOf(this).constructor.name;
+    
+    toString() {
+        return `(DATABASE DIFF) DATABASE: "${this.settings.database}" STATUS: "${this.isUpgrade ? 'missing' : 'extra'}"`;
     }
     
     async upgrade() {
-        try {
-            if (this.isUpgrade) {
-                await this.connect();
-                await this.upgradeDiff();
-                await this.close();
-            }
-        }
-        catch (e) {
-            log(`Error while upgrading database schema.`, e);
+        if (this.isUpgrade) {
+            await dbCreate(this.settings, this.settings.database);
         }
     }
 }
 
-class DbDatabaseDiff extends DbDiff {
-    constructor(settings, isUpgrade) {
-        super(settings, isUpgrade, true);
+class DbTableDiff {
+    constructor(settings, isUpgrade, tableInfo, prefix) {
+        this.settings = settings;
+        this.isUpgrade = isUpgrade;
+        this.tableInfo = tableInfo
+        this.prefix = prefix;
     }
     
-    async downgradeDiff() {
-        this.dbc.dropDatabase(this.settings.database);
-    }
-    
-    toString() {
-        return `type: ${this.type()}  database: ${this.settings.database}  info: ${this.isUpgrade ? 'missing' : 'extra'}`;
-    }
-    
-    async upgradeDiff() {
-        this.dbc.createDatabase(this.settings.database);
-    }
-}
-
-class DbTableDiff extends DbDiff{
-    constructor(settings, isUpgrade, tableInfo) {
-        super(settings, isUpgrade, false);
-        this.tableInfo = tableInfo;
-    }
-    
-    async downgradeDiff() {
-        this.dbc.dropTable(this.tableInfo);
+    async downgrade() {
+        if (!this.isUpgrade) {
+            let dbc = await dbConnect(this.settings);
+            dbc.query(`DROP TABLE _${this.tableInfo}`);
+            await dbc.free();
+        }
     }
     
     toString() {
+        let prefix = this.prefix ? `[${this.prefix}]` : '';
         let tableName = this.isUpgrade ? this.tableInfo.name : this.tableInfo;
-        return `type: ${this.type()}  database: ${this.settings.database}  table:  ${tableName}  info: ${this.isUpgrade ? 'missing' : 'extra'}`;
+        return `(TABLE DIFF   ) DATABASE: "${this.settings.database}" TABLE: "${prefix}${tableName}" STATUS: "${this.isUpgrade ? 'missing' : 'extra'}"`;
     }
     
-    async upgradeDiff() {
-        this.dbc.createTable(this.tableInfo);
+    async upgrade() {
+        if (this.isUpgrade) {
+            let dbc = await dbConnect(this.settings);
+            const prefix = this.prefix ? `_${this.prefix}_` : '_';
+
+            let columns = this.tableInfo.columnArray.map(columnDef => {
+                let name = `${prefix}${toSnakeCase(columnDef.name)}`;
+                let type = dbc.types()[columnDef.type.name()].type();
+                return `${name} ${type}`;
+            }).join(', ');
+
+            await dbc.query(`CREATE TABLE ${prefix}${toSnakeCase(this.tableInfo.name)} (${columns});`);
+     
+            for (let indexDef of this.tableInfo.indexArray) {
+                let indexColumns = indexDef.columnArray.map(indexColumn => {
+                    return `${prefix}${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
+                }).join(', ');
+     
+                await dbc.query(`CREATE INDEX ${prefix}${toSnakeCase(indexDef.name)} on ${prefix}${toSnakeCase(this.tableInfo.name)} (${indexColumns});`);
+            }
+
+            await dbc.free();
+        }
     }
 }
 
-/*
-class DbColumnDiff extends DbDiff{
-    constructor(settings, isUpgrade) {
-        super(settings, isUpgrade, false);
-    }
-    
-    async downgradeDiff() {
-    }
-    
-    async upgradeDiff() {
-    }
-}
 class DbColumnDiff {
-    constructor(config, schemaColumn, missing) {
-        this.type = 'column';
-        this.config = config;
-        this.schemaColumn = schemaColumn;
-        this.missing = missing;
+    constructor(settings, isUpgrade, columnInfo) {
+        this.settings = settings;
+        this.isUpgrade = isUpgrade;
+        this.columnInfo = columnInfo;
     }
     
     async downgrade() {
-        if (!this.missing) {
-        }
-    }
-    
-    async upgrade() {
-        if (this.missing) {
-        }
     }
     
     toString() {
-        return `type: ${this.type}  dbName: ${this.config.database}  table: ${this.schemaColumn.table.name}  column: ${this.schemaColumn.name}  state: ${this.missing ? 'missing' : 'extra'}`;
+    }
+    
+    async upgrade() {
     }
 }
 
-class DbIndexDiff extends DbDiff{
-    constructor(settings, isUpgrade) {
-        super(settings, isUpgrade, false);
-    }
-    
-    async downgradeDiff() {
-    }
-    
-    async upgradeDiff() {
-    }
-}
 class DbIndexDiff {
-    constructor(config, schemaIndex, missing) {
-        this.type = 'index';
-        this.config = config;
-        this.schemaIndex = schemaIndex;
-        this.missing = missing;
+    constructor(settings, isUpgrade, indexInfo) {
+        this.settings = settings;
+        this.isUpgrade = isUpgrade;
+        this.indexInfo = indexInfo;
     }
     
     async downgrade() {
-        if (!this.missing) {
-        }
-    }
-    
-    async upgrade() {
-        if (this.missing) {
-        }
     }
     
     toString() {
-        return `type: ${this.type}  dbName: ${this.config.database}  table: ${this.schemaIndex.table.name}  index: ${this.schemaIndex.name}  state: ${this.missing ? 'missing' : 'extra'}`;
+    }
+    
+    async upgrade() {
     }
 }
-*/
 
 
 /*****
 *****/
 register(class DbSchemaAnalyzer {
-    constructor(schema, configDbName, prefix) {
-        this.schema = schema;
-        this.prefix = prefix;
-        this.settings = Config.databases[configDbName];
-        this.diffs = [];
-        this.message = '';
-    }
+    constructor(configName, schemas) {
+        return new Promise(async (ok, fail) => {
+            this.configName = configName;
+            this.schemas = schemas;
+            this.settings = Config.databases[this.configName];
+            this.diffs = [];
 
-    async analyze() {
-        try {
-            let dbc = await dbConnect(this.settings, 'dba');
-
-            if (!(await dbc.existsDatabase(this.settings.database))) {
-                this.diffs.push(new DbDatabaseDiff(this.settings, true));
-
-                for (let tableDef of this.schema.tableArray) {
-                    this.diffs.push(new DbTableDiff(this.settings, true, tableDef));
+            if (await this.analyzeDb()) {
+                if (await this.analyzeTables()) {
+                    ok(this);
                 }
             }
 
-            await dbc.close();
-            await dbc.free();
+            ok(this);
+        });
+    }
 
-            if (!this.diffs.length) {
-            }
+    async analyzeDb() {
+        if ((await dbList(this.settings)).has(this.settings.database)) {
+            return true;
         }
-        catch (e) {
-            this.message = e.stack;
+        else {
+            this.diffs.push(new DbDatabaseDiff(this.settings, true));
+
+            for (let schemaInfo of this.schemas) {
+                let schema = DbSchemaContainer.schemas[schemaInfo.schemaName];
+
+                schemaInfo.prefixes.forEach(prefix => {
+                    for (let tableDef of schema.tableArray) {
+                        this.diffs.push(new DbTableDiff(this.settings, true, tableDef, prefix));
+                    }
+                });
+            }
+            return false;
         }
     }
+
+    async analyzeTables() {
+        let schemaDef = await dbSchema(this.settings);
+    }
 });
+/*****
+ * Each DBMS client supported by this framework must be able to return a new DB
+ * admin object, which is used for performing DBA tasks for the application
+ * server.  Features inclucde database management, column management, index
+ * management, and database reflection.
+*****
+class PgAdmin {
+    constructor(pg) {
+        this.pg = pg;
+    }
+ 
+    async createColumn(tableName, columnName, dbType) {
+        let table = `_${toSnakeCase(tableName)}`;
+        let column = `_${toSnakeCase(columnName)}`;
+        let pgType = pgTypes[dbType.name()];
+        let value = pgType.encode(dbType.init());
+ 
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+ 
+        await dbc.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${pgType.type()}`);
+        await dbc.query(`UPDATE ${table} SET ${column}=${value}`);
+ 
+        await dbc.commit();
+        await dbc.free();
+    }
+
+    async createIndex(tableName, indexColumns) {
+        let table = `_${toSnakeCase(tableName)}`;
+ 
+        let columns = indexColumns.map(indexColumn => {
+            return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
+        }).join(', ');
+ 
+        let name = table + indexColumns.map(indexColumn => {
+            return `_${toSnakeCase(indexColumn.columnName)}`;
+        }).join('');
+ 
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+        await dbc.query(`CREATE INDEX ${name} on ${table} (${columns})`);
+        await dbc.commit();
+        await dbc.free();
+    }
+
+    async dropColumn(tableName, columnName) {
+        let table = `_${toSnakeCase(tableName)}`;
+        let column = `_${toSnakeCase(columnName)}`;
+        let sql = `ALTER TABLE ${table} DROP COLUMN ${column}`;
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+        await dbc.query(sql);
+        await dbc.commit();
+        await dbc.free();
+    }
+
+    async dropIndex(indexName) {
+        let sql = `DROP INDEX _${toSnakeCase(indexName)}`;
+        this.settings.database = this.database;
+        let dbc = await dbConnect(this.settings);
+        await dbc.query(sql);
+        await dbc.commit();
+        await dbc.free();
+    }
+
+    async createDatabase(dbName) {
+        await this.query(`CREATE DATABASE ${toSnakeCase(dbName)}`);
+    }
+
+    async createTable(tableDef) {
+        let columns = tableDef.columnArray.map(columnDef => {
+            let name = `_${toSnakeCase(columnDef.name)}`;
+            let type = pgTypes[columnDef.type.name()].type();
+            return `${name} ${type}`;
+        }).join(', ');
+ 
+        await this.query(`CREATE TABLE _${toSnakeCase(tableDef.name)} (${columns});`);
+ 
+        for (let indexDef of tableDef.indexArray) {
+            let indexColumns = indexDef.columnArray.map(indexColumn => {
+                return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
+            }).join(', ');
+ 
+            await this.query(`CREATE INDEX _${toSnakeCase(indexDef.name)} on _${toSnakeCase(tableDef.name)} (${indexColumns});`);
+        }
+    }
+
+    async dropDatabase(dbName) {
+        await this.query(`DROP DATABASE ${toSnakeCase(dbName)}`);
+    }
+
+    async dropTable(tableName) {
+        await this.query(`DROP TABLE _${toSnakeCase(tableName)}`);
+    }
+
+    async existsDatabase(dbName) {
+        let result = await this.query(`SELECT datname FROM pg_database`);
+        let set = mkSet(result.rows.map(row => row.datname));
+        return set.has(dbName);
+    }
+}
+*/

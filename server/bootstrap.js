@@ -77,8 +77,7 @@ global.env = {
     network:    OS.networkInterfaces(),
     memory:     ({ free: OS.freemem(), total: OS.totalmem() }),
     kodePath:   PATH.join(__dirname, '..'),
-    addonPath:  PATH.join(__dirname, './addons'),
-    modulePath: PATH.join(__dirname, './modules'),
+    modulePath: PATH.join(__dirname, '../modules'),
     daemonPath: PATH.join(__dirname, './daemons'),
     serverPath: PATH.join(__dirname, './servers'),
 };
@@ -142,15 +141,13 @@ require('./servers/http.js');
     await onSingletons();
     await Config.loadSystem(env.kodePath);
 
-    Config.schemas = {};
-    require('./dbms/builtinSchema.js');
-
     await onSingletons();
     namespace();
  
     logPrimary('[ Loading Modules ]');
     Config.moduleMap = {};
     Config.moduleArray = [];
+    require('./dbms/builtinSchema.js');
  
     for (let entry of await FILES.readdir(env.modulePath)) {
         if (!entry.startsWith('.')) {
@@ -178,6 +175,7 @@ require('./servers/http.js');
         }
     }
 
+    /*
     if (CLUSTER.isPrimary) {
         logPrimary('[ Starting Servers ]');
 
@@ -199,6 +197,7 @@ require('./servers/http.js');
             eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
         }
     }
+    */
 
     await onSingletons();
     Config.sealOff();

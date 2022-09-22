@@ -203,9 +203,9 @@ class PgSchema {
     }
 
     async load() {
-        let result = await this.pg.query(`SELECT table_name FROM information_schema.TABLES WHERE table_schema='public' AND table_catalog='${dbName}'`);
+        let result = await this.pg.query(`SELECT table_name FROM information_schema.TABLES WHERE table_schema='public' AND table_catalog='${this.pg.settings.database}' ORDER BY table_name`);
         
-        for (let table of result.rows) {
+        for (let table of result.data) {
             await this.tableDef(table.table_name);
         }
 
@@ -218,10 +218,13 @@ class PgSchema {
             columns: [],
             indexes: []
         };
+
+        console.log(tableDef.name);
+        return;
         
         let result = await this.pg.query(`SELECT table_catalog, table_name, column_name, ordinal_position, udt_name FROM information_schema.COLUMNS WHERE table_catalog='${this.dbName}' AND table_name='${tableName}' ORDER BY ordinal_position`);
         
-        for (let column of result.rows) {
+        for (let column of result.data) {
             let columnName = toCamelCase(column.column_name);
             
             if (columnName == 'oid') {
@@ -242,7 +245,7 @@ class PgSchema {
         
         result = await this.pg.query(`SELECT X.indexname, I.indnatts, I.indisunique, I.indisprimary, I.indkey, I.indoption FROM pg_indexes AS X JOIN pg_class AS C ON C.relname=X.indexname JOIN pg_index AS I ON I.indexrelid=C.oid WHERE X.tablename='${tableName}'`);
         
-        for (let row of result.rows) {
+        for (let row of result.data) {
             let index = [];
             
             for (let i = 0; i < row.indkey.length; i++) {
@@ -259,74 +262,6 @@ class PgSchema {
 
 
 /*****
- * Each DBMS client supported by this framework must be able to return a new DB
- * admin object, which is used for performing DBA tasks for the application
- * server.  Features inclucde database management, column management, index
- * management, and database reflection.
-*****
-class PgAdmin {
-    constructor(pg) {
-        this.pg = pg;
-    }
- 
-    async createColumn(tableName, columnName, dbType) {
-        let table = `_${toSnakeCase(tableName)}`;
-        let column = `_${toSnakeCase(columnName)}`;
-        let pgType = pgTypes[dbType.name()];
-        let value = pgType.encode(dbType.init());
- 
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
- 
-        await dbc.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${pgType.type()}`);
-        await dbc.query(`UPDATE ${table} SET ${column}=${value}`);
- 
-        await dbc.commit();
-        await dbc.free();
-    }
-
-    async createIndex(tableName, indexColumns) {
-        let table = `_${toSnakeCase(tableName)}`;
- 
-        let columns = indexColumns.map(indexColumn => {
-            return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
-        }).join(', ');
- 
-        let name = table + indexColumns.map(indexColumn => {
-            return `_${toSnakeCase(indexColumn.columnName)}`;
-        }).join('');
- 
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(`CREATE INDEX ${name} on ${table} (${columns})`);
-        await dbc.commit();
-        await dbc.free();
-    }
-
-    async dropColumn(tableName, columnName) {
-        let table = `_${toSnakeCase(tableName)}`;
-        let column = `_${toSnakeCase(columnName)}`;
-        let sql = `ALTER TABLE ${table} DROP COLUMN ${column}`;
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(sql);
-        await dbc.commit();
-        await dbc.free();
-    }
-
-    async dropIndex(indexName) {
-        let sql = `DROP INDEX _${toSnakeCase(indexName)}`;
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(sql);
-        await dbc.commit();
-        await dbc.free();
-    }
-}
-*/
-
-
-/*****
  * The PgClient class wraps the PG addon with a full set of the required
  * functions for a native DBMS client.  All of the methods are pretty much
  * just there to call the native addon class.  In some cases, like commit(),
@@ -334,85 +269,82 @@ class PgAdmin {
  * query() function.
 *****/
 class PgClient {
-    //static PG = require('pg');
+    static PG = require('pg');
 
     constructor(settings) {
-        this.dbConn = null;
+        this.pg = null;
         this.settings = settings;
-        this.settings.binaryMode = false;
         this.settings.port ? true : this.settings.port = 5433;
         this.settings.database ? true : this.settings.database = 'postgres';
-        this.settings.switches.has('dba') ? this.settings.database = 'postgres' : false;
-    }
-
-    async cancel() {
-        await this.dbConn.cancel();
     }
 
     async close() {
-        await this.dbConn.close();
+        await this.pg.end();
     }
     
     async connect() {
-        this.dbConn = await PgClient.connect(this.settings);
-        console.log(dbConn);
-    }
-
-    async createDatabase(dbName) {
-        await this.query(`CREATE DATABASE ${toSnakeCase(dbName)}`);
-    }
-
-    async createTable(tableDef) {
-        let columns = tableDef.columnArray.map(columnDef => {
-            let name = `_${toSnakeCase(columnDef.name)}`;
-            let type = pgTypes[columnDef.type.name()].type();
-            return `${name} ${type}`;
-        }).join(', ');
- 
-        await this.query(`CREATE TABLE _${toSnakeCase(tableDef.name)} (${columns});`);
- 
-        for (let indexDef of tableDef.indexArray) {
-            let indexColumns = indexDef.columnArray.map(indexColumn => {
-                return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
-            }).join(', ');
- 
-            await this.query(`CREATE INDEX _${toSnakeCase(indexDef.name)} on _${toSnakeCase(tableDef.name)} (${indexColumns});`);
-        }
-    }
-
-    async dropDatabase(dbName) {
-        await this.query(`DROP DATABASE ${toSnakeCase(dbName)}`);
-    }
-
-    async dropTable(tableName) {
-        await this.query(`DROP TABLE _${toSnakeCase(tableName)}`);
-    }
-
-    async existsDatabase(dbName) {
-        let result = await this.query(`SELECT datname FROM pg_database`);
-        let set = mkSet(result.rows.map(row => row.datname));
-        return set.has(dbName);
+        this.pg = new PgClient.PG.Client(this.settings);
+        await this.pg.connect();
     }
  
-    async listDatabases() {
-        let result = await this.query(`SELECT datname FROM pg_database WHERE datname not in ('postgres', 'template0', 'template1')`);
-        return mkSet(result.rows.map(row => row.datname));
+    static async dbCreate(settings, dbName) {
+        settings = clone(settings);
+        settings.database = 'postgres';
+        let pg = new PgClient(settings);
+        await pg.connect();
+        await pg.query(`CREATE DATABASE ${dbName}`);
+        await pg.close();
+    }
+ 
+    static async dbDrop(settings, dbName) {
+        settings = clone(settings);
+        settings.database = 'postgres';
+        let pg = new PgClient(settings);
+        await pg.connect();
+        await pg.query(`DROP DATABASE ${dbName}`);
+        await pg.close();
+    }
+ 
+    static async dbList(settings) {
+        settings = clone(settings);
+        settings.database = 'postgres';
+        let pg = new PgClient(settings);
+        await pg.connect();
+        let result = await pg.query(`SELECT datname FROM pg_database`);
+        await pg.close();
+        return mkSet(result.data.map(row => row.datname));
     }
     
-    async loadSchema(schema) {
-        let pgSchema = new PgSchema(this);
+    static async dbSchema(settings) {
+        let pg = new PgClient(settings);
+        await pg.connect();
+        let pgSchema = new PgSchema(pg);
         await pgSchema.load();
+        await pg.close();
         return pgSchema;
     }
     
-    async query(sql, opts) {
-        if (opts && opts.returnOid) {
-            let result = await this.dbConn.query(sql + " RETURNING _oid");
-            result.oid = result.rows[0]._oid;
-            return result;
+    async query(sql, oidFlag) {
+        try {
+            if (oidFlag) {
+                let pgResult = await this.pg.query(sql + " RETURNING _oid");
+
+                return {
+                    code: 'oid',
+                    data: result.rows[0]._oid,
+                };
+            }
+            else {
+                let pgResult = await this.pg.query(sql);
+
+                return {
+                    code: 'rows',
+                    data: Array.isArray(pgResult.rows) ? pgResult.rows : [],
+                };
+            }
         }
-        else {
-            return await this.dbConn.query(sql);
+        catch (e) {
+            return { code: 'error', error: e };
         }
     }
     

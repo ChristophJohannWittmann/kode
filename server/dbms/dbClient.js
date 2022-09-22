@@ -21,181 +21,126 @@
 *****/
 
 
-{
-    /*****
-     * Internal variables used for managing the database connections for the
-     * process.  Each connection is established with a unique key based on the
-     * db client softare, e.g., postgres, sql server, the DBMS hostname, and
-     * the database name.  Since connections are very specific, the pools must
-     * also be specific.
-    *****/
-    const pools = {};
-    const clients = {};
-    const idle = 30000;
-    
-    
-    /*****
-     * There is actually just one database client, dbClient, that's used for
-     * all database types.  It's a wrapper that provides state-management
-     * features.  The dbClient needs to be passed the client class for the
-     * specific DBMS server when constructed.  This happens when the DBMS-
-     * specific software is required, during which time that software calls the
-     * registerDbClient() to register in the clients object.  Hence, the API
-     * is exactly the same for all DBMS client software.
-    *****/
-    class DbClient {
-        constructor(client, settings) {
-            this.client = new client(settings);
-            this.settings = settings;
-            this.connected = false;
-            this.querying = false;
-            this.transaction = false;
-        }
+/*****
+*****/
+class DbClient {
+    static pools = {};
+    static clients = {};
+    static idle = 30000;
 
-        async close() {
-            if (this.connected) {
-                if (this.querying) {
-                    await this.client.cancel();
-                }
-                
-                if (this.transaction) {
-                    await this.client.rollback();
-                }
-             
-                await this.client.close();
-                this.connected = false;
-            }
-        }
-        
-        async commit() {
-            if (this.connected && this.transaction) {
-                await this.query('COMMIT');
-                this.transaction = false;
-            }
-        }
-        
-        async connect(settings) {
-            if (!this.connected) {
-                await this.client.connect();
-                this.connected = true;
-            }
-        }
-        
-        async free() {
-            Pool.free(this);
-        }
+    constructor(ctor, settings) {
+        this.ctor = ctor;
+        this.settings = settings;
+        this.client = new ctor(settings);
+    }
 
-        async listDatabases() {
-            if (this.settings.switches.has('dba')) {
-                return await this.client.listDatabases();
-            }
-            else {
-                return [];
-            }
-        }
-    
-        async loadSchema(schema) {
-            return await this.client.loadSchema(schema);
-        }
-        
-        async query(sql, opts) {
-            return new Promise(async (ok, fail) => {
-                if (this.connected && !this.querying) {
-                    this.querying = true;
-                    let result = await this.client.query(sql, opts);
-                    
-                    if (!result.ok) {
-                        throw new Error(`Query Error --\nDBMS: "${this.settings.dbms}"\nSQL:  "${sql}"\n`);
-                    }
-                    
-                    this.querying = false;
-                    ok(result);
-                }
-                else {
-                    ok({ error: 'DBMS client not connected.' });
-                }
-            });
-        }
-        
-        async rollback() {
-            if (this.connected && this.transaction) {
-                await this.query('ROLLBACK');
-                this.transaction = false;
-            }
-        }
-        
-        async startTransaction() {
-            if (this.connected && !this.transaction) {
-                await this.query('START TRANSACTION');
-                this.transaction = true;
-            }
-        }
-        
-        types() {
-            return this.client.types();
-        }
+    async close() {
+        await this.client.close();
     }
     
+    async commit() {
+        await this.query('COMMIT');
+    }
     
-    /*****
-     * Create a DBMS connection using the configuration settings based on the
-     * passed "config" argument.  If the config argument is a string, we'll
-     * fetch the configuration data from the loaded configuration.  If an
-     * object is passed, that object will be used.  That object must match
-     * the layout of the settings in the application configuration JSON.
-    *****/
-    register(async function dbConnect(config, ...switches) {
-        if (typeof config == 'string') {
-            this.config = Config.databases[config];
-        }
-        else if (typeof config == 'object') {
-            this.config = config;
-        }
-        else {
-            throw new Error(`Invalid DBMS configurtion: ${config}`);
-        }
-
-        let switchSet = mkSet(switches);
-
-        let settings = {
-            switches: switchSet,
-            dbms: this.config.dbms,
-            host: this.config.host ? this.config.host : 'localhost',
-            database: this.config.database ? this.config.database : '',
-            username: this.config.username ? this.config.username : '',
-            password: this.config.password ? this.config.password : '',
-            privateKey: this.config.privateKey ? this.config.privateKey : '',
-            privatePath: this.config.privatePath ? this.config.privatePath : '',
-            port: this.config.port ? this.config.port : 0,
-            libPath: this.config.libPath ? this.config.libPath : '',
-        };
-
-        const poolKey = `${settings.dbms}_${settings.hostname}_${settings.database}`;
-        
-        if (!(poolKey in pools)) {
-            pools[poolKey] = mkPool(settings => new DbClient(clients[this.config.dbms], settings), idle);
-        }
-        
-        if (switchSet.has('notran') || switchSet.has('dba')) {
-            let dbClient = await pools[poolKey].create(settings);
-            await dbClient.connect();
-            return dbClient;
-        }
-        else {
-            let dbClient = await pools[poolKey].alloc(settings);
-            await dbClient.connect();
-            await dbClient.startTransaction();
-            return dbClient;
-        }
-    });
+    async connect() {
+        await this.client.connect();
+    }
     
+    async free() {
+        await this.client.close();
+        //Pool.free(this);
+    }
     
-    /*****
-     * Registers the specified DBMS client software with this module. Note, this
-     * function should be called exactly once for each supported DBMS client
-     * application.
-    *****/
-    register(async function registerDbClient(name, client) {
-        clients[name] = client;
-    });
+    async query(sql, oidFlag) {
+        return await this.client.query(sql, oidFlag);
+    }
+    
+    async rollback() {
+        await this.query('ROLLBACK');
+    }
+    
+    async startTransaction() {
+        await this.query('START TRANSACTION');
+    }
+    
+    types() {
+        return this.client.types();
+    }
 }
+
+
+/*****
+*****/
+register(async function dbConnect(config) {
+    if (typeof config == 'string') {
+        this.config = Config.databases[config];
+    }
+    else if (typeof config == 'object') {
+        this.config = config;
+    }
+    else {
+        throw new Error(`Invalid DBMS configurtion: ${config}`);
+    }
+
+    let settings = {
+        dbms: this.config.dbms,
+        host: this.config.host ? this.config.host : 'localhost',
+        port: this.config.port ? this.config.port : 0,
+        user: this.config.user ? this.config.user : '',
+        password: this.config.password ? this.config.password : '',
+        database: this.config.database ? this.config.database : '',
+        privateKey: this.config.privateKey ? this.config.privateKey : '',
+        privateKeyPath: this.config.privateKeyPath ? this.config.privateKeyPath : '',
+    };
+
+    /*
+    const database = settings.switches.has('dba') ? 'DBA' : settings.database; 
+    const poolKey = `${settings.dbms}_${settings.host}_${database}`;
+    
+    if (!(poolKey in pools)) {
+        pools[poolKey] = mkPool(settings => new DbClient(clients[this.config.dbms], settings), idle);
+    }
+    
+    if (switchSet.has('notran') || switchSet.has('dba')) {
+        let dbClient = await pools[poolKey].create(settings);
+        await dbClient.connect();
+        return dbClient;
+    }
+    else {
+        let dbClient = await pools[poolKey].alloc(settings);
+        await dbClient.connect();
+        await dbClient.startTransaction();
+        return dbClient;
+    }
+    */
+    
+    let dbClient = new DbClient(DbClient.clients[this.config.dbms], settings);
+    await dbClient.connect();
+    return dbClient;
+});
+
+register(async function dbCreate(settings, dbName) {
+    await DbClient.clients[settings.dbms].dbCreate(settings, dbName);
+});
+
+register(async function dbDrop(settings, dbName) {
+    await DbClient.clients[settings.dbms].dbDrop(settings, dbName);
+});
+
+register(async function dbList(settings) {
+    return DbClient.clients[settings.dbms].dbList(settings);
+});
+
+register(async function dbSchema(settings) {
+    await DbClient.clients[settings.dbms].dbSchema(settings);
+});
+
+
+/*****
+ * Registers the specified DBMS client software with this module. Note, this
+ * function should be called exactly once for each supported DBMS client
+ * application.
+*****/
+register(async function registerDbClient(name, client) {
+    DbClient.clients[name] = client;
+});
