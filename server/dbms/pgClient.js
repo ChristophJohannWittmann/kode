@@ -348,6 +348,10 @@ class PgClient {
             return { code: 'error', error: e };
         }
     }
+
+    sized() {
+        return false;
+    }
     
     types() {
         return pgTypes;

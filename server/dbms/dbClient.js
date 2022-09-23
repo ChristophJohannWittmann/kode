@@ -76,6 +76,10 @@ class DbClient {
             await this.query('START TRANSACTION');
         }
     }
+
+    sized() {
+        return this.client.sized();
+    }
     
     types() {
         return this.client.types();

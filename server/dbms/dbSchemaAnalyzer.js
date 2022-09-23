@@ -191,6 +191,11 @@ register(class DbSchemaAnalyzer {
             if (!(column.name in pair.actual.columnMap)) {
                 this.diffs.push(new DbColumnDiff(this.settings, true, column));
             }
+            else {
+                if (column.type.name() != pair.actual.columnMap[column.name].type.name()) {
+                    throw new Error(`DBMS column type mismatch: TABLE: "${column.table.name}" COLUMN: "${column.name}"`);
+                }
+            }
         }
 
         for (let column of pair.actual.columnArray) {
