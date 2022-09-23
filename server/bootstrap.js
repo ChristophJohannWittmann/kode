@@ -30,6 +30,7 @@
 *****/
 require('../framework/core.js');
 require('../framework/activeData.js');
+require('../framework/binary.js');
 require('../framework/message.js');
 require('../framework/mime.js');
 require('../framework/set.js');
@@ -90,7 +91,6 @@ global.env = {
 require('./config.js');
 
 require('./lib/auth.js');
-require('./lib/binary.js');
 require('./lib/content.js');
 require('./lib/crypto.js');
 require('./lib/pool.js');
@@ -100,6 +100,7 @@ require('./lib/webSocket.js');
 require('./dbms/dbClient.js');
 require('./dbms/pgClient.js');
 require('./dbms/dbSchema.js');
+require('./dbms/dbSchemas.js');
 require('./dbms/dbSchemaAnalyzer.js');
 require('./dbms/dbObject.js');
 
@@ -116,6 +117,54 @@ if (CLUSTER.isPrimary) {
 }
 
 require('./servers/http.js');
+
+
+/*****
+*****/
+async function upgradeDbSchemas() {
+    let configMap = {};
+
+    for (let module of Config.moduleArray) {
+        if ('schemas' in module.config) {
+            for (let instance of module.config.schemas) {
+                if (!(instance.schemaName in DbSchema.schemas)) {
+                    throw new Error(`Undefined DBMS schema name: ${instance.schemaName}`);
+                }
+
+                if (!(instance.configName in configMap)) {
+                    configMap[instance.configName] = mkSet();
+                }
+
+                configMap[instance.configName].set(instance.schemaName);
+            }
+        }
+    }
+
+    for (let configName in configMap) {
+        let settings = Config.databases[configName];
+        let tableMap = {};
+
+        for (let schemaName of configMap[configName].array()) {
+            let schema = DbSchema.schemas[schemaName];
+
+            for (let tableDef of schema.tableArray) {
+                if (tableDef.name in tableMap) {
+                    throw new Error(`Duplicate table name DBMS: "${configName}" TABLE: "${tableDef.name}"`);
+                }
+
+                tableMap[tableDef.name] = tableDef;
+            }
+        }
+
+        for (let diff of (await mkDbSchemaAnalyzer(configName, tableMap)).diffs) {
+            logPrimary(`    ${diff.toString()}`);
+
+            if (diff.isUpgrade) {
+                await diff.upgrade();
+            }
+        }
+    }
+}
 
 
 /*****
@@ -147,7 +196,6 @@ require('./servers/http.js');
     logPrimary('[ Loading Modules ]');
     Config.moduleMap = {};
     Config.moduleArray = [];
-    require('./dbms/builtinSchema.js');
  
     for (let entry of await FILES.readdir(env.modulePath)) {
         if (!entry.startsWith('.')) {
@@ -167,12 +215,10 @@ require('./servers/http.js');
     }
 
     await onSingletons();
-    logPrimary('[ Analyzing DBMS Schemas ]');
+    logPrimary('[ Upgrading DBMS Schemas ]');
 
     if (CLUSTER.isPrimary) {
-        for (let module of Config.moduleArray) {
-            await module.upgradeSchemas();
-        }
+        await upgradeDbSchemas();
     }
 
     /*

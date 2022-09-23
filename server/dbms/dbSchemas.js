@@ -22,13 +22,9 @@
 
 
 /*****
- * This is the schema used by the basic framework infrastructure.  This schema
- * will support a lot of the essential administrative functions that are common
- * across all applications.  Hence, things such as authentication, user mgmt,
- * and session management are required by this schema.
 *****/
-DbSchemaContainer.setSchema(mkDbSchema(
-    'builtin',
+mkDbSchema(
+    'USER',
     true,
     {
         name: 'user',
@@ -97,6 +93,78 @@ DbSchemaContainer.setSchema(mkDbSchema(
         ]
     },
     {
+        name: 'address',
+        columns: [
+            { name: 'ownerType',    type: dbText, size:  20 },
+            { name: 'ownerOid',     type: dbInt64           },
+            { name: 'street',       type: dbText, size: 100 },
+            { name: 'building',     type: dbText, size:  50 },
+            { name: 'suite',        type: dbText, size:  50 },
+            { name: 'poBox',        type: dbText, size:  20 },
+            { name: 'city',         type: dbText, size: 100 },
+            { name: 'region',       type: dbText, size: 100 },
+            { name: 'postalCode',   type: dbText, size:  20 },
+            { name: 'countryCode',  type: dbText, size:   6 },
+            { name: 'verified',     type: dbBool            },
+            { name: 'lastVerified', type: dbTime            },
+        ],
+        indexes: [
+            'ownerType:asc, ownerOid:asc',
+        ]
+    },
+);
+
+
+/*****
+*****/
+mkDbSchema(
+    'CONTACT',
+    true,
+    {
+        name: 'phone',
+        columns: [
+            { name: 'ownerType',   type: dbText, size:   20 },
+            { name: 'ownerOid',    type: dbInt64            },
+            { name: 'country',     type: dbText, size:   10 },
+            { name: 'region',      type: dbText, size:   20 },
+            { name: 'number',      type: dbText, size:  200 },
+            { name: 'unformatted', type: dbText, size:  200 },
+            { name: 'formatted',   type: dbText, size:  200 },
+        ],
+        indexes: [
+            'ownerType:asc, ownerOid:asc',
+            'unformatted:asc',
+        ]
+    },
+    {
+        name: 'address',
+        columns: [
+            { name: 'ownerType',    type: dbText, size:  20 },
+            { name: 'ownerOid',     type: dbInt64           },
+            { name: 'street',       type: dbText, size: 100 },
+            { name: 'building',     type: dbText, size:  50 },
+            { name: 'suite',        type: dbText, size:  50 },
+            { name: 'poBox',        type: dbText, size:  20 },
+            { name: 'city',         type: dbText, size: 100 },
+            { name: 'region',       type: dbText, size: 100 },
+            { name: 'postalCode',   type: dbText, size:  20 },
+            { name: 'countryCode',  type: dbText, size:   6 },
+            { name: 'verified',     type: dbBool            },
+            { name: 'lastVerified', type: dbTime            },
+        ],
+        indexes: [
+            'ownerType:asc, ownerOid:asc',
+        ]
+    },
+);
+
+
+/*****
+*****/
+mkDbSchema(
+    'INET',
+    true,
+    {
         name: 'dnsDomain',
         columns: [
             { name: 'domain',       type: dbText, size: 200 },
@@ -141,24 +209,4 @@ DbSchemaContainer.setSchema(mkDbSchema(
             'ownerType:asc, ownerOid:asc',
         ]
     },
-    {
-        name: 'address',
-        columns: [
-            { name: 'ownerType',    type: dbText, size:  20 },
-            { name: 'ownerOid',     type: dbInt64           },
-            { name: 'street',       type: dbText, size: 100 },
-            { name: 'building',     type: dbText, size:  50 },
-            { name: 'suite',        type: dbText, size:  50 },
-            { name: 'poBox',        type: dbText, size:  20 },
-            { name: 'city',         type: dbText, size: 100 },
-            { name: 'region',       type: dbText, size: 100 },
-            { name: 'postalCode',   type: dbText, size:  20 },
-            { name: 'countryCode',  type: dbText, size:   6 },
-            { name: 'verified',     type: dbBool            },
-            { name: 'lastVerified', type: dbTime            },
-        ],
-        indexes: [
-            'ownerType:asc, ownerOid:asc',
-        ]
-    },
-));
+);

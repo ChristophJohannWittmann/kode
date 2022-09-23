@@ -1,7 +1,6 @@
 {
     "active": true,
-    "host": "*",
-    "url": "",
+    "url": "/config",
     "namespace": "config",
     "client": [
     ],
@@ -9,7 +8,9 @@
     ],
     "content": [
     ],
-    "schemas": {
-        "builtin": "system"
-    }
+    "schemas": [
+    ],
+    "instances": [
+        { "schemaName": "USER", "configName": "main" }
+    ]
 }

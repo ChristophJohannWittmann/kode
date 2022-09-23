@@ -47,46 +47,42 @@ class DbDatabaseDiff {
 }
 
 class DbTableDiff {
-    constructor(settings, isUpgrade, tableInfo, prefix) {
+    constructor(settings, isUpgrade, tableInfo) {
         this.settings = settings;
         this.isUpgrade = isUpgrade;
         this.tableInfo = tableInfo
-        this.prefix = prefix;
     }
     
     async downgrade() {
         if (!this.isUpgrade) {
             let dbc = await dbConnect(this.settings);
-            dbc.query(`DROP TABLE _${this.tableInfo}`);
+            dbc.query(`DROP TABLE _${this.tableInfo.name}`);
             await dbc.free();
         }
     }
     
     toString() {
-        let prefix = this.prefix ? `[${this.prefix}]` : '';
-        let tableName = this.isUpgrade ? this.tableInfo.name : this.tableInfo;
-        return `(TABLE DIFF   ) DATABASE: "${this.settings.database}" TABLE: "${prefix}${tableName}" STATUS: "${this.isUpgrade ? 'missing' : 'extra'}"`;
+        return `(TABLE DIFF   ) DATABASE: "${this.settings.database}" TABLE: "${this.tableInfo.name}" STATUS: "${this.isUpgrade ? 'missing' : 'extra'}"`;
     }
     
     async upgrade() {
         if (this.isUpgrade) {
             let dbc = await dbConnect(this.settings);
-            const prefix = this.prefix ? `_${this.prefix}_` : '_';
 
             let columns = this.tableInfo.columnArray.map(columnDef => {
-                let name = `${prefix}${toSnakeCase(columnDef.name)}`;
+                let name = `_${toSnakeCase(columnDef.name)}`;
                 let type = dbc.types()[columnDef.type.name()].type();
                 return `${name} ${type}`;
             }).join(', ');
 
-            await dbc.query(`CREATE TABLE ${prefix}${toSnakeCase(this.tableInfo.name)} (${columns});`);
+            await dbc.query(`CREATE TABLE _${toSnakeCase(this.tableInfo.name)} (${columns});`);
      
             for (let indexDef of this.tableInfo.indexArray) {
                 let indexColumns = indexDef.columnArray.map(indexColumn => {
-                    return `${prefix}${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
+                    return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
                 }).join(', ');
-     
-                await dbc.query(`CREATE INDEX ${prefix}${toSnakeCase(indexDef.name)} on ${prefix}${toSnakeCase(this.tableInfo.name)} (${indexColumns});`);
+
+                await dbc.query(`CREATE INDEX _${toSnakeCase(indexDef.name)} on _${toSnakeCase(this.tableInfo.name)} (${indexColumns});`);
             }
 
             await dbc.free();
@@ -102,12 +98,24 @@ class DbColumnDiff {
     }
     
     async downgrade() {
+        if (!this.isUpgrade) {
+            let dbc = await dbConnect(this.settings);
+            dbc.query(`ALTER TABLE _${toSnakeCase(this.columnInfo.table.name)} DROP COLUMN _${toSnakeCase(this.columnInfo.name)};`);
+            await dbc.free();
+        }
     }
     
     toString() {
+        return `(COLUMN DIFF  ) DATABASE: "${this.settings.database}" TABLE: "${this.columnInfo.table.name}" COLUMN: "${this.columnInfo.name}" STATUS: "${this.isUpgrade ? 'missing' : 'extra'}"`;
     }
     
     async upgrade() {
+        if (this.isUpgrade) {
+            let dbc = await dbConnect(this.settings);
+            let type = dbc.types()[this.columnInfo.type.name()].type();
+            dbc.query(`ALTER TABLE _${toSnakeCase(this.columnInfo.table.name)} ADD COLUMN _${toSnakeCase(this.columnInfo.name)} ${type};`);
+            await dbc.free();
+        }
     }
 }
 
@@ -119,12 +127,28 @@ class DbIndexDiff {
     }
     
     async downgrade() {
+        if (!this.isUpgrade) {
+            let dbc = await dbConnect(this.settings);
+            await dbc.query(`DROP INDEX _${toSnakeCase(this.indexInfo.name)};`);
+            await dbc.free();
+        }
     }
     
     toString() {
+        return `(INDEX DIFF   ) DATABASE: "${this.settings.database}" TABLE: "${this.indexInfo.table.name}" INDEX: "${this.indexInfo.name}" STATUS: "${this.isUpgrade ? 'missing' : 'extra'}"`;
     }
     
     async upgrade() {
+        if (this.isUpgrade) {
+            let dbc = await dbConnect(this.settings);
+
+            let indexColumns = this.indexInfo.columnArray.map(indexColumn => {
+                return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
+            }).join(', ');
+
+            await dbc.query(`CREATE INDEX _${toSnakeCase(this.indexInfo.name)} on _${toSnakeCase(this.indexInfo.table.name)} (${indexColumns});`);
+            await dbc.free();
+        }
     }
 }
 
@@ -132,17 +156,15 @@ class DbIndexDiff {
 /*****
 *****/
 register(class DbSchemaAnalyzer {
-    constructor(configName, schemas) {
+    constructor(configName, tableMap) {
         return new Promise(async (ok, fail) => {
-            this.configName = configName;
-            this.schemas = schemas;
-            this.settings = Config.databases[this.configName];
+            this.settings = Config.databases[configName];
             this.diffs = [];
+            this.design = { tableMap: tableMap };
+            this.design.tableArray = Object.values(tableMap);
 
             if (await this.analyzeDb()) {
-                if (await this.analyzeTables()) {
-                    ok(this);
-                }
+                await this.analyzeTables();
             }
 
             ok(this);
@@ -156,122 +178,64 @@ register(class DbSchemaAnalyzer {
         else {
             this.diffs.push(new DbDatabaseDiff(this.settings, true));
 
-            for (let schemaInfo of this.schemas) {
-                let schema = DbSchemaContainer.schemas[schemaInfo.schemaName];
-
-                schemaInfo.prefixes.forEach(prefix => {
-                    for (let tableDef of schema.tableArray) {
-                        this.diffs.push(new DbTableDiff(this.settings, true, tableDef, prefix));
-                    }
-                });
+            for (let tableDef of this.tableDefArray) {
+                this.diffs.push(new DbTableDiff(this.settings, true, tableDef));
             }
+
             return false;
         }
     }
 
-    async analyzeTables() {
-        let schemaDef = await dbSchema(this.settings);
-    }
-});
-/*****
- * Each DBMS client supported by this framework must be able to return a new DB
- * admin object, which is used for performing DBA tasks for the application
- * server.  Features inclucde database management, column management, index
- * management, and database reflection.
-*****
-class PgAdmin {
-    constructor(pg) {
-        this.pg = pg;
-    }
- 
-    async createColumn(tableName, columnName, dbType) {
-        let table = `_${toSnakeCase(tableName)}`;
-        let column = `_${toSnakeCase(columnName)}`;
-        let pgType = pgTypes[dbType.name()];
-        let value = pgType.encode(dbType.init());
- 
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
- 
-        await dbc.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${pgType.type()}`);
-        await dbc.query(`UPDATE ${table} SET ${column}=${value}`);
- 
-        await dbc.commit();
-        await dbc.free();
-    }
+    async analyzeColumns(pair) {
+        for (let column of pair.design.columnArray) {
+            if (!(column.name in pair.actual.columnMap)) {
+                this.diffs.push(new DbColumnDiff(this.settings, true, column));
+            }
+        }
 
-    async createIndex(tableName, indexColumns) {
-        let table = `_${toSnakeCase(tableName)}`;
- 
-        let columns = indexColumns.map(indexColumn => {
-            return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
-        }).join(', ');
- 
-        let name = table + indexColumns.map(indexColumn => {
-            return `_${toSnakeCase(indexColumn.columnName)}`;
-        }).join('');
- 
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(`CREATE INDEX ${name} on ${table} (${columns})`);
-        await dbc.commit();
-        await dbc.free();
-    }
-
-    async dropColumn(tableName, columnName) {
-        let table = `_${toSnakeCase(tableName)}`;
-        let column = `_${toSnakeCase(columnName)}`;
-        let sql = `ALTER TABLE ${table} DROP COLUMN ${column}`;
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(sql);
-        await dbc.commit();
-        await dbc.free();
-    }
-
-    async dropIndex(indexName) {
-        let sql = `DROP INDEX _${toSnakeCase(indexName)}`;
-        this.settings.database = this.database;
-        let dbc = await dbConnect(this.settings);
-        await dbc.query(sql);
-        await dbc.commit();
-        await dbc.free();
-    }
-
-    async createDatabase(dbName) {
-        await this.query(`CREATE DATABASE ${toSnakeCase(dbName)}`);
-    }
-
-    async createTable(tableDef) {
-        let columns = tableDef.columnArray.map(columnDef => {
-            let name = `_${toSnakeCase(columnDef.name)}`;
-            let type = pgTypes[columnDef.type.name()].type();
-            return `${name} ${type}`;
-        }).join(', ');
- 
-        await this.query(`CREATE TABLE _${toSnakeCase(tableDef.name)} (${columns});`);
- 
-        for (let indexDef of tableDef.indexArray) {
-            let indexColumns = indexDef.columnArray.map(indexColumn => {
-                return `_${toSnakeCase(indexColumn.columnName)} ${indexColumn.direction.toUpperCase()}`;
-            }).join(', ');
- 
-            await this.query(`CREATE INDEX _${toSnakeCase(indexDef.name)} on _${toSnakeCase(tableDef.name)} (${indexColumns});`);
+        for (let column of pair.actual.columnArray) {
+            if (!(column.name in pair.design.columnMap)) {
+                this.diffs.push(new DbColumnDiff(this.settings, false, column));
+            }
         }
     }
 
-    async dropDatabase(dbName) {
-        await this.query(`DROP DATABASE ${toSnakeCase(dbName)}`);
+    async analyzeIndexes(pair) {
+        for (let index of pair.design.indexArray) {
+            if (!(index.name in pair.actual.indexMap)) {
+                this.diffs.push(new DbIndexDiff(this.settings, true, index));                
+            }
+        }
+
+        for (let index of pair.actual.indexArray) {
+            if (!(index.name in pair.design.indexMap)) {
+                this.diffs.push(new DbIndexDiff(this.settings, false, index));
+            }
+        }
     }
 
-    async dropTable(tableName) {
-        await this.query(`DROP TABLE _${toSnakeCase(tableName)}`);
-    }
+    async analyzeTables() {
+        this.actual = await dbSchema(this.settings);
+        this.intersection = [];
 
-    async existsDatabase(dbName) {
-        let result = await this.query(`SELECT datname FROM pg_database`);
-        let set = mkSet(result.rows.map(row => row.datname));
-        return set.has(dbName);
+        for (let table of this.design.tableArray) {
+            if (table.name in this.actual.tableMap) {
+                this.intersection.push({ design: table, actual: this.actual.tableMap[table.name] });
+            }
+            else {
+                this.diffs.push(new DbTableDiff(this.settings, true, table));
+            }
+        }
+
+        for (let table of this.actual.tableArray) {
+            if (!(table.name in this.design.tableMap)) {
+                this.diffs.push(new DbTableDiff(this.settings, false, table));
+            }
+        }
+
+        for (let pair of this.intersection) {
+            await this.analyzeColumns(pair);
+            await this.analyzeIndexes(pair);
+        }
     }
-}
-*/
+});

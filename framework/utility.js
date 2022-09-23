@@ -203,10 +203,10 @@ register(function fromJson(json) {
                 return new RegExp(value['#REGEX']);
             }
             else if ('#FUNC' in value) {
-                return mkBuffer(value['#FUNC'], 'base64').toString();
+                return mkBinary(value['#FUNC'], 'base64').toString();
             }
             else if ('#BUFFER' in value) {
-                return mkBuffer(value['#BUFFER'], 'base64');
+                return mkBinary(value['#BUFFER'], 'base64');
             }
             else if ('#BIG' in value) {
                 return BigInt(value['#BIG']);
@@ -421,7 +421,7 @@ register(function toJson(value, humanReadable) {
             return { '#REGEX': value.toString() };
         }
         else if (typeof value == 'function') {
-            return { '#FUNC': mkBuffer(value.toString()).str('base64') };
+            return { '#FUNC': mkBinary(value.toString()).toString('base64') };
         }
         else if (typeof value == 'bigint') {
             return { '#BIG': value.toString() };

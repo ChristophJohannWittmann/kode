@@ -35,6 +35,9 @@ register(class Pool {
 
     constructor() {
     }
+
+    static async free(pooled) {
+    }
 });
 register(class PoolX extends Emitter {
     static lookAhead = 600;

@@ -109,16 +109,13 @@ register(class Module {
     }
 
     async loadSchemas() {
-        let dbSchemasPath = PATH.join(this.path, 'dbmsSchemas.js');
+        let schemasPath = PATH.join(this.path, 'dbSchemas.js');
 
-        if (FS.existsSync(dbSchemasPath)) {
-            let dbSchemas;
-            let buffer = await FILES.readFile(dbSchemasPath);
-            eval(`dbSchemas = ${buffer.toString()};`);
+        if (FS.existsSync(schemasPath)) {
+            let stats = await FILES.stat(schemasPath);
 
-            for (let schemaName in dbSchemas) {
-                let schema = mkDbSchema(schemaName, true, ...dbSchemas[schemaName]);
-                DbSchemaContainer.setSchema(schema);
+            if (stats.isFile()) {
+                require(schemasPath);
             }
         }
     }
@@ -126,33 +123,6 @@ register(class Module {
     async loadServer() {
         if (FS.existsSync(PATH.join(this.path, 'server'))) {
             // *** TBD ***
-        }
-    }
-
-    async upgradeSchemas() {
-        let prefix = '(ok.     )';
-
-        for (let schemaName in this.config.schemas) {
-            let config = this.config.schemas[schemaName];
-            DbSchemaContainer.setInstance(schemaName, config.database, config.prefix);
-        }
-
-        for (let configName in DbSchemaContainer.instancesByConfig) {
-            let instance = DbSchemaContainer.instancesByConfig[configName];
-
-            let schemas = Object.entries(instance.schemas).map(entry => {
-                let [ schemaName, prefixes ] = entry;
-                return { schemaName: schemaName, prefixes: prefixes.array() };
-            });
-
-            let analysis = await mkDbSchemaAnalyzer(configName, schemas);
-
-            for (let diff of analysis.diffs) {
-                if (diff.isUpgrade) {
-                    logPrimary(`    ${diff.toString()}`);
-                    await diff.upgrade();
-                }
-            }
         }
     }
 

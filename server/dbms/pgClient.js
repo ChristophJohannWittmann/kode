@@ -196,7 +196,7 @@ const pgReverseMap = {
  * implemented on the server. The output of such a comparison is used for applying
  * modifications to the implemented schema on the server.
 *****/
-class PgSchema {
+class PgSchemaDef {
     constructor(pg) {
         this.pg = pg;
         this.tableDefs = [];
@@ -218,12 +218,9 @@ class PgSchema {
             columns: [],
             indexes: []
         };
+        
+        let result = await this.pg.query(`SELECT table_catalog, table_name, column_name, ordinal_position, udt_name FROM information_schema.COLUMNS WHERE table_catalog='${this.pg.settings.database}' AND table_name='${tableName}' ORDER BY ordinal_position`);
 
-        console.log(tableDef.name);
-        return;
-        
-        let result = await this.pg.query(`SELECT table_catalog, table_name, column_name, ordinal_position, udt_name FROM information_schema.COLUMNS WHERE table_catalog='${this.dbName}' AND table_name='${tableName}' ORDER BY ordinal_position`);
-        
         for (let column of result.data) {
             let columnName = toCamelCase(column.column_name);
             
@@ -232,7 +229,7 @@ class PgSchema {
                 tableDef.columns.push({ name: columnName, type: fmwkType });
             }
             else {
-                var fmwkType = this.pgReverseMap[column.udt_name].fmwk();
+                var fmwkType = pgReverseMap[column.udt_name].fmwk();
                 
                 if (fmwkType.name() == 'dbText') {
                     tableDef.columns.push({ name: columnName, type: fmwkType, size: -1 });
@@ -242,18 +239,22 @@ class PgSchema {
                 }
             }
         }
-        
+
         result = await this.pg.query(`SELECT X.indexname, I.indnatts, I.indisunique, I.indisprimary, I.indkey, I.indoption FROM pg_indexes AS X JOIN pg_class AS C ON C.relname=X.indexname JOIN pg_index AS I ON I.indexrelid=C.oid WHERE X.tablename='${tableName}'`);
         
         for (let row of result.data) {
-            let index = [];
-            
-            for (let i = 0; i < row.indkey.length; i++) {
-                let columnIndex = row.indkey[i] - 1;
-                index.push(`${tableDef.columns[columnIndex].name} ${row.indoption[i] ? 'DESC' : 'ASC'}`);
+            if (!row.indexname.endsWith('_pkey')) {
+                let index = [];
+                let indkey = row.indkey.split(' ').map(el => parseInt(el));
+                let indopt = row.indoption.split(' ').map(el => parseInt(el));
+                
+                for (let i = 0; i < indkey.length; i++) {
+                    let columnIndex = indkey[i] - 1;
+                    index.push(`${tableDef.columns[columnIndex].name}:${indopt[i] ? 'DESC' : 'ASC'}`);
+                }
+
+                tableDef.indexes.push(index.join(','));
             }
-            
-            tableDef.indexes.push(index);
         }
         
         this.tableDefs.push(tableDef);
@@ -318,10 +319,10 @@ class PgClient {
     static async dbSchema(settings) {
         let pg = new PgClient(settings);
         await pg.connect();
-        let pgSchema = new PgSchema(pg);
-        await pgSchema.load();
+        let pgSchemaDef = new PgSchemaDef(pg);
+        await pgSchemaDef.load();
         await pg.close();
-        return pgSchema;
+        return pgSchemaDef.tableDefs;
     }
     
     async query(sql, oidFlag) {

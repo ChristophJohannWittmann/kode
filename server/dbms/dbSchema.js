@@ -145,68 +145,6 @@ global.dbTimeArray = {
 
 
 /*****
- * The schema container provides a complex storage mechanism for keepting track
- * of all schemas and schema instances.  A schema instance is essentially a map
- * of each use of a schema.  Each scheme use or instance needs to have an assigned
- * database (in the configuration) and a table-name prefix, if any.  Instances
- * can be looked up both by schemaName and by DBMS configuration name.
-*****/
-singleton(class DbSchemaContainer {
-    constructor() {
-        this.schemas = {};
-        this.instancesBySchema = {};
-        this.instancesByConfig = {};
-    }
-
-    async setInstance(schemaName, configName, prefix) {
-        if (!(schemaName in this.schemas)) {
-            throw new Error(`Unknown Schema: ${schemaName}`);
-        }
-
-        if (!(configName in Config.databases)) {
-            throw new Error(`Unknown Database Configuration: ${configName}`);
-        }
-
-        if (!(schemaName in this.instancesBySchema)) {
-            this.instancesBySchema[schemaName] = { schemaName: schemaName, configs: {} };
-        }
-
-        let instance = this.instancesBySchema[schemaName];
-
-        if (configName in instance.configs) {
-            instance.configs[configName].set(prefix);
-        }
-        else {
-            instance.configs[configName] = mkSet(prefix);
-        }
-
-        if (!(configName in this.instancesByConfig)) {
-            this.instancesByConfig[configName] = { configName: configName, schemas: {} };
-        }
-
-        instance = this.instancesByConfig[configName];
-
-        if (schemaName in instance.schemas) {
-            instance.schemas[schemaName].set(prefix);
-        }
-        else {
-            instance.schemas[schemaName] = mkSet(prefix);
-        }
-    }
-
-    setSchema(schema) {
-        if (!(schema.name in this.schemas)) {
-            this.schemas[schema.name] = schema;
-        }
-        else {
-            let stored = this.schemas[schema.name];
-            stored.addTables(schema.tableArray);
-        }
-    }
-});
-
-
-/*****
  * This is a DBMS independent representation of a DBMS schema.  In effect, it's
  * a type of compiler.  It accepts a schema name and table definitions to
  * generate the generic representation of a schema.  As such, it defines a
@@ -215,19 +153,35 @@ singleton(class DbSchemaContainer {
  * all supported DBMS platforms and is used for analyzing existing schemas.
 *****/
 register(class DbSchema {
+    static schemas = {};
+
     constructor(name, defined, ...tableDefs) {
         this.name = name;
         this.tableMap = {};
         this.tableArray = [];
-        this.defined = defined;
-        this.addTables(...tableDefs);
-    }
 
-    addTables(...tableDefs) {
-        for (let tableDef of tableDefs) {
-            let schemaTable = new DbSchemaTable(this, tableDef);
-            this.tableArray.push(schemaTable);
-            this.tableMap[schemaTable.name] = schemaTable;
+        if (defined && this.name in DbSchema.schemas) {
+            throw new Error(`Duplicate DB schema name: ${this.name}`);
+        }
+        else {
+            if (defined) {
+                DbSchema.schemas[this.name] = this;
+            }
+            
+            for (let tableDef of tableDefs) {
+                if (defined) {
+                    tableDef.columns.unshift({ name: 'updated', type: dbTime });
+                    tableDef.columns.unshift({ name: 'created', type: dbTime });
+                    tableDef.columns.unshift({ name: 'oid',     type: dbKey  });
+                    tableDef.indexes.unshift('updated:asc');
+                    tableDef.indexes.unshift('created:asc');
+                    tableDef.indexes.unshift('oid:asc');
+                }
+
+                let schemaTable = new DbSchemaTable(this, tableDef);
+                this.tableArray.push(schemaTable);
+                this.tableMap[schemaTable.name] = schemaTable;
+            }
         }
     }
 });
@@ -240,13 +194,6 @@ class DbSchemaTable {
         this.columnArray = [];
         this.indexMap = {};
         this.indexArray = [];
-        
-        if (this.defined) {
-            tableDef.columns.unshift({ name: 'updated', type: dbTime });
-            tableDef.columns.unshift({ name: 'created', type: dbTime });
-            tableDef.columns.unshift({ name: 'oid',     type: dbKey  });
-            tableDef.indexes.unshift('oid:asc');
-        }
   
         tableDef.columns.forEach(columnDef => {
             if (columnDef.name in this.columnMap) {

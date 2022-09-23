@@ -32,6 +32,7 @@ class DbClient {
         this.ctor = ctor;
         this.settings = settings;
         this.client = new ctor(settings);
+        this.trans = false;
     }
 
     async close() {
@@ -39,7 +40,10 @@ class DbClient {
     }
     
     async commit() {
-        await this.query('COMMIT');
+        if (this.trans) {
+            this.trans = false;
+            await this.query('COMMIT');
+        }
     }
     
     async connect() {
@@ -47,8 +51,12 @@ class DbClient {
     }
     
     async free() {
-        await this.client.close();
-        //Pool.free(this);
+        if (this.trans) {
+            this.trans = false;
+            await this.query('COMMIT');
+        }
+
+        Pool.free(this);
     }
     
     async query(sql, oidFlag) {
@@ -56,11 +64,17 @@ class DbClient {
     }
     
     async rollback() {
-        await this.query('ROLLBACK');
+        if (this.trans) {
+            this.trans = false;
+            await this.query('ROLLBACK');
+        }
     }
     
     async startTransaction() {
-        await this.query('START TRANSACTION');
+        if (!this.trans) {
+            this.trans = true;
+            await this.query('START TRANSACTION');
+        }
     }
     
     types() {
@@ -132,7 +146,8 @@ register(async function dbList(settings) {
 });
 
 register(async function dbSchema(settings) {
-    await DbClient.clients[settings.dbms].dbSchema(settings);
+    let tableDefs = await DbClient.clients[settings.dbms].dbSchema(settings);
+    return mkDbSchema('', false, ...tableDefs);
 });
 
 
