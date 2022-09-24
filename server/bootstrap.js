@@ -120,8 +120,27 @@ require('./servers/http.js');
 
 
 /*****
+ * In order to properly analyze a DBMS schema, we need to wait until we have
+ * all of the modules registered so we know what tables are associated with
+ * what DBMS connections. (1) Iterate through the loaded modules and generate
+ * the configMap.  The configMap shows all expected schemas (tables) on each
+ * defined DBMS connection.  (2) Perform a deep DBMS analysis on each of the
+ * defined DBMS connections to determine differences between the design and
+ * the actual schemas.  The startup behavior is to executed upgrade diffs only.
+ * Downgrads can be left waiting for manual DBMS maintenance.
 *****/
 async function upgradeDbSchemas() {
+    let dbc = await dbConnect("main");
+    console.log(dbc[Pool.idKey]);
+
+    setTimeout(async () => {
+        await dbc.free();
+
+        dbc = await dbConnect("main");
+        console.log(dbc[Pool.idKey]);
+    }, 1000);
+
+    /*
     let configMap = {};
 
     for (let module of Config.moduleArray) {
@@ -164,6 +183,7 @@ async function upgradeDbSchemas() {
             }
         }
     }
+    */
 }
 
 

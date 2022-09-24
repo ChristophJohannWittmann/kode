@@ -22,6 +22,13 @@
 
 
 /*****
+ * DB diffs are classses that describe a difference between a design schema and
+ * an actual schema: database, table, column, index.  An upgrade is a change
+ * that extends the current schema without affecting current functionality.  A
+ * downgrade is a cleanup operate the removes backward compatibility with the
+ * intent of cleaning things up.  Downgrades should happen after a period of
+ * time to ensure that if a new software version failes, we can still fall back
+ * as needed.
 *****/
 class DbDatabaseDiff {
     constructor(settings, isUpgrade) {
@@ -154,6 +161,14 @@ class DbIndexDiff {
 
 
 /*****
+ * The DbSchemaAnalyzer performs a deep analysis of a single DBMS database with
+ * a map of the design of the tables that are expected to be available on that
+ * DBMS server: (1) Check for the existence of the database.  (2) Determine the
+ * table diffs.  A diff means that there's either an extra or missing item.  (3)
+ * Determine the column diffs for tables that are common to the design and actual
+ * schemas.  (4) Determine index diffs for tables that are common to the design
+ * and actual schemas.  The generated diffs are self-contained objects can be
+ * executed to perform DBMS upgrades or downgrades.
 *****/
 register(class DbSchemaAnalyzer {
     constructor(configName, tableMap) {

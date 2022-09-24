@@ -22,14 +22,22 @@
 
 
 /*****
+ * A DbClient is a shell or wrapper for one of the DBMS-specific DBMS clients.
+ * MSSQL and PostgreSQL are examples of specific clients.  Each specific client
+ * has its own wrapper or API layer to ensure they all behave identially.  In
+ * this architecture, any DBMS can be used in any instances as required.  The
+ * exact DBMS product is managed by configuration settings.  Note that this
+ * class also implements code for managing connects as a pool to ensure server
+ * performance.  Note that there is a separate pool for each DBMS instance.
 *****/
 class DbClient {
     static pools = {};
     static clients = {};
-    static idle = 30000;
+    static max = 10;
+    static idle = 3000;
+    static poolKey = Symbol('#Pool');
 
     constructor(ctor, settings) {
-        this.ctor = ctor;
         this.settings = settings;
         this.client = new ctor(settings);
         this.trans = false;
@@ -37,6 +45,7 @@ class DbClient {
 
     async close() {
         await this.client.close();
+        console.log('closed DB client');
     }
     
     async commit() {
@@ -53,10 +62,8 @@ class DbClient {
     async free() {
         if (this.trans) {
             this.trans = false;
-            await this.query('COMMIT');
+            await this.query('ROLLBACK');
         }
-
-        Pool.free(this);
     }
     
     async query(sql, oidFlag) {
@@ -88,6 +95,11 @@ class DbClient {
 
 
 /*****
+ * These are the globally available DBMS functions used for connecting and
+ * administering a database management system.  The most commonly, pgConnect,
+ * returns an open DBMS connection.  The other functions provide DBA features
+ * that are generally DBMS specific.  Hence, they are encapsulated within the
+ * code the DBMS-specific client.
 *****/
 register(async function dbConnect(config) {
     if (typeof config == 'string') {
@@ -111,30 +123,25 @@ register(async function dbConnect(config) {
         privateKeyPath: this.config.privateKeyPath ? this.config.privateKeyPath : '',
     };
 
-    /*
-    const database = settings.switches.has('dba') ? 'DBA' : settings.database; 
-    const poolKey = `${settings.dbms}_${settings.host}_${database}`;
+    const poolKey = `${settings.dbms}_${settings.host}_${settings.database}`;
     
-    if (!(poolKey in pools)) {
-        pools[poolKey] = mkPool(settings => new DbClient(clients[this.config.dbms], settings), idle);
+    if (!(poolKey in DbClient.pools)) {
+        let pool = mkPool(
+            async () => {
+                let dbc = new DbClient(DbClient.clients[settings.dbms], settings);
+                await dbc.connect();
+                return dbc;
+            },
+            DbClient.max,
+            DbClient.idle
+        );
+
+        DbClient.pools[poolKey] = pool;
     }
-    
-    if (switchSet.has('notran') || switchSet.has('dba')) {
-        let dbClient = await pools[poolKey].create(settings);
-        await dbClient.connect();
-        return dbClient;
-    }
-    else {
-        let dbClient = await pools[poolKey].alloc(settings);
-        await dbClient.connect();
-        await dbClient.startTransaction();
-        return dbClient;
-    }
-    */
-    
-    let dbClient = new DbClient(DbClient.clients[this.config.dbms], settings);
-    await dbClient.connect();
-    return dbClient;
+
+    let dbc = await DbClient.pools[poolKey].alloc();
+    dbc[DbClient.poolKey] = poolKey;
+    return dbc;
 });
 
 register(async function dbCreate(settings, dbName) {

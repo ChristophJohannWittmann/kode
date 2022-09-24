@@ -31,67 +31,81 @@
  * a ctor and have a close() member.  Everything else is up to the pool class.
 *****/
 register(class Pool {
-    static expireKey = Symbol('#Expire');
-
-    constructor() {
-    }
-
-    static async free(pooled) {
-    }
-});
-register(class PoolX extends Emitter {
     static lookAhead = 600;
-    static id = 1;
-    static idKey = Symbol('#Id');
-    static poolKey = Symbol('#PoolId');
+    static idKey = Symbol('#PoolId');
+    static poolKey = Symbol('#Pool');
     static expireKey = Symbol('#Expire');
-    static reuseKey = Symbol('#Reuse');
-    static pools = {};
 
-    constructor(ctor, idleTime) {
-        super();
-        this.id = Pool.id++;
-        this.resourceId = 1;
-        this.ctor = ctor;
+    constructor(make, max, idle) {
+        this.make = make;
+        this.idle = idle;
+        this.max = max;
+        this.nextId = 1;
         this.freed = [];
-        this.allocated = {};
+        this.inuse = {};
+        this.pending = [];
         this.timeout = null;
-        this.closed = false;
-        this.idleTime = idleTime;
-        Pool.pools[this.id] = this;
     }
-  
-    async alloc(...args) {
-        if (!this.closed) {
+
+    alloc(...args) {
+        return new Promise(async (ok, fail) => {
             if (this.freed.length) {
+                this.clearTimeout();
                 let resource = this.freed.shift();
-                this.allocated[resource[Pool.poolKey]] = resource;
-                return resource;
+                this.inuse[resource[Pool.idKey]] = resource;
+                this.setTimeout();
+                ok(resource);
             }
             else {
-                let resource = await this.ctor(...args);
-                resource[Pool.idKey] = this.resourceId++;
-                resource[Pool.poolKey] = this.id++;
-                resource[Pool.expireKey] = 0;
-                resource[Pool.reuseKey] = true;
-                this.allocated[resource[Pool.idKey]] = resource;
-                return resource;
+                if (this.count() < this.max) {
+                    let resource = await this.make(...args);
+                    resource[Pool.poolKey] = this;
+                    resource[Pool.idKey] = this.nextId++;
+                    this.inuse[resource[Pool.idKey]] = resource;
+
+                    if ('free' in resource) {
+                        let base = resource.free;
+
+                        resource.free = async (...args) => {
+                            await Reflect.apply(base, resource, args);
+                            await this.free(resource);
+                        };
+                    }
+                    else {
+                        resource.free = async () => {
+                            await this.free(resource);
+                        };
+                    }
+
+                    ok(resource);
+                }
+                else {
+                    this.pending.push(async (resource) => {
+                        ok(resource);
+                    });
+                }
             }
+        });
+    }
+
+    clearTimeout() {
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
         }
     }
-    
-    allocCount() {
-        return Object.keys(this.allocated).length;
+
+    count() {
+        return this.freed.length + Object.keys(this.inuse).length;
     }
-  
-    async clean() {
-        this.timeout = null;
-        let cutoff = DATE().now() + Pool.lookAhead;
-  
+
+    async discard() {
+        let threshold = Date.now() + Pool.lookAhead;
+
         while (this.freed.length) {
-            let resource = this.freed[0];
-  
-            if (resource[Pool.expireKey] < cutoff) {
+            let resource = freed[0];
+
+            if (resource[Pool.expireKey] < threshold) {
                 this.freed.shift();
                 await resource.close();
             }
@@ -99,81 +113,32 @@ register(class PoolX extends Emitter {
                 break;
             }
         }
-  
-        if (this.freed.length) {
-            let resource = this.freed[0];
-            let delta = resource[Pool.expireKey] - DATE().now();
-            this.timeout = setTimeout(() => this.clean(), delta);
-        }
     }
-  
-    async close() {
-        this.closed = true;
-  
-        if (this.timeout) {
-            clearTimeout(this.timeout);
-            this.timeout = null;
-        }
-  
-        while (this.freed.length) {
-            await this.freed.shift().close();
-            this.freed = [];
-        }
-    }
-  
-    async create(...args) {
-        if (!this.closed) {
-            let resource = await this.ctor(...args);
-            resource[Pool.idKey] = this.resourceId++;
-            resource[Pool.poolKey] = this.id++;
-            resource[Pool.expireKey] = 0;
-            resource[Pool.reuseKey] = false;
-            this.allocated[resource[Pool.idKey]] = resource;
-            return resource;
-        }
-    }
-  
+
     async free(resource) {
-        if (this.closed) {
-            await resource.close();
+        if (this.pending.length) {
+            this.pending.shift()(resource);
         }
         else {
             this.freed.push(resource);
-            delete this.allocated[resource[Pool.idKey]];
-         
-            if (resource[Pool.reuseKey]) {
-                resource[Pool.expireKey] = DATE().now() + this.idleTime;
-      
-                if (!this.timeout) {
-                    let delta = resource[Pool.expireKey] - DATE().now() ;
-                    this.timeout = setTimeout(() => this.clean(), delta);
-                }
-            }
-            else {
-                await resource.close();
-            }
-        }
-    }
-    
-    static async free(resource) {
-        if (Pool.poolKey in resource) {
-            let poolId = resource[Pool.poolKey];
-            let pool = Pool.pools[poolId];
-         
-            if (pool && Pool.idKey in resource) {
-                let resourceId = resource[Pool.idKey];
-         
-                if (resourceId in pool.allocated) {
-                    await pool.free(resource);
-                }
-            }
+            delete this.inuse[resource[Pool.idKey]];
+            resource[Pool.expireKey] = Date.now() + this.idle;
         }
     }
 
-    static async remove(resource) {
-    }
-    
-    freedCount() {
+    freeCount() {
         return this.freed.length;
+    }
+
+    inuseCount() {
+        return Object.keys(this.inuse).length;
+    }
+
+    setTimeout() {
+        if (!this.timeout && this.freed.length) {
+            this.timeout = setTimeout(async () => {
+                await this.discard();
+            }, this.freed[0][Pool.expireKey] + this.idle);
+        }
     }
 });

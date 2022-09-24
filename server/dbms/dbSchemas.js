@@ -22,6 +22,11 @@
 
 
 /*****
+ * The DBMS schemas that are standard or default to the server framework.  Each
+ * defined schema is automatically loaded while bootstrapping the server and is
+ * available to the server framework as well as other modules.  I've tried to
+ * make separate logically organized schemas so that they may be replicated as
+ * needed and found useful by outside module developers.
 *****/
 mkDbSchema(
     'USER',
@@ -114,9 +119,6 @@ mkDbSchema(
     },
 );
 
-
-/*****
-*****/
 mkDbSchema(
     'CONTACT',
     true,
@@ -158,9 +160,6 @@ mkDbSchema(
     },
 );
 
-
-/*****
-*****/
 mkDbSchema(
     'INET',
     true,
