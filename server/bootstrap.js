@@ -130,17 +130,6 @@ require('./servers/http.js');
  * Downgrads can be left waiting for manual DBMS maintenance.
 *****/
 async function upgradeDbSchemas() {
-    let dbc = await dbConnect("main");
-    console.log(dbc[Pool.idKey]);
-
-    setTimeout(async () => {
-        await dbc.free();
-
-        dbc = await dbConnect("main");
-        console.log(dbc[Pool.idKey]);
-    }, 1000);
-
-    /*
     let configMap = {};
 
     for (let module of Config.moduleArray) {
@@ -183,7 +172,6 @@ async function upgradeDbSchemas() {
             }
         }
     }
-    */
 }
 
 

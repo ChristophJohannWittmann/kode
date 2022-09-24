@@ -33,8 +33,8 @@
 class DbClient {
     static pools = {};
     static clients = {};
-    static max = 10;
-    static idle = 3000;
+    static max = 50;
+    static idle = 30000;
     static poolKey = Symbol('#Pool');
 
     constructor(ctor, settings) {
@@ -45,7 +45,6 @@ class DbClient {
 
     async close() {
         await this.client.close();
-        console.log('closed DB client');
     }
     
     async commit() {

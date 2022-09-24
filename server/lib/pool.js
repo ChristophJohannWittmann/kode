@@ -53,6 +53,7 @@ register(class Pool {
                 this.clearTimeout();
                 let resource = this.freed.shift();
                 this.inuse[resource[Pool.idKey]] = resource;
+                delete resource[Pool.id];
                 this.setTimeout();
                 ok(resource);
             }
@@ -100,10 +101,11 @@ register(class Pool {
     }
 
     async discard() {
+        this.timeout = null;
         let threshold = Date.now() + Pool.lookAhead;
 
         while (this.freed.length) {
-            let resource = freed[0];
+            let resource = this.freed[0];
 
             if (resource[Pool.expireKey] < threshold) {
                 this.freed.shift();
@@ -113,6 +115,8 @@ register(class Pool {
                 break;
             }
         }
+
+        this.setTimeout();
     }
 
     async free(resource) {
@@ -123,6 +127,7 @@ register(class Pool {
             this.freed.push(resource);
             delete this.inuse[resource[Pool.idKey]];
             resource[Pool.expireKey] = Date.now() + this.idle;
+            this.setTimeout();
         }
     }
 
@@ -136,9 +141,8 @@ register(class Pool {
 
     setTimeout() {
         if (!this.timeout && this.freed.length) {
-            this.timeout = setTimeout(async () => {
-                await this.discard();
-            }, this.freed[0][Pool.expireKey] + this.idle);
+            let millis = this.freed[0][Pool.expireKey] - Date.now();
+            this.timeout = setTimeout(async () => await this.discard(), millis);
         }
     }
 });
