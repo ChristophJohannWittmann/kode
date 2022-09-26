@@ -22,10 +22,13 @@
 
 
 /*****
+ * Need to escape a value such that it can be saved in the database as a string
+ * value.  Generally, we know the DBMS standard escape sequences.  Since we're
+ * being careful about DBMS-specific approaches, each DBMS module will need to
+ * do its own escaping.
 *****/
 function escape(raw) {
-    let escaped = raw;
-
+    let escaped = raw.replace(/'/g, "''");
     return escaped;
 }
 
@@ -120,60 +123,70 @@ const pgTypes = {
         type: () => '_bytea',
         fmwk: () => global.dbBinArray,
         encode: array => `ARRAY[E:'\\x${array.map(el => el.toString("hex")).join("',E:'\\x")}']::bytea[]`,
+        decode: array => array.map(el => mkBinary(el)),
     },
   
     dbBoolArray: {
         type: () => '_bool',
         fmwk: () => global.dbBoolArray,
         encode: array => `ARRAY[${array.map(el => el ? "true" : "false").join(",")}]::bool[]`,
+        decode: array => array,
     },
   
     dbFloat32Array: {
         type: () => '_float4',
         fmwk: () => global.dbFloat32Array,
         encode: array => `ARRAY[${array.map(el => el.toString()).join(",")}]::float4[]`,
+        decode: array => array,
     },
   
     dbFloat64Array: {
         type: () => '_float8',
         fmwk: () => global.dbFloat64Array,
         encode: array => `ARRAY[${array.map(el => el.toString()).join(",")}]::float4[]`,
+        decode: array => array,
     },
   
     dbInt16Array: {
         type: () => '_int2',
         fmwk: () => global.dbInt16Array,
         encode: array => `ARRAY[${array.map(el => el.toString()).join(",")}]::int2[]`,
+        decode: array => array,
     },
   
     dbInt32Array: {
         type: () => '_int4',
         fmwk: () => global.dbInt32Array,
         encode: array => `ARRAY[${array.map(el => el.toString()).join(",")}]::int4[]`,
+        decode: array => array,
     },
   
     dbInt64Array: {
         type: () => '_int8',
         fmwk: () => global.dbInt64Array,
         encode: array => `ARRAY[${array.map(el => el.toString()).join(",")}]::int8[]`,
+        decode: array => array.map(el => BigInt(el)),
     },
   
     dbJsonArray: {
         type: () => '_json',
         fmwk: () => global.dbJsonArray,
         encode: array => `ARRAY['${array.map(el => escape(JSON.stringify(el))).join("','")}']::json[]`,
+        decode: array => array.map(el => fromJson(el)),
     },
   
     dbTextArray: {
         type: () => '_varchar',
         fmwk: () => global.dbTextArray,
         encode: array => `ARRAY['${array.map(el => escape(toJson(el))).join("','")}']::varchar[]`,
+        decode: array => array,
     },
   
     dbTimeArray: {
         type: () => '_timestamp',
         fmwk: () => global.dbTimeArray,
         encode: array => `ARRAY['${array.map(el => el.jsDate.toISOString()).join("','")}']::timestamp[]`,
+        decode: array => array.map(el => mkTime(el)),
     },
 };
 

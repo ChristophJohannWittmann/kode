@@ -247,20 +247,24 @@ async function prepareDbms() {
     // ***************************************************************************
     // ***************************************************************************
 
+    /*
     let dbc = await dbConnect("main");
     await dbc.startTransaction();
 
     let obj;
+    */
 
     /*
     obj = mkDboUser({ firstName: 'Christoph', lastName: 'Wittmann', orgOid: BigInt(43) });
     await obj.save(dbc);
     */
 
+    /*
     await updateDboUser(dbc, { title: 'Herr' }, 1n);
 
     await dbc.commit();
     dbc.free();
+    */
 
     // ***************************************************************************
     // ***************************************************************************
