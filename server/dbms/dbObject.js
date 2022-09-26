@@ -30,210 +30,242 @@
  * the DBMS tables and records.
 *****/
 register(function defineDboType(schemaTable) {
-    const prefix = `${schemaTable.schema.name[0].toUpperCase()}${schemaTable.schema.name.substr(1)}`;
-    const body = `${schemaTable.name[0].toUpperCase()}${schemaTable.name.substr(1)}`;
-    const className = `${prefix}${body}`;
-    const table = `_${toSnakeCase(schemaTable.name)}`;
-    const columns = schemaTable.columnArray.map(column => `_${toSnakeCase(column.name)}`);
+    const tableName = `_${toSnakeCase(schemaTable.name)}`;
+    const className = `Dbo${schemaTable.name[0].toUpperCase()}${schemaTable.name.substr(1)}`;
+
+    const fwdMap = {};
+    const revMap = {};
+
+    schemaTable.columnArray.forEach(column => fwdMap[column.name] = ({
+        name: `_${toSnakeCase(column.name)}`,
+        type: column.type,
+        size: column.size,
+    }));
+
+    schemaTable.columnArray.forEach(column => revMap[`_${toSnakeCase(column.name)}`] = ({
+        name: column.name,
+        type: column.type,
+    }));
     
-    eval(
-`{
+    eval(`
     register(class ${className} {
-        constructor(properties) {
-            schemaTable.columnArray.forEach(column => this[column.name] = column.type.init());
-            this.set(properties);
+        constructor(values) {
+            this.init();
+            this.set(values);
         }
-        
+
+        copy() {
+            let copy = mk${className}();
+
+            for (let propertyName in fwdMap) {
+                copy[propertyName] = this[propertyName];
+            }
+
+            copy.oid = 0;
+            copy.created = mkTime();
+            copy.updated = mkTime();
+
+            return copy;
+        }
+
         async erase(dbc) {
-            if (this.oid) {
-                let sql = "DELETE FROM ${table} WHERE _oid=" + this.oid;
-                await dbc.query(sql);
-            }
-            
+            await dbc.query("DELETE FROM ${tableName} WHERE _oid=" + this.oid);
+            this.oid = 0;
             return this;
         }
-        
+
+        init() {
+            for (let memberName in fwdMap) {
+                this[memberName] = fwdMap[memberName].type.init();
+            }
+
+            return this;
+        }
+
+        async insert(dbc) {
+            this.created = mkTime();
+            this.updated = mkTime();
+
+            let dbcTypes = dbc.dbClass().dbTypes();
+            let sql = ['INSERT INTO ${tableName}'];
+            sql.push('(${Object.keys(fwdMap).filter(key => key != 'oid').map(key => "_" + toSnakeCase(key)).join(',')})');
+
+            sql.push(
+                "VALUES(" +
+                Object.keys(fwdMap).filter(key => key != 'oid').map(key => {
+                    let propertyMeta = fwdMap[key];
+                    return dbcTypes[propertyMeta.type.name()].encode(this[key]);
+                }).join(',') +
+                ")"
+            );
+
+            let result = await dbc.query(sql.join(' '), true);
+            this.oid = result.data;
+        }
+
         async save(dbc) {
-            let types = dbc.types();
-             
-            if (this.oid) {
-                this.updated = new Date();
-             
-                let values = Object.keys(this)
-                .filter(key => key in schemaTable.columnMap && key != 'oid')
-                .map(key => {
-                    let columnName = "_" + toSnakeCase(key);
-                    let driverType = types[schemaTable.columnMap[key].type.name()];
-                    return columnName + "=" + driverType.encode(this[key]);
-                }).join(',');
-             
-                let sql = "UPDATE ${table} SET " + values + " WHERE _oid=" + this.oid;
-                await dbc.query(sql);
+            if (this.oid == 0) {
+                await this.insert(dbc);
             }
             else {
-                this.created = new Date();
-                this.updated = new Date();
-             
-                let values = Object.keys(this)
-                .filter(key => key in schemaTable.columnMap && key != 'oid')
-                .map(key => {
-                    let columnName = "_" + toSnakeCase(key);
-                    let driverType = types[schemaTable.columnMap[key].type.name()];
-                    return driverType.encode(this[key]);
-                }).join(',');
-             
-                let sql = "INSERT INTO ${table} (${columns.filter(colName => colName != '_oid').join(',')}) VALUES(" + values + ")";
-                let result = await dbc.query(sql, { returnOid: true });
-                this.oid = result.oid;
+                await this.update(dbc);
             }
-            
+
             return this;
         }
-        
-        set(properties) {
-            if (typeof properties == 'object') {
-                Object.keys(properties).forEach(key => {
-                    if (key in this) {
-                        this[key] = properties[key];
+
+        set(values) {
+            if (typeof values == 'object') {
+                for (let key in values) {
+                    if (key in fwdMap) {
+                        this[key] = fwdMap[key].type.check(values[key]);
                     }
-                });
+                    else {
+                        throw new Error('DBO: "${className}"" Attempt to set unknown property name: "' + key + '"');
+                    }
+                }
             }
-            
+        }
+
+        async update(dbc) {
+            this.updated = mkTime();
+
+            let dbcTypes = dbc.dbClass().dbTypes();
+            let sql = ['UPDATE ${tableName}'];
+
+            sql.push(
+                "SET " +
+                Object.keys(fwdMap).filter(key => key != 'oid').map(key => {
+                    let propertyMeta = fwdMap[key];
+                    return propertyMeta.name + "=" + dbcTypes[propertyMeta.type.name()].encode(this[key]);
+                }).join(',')
+            );
+
+            sql.push("WHERE _oid=" + this.oid);
+            let result = await dbc.query(sql.join(' '));
+            console.log(result);
             return this;
         }
     });
-    
+
     register(async function erase${className}(dbc, where) {
-        let whereClause = '';
-        let orderClause = '';
-        let types = dbc.types();
-        
-        if (where) {
-            if (typeof where == 'object') {
-                let wheres = Object.keys(where)
-                .filter(key => key in schemaTable.columnMap)
-                .map(key => {
-                    let driverType = types[schemaTable.columnMap[key].type.name()];
-                    return "_" + toSnakeCase(key) + "=" + driverType.encode(where[key]);
-                });
-             
-                if (wheres.length) {
-                    whereClause = " WHERE " + wheres.join(',');
-                }
-            }
-            else {
-                whereClause = " WHERE " + where;
-            }
+        if (typeof where == 'string') {
+            await dbc.query("DELETE FROM ${tableName} WHERE " + where);
         }
-        
-        let sql = "DELETE FROM ${table}" + whereClause;
-        await dbc.query(sql);
+        else if (typeof where == 'number' || typeof where == 'bigint') {
+            await dbc.query("DELETE FROM ${tableName} WHERE _oid=" + where);
+        }
     });
-    
+
     register(async function get${className}(dbc, oid) {
-        let sql = "SELECT ${columns.join(',')} FROM ${table} WHERE _oid=" + oid;
-        let result = await dbc.query(sql);
-        let obj = mk${className}();
+        let sql = ['SELECT'];
+        sql.push('${Object.keys(fwdMap).map(key => "_" + toSnakeCase(key)).join(',')}');
+        sql.push('FROM ${tableName}');
+        sql.push("WHERE _oid=" + oid);
+        let result = await dbc.query(sql.join(' '));
 
-        if (result.rows.length == 1) {
-            let row = result.rows[0];
-            
-            Object.keys(row).forEach(key => {
-                obj[toCamelCase(key)] = row[key];
+        if (result.data.length) {
+            let data = {};
+            let dbcTypes = dbc.dbClass().dbTypes();
+
+            Object.entries(result.data[0]).forEach(entry => {
+                let field = revMap[entry[0]];
+                let dbcType = dbcTypes[field.type.name()];
+                data[toCamelCase(entry[0])] = dbcType.decode(entry[1]);
             });
-        }
 
-        return obj;
+            return mk${className}(data);
+        }
+        else {
+            return mk${className}();
+        }
     });
-    
+
     register(async function select${className}(dbc, where, order) {
-        let objs = [];
-        let whereClause = '';
-        let orderClause = '';
-        let types = dbc.types();
-        
-        if (where) {
-            if (typeof where == 'object') {
-                let wheres = Object.keys(where)
-                .filter(key => key in schemaTable.columnMap)
-                .map(key => {
-                    let driverType = types[schemaTable.columnMap[key].type.name()];
-                    return "_" + toSnakeCase(key) + "=" + driverType.encode(where[key]);
-                });
-             
-                if (wheres.length) {
-                    whereClause = " WHERE " + wheres.join(',');
-                }
-            }
-            else {
-                whereClause = " WHERE " + where;
-            }
-        }
-        
-        if (order) {
-            let orders = Object.keys(order)
-            .filter(key => key in schemaTable.columnMap)
-            .map(key => {
-                let driverType = types[schemaTable.columnMap[key].type.name()];
-                return "_" + toSnakeCase(key) + " " + order[key].toUpperCase();
-            });
-         
-            if (orders.length) {
-                orderClause = " ORDER BY " + orders.join(',');
-            }
-        }
-        
-        let sql = "SELECT ${columns.join(',')} FROM ${table}" + whereClause + orderClause;
-        let result = await dbc.query(sql);
-        
-        result.rows.forEach(row => {
-            let obj = mk${className}();
-            objs.push(obj);
-         
-            Object.keys(row).forEach(key => {
-                obj[toCamelCase(key)] = row[key];
-            });
-        });
+        let sql = ['SELECT'];
+        sql.push('${Object.keys(fwdMap).map(key => "_" + toSnakeCase(key)).join(',')}');
+        sql.push('FROM ${tableName}');
+        where ? sql.push("WHERE " + where) : false;
+        order ? sql.push("ORDER BY " + order) : false;
+        let result = await dbc.query(sql.join(' '));
 
-        return objs;
-    });
-    
-    register(async function update${className}(dbc, where, properties) {
-        let whereClause = '';
-        let types = dbc.types();
-        
-        if (where) {
-            if (typeof where == 'object') {
-                let wheres = Object.keys(where)
-                .filter(key => key in schemaTable.columnMap)
-                .map(key => {
-                    let driverType = types[schemaTable.columnMap[key].type.name()];
-                    return "_" + toSnakeCase(key) + "=" + driverType.encode(where[key]);
+        if (result.data.length) {
+            let array = [];
+            let dbcTypes = dbc.dbClass().dbTypes();
+
+            for (let row of result.data) {
+                let data = {};
+
+                Object.entries(row).forEach(entry => {
+                    let field = revMap[entry[0]];
+                    let dbcType = dbcTypes[field.type.name()];
+                    data[toCamelCase(entry[0])] = dbcType.decode(entry[1]);
                 });
-             
-                if (wheres.length) {
-                    whereClause = " WHERE " + wheres.join(',');
-                }
+
+                array.push(mk${className}(data));
             }
-            else {
-                whereClause = " WHERE " + where;
-            }
+
+            return array;
         }
-        
-        if (!properties || typeof properties != 'object') {
-            return;
+        else {
+            return [];
         }
-        
-        let sets = Object.keys(properties)
-        .filter(key => key in schemaTable.columnMap)
-        .map(key => {
-            let columnName = "_" + toSnakeCase(key);
-            let driverType = types[schemaTable.columnMap[key].type.name()];
-            return columnName + "=" + driverType.encode(properties[key]);
-        }).join(',');
-        
-        let sql = "UPDATE ${table} SET " + sets + whereClause;
-        await dbc.query(sql);
     });
-}`);
+
+    register(async function selectOne${className}(dbc, where, order) {
+        let sql = ['SELECT'];
+        sql.push('${Object.keys(fwdMap).map(key => "_" + toSnakeCase(key)).join(',')}');
+        sql.push('FROM ${tableName}');
+        where ? sql.push("WHERE " + where) : false;
+        order ? sql.push("ORDER BY " + order) : false;
+        let result = await dbc.query(sql.join(' '));
+
+        if (result.data.length) {
+            let array = [];
+            let dbcTypes = dbc.dbClass().dbTypes();
+            let data = {};
+
+            Object.entries(result.data[0]).forEach(entry => {
+                let field = revMap[entry[0]];
+                let dbcType = dbcTypes[field.type.name()];
+                data[toCamelCase(entry[0])] = dbcType.decode(entry[1]);
+            });
+
+            return (mk${className}(data));
+        }
+        else {
+            return [];
+        }
+    });
+
+    register(async function update${className}(dbc, changes, where) {
+        let updated = mkTime();
+        let dbcTypes = dbc.dbClass().dbTypes();
+        let sql = ['UPDATE ${tableName}'];
+
+        if (typeof changes == 'string') {
+            sql.push("SET " + changes);
+        }
+        else {
+            sql.push(
+                "SET " +
+                Object.keys(changes).filter(key => key != 'oid').map(key => {
+                    let propertyMeta = fwdMap[key];
+                    return propertyMeta.name + "=" + dbcTypes[propertyMeta.type.name()].encode(changes[key]);
+                }).join(',')
+            );
+        }
+
+        if (where) {
+            if (typeof where == 'string') {
+                sql.push("WHERE " + where);
+            }
+            else if (typeof where == 'number' || typeof where == 'bigint') {
+                sql.push("WHERE _oid=" + where);
+            }
+        }
+
+        let result = await dbc.query(sql.join(' '));
+    });
+    `);
 });

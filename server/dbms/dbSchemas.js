@@ -29,7 +29,7 @@
  * needed and found useful by outside module developers.
 *****/
 mkDbSchema(
-    'USER',
+    '#USER',
     true,
     {
         name: 'user',
@@ -117,10 +117,10 @@ mkDbSchema(
             'ownerType:asc, ownerOid:asc',
         ]
     },
-);
+).registerClass();
 
 mkDbSchema(
-    'CONTACT',
+    '#CONTACT',
     true,
     {
         name: 'phone',
@@ -158,10 +158,10 @@ mkDbSchema(
             'ownerType:asc, ownerOid:asc',
         ]
     },
-);
+).registerClass();
 
 mkDbSchema(
-    'INET',
+    '#INET',
     true,
     {
         name: 'dnsDomain',
@@ -208,4 +208,4 @@ mkDbSchema(
             'ownerType:asc, ownerOid:asc',
         ]
     },
-);
+).registerClass();

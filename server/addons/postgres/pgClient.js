@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Copyright (c) 2022 Christoph Wittmann, chris.wittmann@icloud.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +22,12 @@
 
 
 /*****
+ * The PG addon is what makes PostgreSQL available for the kode application
+ * framework.  The PG addon is written using the standard kode addon
+ * application framework.  Once required (loaded), connections are created
+ * by calling the addon's conncect() function.
 *****/
-function escape(raw) {
-    let escaped = raw;
-
-    return escaped;
-}
+const addon = require('../addons/pg/build/Release/pg.node');
 
 
 /*****
@@ -43,77 +43,66 @@ const pgTypes = {
         type: () => 'bytea',
         fmwk: () => global.dbBin,
         encode: value => `E'\\x${value.toString('hex')}'`,
-        decode: value => mkBinary(value),
     },
 
     dbBool: {
         type: () => 'bool',
         fmwk: () => global.dbBool,
         encode: value => value === true ? 'true' : 'false',
-        decode: value => value,
     },
 
     dbFloat32: {
         type: () => 'float4',
         fmwk: () => global.dbFloat32,
         encode: value => value.toString(),
-        decode: value => value,
     },
 
     dbFloat64: {
         type: () => 'float8',
         fmwk: () => global.dbFloat64,
         encode: value => value.toString(),
-        decode: value => value,
     },
 
     dbInt16: {
         type: () => 'int2',
         fmwk: () => global.dbInt16,
         encode: value => value.toString(),
-        decode: value => value,
     },
 
     dbInt32: {
         type: () => 'int4',
         fmwk: () => global.dbInt32,
         encode: value => value.toString(),
-        decode: value => value,
     },
 
     dbInt64: {
         type: () => 'int8',
         fmwk: () => global.dbInt64,
         encode: value => value.toString(),
-        decode: value => BigInt(value),
     },
 
     dbJson: {
         type: () => 'json',
         fmwk: () => dbJson,
-        encode: value => `'${escape(toJson(value))}'`,
-        decode: value => fromJson(value),
+        encode: value => `'${escDbms(toJson(value))}'`,
     },
 
     dbKey: {
         type: () => 'bigserial primary key',
         fmwk: () => global.dbKey,
         encode: value => value.toString(),
-        decode: value => BigInt(value),
     },
 
     dbText: {
         type: () => 'varchar',
         fmwk: () => global.dbText,
-        encode: value => `'${escape(value)}'`,
-        decode: value => value,
+        encode: value => `'${escDbms(value)}'`,
     },
 
     dbTime: {
         type: () => 'timestamp',
         fmwk: () => global.dbTime,
         encode: value => `'${value.jsDate.toISOString()}'`,
-        decode: value => mkTime(value),
     },
   
     dbBinArray: {
@@ -161,13 +150,13 @@ const pgTypes = {
     dbJsonArray: {
         type: () => '_json',
         fmwk: () => global.dbJsonArray,
-        encode: array => `ARRAY['${array.map(el => escape(JSON.stringify(el))).join("','")}']::json[]`,
+        encode: array => `ARRAY['${array.map(el => escDbms(JSON.stringify(el))).join("','")}']::json[]`,
     },
   
     dbTextArray: {
         type: () => '_varchar',
         fmwk: () => global.dbTextArray,
-        encode: array => `ARRAY['${array.map(el => escape(toJson(el))).join("','")}']::varchar[]`,
+        encode: array => `ARRAY['${array.map(el => escDbms(toJson(el))).join("','")}']::varchar[]`,
     },
   
     dbTimeArray: {
@@ -209,39 +198,38 @@ const pgReverseMap = {
 
 
 /*****
- * Each DBMS client supported by this framework must be able to load a complete
- * schema definition in the standard form.  The standard form means it matches
- * the schema that's built with the original schema definition.  The primary need
- * for this class is to be able to compare the definition of a schema with what's
- * implemented on the server. The output of such a comparison is used for applying
- * modifications to the implemented schema on the server.
+ * This is the PostgreSQL specific function that analyzes the meta data to to
+ * build a schema definition, which is then the input to the DbSchema class.
+ * We're using our best practices and previous learning to write the queries
+ * and code to generate the schema definition.  The tricky to figure out query
+ * was that for indexes.
 *****/
 class PgSchemaDef {
-    constructor(pg) {
-        this.pg = pg;
-        this.tableDefs = [];
-    }
-
-    async load() {
-        let result = await this.pg.query(`SELECT table_name FROM information_schema.TABLES WHERE table_schema='public' AND table_catalog='${this.pg.settings.database}' ORDER BY table_name`);
-        
-        for (let table of result.data) {
-            await this.tableDef(table.table_name);
-        }
-
-        return this.tableDefs;
+    constructor(dbConn, dbName) {
+        return new Promise(async (ok, fail) => {
+            this.tableDefs = [];
+            this.dbName = dbName;
+            
+            let result = await dbConn.query(`SELECT table_name FROM information_schema.TABLES WHERE table_schema='public' AND table_catalog='${dbName}'`);
+            
+            for (let table of result.rows) {
+                await this.tableDef(dbConn, table.table_name);
+            }
+            
+            ok(this.tableDefs);
+        });
     }
     
-    async tableDef(tableName) {
+    async tableDef(dbConn, tableName) {
         let tableDef = {
             name: toCamelCase(tableName),
             columns: [],
             indexes: []
         };
         
-        let result = await this.pg.query(`SELECT table_catalog, table_name, column_name, ordinal_position, udt_name FROM information_schema.COLUMNS WHERE table_catalog='${this.pg.settings.database}' AND table_name='${tableName}' ORDER BY ordinal_position`);
-
-        for (let column of result.data) {
+        let result = await dbConn.query(`SELECT table_catalog, table_name, column_name, ordinal_position, udt_name FROM information_schema.COLUMNS WHERE table_catalog='${this.dbName}' AND table_name='${tableName}' ORDER BY ordinal_position`);
+        
+        for (let column of result.rows) {
             let columnName = toCamelCase(column.column_name);
             
             if (columnName == 'oid') {
@@ -259,22 +247,18 @@ class PgSchemaDef {
                 }
             }
         }
-
-        result = await this.pg.query(`SELECT X.indexname, I.indnatts, I.indisunique, I.indisprimary, I.indkey, I.indoption FROM pg_indexes AS X JOIN pg_class AS C ON C.relname=X.indexname JOIN pg_index AS I ON I.indexrelid=C.oid WHERE X.tablename='${tableName}'`);
         
-        for (let row of result.data) {
-            if (!row.indexname.endsWith('_pkey')) {
-                let index = [];
-                let indkey = row.indkey.split(' ').map(el => parseInt(el));
-                let indopt = row.indoption.split(' ').map(el => parseInt(el));
-                
-                for (let i = 0; i < indkey.length; i++) {
-                    let columnIndex = indkey[i] - 1;
-                    index.push(`${tableDef.columns[columnIndex].name}:${indopt[i] ? 'DESC' : 'ASC'}`);
-                }
-
-                tableDef.indexes.push(index.join(','));
+        result = await dbConn.query(`SELECT X.indexname, I.indnatts, I.indisunique, I.indisprimary, I.indkey, I.indoption FROM pg_indexes AS X JOIN pg_class AS C ON C.relname=X.indexname JOIN pg_index AS I ON I.indexrelid=C.oid WHERE X.tablename='${tableName}'`);
+        
+        for (let row of result.rows) {
+            let index = [];
+            
+            for (let i = 0; i < row.indkey.length; i++) {
+                let columnIndex = row.indkey[i] - 1;
+                index.push(`${tableDef.columns[columnIndex].name} ${row.indoption[i] ? 'DESC' : 'ASC'}`);
             }
+            
+            tableDef.indexes.push(index);
         }
         
         this.tableDefs.push(tableDef);
@@ -290,95 +274,47 @@ class PgSchemaDef {
  * query() function.
 *****/
 class PgClient {
-    static PG = require('pg');
-
     constructor(settings) {
-        this.pg = null;
+        this.dbConn = null;
         this.settings = settings;
-        this.settings.port ? true : this.settings.port = 5433;
-        this.settings.database ? true : this.settings.database = 'postgres';
+        this.settings.binaryMode = false;
+        this.settings.database ? this.settings.database : 'postgres';
+    }
+
+    async cancel() {
+        await this.dbConn.cancel();
     }
 
     async close() {
-        await this.pg.end();
+        await this.dbConn.close();
     }
     
     async connect() {
-        this.pg = new PgClient.PG.Client(this.settings);
-        await this.pg.connect();
-    }
-
-    dbClass() {
-        return PgClient;
-    }
- 
-    static async dbCreate(settings, dbName) {
-        settings = clone(settings);
-        settings.database = 'postgres';
-        let pg = new PgClient(settings);
-        await pg.connect();
-        await pg.query(`CREATE DATABASE ${dbName}`);
-        await pg.close();
-    }
- 
-    static async dbDrop(settings, dbName) {
-        settings = clone(settings);
-        settings.database = 'postgres';
-        let pg = new PgClient(settings);
-        await pg.connect();
-        await pg.query(`DROP DATABASE ${dbName}`);
-        await pg.close();
-    }
- 
-    static async dbList(settings) {
-        settings = clone(settings);
-        settings.database = 'postgres';
-        let pg = new PgClient(settings);
-        await pg.connect();
-        let result = await pg.query(`SELECT datname FROM pg_database`);
-        await pg.close();
-        return mkSet(result.data.map(row => row.datname));
+        this.dbConn = await addon.connect(this.settings);
     }
     
-    static async dbSchema(settings) {
-        let pg = new PgClient(settings);
-        await pg.connect();
-        let pgSchemaDef = new PgSchemaDef(pg);
-        await pgSchemaDef.load();
-        await pg.close();
-        return pgSchemaDef.tableDefs;
-    }
-
-    static dbSized() {
-        return false;
+    async dbNames() {
+        let result = await this.dbConn.query('SELECT datname from pg_database order by datname');
+        return result.rows.map(row => row.datname);
     }
     
-    static dbTypes() {
+    async loadDbSchema(dbName) {
+        return await (new PgSchemaDef(this.dbConn, dbName));
+    }
+    
+    async query(sql, opts) {
+        if (opts && opts.returnOid) {
+            let result = await this.dbConn.query(sql + " RETURNING _oid");
+            result.oid = result.rows[0]._oid;
+            return result;
+        }
+        else {
+            return await this.dbConn.query(sql);
+        }
+    }
+    
+    types() {
         return pgTypes;
-    }
-    
-    async query(sql, oidFlag) {
-        try {
-            if (oidFlag) {
-                let pgResult = await this.pg.query(sql + " RETURNING _oid");
-
-                return {
-                    code: 'oid',
-                    data: BigInt(pgResult.rows[0]._oid),
-                };
-            }
-            else {
-                let pgResult = await this.pg.query(sql);
-
-                return {
-                    code: 'rows',
-                    data: Array.isArray(pgResult.rows) ? pgResult.rows : [],
-                };
-            }
-        }
-        catch (e) {
-            return { code: 'error', error: e };
-        }
     }
 }
 

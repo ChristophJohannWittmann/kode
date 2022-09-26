@@ -22,134 +22,139 @@
 
 
 /*****
- * There are two variants of Buffer.  In the server, Buffer wraps the builtin
+ * There are two variants of Binary.  In the server, Binary wraps the builtin
  * Buffer class by providing some additional features.  On the browser, it's
- * a class the implements the same features based on a uint8 array.  This makes
- * coding buffers the same on both the client and server.  Additionally, the
+ * a class the implements the same features based on a nArrayBuffer.  This makes
+ * coding binary the same on both the client and server.  Additionally, the
  * framework buffer is JSON transferable so that buffers can be easily sent
  * between processes, cluster hosts, and the application clients.
 *****/
 register(class Binary {
     constructor(value, encoding) {
+        console.log('MDN ArrayBuffer');
+        console.log('MDN DataView');
+        /*
         if (value instanceof BUFFER) {
             this.jsBuffer = value;
         }
         else {
             this.set(value, encoding);
         }
+        */
     }
   
     float32Be(index, value) {
         if (value) {
-            this.jsBuffer.writeFloatBE(value, index);
+            //this.jsBuffer.writeFloatBE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readFloatBE(index);
+            //return this.jsBuffer.readFloatBE(index);
         }
     }
   
     float32Le(index, value) {
         if (value) {
-            this.jsBuffer.writeFloatLE(value, index);
+            //this.jsBuffer.writeFloatLE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readFloatLE(index);
+            //sreturn this.jsBuffer.readFloatLE(index);
         }
     }
   
     float64Be(index, value) {
         if (value) {
-            this.jsBuffer.writeDoubleBE(value, index);
+            //this.jsBuffer.writeDoubleBE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readBigDoubleBE(index);
+            //return this.jsBuffer.readBigDoubleBE(index);
         }
     }
   
     float64Le(index, value) {
         if (value) {
-            this.jsBuffer.writeDoubleLE(value, index);
+            //this.jsBuffer.writeDoubleLE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readBigDoubleLE(index);
+            //return this.jsBuffer.readBigDoubleLE(index);
         }
     }
   
     int8(index, value) {
         if (value) {
-            this.jsBuffer.writeInt8(value, index);
+            //this.jsBuffer.writeInt8(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readInt8(index);
+            //return this.jsBuffer.readInt8(index);
         }
     }
   
     int16Be(index, value) {
         if (value) {
-            this.jsBuffer.writeInt6BE(value, index);
+            //this.jsBuffer.writeInt6BE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readInt16BE(index);
+            //return this.jsBuffer.readInt16BE(index);
         }
     }
   
     int16Le(index, value) {
         if (value) {
-            this.jsBuffer.writeInt16LE(value, index);
+            //this.jsBuffer.writeInt16LE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readInt16LE(index);
+            //return this.jsBuffer.readInt16LE(index);
         }
     }
   
     int32Be(index, value) {
         if (value) {
-            this.jsBuffer.writeInt32BE(value, index);
+            //this.jsBuffer.writeInt32BE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readInt32BE(index);
+            //return this.jsBuffer.readInt32BE(index);
         }
     }
   
     int32Le(index, value) {
         if (value) {
-            this.jsBuffer.writeInt32LE(value, index);
+            //this.jsBuffer.writeInt32LE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readInt32LE(index);
+            //return this.jsBuffer.readInt32LE(index);
         }
     }
   
     int64Be(index, value) {
         if (value) {
-            this.jsBuffer.writeBigInt64BE(value, index);
+            //this.jsBuffer.writeBigInt64BE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readBigInt64BE(index);
+            //return this.jsBuffer.readBigInt64BE(index);
         }
     }
   
     int64Le(index, value) {
         if (value) {
-            this.jsBuffer.writeBigIn664LE(value, index);
+            //this.jsBuffer.writeBigIn664LE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readBigInt64LE(index);
+            //return this.jsBuffer.readBigInt64LE(index);
         }
     }
   
     find(startIndex, byteArray) {
+        /*
         for (let i = startIndex; i < this.jsBuffer.length - bytes.length; i++) {
             let j;
   
@@ -165,13 +170,15 @@ register(class Binary {
         }
   
         return -1;
+        */
     }
   
     length() {
-        return this.jsBuffer.length;
+        //return this.jsBuffer.length;
     }
 
     set(value, encoding) {
+        /*
         if (typeof value == 'string') {
             switch (encoding) {
                 case 'hex':
@@ -190,78 +197,80 @@ register(class Binary {
         else {
             this.jsBuffer = BUFFER.alloc(value);
         }
+        */
     }
   
-    subBuffer(startIndex, endIndex) {
-        return mkBuffer(this.jsBuffer.subarray(startIndex, endIndex));
+    subBinary(startIndex, endIndex) {
+        //return mkBuffer(this.jsBuffer.subarray(startIndex, endIndex));
     }
   
     uint8(index, value) {
         if (value) {
-            this.jsBuffer[index] = value;
+            //this.jsBuffer[index] = value;
+            return this;
         }
         else {
-            return this.jsBuffer[index];
+            //return this.jsBuffer[index];
         }
     }
   
     uint16Be(index, value) {
         if (value) {
-            this.jsBuffer.writeUInt16BE(value, index);
+            //this.jsBuffer.writeUInt16BE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readUInt16BE(index);
+            //return this.jsBuffer.readUInt16BE(index);
         }
     }
   
     uint16Le(index, value) {
         if (value) {
-            this.jsBuffer.writeUInt16LE(value, index);
+            //this.jsBuffer.writeUInt16LE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readUInt16LE(index);
+            //return this.jsBuffer.readUInt16LE(index);
         }
     }
   
     uint32Be(index, value) {
         if (value) {
-            this.jsBuffer.writeUInt32Be(value, index);
+            //this.jsBuffer.writeUInt32Be(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readUInt32BE(index);
+            //return this.jsBuffer.readUInt32BE(index);
         }
     }
   
     uint32Le(index, value) {
         if (value) {
-            this.jsBuffer.writeUInt32LE(value, index);
+            //this.jsBuffer.writeUInt32LE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readUInt32LE(index);
+            //return this.jsBuffer.readUInt32LE(index);
         }
     }
   
     uint64Be(index, value) {
         if (value) {
-            this.jsBuffer.writeBigUInt64BE(value, index);
+            //this.jsBuffer.writeBigUInt64BE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readBigUInt64BE(index);
+            //return this.jsBuffer.readBigUInt64BE(index);
         }
     }
   
     uint64Le(index, value) {
         if (value) {
-            this.jsBuffer.writeBigUInt64LE(value, index);
+            //this.jsBuffer.writeBigUInt64LE(value, index);
             return this;
         }
         else {
-            return this.jsBuffer.readBigUInt64LE(index);
+            //return this.jsBuffer.readBigUInt64LE(index);
         }
     }
 
@@ -269,13 +278,13 @@ register(class Binary {
         switch (encoding) {
             case 'hex':
             case 'base64':
-                return this.jsBuffer.toString(encoding);
+                //return this.jsBuffer.toString(encoding);
     
             case 'b64':
-                return this.jsBuffer.toString('base64');
+                //return this.jsBuffer.toString('base64');
 
             default:
-                return this.jsBuffer.toString();
+                //return this.jsBuffer.toString();
         }
     }
 });

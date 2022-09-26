@@ -27,7 +27,14 @@
      * that "global" is defined and can be used in the rest of the core of the
      * framework.
     *****/
-    try { window.global = window; } catch (error) {}
+    try {
+        window.global = window;
+        global.platform = 'client';
+    }
+    catch (e) {
+        global.platform = 'server';
+    }
+
     global.JsDate = Date;
  
  

@@ -30,7 +30,7 @@
 *****/
 require('../framework/core.js');
 require('../framework/activeData.js');
-require('../framework/binary.js');
+require('../framework/binaryServer.js');
 require('../framework/message.js');
 require('../framework/mime.js');
 require('../framework/set.js');
@@ -78,6 +78,7 @@ global.env = {
     network:    OS.networkInterfaces(),
     memory:     ({ free: OS.freemem(), total: OS.totalmem() }),
     kodePath:   PATH.join(__dirname, '..'),
+    addonPath:  PATH.join(__dirname, './addons'),
     modulePath: PATH.join(__dirname, '../modules'),
     daemonPath: PATH.join(__dirname, './daemons'),
     serverPath: PATH.join(__dirname, './servers'),
@@ -100,11 +101,12 @@ require('./lib/webSocket.js');
 require('./dbms/dbClient.js');
 require('./dbms/pgClient.js');
 require('./dbms/dbSchema.js');
-require('./dbms/dbSchemas.js');
 require('./dbms/dbSchemaAnalyzer.js');
 require('./dbms/dbObject.js');
+require('./dbms/dbSchemas.js');
 
 require('./cluster.js');
+require('./addon.js');
 require('./ipc.js');
 require('./logging.js');
 require('./module.js');
@@ -129,7 +131,7 @@ require('./servers/http.js');
  * the actual schemas.  The startup behavior is to executed upgrade diffs only.
  * Downgrads can be left waiting for manual DBMS maintenance.
 *****/
-async function upgradeDbSchemas() {
+async function prepareDbms() {
     let configMap = {};
 
     for (let module of Config.moduleArray) {
@@ -197,6 +199,19 @@ async function upgradeDbSchemas() {
     logPrimary(`\n[ Booting Server at ${(new Date()).toISOString()} ]`);
     await onSingletons();
     await Config.loadSystem(env.kodePath);
+ 
+    logPrimary('[ Loading Addons ]');
+    Config.addonMap = {};
+    Config.addonArray = [];
+
+    for (let entry of await FILES.readdir(env.addonPath)) {
+        if (!entry.startsWith('.') && !entry.startsWith('apiV')) {
+            let addonPath = PATH.join(env.addonPath, entry);
+            let addon = mkAddon(addonPath);
+            await addon.load();
+            logPrimary(`    ${addon.info()}`);
+        }
+    }
 
     await onSingletons();
     namespace();
@@ -223,11 +238,32 @@ async function upgradeDbSchemas() {
     }
 
     await onSingletons();
-    logPrimary('[ Upgrading DBMS Schemas ]');
+    logPrimary('[ Preparing DBMS API ]');
 
     if (CLUSTER.isPrimary) {
-        await upgradeDbSchemas();
+        await prepareDbms();
     }
+
+    // ***************************************************************************
+    // ***************************************************************************
+
+    let dbc = await dbConnect("main");
+    await dbc.startTransaction();
+
+    let obj;
+
+    /*
+    obj = mkDboUser({ firstName: 'Christoph', lastName: 'Wittmann', orgOid: BigInt(43) });
+    await obj.save(dbc);
+    */
+
+    await updateDboUser(dbc, { title: 'Herr' }, 1n);
+
+    await dbc.commit();
+    dbc.free();
+
+    // ***************************************************************************
+    // ***************************************************************************
 
     /*
     if (CLUSTER.isPrimary) {

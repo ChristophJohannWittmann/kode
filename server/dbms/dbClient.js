@@ -30,7 +30,7 @@
  * class also implements code for managing connects as a pool to ensure server
  * performance.  Note that there is a separate pool for each DBMS instance.
 *****/
-class DbClient {
+global.DbClient = class DbClient {
     static pools = {};
     static clients = {};
     static max = 50;
@@ -57,6 +57,10 @@ class DbClient {
     async connect() {
         await this.client.connect();
     }
+
+    dbClass() {
+        return this.client.dbClass();
+    }
     
     async free() {
         if (this.trans) {
@@ -81,14 +85,6 @@ class DbClient {
             this.trans = true;
             await this.query('START TRANSACTION');
         }
-    }
-
-    sized() {
-        return this.client.sized();
-    }
-    
-    types() {
-        return this.client.types();
     }
 }
 
@@ -158,6 +154,14 @@ register(async function dbList(settings) {
 register(async function dbSchema(settings) {
     let tableDefs = await DbClient.clients[settings.dbms].dbSchema(settings);
     return mkDbSchema('', false, ...tableDefs);
+});
+
+register(function dbSized(settings) {
+    return DbClient.clients[settings.dbms].dbSized();
+});
+
+register(function dbTypes(settings) {
+    return DbClient.clients[settings.dbms].dbTypes();
 });
 
 

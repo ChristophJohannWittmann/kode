@@ -51,7 +51,7 @@ register(class Time {
             this.jsDate = new Date(-8640000000000000);
         }
         else {
-            this.jsDate = new Date();
+            this.jsDate = new Date(Date.now());
         }
     }
  

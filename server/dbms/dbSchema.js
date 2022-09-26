@@ -40,107 +40,278 @@ global.dbUnsupportedType = {
 *****/
 global.dbBin = {
     name: () => 'dbBin',
-    init: () => Buffer.alloc(0),
+    init: () => mkBinary(),
+    check: value => {
+        if (typeof value == 'object' && value instanceof Binary) {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbBin": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbBool = {
     name: () => 'dbBool',
     init: () => false,
+    check: value => {
+        if (typeof value == 'boolean') {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbBool": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbFloat32 = {
     name: () => 'Float32',
     init: () => 0.0,
+    check: value => {
+        if (typeof value == 'number') {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbFloat32": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbFloat64 = {
     name: () => 'Float64',
     init: () => 0.0,
+    check: value => {
+        if (typeof value == 'number') {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbFloat64": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbInt16 = {
     name: () => 'dbInt16',
     init: () => 0,
+    check: value => {
+        if (typeof value == 'number') {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbInt16": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbInt32 = {
     name: () => 'dbInt32',
     init: () => 0,
+    check: value => {
+        if (typeof value == 'number') {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbInt32": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbInt64 = {
     name: () => 'dbInt64',
     init: () => 0,
+    check: value => {
+        if (typeof value == 'bigint') {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbInt64": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbJson = {
     name: () => 'dbJson',
     init: () => new Object(),
+    check: value => {
+        if (typeof value == 'object') {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbJson": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbKey = {
     name: () => 'dbKey',
     init: () => 0,
+    check: value => {
+        if (typeof value == 'bigint') {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbKey": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbText = {
     name: () => 'dbText',
     init: () => '',
+    check: value => {
+        return value.toString();
+    }
 };
 
 global.dbTime = {
     name: () => 'dbTime',
     init: () => new Date(),
+    check: value => {
+        if (typeof value == 'object') {
+            if (value instanceof Time) {
+                return value;
+            }
+            else if (value instanceof Date) {
+                return mkTime(value);
+            }
+            else if (value instanceof bigint) {
+                return mkTime(Number(bigint));
+            }
+        }
+        else {
+            throw new Error(`DB Data Type: "DbInt64": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbBinArray = {
     name: () => 'dbBinArray',
     init: () => new Array(),
+    check: value => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbBinArray": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbBoolArray = {
     name: () => 'dbBoolArray',
     init: () => new Array(),
+    check: value => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbBoolArray": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbFloat32Array = {
     name: () => 'dbFloat32Array',
     init: () => new Array(),
+    check: value => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbFloat32Array": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbFloat64Array = {
     name: () => 'dbFloat64Array',
     init: () => new Array(),
+    check: value => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbFloat64Array": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbInt16Array = {
     name: () => 'dbInt16Array',
     init: () => new Array(),
+    check: value => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbInt16Array": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbInt32Array = {
     name: () => 'dbInt32Array',
     init: () => new Array(),
+    check: value => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbInt32Array": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbInt64Array = {
     name: () => 'dbInt64Array',
     init: () => new Array(),
+    check: value => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbInt64Array": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbJsonArray = {
     name: () => 'dbJsonArray',
     init: () => new Array(),
+    check: value => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbJsonArray": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbTextArray = {
     name: () => 'dbTextArray',
     init: () => new Array(),
+    check: value => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbTextArray": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 global.dbTimeArray = {
     name: () => 'dbTimeArray',
     init: () => new Array(),
+    check: value => {
+        if (Array.isArray(value)) {
+            return value;
+        }
+        else {
+            throw new Error(`DB Data Type: "DbTimeArray": Set() with invalid value type. ${value} ${typeof value}`);
+        }
+    }
 };
 
 
@@ -159,6 +330,7 @@ register(class DbSchema {
         this.name = name;
         this.tableMap = {};
         this.tableArray = [];
+        this.registered = false;
 
         if (defined && this.name in DbSchema.schemas) {
             throw new Error(`Duplicate DB schema name: ${this.name}`);
@@ -183,6 +355,15 @@ register(class DbSchema {
                 this.tableMap[schemaTable.name] = schemaTable;
             }
         }
+    }
+
+    registerClass() {
+        for (let table of this.tableArray) {
+            defineDboType(table);
+        }
+
+        this.registered = true;
+        return this;
     }
 });
 
