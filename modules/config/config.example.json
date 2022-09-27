@@ -1,16 +1,10 @@
 {
     "active": true,
-    "url": "/config",
-    "namespace": "config",
-    "client": [
-    ],
-    "server": [
-    ],
-    "content": [
-    ],
+    "ns": "config",
     "schemas": [
+        { "schemaName": "#USER", "configName": "main" }
     ],
-    "instances": [
-        { "schemaName": "USER", "configName": "main" }
+    "links": [
+        { "url": "/config", "path": "./config.js" }
     ]
 }

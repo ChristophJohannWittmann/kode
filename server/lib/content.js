@@ -33,57 +33,65 @@ class Content {
         string: buffer => buffer.toString(),
     };
 
-    constructor(module, path) {
-        this.exists = false;
-        this.absPath = path;
-        this.dirPath = PATH.join(module.path, 'content', PATH.sep);
-        this.relPath = this.absPath.substr(this.dirPath.length);
-        this.baseName = PATH.basename(this.absPath);
-        this.extName = PATH.extname(this.absPath);
-        this.mime = Mime.fromExtension(this.extName);
-        this.url = PATH.join(module.config.namespace, this.relPath);
-        this.content = '';
-    }
+    constructor(url, path) {
+        return new Promise(async (ok, fail) => {
+            this.url = url;
+            this.path = path;
+            this.mime = Mime.fromExtension(PATH.extname(this.path));
+            this.isApp = false;
+            this.found = false;
+            this.blob = null;
 
-    async analyze() {
-        if (this.mime) {
-            if (FS.existsSync(this.absPath)) {
-                let stats = await FILES.stat(this.absPath);
+            if (this.mime) {
+                if (FS.existsSync(this.path)) {
+                    let stats = await FILES.stat(this.path);
 
-                if (stats.isFile()) {
-                    this.exists = true;
+                    if (stats.isFile()) {
+                        this.found = true;
+
+                        if (this.mime.code == 'text/javascript') {
+                            let buffer = await FILES.readFile(this.path);
+                            this.blob = buffer.toString();
+
+                            if (this.blob.match(/'KODE#MODULE';/m)) {
+                                this.isApp = true;
+                            }
+                        }
+                    }
                 }
             }
-        }
+
+            ok(this);
+        });
     }
 
     async get() {
-        if (this.content) {
+        if (this.blob) {
             return {
                 mime: this.mime,
-                content: this.content,
+                blob: this.blob,
             };
         }
         else {
-            let content;
+            let blob;
 
             try {
-                let raw = await FILES.readFile(this.absPath);
-                content = Content.formatters[this.mime.type](raw);
+                let buffer = await FILES.readFile(this.path);
+                blob = Content.formatters[this.mime.type](buffer);
 
                 if (Config.cache) {
-                    this.content = content;
+                    this.blob = blob;
                 }
             } 
             catch (e) {
-                this.content = `ERROR: ${this.absPath}`;
+                this.blob = `ERROR: ${this.absPath}`;
                 this.mime = Mime.fromMimeCode('text/plain');
-                log(`Error occured while reading conent file: ${this.absPath}`, e);
+                log(`Error occured while reading content file: ${this.path}`, e);
             }
 
             return {
                 mime: this.mime,
-                content: content,
+                blob: blob,
             };
         }
     }
@@ -96,10 +104,9 @@ class Content {
  * has a unique URL.  On the aggregate level, the content from each module is
  * segregated to ensure unique URLs for each register content file.
 *****/
-singleton(class ContentManager {
+singleton(class ContentLibrary {
     constructor() {
         this.urls = {};
-        this.cache = Config.cache;
     }
 
     deregister(url) {
@@ -110,15 +117,18 @@ singleton(class ContentManager {
     
     async get(url) {
         if (url in this.urls) {
-            return this.urls[url].get();
+            return await this.urls[url].get();
         }
     }
     
-    async registerModule(module) {
-        for (let path of await recurseFiles(module.contentPath)) {
-            let content = new Content(module, path);
-            await content.analyze();
+    async register(url, path) {
+        if (url in this.urls) {
+            logPrimary(`    ERROR: "Duplicate URL ignored"  URL: "${url}"`);            
+        }
+        else {
+            let content = await new Content(url, path);
             this.urls[content.url] = content;
+            return content;
         }
     }
 });

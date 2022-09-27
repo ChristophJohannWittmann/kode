@@ -22,15 +22,19 @@
 
 
 /*****
+ * A module is an encapsulation of the data and functions that are required for
+ * loading and executing the module content and programming code.
 *****/
 register(class Module {
     constructor(path, builtin) {
         this.path = path;
-        this.status = 'ok';
-        this.error = '';
-        this.schemas = {};
-        this.prefix = '(ok      )';
         this.configPath = PATH.join(this.path, 'config.json');
+        this.status = 'ok';
+        this.prefix = '(ok      )';
+        this.error = '';
+        this.apps = {};
+        this.urls = {};
+        this.schemas = {};
     }
 
     info() {
@@ -48,19 +52,10 @@ register(class Module {
                     if (stats.isFile()) {
                         try {                    
                             this.config = fromJson((await FILES.readFile(this.configPath)).toString());
+                            await this.validate();
 
-                            for (let methodName of [
-                                'validate',
-                                'loadServer',
-                                'loadClient',
-                                'loadContent',
-                                'loadSchemas',
-                            ]) {
-                                await this[methodName]();
-
-                                if (this.status != 'ok') {
-                                    break;
-                                }
+                            if (this.status == 'ok') {
+                                await this.loadUrls();
                             }
 
                             if (this.status == 'ok') {
@@ -96,39 +91,45 @@ register(class Module {
         }
     }
 
-    async loadClient() {
-        if (FS.existsSync(PATH.join(this.path, 'client'))) {
-            // *** TBD ***
-        }
-    }
+    async loadUrls() {
+        for (let link of this.config.links) {
+            let path = PATH.isAbsolute(link.path) ? link.path : PATH.join(this.path, link.path);
 
-    async loadContent() {
-        if (FS.existsSync(PATH.join(this.path, 'content'))) {
-            await ContentManager.registerModule(this);
-        }
-    }
+            if (FS.existsSync(path)) {
+                let stats = await FILES.stat(path);
 
-    async loadSchemas() {
-        let schemasPath = PATH.join(this.path, 'dbSchemas.js');
+                if (stats.isFile()) {
+                    let content = await ContentLibrary.register(link.url, path);
 
-        if (FS.existsSync(schemasPath)) {
-            let stats = await FILES.stat(schemasPath);
+                    if (content && content.isApp) {
+                        this.apps[link.url] = path;
+                    }
+                }
+                else if (stats.isDirectory()) {
+                    for (let filePath of await recurseFiles(path)) {
+                        let baseName = PATH.basename(filePath);
 
-            if (stats.isFile()) {
-                require(schemasPath);
+                        if (!baseName.startsWith('.')) {
+                            let relative = filePath.substr(path.length);
+                            let url = PATH.join(link.url, relative);
+                            let content = await ContentLibrary.register(url, filePath);
+
+                            if (content.isApp) {
+                                this.apps[link.url] = path;
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                logPrimary(`    ERROR: "File Not Found"  PATH: "${path}"`);
             }
         }
     }
 
-    async loadServer() {
-        if (FS.existsSync(PATH.join(this.path, 'server'))) {
-            // *** TBD ***
-        }
-    }
-
     async validate() {
-        if (this.status == 'ok' && 'namespace' in this.config) {
-            if (this.config.namespace in Config.moduleMap) {
+        if (this.status == 'ok' && 'ns' in this.config) {
+            if (this.config.ns in Config.moduleMap) {
                 this.status = 'dupname';
                 this.prefix = '(dupname )';
             }
