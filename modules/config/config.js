@@ -23,6 +23,11 @@
 
 /*****
 *****/
+exports.programmaticUrlModule = true;
+
+
+/*****
+*****/
 exports.permissions = async function() {
     return ['configure'];
 };

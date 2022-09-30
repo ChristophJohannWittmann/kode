@@ -238,33 +238,12 @@ async function prepareDbms() {
     }
 
     await onSingletons();
+    Config.sealOff();
 
     if (CLUSTER.isPrimary) {
         logPrimary('[ Preparing DBMS API ]');
         await prepareDbms();
     }
-
-    // *****************************************************************************
-    // *****************************************************************************
-
-    let response = await query({ messageName: '#EventsSet', eventName: 'BootStrap', wait: 7000 });
-    once(response.id, message => console.log(message));
-
-    response = await query({ messageName: '#EventsSet', eventName: 'BootStrap', wait: 4000 });
-    once(response.id, message => console.log(message));
-
-    response = await query({ messageName: '#EventsSet', eventName: 'BootStrap', wait: 11000 });
-    once(response.id, message => console.log(message));
-
-    setTimeout(async () => send({ messageName: '#EventsClear', eventId: response.id }), 2000);
-
-    response = await query({ messageName: '#EventsSet', eventName: 'BootStrap', wait: 13000 });
-    once(response.id, message => console.log(message));
-
-    setTimeout(() => {}, 240000);
-
-    // *****************************************************************************
-    // *****************************************************************************
 
     /*
     if (CLUSTER.isPrimary) {

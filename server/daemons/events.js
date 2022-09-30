@@ -22,6 +22,12 @@
 
 
 /*****
+ * An event object contains the data for a future event to be triggered and
+ * a notification to be sent.  From a practical point of view, a future event
+ * contains a unique identifier and some information to guide the receiver
+ * of the event notification to take some action based on the event data or
+ * information.  Events are created and managed exclusively by the Events
+ * daemon.
 *****/
 class Event {
     static id = 1;
@@ -53,6 +59,15 @@ class Event {
 
 
 /*****
+ * Each host has a singleton Events daemon operating on the host's primary task
+ * or process.  Communication two-from the Events daemon goes according to all
+ * singletons the extend Daemon, which is by the interprocess communications
+ * singleton, Ipc.  Events are either set or cleared.  That's all!  If you want
+ * to change event, you need to clear the existing event and then set a new
+ * event.  This singleton uses a javascript object and an array sorted based on
+ * the event's time in milliseconds.  The array is used for managing operatioins
+ * of sequencing events, while the event map is used for finding specific event
+ * objects.
 *****/
 singleton(class Events extends Daemon {
     constructor() {
@@ -72,9 +87,6 @@ singleton(class Events extends Daemon {
                 return index;
             }
         }
-    }
-
-    async onChange(message) {
     }
 
     async onClear(message) {
@@ -130,19 +142,14 @@ singleton(class Events extends Daemon {
 
     trigger(event) {
         let message = { messageName: event.id, event: event };
-        send(message);
-        Ipc.sendWorkers(message);
-
+        Ipc.sendHost(message);
         this.eventArray.shift();
         delete this.eventMap[event.id];
 
         for (let until = Date.now() + 200; this.eventArray.length && this.eventArray[0].time.time() < until; ) {
             let event = this.eventArray.shift();
             let message = { messageName: event.id, event: event };
-
-            send(message);
-            Ipc.sendWorkers(message);
-
+            Ipc.sendHost(message);
             this.eventArray.shift();
             delete this.eventMap(event.id);
         }

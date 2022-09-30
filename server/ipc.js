@@ -33,6 +33,16 @@ if (CLUSTER.isPrimary) {
             super();
         }
 
+        async queryHost(message) {
+            let primaryReply = await this.query(message);
+            let workersReply = await this.queryWorkers(message);
+            return [primaryReply, workersReply];
+        }
+
+        async queryPrimary(message) {
+            return await this.query(message);
+        }
+
         async queryWorker(worker, message) {
             if (typeof worker == 'number') {
                 worker = CLUSTER.workers[worker];
@@ -60,6 +70,15 @@ if (CLUSTER.isPrimary) {
             }
             
             return trap.promise;
+        }
+
+        sendHost(message) {
+            this.send(message);
+            this.sendWorkers(message);
+        }
+
+        sendPrimary(message) {
+            this.send(message);
         }
 
         sendWorker(worker, message) {

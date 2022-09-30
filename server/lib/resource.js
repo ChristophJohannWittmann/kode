@@ -96,14 +96,6 @@ class Resource {
 singleton(class ResourceLibrary {
     constructor() {
         this.urls = {};
-        /*
-        if (CLUSTER.isPrimary) {
-            Ipc.on('#Resource', async message => await this.onPrimary(message));
-        }
-        else {
-            Ipc.on('#Resource', async message => await this.onWorker(message));
-        }
-        */
     }
 
     deregister(url) {
@@ -155,16 +147,6 @@ singleton(class ResourceLibrary {
             return await this.urls[url].get();
         }
     }
-
-    /*
-    async onPrimary(message) {
-        console.log(message);
-    }
-
-    async onWorker(message) {
-        //console.log(message);
-    }
-    */
     
     async register(reference) {
         for (let ref of await this.expandReference(reference)) {
