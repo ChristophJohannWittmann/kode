@@ -23,7 +23,10 @@
 
 /*****
  * A module is an encapsulation of the data and functions that are required for
- * loading and executing the module content and programming code.
+ * loading and executing the module content and programming code.  A module is
+ * NOT coded as a nodeJS module.  The module is a directory with one config.js
+ * file and zero or more additional files containing content, applications, and
+ * javascript code.
 *****/
 register(class Module {
     constructor(path, builtin) {
@@ -55,7 +58,10 @@ register(class Module {
                             await this.validate();
 
                             if (this.status == 'ok') {
-                                await this.loadUrls();
+                                for (let reference of this.config.references) {
+                                    reference.modulePath = this.path;
+                                    await ResourceLibrary.register(reference);
+                                }
                             }
 
                             if (this.status == 'ok') {
@@ -88,42 +94,6 @@ register(class Module {
         else {
             this.status = 'fail';
             this.prefix = '(notfound)';
-        }
-    }
-
-    async loadUrls() {
-        for (let link of this.config.links) {
-            let path = PATH.isAbsolute(link.path) ? link.path : PATH.join(this.path, link.path);
-
-            if (FS.existsSync(path)) {
-                let stats = await FILES.stat(path);
-
-                if (stats.isFile()) {
-                    let content = await ContentLibrary.register(link.url, path);
-
-                    if (content && content.isApp) {
-                        this.apps[link.url] = path;
-                    }
-                }
-                else if (stats.isDirectory()) {
-                    for (let filePath of await recurseFiles(path)) {
-                        let baseName = PATH.basename(filePath);
-
-                        if (!baseName.startsWith('.')) {
-                            let relative = filePath.substr(path.length);
-                            let url = PATH.join(link.url, relative);
-                            let content = await ContentLibrary.register(url, filePath);
-
-                            if (content.isApp) {
-                                this.apps[link.url] = path;
-                            }
-                        }
-                    }
-                }
-            }
-            else {
-                logPrimary(`    ERROR: "File Not Found"  PATH: "${path}"`);
-            }
         }
     }
 

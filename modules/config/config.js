@@ -19,17 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
 *****/
-'KODE#MODULE';
 
 
 /*****
 *****/
-exports = module.exports = class ConfigApp {
-    static name() {
-        return 'config';
-    }
+exports.permissions = async function() {
+    return ['configure'];
+};
 
-    static type() {
-        return 'module';
-    }
+
+/*****
+*****/
+exports.name = function() {
+};
+
+
+/*****
+*****/
+exports.load = async function() {
 };

@@ -92,9 +92,9 @@ global.env = {
 require('./config.js');
 
 require('./lib/auth.js');
-require('./lib/content.js');
 require('./lib/crypto.js');
 require('./lib/pool.js');
+require('./lib/resource.js');
 require('./lib/utility.js');
 require('./lib/webSocket.js');
 
@@ -244,7 +244,27 @@ async function prepareDbms() {
         await prepareDbms();
     }
 
-    console.log(await ContentLibrary.get('/index.html'));
+    // *****************************************************************************
+    // *****************************************************************************
+
+    let response = await query({ messageName: '#EventsSet', eventName: 'BootStrap', wait: 7000 });
+    once(response.id, message => console.log(message));
+
+    response = await query({ messageName: '#EventsSet', eventName: 'BootStrap', wait: 4000 });
+    once(response.id, message => console.log(message));
+
+    response = await query({ messageName: '#EventsSet', eventName: 'BootStrap', wait: 11000 });
+    once(response.id, message => console.log(message));
+
+    setTimeout(async () => send({ messageName: '#EventsClear', eventId: response.id }), 2000);
+
+    response = await query({ messageName: '#EventsSet', eventName: 'BootStrap', wait: 13000 });
+    once(response.id, message => console.log(message));
+
+    setTimeout(() => {}, 240000);
+
+    // *****************************************************************************
+    // *****************************************************************************
 
     /*
     if (CLUSTER.isPrimary) {
@@ -271,5 +291,4 @@ async function prepareDbms() {
     */
 
     await onSingletons();
-    Config.sealOff();
 })();

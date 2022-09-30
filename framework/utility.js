@@ -22,73 +22,6 @@
 
 
 /*****
- * This utility provides a robust algorithm for deeply cloning any javascript
- * value, including objects and arrays with circular references.  When viewing
- * this code below, remember that javascript non-object values, NOVs, are
- * immutable.  Hence, there's no need to clone them.  If an immutable value is
- * passed as the argument, it is simply returned.  If an object is passed, it
- * gets interesting.  Now we have to recursively create new objects to be clones
- * and add values from the source object network.  We need the weak map to
- * keep instances of objects and arrays to know where they link when there are
- * circular references.
-*****/
-register(function clone(src) {
-    if (typeof src == 'object') {
-        let map = new WeakMap();
-        let dst = Array.isArray(src) ? new Array() : new Object();
-        map.set(src, dst);
-        let stack = [{ src: src, dst: dst }];
-        
-        function addObjectValue(src, dst, key, value) {
-            if (map.has(value)) {
-                dst[key] = map.get(value);
-            }
-            else {
-                let clone = Array.isArray(value) ? new Array() : new Object();
-                map.set(value, clone);
-                dst[key] = clone;
-                stack.push({ src: value, dst: clone });
-            }
-        }
-        
-        while (stack.length) {
-            let { src, dst } = stack.pop();
-         
-            if (Array.isArray(src)) {
-                for (let i = 0; i < src.length; i++) {
-                    let value = src[i];
-     
-                    if (typeof value == 'object') {
-                        addObjectValue(src, dst, i, value);
-                    }
-                    else {
-                        dst[i] = value;
-                    }
-                }
-            }
-            else {
-                Object.entries(src).forEach(entry => {
-                    let [ key, value ] = entry;
-                    
-                    if (typeof value == 'object') {
-                        addObjectValue(src, dst, key, value);
-                    }
-                    else {
-                        dst[key] = value;
-                    }
-                });
-            }
-        }
-        
-        return dst;
-    }
-    else {
-        return src;
-    }
-});
-
-
-/*****
  * This is the most generic and powerful comparison function for two js values.
  * The return value is a simple boolean specifying whether the two argument
  * values are identical.  For aggregate values, objects, that means comparing
@@ -158,6 +91,107 @@ register(function areEqual(a, b) {
     }
     
     return true;
+});
+
+
+/*****
+ * Performs a binary search and returns the index, at which to insert the value
+ * into the given array.  If the array contains one or more values (in a sequence)
+ * of the same value and the provided value matches the sequence, the returned
+ * index will be right at the start of that sequence.  Given a valid parameter
+ * set, this function will always return a valid index.
+*****/
+register(function binarySearch(array, func, value) {
+    let l = 0;
+    let r = array.length - 1;
+
+    while (l <= r) {
+        if (value <= func(array[l])) {
+            return l;
+        }
+        else if (value > func(array[r])) {
+            return r + 1;
+        }
+
+        let m = Math.floor((r - l)/2 + l);
+        let v = func(array[m]);
+
+        if (value <= v) {
+            r = m;
+        }
+        else {
+            l = m + 1;
+        }
+    }
+
+    return l;
+});
+
+
+/*****
+ * This utility provides a robust algorithm for deeply cloning any javascript
+ * value, including objects and arrays with circular references.  When viewing
+ * this code below, remember that javascript non-object values, NOVs, are
+ * immutable.  Hence, there's no need to clone them.  If an immutable value is
+ * passed as the argument, it is simply returned.  If an object is passed, it
+ * gets interesting.  Now we have to recursively create new objects to be clones
+ * and add values from the source object network.  We need the weak map to
+ * keep instances of objects and arrays to know where they link when there are
+ * circular references.
+*****/
+register(function clone(src) {
+    if (typeof src == 'object') {
+        let map = new WeakMap();
+        let dst = Array.isArray(src) ? new Array() : new Object();
+        map.set(src, dst);
+        let stack = [{ src: src, dst: dst }];
+        
+        function addObjectValue(src, dst, key, value) {
+            if (map.has(value)) {
+                dst[key] = map.get(value);
+            }
+            else {
+                let clone = Array.isArray(value) ? new Array() : new Object();
+                map.set(value, clone);
+                dst[key] = clone;
+                stack.push({ src: value, dst: clone });
+            }
+        }
+        
+        while (stack.length) {
+            let { src, dst } = stack.pop();
+         
+            if (Array.isArray(src)) {
+                for (let i = 0; i < src.length; i++) {
+                    let value = src[i];
+     
+                    if (typeof value == 'object') {
+                        addObjectValue(src, dst, i, value);
+                    }
+                    else {
+                        dst[i] = value;
+                    }
+                }
+            }
+            else {
+                Object.entries(src).forEach(entry => {
+                    let [ key, value ] = entry;
+                    
+                    if (typeof value == 'object') {
+                        addObjectValue(src, dst, key, value);
+                    }
+                    else {
+                        dst[key] = value;
+                    }
+                });
+            }
+        }
+        
+        return dst;
+    }
+    else {
+        return src;
+    }
 });
 
 

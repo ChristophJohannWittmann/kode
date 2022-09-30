@@ -4,7 +4,7 @@
     "schemas": [
         { "schemaName": "#USER", "configName": "main" }
     ],
-    "links": [
-        { "url": "/config", "path": "./config.js" }
+    "references": [
+        { "url": "/config", "type": "app", "path": "./config.js" }
     ]
 }

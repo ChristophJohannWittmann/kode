@@ -34,9 +34,11 @@
 *****/
 register(class Daemon {
     constructor() {
+        let suffix = Reflect.getPrototypeOf(this).constructor.name;
+
         for (let propertyName of Object.getOwnPropertyNames(Reflect.getPrototypeOf(this))) {
             if (propertyName.startsWith('on') && typeof this[propertyName] == 'function') {
-                let messageName = `#${propertyName.substr(2)}`;
+                let messageName = `#${suffix}${propertyName.substr(2)}`;
                 Ipc.on(messageName, async message => await this[propertyName](message));
                 on(messageName, async message => await this[propertyName](message));
             }

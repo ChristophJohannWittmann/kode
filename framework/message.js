@@ -226,6 +226,8 @@ register(class Message extends Jsonable {
 *****/
 {
     const e = mkEmitter();
+
+    global.Ignored = Symbol('#IGNORED');
     
     global.off = (messageName, handler) => {
         return e.off(messageName, handler);
