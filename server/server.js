@@ -51,6 +51,9 @@ register(class ServerBase extends Emitter {
         return this.network.caUrl ? this.network.caUrl : '';
     }
 
+    crypto() {
+    }
+
     domain() {
         return this.network.domain ? this.network.domain : '';
     }

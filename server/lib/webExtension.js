@@ -19,14 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
 *****/
-'javascript-web-extension';
 
 
 /*****
 *****/
-exports = module.exports = new (class ConfigApp extends WebApp {
+register(class WebExtension {
     constructor() {
-        super();
-        this.allowSocket = true;
+        this.allowSocket = false;
     }
-})();
+
+    async handle(message) {
+        try {
+        }
+        catch (e) {
+        }
+    }
+
+    async init() {
+    }
+
+    async upgrade(httpReq, socket, headPacket) {
+        if (this.allowSocket) {
+            let secureKey = httpReq.headers['sec-websocket-key'];
+            let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
+            let webSocket = mkWebSocket(socket, req.headers['sec-websocket-extensions'], headPacket);
+            
+            let headers = [
+                'HTTP/1.1 101 Switching Protocols',
+                'Upgrade: websocket',
+                'Connection: upgrade',
+                `Sec-WebSocket-Accept: ${hash}`,
+                '\r\n'
+            ];
+  
+            if (webSocket.secWebSocketExtensions()) {
+                headers.append(`Sec-WebSocket-Extensions: ${webSocket.secWebSocketExtensions()}`);
+            }
+        
+            socket.write(headers.join('\r\n'));
+        }
+    }
+});

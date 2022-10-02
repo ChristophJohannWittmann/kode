@@ -38,63 +38,75 @@ if (CLUSTER.isPrimary) {
 /*****
 *****/
 if (CLUSTER.isWorker) {
+    require('./http/httpRequest.js');
+    require('./http/httpResponse.js');
+
     register(class HttpServer extends Server {
         constructor(config, serverName) {
             super(config, serverName);
-            this.handlers = {};
 
             if (this.tls()) {
+                const crypto = this.crypto();
+
                 this.nodeHttpServer = HTTPS.createServer({
-                    key: crypto.pemPrivate,
-                    cert: crypto.pemCert,
-                    ca: crypto.pemCA,
-                }, (httpReq, httpRsp) => this.handle(httpReq, httpRsp));
+                    key: crypto.key,
+                    cert: crypto.cert,
+                    ca: crypto.CA,
+                }, (...args) => this.handle(...args));
             }
             else {
-                this.nodeHttpServer = HTTP.createServer((httpReq, httpRsp) => this.handleRequest(httpReq, httpRsp));
+                this.nodeHttpServer = HTTP.createServer((...args) => this.handle(...args));
             }
-      
-            this.nodeHttpServer.listen(this.port(), this.addr());
-            
-            /*
-            this.nodeHttpServer.on('upgrade', async (req, socket, headPacket) => {
-                if (this.config.websocket) {
-                    let secureKey = req.headers['sec-websocket-key'];
-                    let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
-                    let webSocket = $WebSocket(socket, req.headers['sec-websocket-extensions'], headPacket);
-                    
-                    let headers = [
-                        'HTTP/1.1 101 Switching Protocols',
-                        'Upgrade: websocket',
-                        'Connection: upgrade',
-                        `Sec-WebSocket-Accept: ${hash}`,
-                        '\r\n'
-                    ];
-          
-                    if (webSocket.secWebSocketExtensions()) {
-                        headers.append(`Sec-WebSocket-Extensions: ${webSocket.secWebSocketExtensions()}`);
-                    }
-                
-                    socket.write(headers.join('\r\n'));
+
+            this.nodeHttpServer.on('upgrade', async (httpReq, socket, headPacket) => {
+                let resource = ResourceLibrary.get(httpReq.url);
+
+                if (resource && resource.webExtension) {
+                    await value.upgrade(httpReq, socket, headPacket);
                 }
             });
-            */
+      
+            this.nodeHttpServer.listen(this.port(), this.addr());
         }
 
-        clearHandler(handler, criteria) {
+        async handle(httpReq, httpRsp) {
+            let req = await mkHttpRequest(this, httpReq);
+            let rsp = await mkHttpResponse(this, httpRsp);
+            let resource = await ResourceLibrary.get(req.url());
+
+            if (resource) {
+                if (resource.webExtension) {
+                    await this.handleExtension(req, rsp, resource);
+                }
+                else {
+                    await this.handleResource(req, rsp, resource);
+                }
+            }
+            else {
+                console.log(`HTTP Server, responsd with 404, not found: ${req.url()}`);
+                rsp.setContent('Very nice web server.  ', 'Nothing');
+                await rsp.respond();
+            }
         }
 
-        async handleRequest(httpReq, httpRsp) {
-            console.log(httpReq.headers.host);
+        async handleExtension(req, rsp, ext) {
+            console.log(ext)
+            rsp.setContent('Very nice web server.  ', 'Extension');
+            await rsp.end();
+        }
 
-            httpRsp.end('Hello Plain Text', 'utf-8');
+        async handleFavicon(req, rsp) {
+        }
+
+        async handleResource(req, rsp, resource) {
+            let content = await resource.get();
+            rsp.mime(content.mime);
+            rsp.setContent(content.value);
+            await rsp.end();
         }
 
         port() {
             return this.tls() ? 443 : 80;
-        }
-
-        setHandler(handler, criteria) {
         }
     });
 }

@@ -19,14 +19,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
 *****/
-'javascript-web-extension';
 
 
 /*****
 *****/
-exports = module.exports = new (class ConfigApp extends WebApp {
+const builtinCss =
+`:root {
+}
+html {
+}
+`;
+
+
+/*****
+*****/
+const builtinHtml =
+`<!DOCTYPE html>
+<html>
+    <head>
+        <title>\${title}</title>
+        <meta charset="utf-8">
+        <style>
+        </style>
+        <script>
+            const sessionId = '\${sessionId}';
+        </script>
+    </head>
+    <body>
+    </body>
+</html>`;
+
+
+/*****
+*****/
+register(class WebApp extends WebExtension {
     constructor() {
         super();
-        this.allowSocket = true;
+        this.permissions = [];
     }
-})();
+
+    async css() {
+        return css;
+    }
+
+    async doc() {
+    }
+
+    async html() {
+        return html;
+    }
+});

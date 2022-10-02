@@ -19,14 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
 *****/
-'javascript-web-extension';
 
 
 /*****
 *****/
-exports = module.exports = new (class ConfigApp extends WebApp {
-    constructor() {
-        super();
-        this.allowSocket = true;
+register(class Encoding {
+    constructor(name) {
+        this.name = name ? name : 'UTF-8';
     }
-})();
+
+    code() {
+        return this.name;
+    }
+
+    async decode(value) {
+        return value;
+    }
+
+    async encode(value) {
+        return value;
+    }
+});

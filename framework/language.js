@@ -23,54 +23,18 @@
 
 /*****
 *****/
-register(class HtmlDocumentBuilder(symbols) {
-    constructor() {
-        this.dict = {
-            session: '${session}',
-            sockets: '${sockets}',
-        };
-
-        this.stylesheets = [];
+register(class Language {
+    constructor(code, region) {
+        this.langCode = 'en';
+        this.regionCode = 'US';
     }
 
-    render() {
-    }
-
-    stylesheet(css) {
-    }
-
-    symbol(symbol, value) {
-        if (typeof value == 'undefined') {
-            return this.dict[symbol];
+    code() {
+        if (this.regionCode) {
+            return `${this.langCode.toLowerCase()}_${this.regionCode.toUpperCase()}`;
         }
         else {
-            this.dict[symbol] = value.toString();
+            return this.langCode.toLowerCase();
         }
     }
-
-    symbols() {
-        return Object.keys(this.symbols);
-    }
-
-    renderTemplate() {
-return `<!DOCTYPE html>
-<html class="html">
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" href="STYLE?SESSION=${sessionId}">
-        <script src="FRAMEWORK?SESSION=${sessionId}"></script>
-        <script>
-           let SESSION = '${this.dict.SESSION}';
-           let SOCKETS = ${$toJson(sockets)};
-           function $client() {
-               $.classPrefix  = 'Clss';
-               $query('head').append($script($attr('src', 'APPLICATION')));
-           }
-    </script>
-    </head>
-    <body class="body colors" onload="$client()">
-    </body>
-</html>
-`;
-}
 });

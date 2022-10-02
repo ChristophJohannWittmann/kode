@@ -23,190 +23,177 @@
 
 /*****
 *****/
-$(class $HttpResponse {
-    constructor(httpRsp, req, httpServer) {
+register(class HttpResponse {
+    static statusCodes = {
+        100: { text: 'Continue' },
+        101: { text: 'Switching Protocols' },
+        102: { text: 'WebDav Processing' },
+        103: { text: 'Early Hints' },
+        200: { text: 'OK' },
+        201: { text: 'Created' },
+        202: { text: 'Accepted' },
+        203: { text: 'Non-Authoritative Information' },
+        204: { text: 'No Content' },
+        205: { text: 'Reset Content' },
+        206: { text: 'PartialContent' },
+        207: { text: 'WebDav Multi-Status' },
+        208: { text: 'WebDav Already Reported' },
+        226: { text: 'WebDav IM Used' },
+        300: { text: 'Multiple Choices' },
+        301: { text: 'Moved Permanently' },
+        302: { text: 'Found' },
+        303: { text: 'See Other' },
+        304: { text: 'Not Modified' },
+        305: { text: 'Use Proxy' },
+        306: { text: 'unused' },
+        307: { text: 'Temporary Redirect' },
+        308: { text: 'Permanent Redirect' },
+        400: { text: 'Bad Request' },
+        401: { text: 'Unauthorized' },
+        402: { text: 'Payment Required' },
+        403: { text: 'Forbidden' },
+        404: { text: 'Not Found' },
+        405: { text: 'Method Not Allowed' },
+        406: { text: 'Not Acceptable' },
+        407: { text: 'Proxy Authentiation Required' },
+        408: { text: 'Request Timeout' },
+        409: { text: 'Conflict' },
+        410: { text: 'Gone' },
+        411: { text: 'Length Required' },
+        412: { text: 'Precondition Failed' },
+        413: { text: 'Payload Too Large' },
+        414: { text: 'URI Too Long' },
+        415: { text: 'Unsupported Media Type' },
+        416: { text: 'Range Not Satisfiable' },
+        417: { text: 'Expectation Failed' },
+        418: { text: 'I\'m a teapot' },
+        421: { text: 'Misdirected Request' },
+        422: { text: 'Unprocessable Entity' },
+        423: { text: 'Locked' },
+        424: { text: 'Failed Dependency' },
+        425: { text: 'Too Early' },
+        426: { text: 'Upgrade Required' },
+        428: { text: 'Precondition Required' },
+        429: { text: 'Too Many Requests' },
+        431: { text: 'Request Header Fields Too Large' },
+        451: { text: 'Unavailable For Legal Reasons' },
+        500: { text: 'Internal Server Error' },
+        501: { text: 'Not Implemented' },
+        502: { text: 'Bad Gateway' },
+        503: { text: 'Service Unavailable' },
+        504: { text: 'Gateway Timeout' },
+        505: { text: 'HTTP Version Not Supported' },
+        506: { text: 'Variant Also Negotiates' },
+        507: { text: 'Insuficient Storage' },
+        508: { text: 'Loop Detected' },
+        510: { text: 'Not Extended' },
+        511: { text: 'Network Authentiation Failed' },
+    };
+
+    constructor(httpServer, httpRsp) {
         return new Promise(async (ok, fail) => {
-            this._httpRsp = httpRsp;
-            this._req = req;
-            this._httpServer = httpServer;
-            this._status = 200;
-            this._headers = {};
-            this._body = [];
-            this._contentType = '';
-            this._contentEncoding = '';
-            await this.setLanguage();
+            this.httpServer = httpServer;
+            this.httpRsp = httpRsp;
+            this.statusValue = 200;
+            this.statusMessage = HttpResponse.statusCodes[200];
+            this.mimeValue = Mime.fromMimeCode('text/plain');
+            this.encodingValue = mkEncoding('UTF-8');
+            this.languageValue = mkLanguage();
+            this.httpHeaders = {};
+            this.contentValue = [''];
             ok(this);
         });
     }
 
-    appendBody(...args) {
-        args.forEach(arg => {
-            this._body.push(arg);
-        });
+    appendContent(...args) {
+        for (let arg of args) {
+            this.contentValue.push(arg);
+        }
     }
-  
-    language(code) {
-        return this._language;
-    }
-  
-    locale(code) {
-        return this._locale;
-    }
-    
-    respondJson(object) {
-        this.setContentType('application/json');
-        this.appendBody($toJson(object));
-    }
-    
-    async respond403() {
-        this.setStatus(403);
-        this.setContentType('text/plain');
-        this.appendBody('Forbidden');
-    }
-    
-    async respond404() {
-        this.setStatus(404);
-        this.setContentType('text/plain');
-        this.appendBody('Not Found');
-    }
-    
-    async respond405() {
-        this.setStatus(405);
-        this.setContentType('text/plain');
-        this.appendBody('Method not allowed.');
-    }
-    
-    async respond500() {
-        this.setStatus(500);
-        this.setContentType('text/plain');
-        this.appendBody('Internal Server Error');
-    }
-    
-    async respondCode(code, text) {
-        this.setStatus(code);
-        this.setContentType('text/plain');
-        this.appendBody(text);
-    }
-    
-    async respondContent(path) {
-        let content = await Cls$Content.get(path.substr(1));
 
-        if (content.mime) {
-            this.setContentType(content.mime.code);
-            this.appendBody(content.data);
+    clearContent() {
+        this.contentValue = [];
+    }
+
+    clearHeader(headerName) {
+        delete this.httpHeaders[headerName.toLowerCase()];
+    }
+
+    encoding(encoding) {
+        if (typeof encoding == 'undefined') {
+            return this.encodingValue;
+        }
+        else if (typeof encoding == 'string') {
+            this.encodingValue = mkEncoding(encoding);
+        }
+        else if (encoding instanceof Encoding) {
+            this.encodingValue = encoding;
+        }
+    }
+
+    async end() {
+        this.setHeader('Content-Language', this.languageValue.code());
+
+        if (this.mimeValue.type == 'string') {
+            this.setHeader('Content-Type', this.mimeValue.code);
+            this.setHeader('Content-Encoding', this.encodingValue.code());
         }
         else {
-            await this.respond404();
+            console.log('TODO -- binary data!')
         }
-    }
-    
-    async respondPage() {
-        let sessionId = await Cls$Ipc.queryPrimary({messageName: '$CreateSession'});
-        let sockets = {};
-        let languages = [`'${$Config.language}'`];
-        
-        Cls$Server.getServers().forEach(server => {
-            if (server.type() == 'webSocket' || (server.type() == 'http' && server.property('upgradable'))) {
-                sockets[server.name()] = {
-                    name: server.name(),
-                    type: server.type(),
-                    port: server.port(),
-                };
-            }
-        });
-        
-        this.appendBody([
-            `<!DOCTYPE html>`,
-            `<html class="html">`,
-            `    <head>`,
-            `        <meta charset="utf-8">`,
-            `        <link rel="stylesheet" href="STYLE?SESSION=${sessionId}">`,
-            `        <script src="FRAMEWORK?SESSION=${sessionId}"></script>`,
-            `        <script>`,
-            `           let SESSION = '${sessionId}';`,
-            `           let SOCKETS = ${$toJson(sockets)};`,
-            `           let LANGUAGES = ${languages};`,
-            `           function $client() {`,
-            `               $.classPrefix  = 'Clss';`,
-            `               $query('head').append($script($attr('src', 'APPLICATION')));`,
-            `           }`,
-            `        </script>`,
-            `    </head>`,
-            `    <body class="body colors" onload="$client()">`,
-            `    </body>`,
-            `</html>`
-        ].join('\n'));
-        
-        this.setContentType('text/html');
-    }
-    
-    async respondSignIn() {
-        return this.respondPage();
-    }
 
-    async send() {
-        if (this._contentEncoding) {
-            this._headers['Content-Type'] = `${this._contentType}; ${this._contentEncoding}`;
+        let headerMap = {};
+        Object.values(this.httpHeaders).forEach(header => headerMap[header.name] = header.value);
+        this.httpRsp.writeHead(this.statusValue, headerMap);
+
+
+        if (this.mimeValue.type == 'string') {
+            this.httpRsp.end(this.contentValue.join(''));
         }
         else {
-            this._headers['Content-Type'] = this._contentType;
+            console.log('TODO -- binary data!')
         }
-
-        this._httpRsp.writeHead(this._status, this._headers);
-        this._httpRsp.end(this._body.map(item => item.toString()).join(''));
     }
 
-    setContentEncoding(contentEncoding) {
-        this._contentEncoding = contentEncoding;
-    }
-
-    setContentType(contentType) {
-        this._contentType = contentType;
-    }
-
-    setHeader(name, value) {
-        this._headers[name] = value;
-    }
-  
-    async setLanguage() {
-        let session = null;
-        let acceptLanguages = this._req.acceptLanguage();
-  
-        if (this._req.sessionId()) {
-            session = Cls$Ipc.queryPrimary({
-                messageName: '$GetSession',
-                sessionId: this._req.sessionId()
-            });
+    language(language) {
+        if (typeof language == 'undefined') {
+            return this.languageValue;
         }
-  
-        for (let i = 0; i < acceptLanguages.length; i++) {
-            let acceptLanguage = acceptLanguages[i].value;
-  
-            if (acceptLanguage == '*') {
-                if (session) {
-                    this._language = session.language;
-                }
-  
-                return;
-            }
-            else {
-                if ($Application.hasLanguage(acceptLanguage)) {
-                    if (session && acceptLanguage == session.language) {
-                        this._language = session.language;
-                        return;
-                    }
-                    else {
-                        this._language = acceptLanguage;
-                        return;
-                    }
-                }
-            }
+        else if (typeof language == 'string') {
+            this.languageValue = mkLanguage(language);
         }
-  
-        this._language = $Config.language;
+        else if (language instanceof Language) {
+            this.languageValue = language;
+        }
     }
 
-    setStatus(httpStatus) {
-        this._status = httpStatus;
+    mime(mime) {
+        if (typeof mime == 'undefined') {
+            return this.mimeValue;
+        }
+        else if (typeof mime == 'string') {
+            this.mimeValue = Mime.fromMimeCode(mime);
+        }
+        else if (mime instanceof Mime) {
+            this.mimeValue = mime;
+        }
+    }
+
+    setContent(...args) {
+        this.contentValue = args;
+    }
+
+    setHeader(headerName, value) {
+        let key = headerName.toLowerCase();
+        this.httpHeaders[key] = { name: headerName, value: value.toString() };
+    }
+
+    status(status) {
+        if (typeof status == 'undefined') {
+            return this.statusValue;
+        }
+        else if (typeof status == 'number') {
+            this.status = status;
+        }
     }
 });

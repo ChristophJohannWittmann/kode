@@ -39,14 +39,17 @@ class Resource {
             this.oneTime = false;
             this.url = reference.expandedUrl;
             this.path = reference.expandedPath;
+            this.mime = Mime.fromExtension(PATH.extname(this.path));
+            this.value = null;
 
-            if (reference.type == 'content') {
-                this.mime = Mime.fromExtension(PATH.extname(this.path));
-                this.value = null;
-            }
-            else if (reference.type == 'app') {
-                this.mime = null;
-                this.value = require(reference.expandedPath);
+            if (this.mime.code == 'text/javascript') {
+                const code = (await FILES.readFile(this.path)).toString();
+
+                if (code.match(/'javascript-web-extension';/m)) {
+                    this.webExtension = true;
+                    this.value = require(this.path);
+                    await this.value.init();
+                }
             }
 
             ok(this);
@@ -144,7 +147,7 @@ singleton(class ResourceLibrary {
     
     async get(url) {
         if (url in this.urls) {
-            return await this.urls[url].get();
+            return await this.urls[url];;
         }
     }
     

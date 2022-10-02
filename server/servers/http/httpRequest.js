@@ -23,35 +23,40 @@
 
 /*****
 *****/
-$(class $HttpRequest {
-    constructor(httpReq, httpServer) {
+register(class HttpRequest {
+    constructor(httpServer, httpReq) {
         return new Promise(async (ok, fail) => {
-            this._httpReq = httpReq;
-            this._httpServer = httpServer;
-            this._httpMethod = httpReq.method;
-            this._httpHeaders = httpReq.headers;
-            this._body = {mime: 'text/plain', type: 'error', value: 'GET request has no body.'};
-            this._params = {};
-            this._message = {};
-            this._sessionId = '';
+            this.httpServer = httpServer;
+            this.httpReq = httpReq;
+            await this.loadBody();
 
-            if (this._httpMethod == 'GET') {
-                let iterator = this.url().searchParams.entries();
+            this.params = {};
+            this.parsedUrl = URL.parse(this.httpReq.url);
+            let iterator = new URL.URLSearchParams(this.query()).entries();
 
-                for (let param = iterator.next(); !param.done; param = iterator.next()) {
-                    this._params[param.value[0]] = param.value[1];
-
-                    if (param.value[0] == 'SESSION') {
-                        this._sessionId = param.value[1].toString().replace(/ /g, '+');
-                    }
-                }
+            for (let param = iterator.next(); !param.done; param = iterator.next()) {
+                this.params[param.value[0]] = param.value[1];
             }
-            
+
+            Object.seal(this.params);
+            Object.freeze(this.params);
             ok(this);
         });
     }
+
+    accept() {
+        return this.acceptor('accept');
+    }
+
+    acceptEncoding() {
+        return this.acceptor('accept-encoding');
+    }
   
-    _accept(headerName) {
+    acceptLanguage() {
+        return this.acceptor('accept-language');
+    }
+
+    acceptor(headerName) {
         let items = {};
         let value = this.header(headerName);
 
@@ -69,71 +74,77 @@ $(class $HttpRequest {
         return items;
     }
 
-    accept() {
-        return this._accept('accept');
-    }
-
-    acceptEncoding() {
-        return this._accept('accept-encoding');
-    }
-  
-    acceptLanguage() {
-        return this._accept('accept-language');
+    auth() {
+        return this.parsedUrl.auth;
     }
 
     body() {
-        return this._body.value;
+        return this.requestBody.data;
     }
 
-    contentFormat() {
-        return this._body.type;
-    }
-
-    contentType() {
-        return this._body.mime;
-    }
-
-    header(name) {
-        let headerName = name.toLowerCase();
-
-        if (headerName in this._httpHeaders) {
-            return this._httpHeaders[name.toLowerCase()];
+    encoding() {
+        if ('content-encoding' in this.headers()) {
+            return mkEncoding(this.header('content-encoding'));
         }
+        else {
+            return mkEncoding();
+        }
+    }
 
-        return '';
+    hash() {
+        return this.parsedUrl.hash;
+    }
+
+    hasHeader(headerName) {
+        return headerName.toLowerCase() in this.httpReq.headers;
+    }
+
+    header(headerName) {
+        return this.httpReq.headers[headerName.toLowerCase()];
     }
 
     headers() {
-        return this._httpHeaders;
+        return this.httpReq.headers;
     }
 
     host() {
-        return this.header('host');
-    }
-  
-    language() {
-        return this._language;
-    }
-  
-    locale() {
-        return this._locale;
+        return this.parsedUrl.host;
     }
 
-    async loadMessageBody() {
+    hostname() {
+        return this.parsedUrl.hostname;
+    }
+
+    href() {
+        return this.parsedUrl.href;
+    }
+
+    isMessage() {
+        if (this.requestBody.mime.code === 'application/json') {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    
+    async loadBody() {
+        this.requestTooLarge = false;
+
         return new Promise((ok, fail) => {
             let size = 0;
             let chunks = [];
             
-            this._httpReq.on('data', data => {
+            this.httpReq.on('data', data => {
                 size += data.length;
                 
                 if (size > 100000000) {
-                    this._body = {
-                        mime: 'text/plain',
-                        type: 'error',
-                        value: 'Incoming reqest body exceeds allowable length.'
+                    this.requestBody = {
+                        mime: Mime.fromMimeCode('text/plain'),
+                        value: 'Payload Too Large'
                     };
                     
+                    this.requestTooLarge = true;
                     ok();
                 }
                 else {
@@ -141,29 +152,33 @@ $(class $HttpRequest {
                 }
             });
             
-            this._httpReq.on('end', () => {
-                let mimeCode = this.header('content-type');
-                let mime = Cls$Mime.fromMimeCode(mimeCode);
-                
-                if (mime.type == 'binary') {
-                    this._body = {
-                        mime: mime.code,
-                        type: 'binary',
-                        value: Buffer.concat(chunks)
-                    };
+            this.httpReq.on('end', () => {
+                if (chunks.length) {
+                    let mimeCode = this.header('content-type');
+                    let mime = Mime.fromMimeCode(mimeCode);
+                    
+                    if (mime.type == 'binary') {
+                        this.requestBody = {
+                            mime: mime,
+                            value: mkBinary(Buffer.concat(chunks))
+                        };
+                    }
+                    else {
+                        this.requestBody = {
+                            mime: mime,
+                            value: chunks.map(chunk => chunk.toString()).join('')
+                        };
+                    }
+                    
+                    if (mimeCode == 'application/json') {
+                        this.requestMessage = fromJson(this.requestBody.value);
+                    }
                 }
                 else {
-                    this._body = {
-                        mime: mime.code,
-                        type: 'text',
-                        value: chunks.map(chunk => chunk.toString()).join('')
+                    this.requestBody = {
+                        mime: Mime.fromMimeCode('text/plain'),
+                        data: ''
                     };
-                }
-                
-                if (mimeCode == 'application/json') {
-                    this._message = $fromJson(this._body.value);
-                    this._sessionId = this._message.$sessionId;
-                    delete this._message.$session;
                 }
                 
                 ok();
@@ -172,42 +187,50 @@ $(class $HttpRequest {
     }
 
     message() {
-        return this._message;
+        if (this.requestBody.mime.code === 'application/json') {
+            try {
+                return fromJson(this.requestBody);
+            }
+            catch (e) {
+                return new Object();
+            }
+        }
     }
 
     method() {
-        return this._httpMethod;
+        return this.httpReq.method;
     }
 
-    param(name) {
-        if (name in this._params) {
-            return this._params[name];
-        }
+    mime() {
+        return this.requestBody.mime;
+    }
+
+    parameters() {
+        return this.params;
     }
 
     path() {
-        return this.url().pathname;
+        return this.parsedUrl.path;
+    }
+
+    pathname() {
+        return this.parsedUrl.pathname;
     }
 
     protocol() {
-        return this._httpServer.tls() ? 'https' : 'http';
+        return this.parsedUrl.protocol;
     }
 
-    sessionId() {
-        return this._sessionId;
+    query() {
+        return this.parsedUrl.query;
     }
 
-    tls() {
-        return this._httpServer.tls();
+    search() {
+        return this.parsedUrl.search;
     }
 
     url() {
-        if (this.header('host')) {
-            return new URL.URL(`${this.protocol()}://${this.header('host')}${this._httpReq.url}`);
-        }
-        else {
-            return new URL.URL(`${this.protocol()}://NOHOST${this._httpReq.url}`);
-        }
+        return this.httpReq.url;
     }
 
     userAgent() {

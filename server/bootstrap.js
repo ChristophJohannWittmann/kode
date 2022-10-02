@@ -31,6 +31,8 @@
 require('../framework/core.js');
 require('../framework/activeData.js');
 require('../framework/binaryServer.js');
+require('../framework/encoding.js');
+require('../framework/language.js');
 require('../framework/message.js');
 require('../framework/mime.js');
 require('../framework/set.js');
@@ -96,6 +98,8 @@ require('./lib/crypto.js');
 require('./lib/pool.js');
 require('./lib/resource.js');
 require('./lib/utility.js');
+require('./lib/webExtension.js');
+require('./lib/webApp.js');
 require('./lib/webSocket.js');
 
 require('./dbms/dbClient.js');
@@ -245,7 +249,6 @@ async function prepareDbms() {
         await prepareDbms();
     }
 
-    /*
     if (CLUSTER.isPrimary) {
         logPrimary('[ Starting Servers ]');
 
@@ -267,7 +270,6 @@ async function prepareDbms() {
             eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
         }
     }
-    */
 
     await onSingletons();
 })();
