@@ -68,7 +68,11 @@ register(class WebApp extends WebExtension {
         return html;
     }
 
-    async handleRequest(req, tsp) {
+    async handleHttpRequest(req) {
+        return {
+            mime: mkMime('text/plain'),
+            data: 'WebApp Request Handler Stub.',
+        };
     }
 
     async init() {

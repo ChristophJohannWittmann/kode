@@ -22,6 +22,11 @@
 
 
 /*****
+ * The HTTP server wraps the node JS builtin HTTP server in the framework API
+ * to make controlling the HTTP server that same API as servers written entirely
+ * using the framework API.  The primary process was written as stub that does
+ * essentially nothing!  Note that the listen() method was overridden to ensure
+ * our code doesn't attempt to open the HTTP ports.
 *****/
 if (CLUSTER.isPrimary) {
     register(class HttpServer extends Server {
@@ -36,6 +41,13 @@ if (CLUSTER.isPrimary) {
 
 
 /*****
+ * The HTTP server wraps the node JS builtin HTTP server in the framework API
+ * to make controlling the HTTP server that same API as servers entirely written
+ * using the framework API.  The worker code using the builtin class to start
+ * the listener (somehow in the buildtin code) and to start the HTTP handler.
+ * The HTTP worker essentially does nothing with regards to a websocket upgrade.
+ * If the requested URL refers to a web extension module, that module is called
+ * handle or ignore the upgrade request.
 *****/
 if (CLUSTER.isWorker) {
     require('./http/httpRequest.js');
@@ -62,7 +74,12 @@ if (CLUSTER.isWorker) {
                 let resource = ResourceLibrary.get(httpReq.url);
 
                 if (resource && resource.webExtension) {
-                    await value.upgrade(httpReq, socket, headPacket);
+                    try {
+                        await resource.value.upgrade(httpReq, socket, headPacket);
+                    }
+                    catch (e) {
+                        log(`Web Socket Upgrade Request Error: ${httpReq.url}`, e);
+                    }
                 }
             });
       
@@ -76,27 +93,24 @@ if (CLUSTER.isWorker) {
 
             if (resource) {
                 if (resource.webExtension) {
-                    await this.handleExtension(req, rsp, resource);
+                    await resource.value.handle(req, rsp);
                 }
                 else {
-                    await this.handleResource(req, rsp, resource);
+                    let content = await resource.get(rsp.encoding);
+
+                    if (content.error) {
+                        rsp.mime = mkMime('text/plain');
+                        rsp.end(`Error while fetching ${req.url()}`);
+                    }
+                    else {
+                        rsp.mime = content.mime;
+                        rsp.end(content.value);
+                    }
                 }
             }
             else {
-                console.log(`HTTP Server, responsd with 404, not found: ${req.url()}`);
-                rsp.end('Very nice web server.  ', 'Nothing');
+                rsp.endError(404);
             }
-        }
-
-        async handleExtension(req, rsp, ext) {
-            console.log(ext)
-            rsp.end('Very nice web server.  ', 'Extension');
-        }
-
-        async handleResource(req, rsp, resource) {
-            let content = await resource.get(rsp.encoding);
-            rsp.mime = content.mime;
-            rsp.end(content.value);
         }
 
         port() {

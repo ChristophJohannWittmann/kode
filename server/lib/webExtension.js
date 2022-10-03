@@ -29,9 +29,30 @@ register(class WebExtension {
     }
 
     async handle(req, rsp) {
+        try {
+            let result = await this.handleHttpRequest(req, rsp);
+            rsp.mime = result.mime;
+            rsp.end(await compress(rsp.encoding, result.data));
+        }
+        catch (e) {
+            let text = `Web Extension HTTP Error: Extension "${this.name()}".`;
+            log(text, e);
+            rsp.end(await compress(rsp.encoding, text));
+        }
     }
 
     async init() {
+    }
+
+    name() {
+        return Reflect.getPrototypeOf(this).constructor.name;
+    }
+
+    async handleHttpRequest(req) {
+        return {
+            mime: mkMime('text/plain'),
+            data: 'WebExtension Default Handler Result.',
+        };
     }
 
     async upgrade(httpReq, socket, headPacket) {

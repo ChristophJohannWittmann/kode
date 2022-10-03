@@ -137,7 +137,7 @@ register(class HttpResponse {
     endError(status) {
         this.status = status;
         this.mime = mkMime('text/plain');
-        this.end(HttpRsp.statusCodes[this.status]);
+        this.end(HttpResponse.statusCodes[this.status].text);
     }
 
     setEncoding() {

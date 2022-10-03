@@ -30,7 +30,11 @@ exports = module.exports = new (class ConfigApp extends WebApp {
         this.allowSocket = true;
     }
 
-    async handleRequest(req, tsp) {
+    async handleHttpRequest(req) {
+        return {
+            mime: mkMime('text/plain'),
+            data: 'The configuration App'
+        };
     }
 
     async init() {

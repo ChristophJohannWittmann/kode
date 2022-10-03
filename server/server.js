@@ -22,6 +22,12 @@
 
 
 /*****
+ * The base class for all of the servers that are implemented with the framework.
+ * In essence, the ServerBase class provides features that are common to both
+ * the priminary process server and the worker process server.  The basic set
+ * of features related to (1) providing configuration and network data, (2) 
+ * performing basic crypto functions, and (3) ensuring that all primary and
+ * worker server objects are emitters.
 *****/
 register(class ServerBase extends Emitter {
     constructor(config, serverName) {
@@ -99,6 +105,11 @@ register(class ServerBase extends Emitter {
 
 
 /*****
+ * **********************************************************************
+ * **********************************************************************
+ * **********************************************************************
+ * **********************************************************************
+ * **********************************************************************
 *****/
 if (CLUSTER.isPrimary) {
     register(class Server extends ServerBase {
@@ -194,6 +205,11 @@ if (CLUSTER.isPrimary) {
 
 
 /*****
+ * **********************************************************************
+ * **********************************************************************
+ * **********************************************************************
+ * **********************************************************************
+ * **********************************************************************
 *****/
 if (CLUSTER.isWorker) {
     register(class Server extends ServerBase {
