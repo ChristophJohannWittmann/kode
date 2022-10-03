@@ -22,6 +22,11 @@
 
 
 /*****
+ * A wrapper for the node JS HTTP server response object, whose primary purpose
+ * is to integrate the server response object into the framework using the
+ * framework style API.  This class provides response header management and also
+ * "narrows" the API to features that are useful within and required by the
+ * server side framework.
 *****/
 register(class HttpResponse {
     static statusCodes = {
@@ -90,110 +95,68 @@ register(class HttpResponse {
         511: { text: 'Network Authentiation Failed' },
     };
 
-    constructor(httpServer, httpRsp) {
+    constructor(httpServer, httpRsp, req) {
         return new Promise(async (ok, fail) => {
             this.httpServer = httpServer;
             this.httpRsp = httpRsp;
-            this.statusValue = 200;
-            this.statusMessage = HttpResponse.statusCodes[200];
-            this.mimeValue = Mime.fromMimeCode('text/plain');
-            this.encodingValue = mkEncoding('UTF-8');
-            this.languageValue = mkLanguage();
+            this.req = req;
+            this.status = 200;
+            this.mime = mkMime('text/plain');
+            this.charset = 'UTF-8';
+            this.language = mkLanguage();
             this.httpHeaders = {};
-            this.contentValue = [''];
+            this.setEncoding();
             ok(this);
         });
-    }
-
-    appendContent(...args) {
-        for (let arg of args) {
-            this.contentValue.push(arg);
-        }
-    }
-
-    clearContent() {
-        this.contentValue = [];
     }
 
     clearHeader(headerName) {
         delete this.httpHeaders[headerName.toLowerCase()];
     }
 
-    encoding(encoding) {
-        if (typeof encoding == 'undefined') {
-            return this.encodingValue;
-        }
-        else if (typeof encoding == 'string') {
-            this.encodingValue = mkEncoding(encoding);
-        }
-        else if (encoding instanceof Encoding) {
-            this.encodingValue = encoding;
-        }
-    }
+    async end(content) {
+        this.setHeader('Content-Language', this.language.code());
 
-    async end() {
-        this.setHeader('Content-Language', this.languageValue.code());
-
-        if (this.mimeValue.type == 'string') {
-            this.setHeader('Content-Type', this.mimeValue.code);
-            this.setHeader('Content-Encoding', this.encodingValue.code());
+        if (this.mime.type == 'string') {
+            this.setHeader('Content-Type', `${this.mime.code}; charset="${this.charset}"`);
         }
         else {
-            console.log('TODO -- binary data!')
+            this.setHeader('Content-Type', this.mime.code);
+        }
+
+        if (this.encoding) {
+            this.setHeader('Content-Encoding', this.encoding);
         }
 
         let headerMap = {};
         Object.values(this.httpHeaders).forEach(header => headerMap[header.name] = header.value);
-        this.httpRsp.writeHead(this.statusValue, headerMap);
-
-
-        if (this.mimeValue.type == 'string') {
-            this.httpRsp.end(this.contentValue.join(''));
-        }
-        else {
-            console.log('TODO -- binary data!')
-        }
+        this.httpRsp.writeHead(this.status, headerMap);
+        this.httpRsp.end(content);
     }
 
-    language(language) {
-        if (typeof language == 'undefined') {
-            return this.languageValue;
-        }
-        else if (typeof language == 'string') {
-            this.languageValue = mkLanguage(language);
-        }
-        else if (language instanceof Language) {
-            this.languageValue = language;
-        }
+    endError(status) {
+        this.status = status;
+        this.mime = mkMime('text/plain');
+        this.end(HttpRsp.statusCodes[this.status]);
     }
 
-    mime(mime) {
-        if (typeof mime == 'undefined') {
-            return this.mimeValue;
-        }
-        else if (typeof mime == 'string') {
-            this.mimeValue = Mime.fromMimeCode(mime);
-        }
-        else if (mime instanceof Mime) {
-            this.mimeValue = mime;
-        }
-    }
+    setEncoding() {
+        for (let encoding of Object.values(this.req.acceptEncoding())) {
+            let { value, quality } = encoding;
 
-    setContent(...args) {
-        this.contentValue = args;
+            if (isCompressionAlgorithmSupported(value)) {
+                this.encoding = value;
+                this.quality = quality;
+                return;
+            }
+        }
+
+        this.encoding = '';
+        this.quality = '';
     }
 
     setHeader(headerName, value) {
         let key = headerName.toLowerCase();
         this.httpHeaders[key] = { name: headerName, value: value.toString() };
-    }
-
-    status(status) {
-        if (typeof status == 'undefined') {
-            return this.statusValue;
-        }
-        else if (typeof status == 'number') {
-            this.status = status;
-        }
     }
 });

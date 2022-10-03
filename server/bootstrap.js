@@ -31,7 +31,6 @@
 require('../framework/core.js');
 require('../framework/activeData.js');
 require('../framework/binaryServer.js');
-require('../framework/encoding.js');
 require('../framework/language.js');
 require('../framework/message.js');
 require('../framework/mime.js');
@@ -60,6 +59,14 @@ global.OS        = require('os');
 global.PATH      = require('path');
 global.PROC      = require('process');
 global.URL       = require('url');
+
+
+/*****
+ * Imported NPM Modules, which are enumerated in the package.json directory
+ * for the framework.
+*****/
+global.npmPG   = require('pg');
+global.npmGZIP = require('node-gzip');
 
 
 /*****
@@ -94,6 +101,7 @@ global.env = {
 require('./config.js');
 
 require('./lib/auth.js');
+require('./lib/compression.js');
 require('./lib/crypto.js');
 require('./lib/pool.js');
 require('./lib/resource.js');

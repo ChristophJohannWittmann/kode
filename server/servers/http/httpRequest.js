@@ -22,6 +22,11 @@
 
 
 /*****
+ * A wrapper for the node JS builtin incoming request object.  This wrapper
+ * has multiple purposes.  (1) provide a fast/simplified API for fetching data
+ * that's often required.  (2) provide an asynchronous interface to all of the
+ * base class's features, and (3) automatically load the HTTP request's body or
+ * content when making a new HTTP request instance.
 *****/
 register(class HttpRequest {
     constructor(httpServer, httpReq) {
@@ -63,6 +68,7 @@ register(class HttpRequest {
         if (value) {
             value.split(',').forEach(item => {
                 let [ value, quality ] = item.split(';');
+                value = value.trim();
                 
                 items[value] = {
                     value: value,
@@ -84,10 +90,7 @@ register(class HttpRequest {
 
     encoding() {
         if ('content-encoding' in this.headers()) {
-            return mkEncoding(this.header('content-encoding'));
-        }
-        else {
-            return mkEncoding();
+            return this.header('content-encoding');
         }
     }
 
@@ -140,7 +143,7 @@ register(class HttpRequest {
                 
                 if (size > 100000000) {
                     this.requestBody = {
-                        mime: Mime.fromMimeCode('text/plain'),
+                        mime: mkMime('text/plain'),
                         value: 'Payload Too Large'
                     };
                     
@@ -155,7 +158,7 @@ register(class HttpRequest {
             this.httpReq.on('end', () => {
                 if (chunks.length) {
                     let mimeCode = this.header('content-type');
-                    let mime = Mime.fromMimeCode(mimeCode);
+                    let mime = mkMime(mimeCode);
                     
                     if (mime.type == 'binary') {
                         this.requestBody = {
@@ -176,7 +179,7 @@ register(class HttpRequest {
                 }
                 else {
                     this.requestBody = {
-                        mime: Mime.fromMimeCode('text/plain'),
+                        mime: mkMime('text/plain'),
                         data: ''
                     };
                 }
@@ -230,6 +233,16 @@ register(class HttpRequest {
     }
 
     url() {
+        if (typeof this.httpReq.url == 'string') {
+            if (this.httpReq.url == '/') {
+                return this.httpReq.url;
+            }
+            else if (this.httpReq.url.endsWith('/')) {
+                let length = this.httpReq.url.length;
+                return this.httpReq.url.substr(0, length - 1);
+            }
+        }
+
         return this.httpReq.url;
     }
 

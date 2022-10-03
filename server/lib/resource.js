@@ -39,7 +39,7 @@ class Resource {
             this.oneTime = false;
             this.url = reference.expandedUrl;
             this.path = reference.expandedPath;
-            this.mime = Mime.fromExtension(PATH.extname(this.path));
+            this.mime = mkMime(PATH.extname(this.path));
             this.value = null;
 
             if (this.mime.code == 'text/javascript') {
@@ -56,36 +56,38 @@ class Resource {
         });
     }
 
-    async get() {
+    async get(alg) {
         let value = this.value;
 
         if (value === null) {
-            value = await this.load();
+            try {
+                let buffer = await FILES.readFile(this.path);
+                value = { '': Resource.formatters[this.mime.type](buffer) };
+
+                if (Config.cache && buffer.length <= 1024*1024*Config.cacheMB) {
+                    this.value = value;
+                }
+            } 
+            catch (e) {
+                return {
+                    url: this.url,
+                    mime: mkMime('text/plain'),
+                    value: `ERROR: ${this.path}`,
+                    error: true,
+                };
+            }
+        }
+
+        if (!(alg in value)) {
+            value[alg] = await compress(alg, value['']);
         }
 
         return {
             url: this.url,
             mime: this.mime,
-            value: value,
+            value: value[alg],
+            error: false,
         };
-    }
-
-    async load() {
-        try {
-            let buffer = await FILES.readFile(this.path);
-            let value = Resource.formatters[this.mime.type](buffer);
-
-            if (Config.cache) {
-                this.value = value;
-            }
-
-            return value;
-        } 
-        catch (e) {
-            this.value = `ERROR: ${this.path}`;
-            this.mime = Mime.fromMimeCode('text/plain');
-            log(`Error occured while reading content file: ${this.path}`, e);
-        }
     }
 }
 
@@ -124,13 +126,29 @@ singleton(class ResourceLibrary {
 
                     for (let filePath of await recurseFiles(absPath)) {
                         let baseName = PATH.basename(filePath);
+                        let relative = filePath.substr(reference.path.length);
 
                         if (!baseName.startsWith('.')) {
-                            let relative = filePath.substr(reference.path.length);
                             let expandedReference = clone(reference);
                             expandedReference.expandedUrl = PATH.join(reference.url, relative);
                             expandedReference.expandedPath = filePath;
                             expanded.push(expandedReference);
+                        }
+                    }
+
+                    for (let dirPath of await recurseDirectories(absPath)) {
+                        let indexPath = PATH.join(dirPath, 'index.html');
+
+                        if (FS.existsSync(indexPath)) {
+                            let stats = await FILES.stat(indexPath);
+
+                            if (stats.isFile()) {
+                                let expandedReference = clone(reference);
+                                let relative = dirPath.substr(reference.path.length);
+                                expandedReference.expandedUrl = PATH.join(reference.url, relative);
+                                expandedReference.expandedPath = indexPath;
+                                expanded.push(expandedReference);
+                            }
                         }
                     }
 

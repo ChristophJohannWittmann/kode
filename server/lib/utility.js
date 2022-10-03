@@ -64,7 +64,6 @@ register(async function recurseDirectories(...args) {
         } catch (e) {}
     }
   
-    dirs.shift();
     return dirs;
 });
 

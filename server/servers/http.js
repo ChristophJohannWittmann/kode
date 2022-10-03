@@ -71,7 +71,7 @@ if (CLUSTER.isWorker) {
 
         async handle(httpReq, httpRsp) {
             let req = await mkHttpRequest(this, httpReq);
-            let rsp = await mkHttpResponse(this, httpRsp);
+            let rsp = await mkHttpResponse(this, httpRsp, req);
             let resource = await ResourceLibrary.get(req.url());
 
             if (resource) {
@@ -84,25 +84,19 @@ if (CLUSTER.isWorker) {
             }
             else {
                 console.log(`HTTP Server, responsd with 404, not found: ${req.url()}`);
-                rsp.setContent('Very nice web server.  ', 'Nothing');
-                await rsp.respond();
+                rsp.end('Very nice web server.  ', 'Nothing');
             }
         }
 
         async handleExtension(req, rsp, ext) {
             console.log(ext)
-            rsp.setContent('Very nice web server.  ', 'Extension');
-            await rsp.end();
-        }
-
-        async handleFavicon(req, rsp) {
+            rsp.end('Very nice web server.  ', 'Extension');
         }
 
         async handleResource(req, rsp, resource) {
-            let content = await resource.get();
-            rsp.mime(content.mime);
-            rsp.setContent(content.value);
-            await rsp.end();
+            let content = await resource.get(rsp.encoding);
+            rsp.mime = content.mime;
+            rsp.end(content.value);
         }
 
         port() {

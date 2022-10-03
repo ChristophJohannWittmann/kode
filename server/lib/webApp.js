@@ -23,7 +23,7 @@
 
 /*****
 *****/
-const builtinCss =
+const styleSheet =
 `:root {
 }
 html {
@@ -33,14 +33,13 @@ html {
 
 /*****
 *****/
-const builtinHtml =
+const html =
 `<!DOCTYPE html>
 <html>
     <head>
         <title>\${title}</title>
         <meta charset="utf-8">
-        <style>
-        </style>
+        <style>\${css}</style>
         <script>
             const sessionId = '\${sessionId}';
         </script>
@@ -56,16 +55,22 @@ register(class WebApp extends WebExtension {
     constructor() {
         super();
         this.permissions = [];
+        this.clientFramework = [];
+        this.clientApplication = [];
+        this.serverApplication = [];
     }
 
-    async css() {
-        return css;
+    async getCss() {
+        return styleSheet;
     }
 
-    async doc() {
-    }
-
-    async html() {
+    async getDoc() {
         return html;
+    }
+
+    async handleRequest(req, tsp) {
+    }
+
+    async init() {
     }
 });

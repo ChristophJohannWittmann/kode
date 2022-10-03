@@ -29,4 +29,10 @@ exports = module.exports = new (class ConfigApp extends WebApp {
         super();
         this.allowSocket = true;
     }
+
+    async handleRequest(req, tsp) {
+    }
+
+    async init() {
+    }
 })();

@@ -28,11 +28,7 @@ register(class WebExtension {
         this.allowSocket = false;
     }
 
-    async handle(message) {
-        try {
-        }
-        catch (e) {
-        }
+    async handle(req, rsp) {
     }
 
     async init() {

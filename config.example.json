@@ -1,5 +1,6 @@
 {
     "cache": false,
+    "cacheMB": 10,
     "logging": "console",
     "network": {
         "public": {

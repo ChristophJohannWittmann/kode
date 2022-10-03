@@ -27,7 +27,7 @@
  * code names.  The code name is something like text/html.  Some of them, like
  * .xlsx for instance, have disguistingly long MIME type codes.
 *****/
-singleton(class Mime {
+register(class Mime {
     static byMimeCode = {};
     static byExtension = {};
   
@@ -82,7 +82,7 @@ singleton(class Mime {
             {code: 'application/vnd.rar',                                                                   type: 'binary', exts: {rar:0}},
             {code: 'application/rtf',                                                                       type: 'binary', exts: {rtf:0}},
             {code: 'application/x-sh',                                                                      type: 'string', exts: {sh:0}},
-            {code: 'application/svg+xml',                                                                   type: 'string', exts: {svg:0}},
+            {code: 'image/svg+xml',                                                                         type: 'string', exts: {svg:0}},
             {code: 'application/x-shockwave-flash',                                                         type: 'binary', exts: {swf:0}},
             {code: 'application/x-tar',                                                                     type: 'binary', exts: {tar:0}},
             {code: 'image/tiff',                                                                            type: 'binary', exts: {tff:0, tiff:0}},
@@ -114,22 +114,24 @@ singleton(class Mime {
             });
         });
     })();
-  
-    fromMimeCode(code) {
-        if (code in Mime.byMimeCode) {
-            return Mime.byMimeCode[code];
+
+    constructor(text) {
+        let entry;
+
+        if (text in Mime.byMimeCode) {
+            entry = Mime.byMimeCode[text];
+        }
+        else if (text in Mime.byExtension) {
+            entry = Mime.byExtension[text];
+        }
+        else if (`.${text}` in Mime.byExtension) {
+            entry = Mime.byExtension[text];
+        }
+        else {
+            entry = Mime.byMimeCode['application/octet-stream'];
         }
 
-        return Mime.byMimeCode['application/octet-stream'];
-    }
-
-    fromExtension(extension) {
-        let ext = extension.startsWith('.') ? extension.substr(1) : extension;
-
-        if (ext in Mime.byExtension) {
-            return Mime.byExtension[extension];
-        }
-
-        return Mime.byMimeCode['application/octet-stream'];
+        this.code = entry.code;
+        this.type = entry.type;
     }
 });

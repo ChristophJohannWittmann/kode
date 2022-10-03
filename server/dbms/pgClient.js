@@ -303,8 +303,6 @@ class PgSchemaDef {
  * query() function.
 *****/
 class PgClient {
-    static PG = require('pg');
-
     constructor(settings) {
         this.pg = null;
         this.settings = settings;
@@ -317,7 +315,7 @@ class PgClient {
     }
     
     async connect() {
-        this.pg = new PgClient.PG.Client(this.settings);
+        this.pg = new npmPG.Client(this.settings);
         await this.pg.connect();
     }
 
