@@ -48,7 +48,9 @@ class Resource {
                 if (code.match(/'javascript-web-extension';/m)) {
                     this.webExtension = true;
                     this.value = require(this.path);
-                    await this.value.init();
+                    // Can't do this here in the primary.
+                    // There's something uninitialized!
+                    //await this.value.init();
                 }
             }
 
@@ -101,6 +103,7 @@ class Resource {
 singleton(class ResourceLibrary {
     constructor() {
         this.urls = {};
+        this.webExtensions = [];
     }
 
     deregister(url) {
@@ -177,6 +180,10 @@ singleton(class ResourceLibrary {
             else {
                 let resource = await (new Resource(ref));
                 this.urls[resource.url] = resource;
+
+                if (resource.webExtension) {
+                    this.webExtensions.push(resource);
+                }
             }
         }
     }

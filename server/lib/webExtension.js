@@ -33,6 +33,7 @@
 register(class WebExtension extends Emitter {
     constructor() {
         super();
+        this.permissions = [];
         this.useSocket = false;
     }
 
@@ -57,6 +58,7 @@ register(class WebExtension extends Emitter {
     }
 
     async init() {
+        await Ipc.queryPrimary({ messageName: '#SentinelAddPermissions', permissions: this.permissions });
     }
 
     name() {

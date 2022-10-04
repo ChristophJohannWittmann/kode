@@ -37,17 +37,18 @@ exports = module.exports = new (class ConfigApp extends WebApp {
                 htmlElement('style', htmlText(this.css))
             ),
             htmlElement('body',
+                htmlAttribute('class', 'font3'),
                 htmlElement('h1',
                     htmlText('Config Application Page')
                 ),
                 htmlElement('div',
-                    htmlAttribute('class', 'beauty beast'),
+                    htmlAttribute('class', 'lite'),
                     htmlText('Wow')
                 ),
                 htmlElement('a',
                     htmlAttribute('href', 'https://google.com'),
                     htmlAttribute('target', '_blank'),
-                    htmlText('Cllick here for Google')
+                    htmlText('Click here for Google')
                 )
             )
         );

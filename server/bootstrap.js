@@ -271,9 +271,17 @@ async function prepareDbms() {
             await server.start();
         }
 
+        for (let webExtension of ResourceLibrary.webExtensions) {
+            await webExtension.value.init();
+        }
+
         logPrimary('[ Kode Application Server Ready ]\n');
     }
     else {
+        for (let webExtension of ResourceLibrary.webExtensions) {
+            await webExtension.value.init();
+        }
+
         const serverName = PROC.env.KODE_SERVER_NAME;
 
         if (serverName) {
