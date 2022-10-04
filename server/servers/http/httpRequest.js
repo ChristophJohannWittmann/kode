@@ -221,14 +221,21 @@ register(class HttpRequest {
     }
 
     pathname() {
-        if (typeof this.parsedUrl.pathname == 'string') {
-            if (this.parsedUrl.pathname.endsWith('/')) {
+        if (this.parsedUrl.pathname) {
+            if (this.parsedUrl.pathname == '/') {
+                return this.parsedUrl.pathname;
+            }
+            else if (this.parsedUrl.pathname.endsWith('/')) {
                 let length = this.parsedUrl.pathname.length;
                 return this.parsedUrl.pathname.substr(0, length - 1);
             }
+            else {
+                return this.parsedUrl.pathname;
+            }
         }
-
-        return this.parsedUrl.pathname;
+        else {
+            return '/';
+        }
     }
 
     protocol() {

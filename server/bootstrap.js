@@ -104,7 +104,7 @@ require('./config.js');
 require('./lib/auth.js');
 require('./lib/compression.js');
 require('./lib/crypto.js');
-require('./lib/htmlBuilder.js');
+require('./lib/html.js');
 require('./lib/pool.js');
 require('./lib/resource.js');
 require('./lib/utility.js');

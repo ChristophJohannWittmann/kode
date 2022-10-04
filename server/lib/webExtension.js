@@ -63,7 +63,7 @@ register(class WebExtension extends Emitter {
         return Reflect.getPrototypeOf(this).constructor.name;
     }
 
-    onWebSocket(webSocket) {
+    async onWebSocket(webSocket) {
     }
 
     async upgrade(httpReq, socket, headPacket) {
@@ -85,7 +85,7 @@ register(class WebExtension extends Emitter {
             }
         
             socket.write(headers.join('\r\n'));
-            this.onWebSocket(webSocket);
+            await this.onWebSocket(webSocket);
         }
     }
 });

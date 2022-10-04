@@ -47,6 +47,12 @@ register(class WebApp extends WebExtension {
         this.serverApplication = [];
     }
 
+    async buildCss() {
+        let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
+        let cssPath = PATH.join(__dirname, 'webApp.css');
+        return (await execShell(`node ${minifyPath} ${cssPath}`)).stdout.trim();
+    }
+
     async buildDoc(req) {
         return htmlDocument(
             htmlElement('head'),
@@ -91,8 +97,9 @@ register(class WebApp extends WebExtension {
 
     async init() {
         await super.init();
-        let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
-        let cssPath = PATH.join(__dirname, 'webApp.css');
-        this.css = (await execShell(`node ${minifyPath} ${cssPath}`)).stdout.trim();
+        this.css = await this.buildCss();
+    }
+
+    async onWebSocket(webSocket) {
     }
 });
