@@ -175,7 +175,7 @@ singleton(class ResourceLibrary {
                 logPrimary(`    ERROR: "Duplicate URL ignored"  URL: "${ref.expandedUrl}"`);
             }
             else {
-                let resource = await new Resource(ref);
+                let resource = await (new Resource(ref));
                 this.urls[resource.url] = resource;
             }
         }

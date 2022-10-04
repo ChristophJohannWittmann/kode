@@ -98,6 +98,10 @@ register(class HttpRequest {
         return this.parsedUrl.hash;
     }
 
+    hasParameters() {
+        return Object.keys(this.params).length > 0;
+    }
+
     hasHeader(headerName) {
         return headerName.toLowerCase() in this.httpReq.headers;
     }
@@ -217,6 +221,13 @@ register(class HttpRequest {
     }
 
     pathname() {
+        if (typeof this.parsedUrl.pathname == 'string') {
+            if (this.parsedUrl.pathname.endsWith('/')) {
+                let length = this.parsedUrl.pathname.length;
+                return this.parsedUrl.pathname.substr(0, length - 1);
+            }
+        }
+
         return this.parsedUrl.pathname;
     }
 
@@ -233,16 +244,6 @@ register(class HttpRequest {
     }
 
     url() {
-        if (typeof this.httpReq.url == 'string') {
-            if (this.httpReq.url == '/') {
-                return this.httpReq.url;
-            }
-            else if (this.httpReq.url.endsWith('/')) {
-                let length = this.httpReq.url.length;
-                return this.httpReq.url.substr(0, length - 1);
-            }
-        }
-
         return this.httpReq.url;
     }
 

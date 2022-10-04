@@ -1,0 +1,129 @@
+/***********************************************
+ * Color Schemes
+ ***********************************************/
+:root {
+    --main-color: #555555;
+    --background-color: white;
+    --stroke-color: #555555;
+    --fill-color: #555555;
+    --hot-color: darkorange;
+    --hot-background-color: whitesmoke;
+    --outline-color: #555555;
+    --inactive-color: gainsboro;
+    --stripe-color: whitesmoke;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --main-color: lightgray;
+        --background-color: #101010;
+        --stroke-color: lightgray;
+        --fill-color: lightgray;
+        --hot-color: orange;
+        --hot-background-color: #202020;
+        --outline-color: orange;
+        --inactive-color: #404040;
+        --stripe-color: #404040;
+    }
+    .lite { display: none; }
+    .dark {}
+}
+@media (prefers-color-scheme: light) {
+    :root {
+        --main-color: #555555;
+        --background-color: white;
+        --stroke-color: #555555;
+        --fill-color: #555555;
+        --hot-color: darkorange;
+        --hot-background-color: whitesmoke;
+        --outline-color: #555555;
+        --inactive-color: gainsboro;
+        --stripe-color: whitesmoke;
+    }
+    .lite {}
+    .dark { display: none; }
+}
+
+/***********************************************
+ * Misc
+ ***********************************************/
+.navy-back { background-color: var(--infosearch-navy); }
+.bottom20 { margin-bottom: 20px; }
+
+
+/***********************************************
+ * Standard, Default
+ ***********************************************/
+html {
+    color: var(--main-color);
+    background-color: var(--background-color);
+}
+@media screen and (max-width: 660px) {
+    .not-tiny { display: none };
+}
+@media screen and (max-width: 999px) {
+    body {
+        margin: 20px;
+        padding: 6px;
+        color: var(--main-color);
+        background-color: var(--background-color);
+        font-family: Avenir, Avenir Next, Arial, Helvectica, sans-serif;
+        font-size: 16px;
+    }
+}
+@media screen and (min-width: 1000px) {
+    body {
+        margin: 20px;
+        padding: 16px;
+        color: var(--main-color);
+        background-color: var(--background-color);
+        font-family: Avenir, Avenir Next, Arial, Helvectica, sans-serif;
+        font-size: 16px;
+    }
+}
+
+/***********************************************
+ * Button Anchor
+ ***********************************************/
+a.button {
+    display: inline-block;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding: 20px;
+    border: solid 1px var(--main-color);
+    color: var(--hot-color);
+}
+a:hover.button {
+    cursor: pointer;
+    background-color: var(--hot-background-color);
+}
+
+/***********************************************
+ * Table
+ ***********************************************/
+.table {
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+.table thead {
+    border: none;
+}
+.table tbody {
+    border: none;
+}
+.table td {
+    margin: 0px;
+    padding: 0px;
+    text-align: left;
+    vertical-align: middle;
+}
+td.navy-border {
+    border: solid 1px var(--infosearch-navy);
+}
+
+/***********************************************
+ * Miscellaneous
+ ***********************************************/
+.center { text-align: center; }

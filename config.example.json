@@ -1,6 +1,7 @@
 {
     "cache": false,
     "cacheMB": 10,
+    "html": "compact",
     "logging": "console",
     "network": {
         "public": {

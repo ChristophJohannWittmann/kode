@@ -27,10 +27,40 @@
 exports = module.exports = new (class ConfigApp extends WebApp {
     constructor() {
         super();
-        this.allowSocket = true;
+        this.useSocket = true;
+        this.authenticate = true;
     }
 
-    async handleHttpRequest(req) {
+    async buildDoc(req) {
+        return htmlDocument(
+            htmlElement('head',
+                htmlElement('style', htmlText(this.css))
+            ),
+            htmlElement('body',
+                htmlElement('h1',
+                    htmlText('Config Application Page')
+                ),
+                htmlElement('div',
+                    htmlAttribute('class', 'beauty beast'),
+                    htmlText('Wow')
+                ),
+                htmlElement('a',
+                    htmlAttribute('href', 'https://google.com'),
+                    htmlAttribute('target', '_blank'),
+                    htmlText('Cllick here for Google')
+                )
+            )
+        );
+    }
+
+    async handleGet(req) {        
+        return {
+            mime: mkMime('text/plain'),
+            data: 'The configuration App'
+        };
+    }
+
+    async handlePOST(req) {
         return {
             mime: mkMime('text/plain'),
             data: 'The configuration App'
@@ -38,5 +68,6 @@ exports = module.exports = new (class ConfigApp extends WebApp {
     }
 
     async init() {
+        await super.init();
     }
 })();

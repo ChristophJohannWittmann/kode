@@ -71,7 +71,7 @@ if (CLUSTER.isWorker) {
             }
 
             this.nodeHttpServer.on('upgrade', async (httpReq, socket, headPacket) => {
-                let resource = ResourceLibrary.get(httpReq.url);
+                let resource = ResourceLibrary.get(httpReq.pathname());
 
                 if (resource && resource.webExtension) {
                     try {
@@ -89,7 +89,7 @@ if (CLUSTER.isWorker) {
         async handle(httpReq, httpRsp) {
             let req = await mkHttpRequest(this, httpReq);
             let rsp = await mkHttpResponse(this, httpRsp, req);
-            let resource = await ResourceLibrary.get(req.url());
+            let resource = await ResourceLibrary.get(req.pathname());
 
             if (resource) {
                 if (resource.webExtension) {

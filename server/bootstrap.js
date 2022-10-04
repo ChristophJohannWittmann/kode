@@ -65,8 +65,8 @@ global.URL       = require('url');
  * Imported NPM Modules, which are enumerated in the package.json directory
  * for the framework.
 *****/
-global.npmPG   = require('pg');
-global.npmGZIP = require('node-gzip');
+global.npmPG        = require('pg');
+global.npmGZIP      = require('node-gzip');
 
 
 /*****
@@ -75,22 +75,23 @@ global.npmGZIP = require('node-gzip');
  * uses throughout the loaded modules and applciations.
 *****/
 global.env = {
-    arch:       OS.arch(),
-    cpus:       OS.cpus().length,
-    endianness: OS.endianness(),
-    platform:   OS.platform(),
-    eol:        OS.EOL,
-    release:    OS.release(),
-    version:    OS.version(),
-    tempdir:    OS.tmpdir(),
-    hostname:   OS.hostname(),
-    network:    OS.networkInterfaces(),
-    memory:     ({ free: OS.freemem(), total: OS.totalmem() }),
-    kodePath:   PATH.join(__dirname, '..'),
-    addonPath:  PATH.join(__dirname, './addons'),
-    modulePath: PATH.join(__dirname, '../modules'),
-    daemonPath: PATH.join(__dirname, './daemons'),
-    serverPath: PATH.join(__dirname, './servers'),
+    arch:           OS.arch(),
+    cpus:           OS.cpus().length,
+    endianness:     OS.endianness(),
+    platform:       OS.platform(),
+    eol:            OS.EOL,
+    release:        OS.release(),
+    version:        OS.version(),
+    tempdir:        OS.tmpdir(),
+    hostname:       OS.hostname(),
+    network:        OS.networkInterfaces(),
+    memory:         ({ free: OS.freemem(), total: OS.totalmem() }),
+    kodePath:       PATH.join(__dirname, '..'),
+    addonPath:      PATH.join(__dirname, './addons'),
+    nodeModulePath: PATH.join(__dirname, '../node_modules'),
+    modulePath:     PATH.join(__dirname, '../modules'),
+    daemonPath:     PATH.join(__dirname, './daemons'),
+    serverPath:     PATH.join(__dirname, './servers'),
 };
 
 
@@ -103,6 +104,7 @@ require('./config.js');
 require('./lib/auth.js');
 require('./lib/compression.js');
 require('./lib/crypto.js');
+require('./lib/htmlBuilder.js');
 require('./lib/pool.js');
 require('./lib/resource.js');
 require('./lib/utility.js');
@@ -208,6 +210,8 @@ async function prepareDbms() {
  * instructed to stop with a system-wide #Stop message.
 *****/
 (async () => {
+    global.npmMinify = await import('minify');
+
     logPrimary(`\n[ Booting Server at ${(new Date()).toISOString()} ]`);
     await onSingletons();
     await Config.loadSystem(env.kodePath);

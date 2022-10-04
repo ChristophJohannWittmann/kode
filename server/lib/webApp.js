@@ -22,59 +22,77 @@
 
 
 /*****
-*****/
-const styleSheet =
-`:root {
-}
-html {
-}
-`;
-
-
-/*****
-*****/
-const html =
-`<!DOCTYPE html>
-<html>
-    <head>
-        <title>\${title}</title>
-        <meta charset="utf-8">
-        <style>\${css}</style>
-        <script>
-            const sessionId = '\${sessionId}';
-        </script>
-    </head>
-    <body>
-    </body>
-</html>`;
-
-
-/*****
+ * A webapp is just one specific type of web extension and probably the most
+ * frequencly employed.  A webapp is an extension with specific behavior: (1)
+ * an undecorated GET results in responding with a dynamically built HTML doc,
+ * (2) a GET with query parameters will be sent off to the handleGET() method
+ * to handle, and (3) all POST querys will be passed on to the handlePOST()
+ * method to be resolved.  To make a functioning webapp, an instance of a sub-
+ * class needs to be made.  To make this happend, the subclass js module needs
+ * to have a single export, and must look something like this:
+ * 
+ * exports = module.exports = new (class SubClass extends WebApp { ... } )();
+ * 
+ * During server bootstrapping, the module is loaded and a single instance of
+ * the sub class is created.  Thereafter, that instance is used repeatedly for
+ * handling HTTP and web socket requests.
 *****/
 register(class WebApp extends WebExtension {
     constructor() {
         super();
         this.permissions = [];
+        this.authenticate = false;
         this.clientFramework = [];
         this.clientApplication = [];
         this.serverApplication = [];
     }
 
-    async getCss() {
-        return styleSheet;
+    async buildDoc(req) {
+        return htmlDocument(
+            htmlElement('head'),
+            htmlElement('body'),
+        );
     }
 
-    async getDoc() {
-        return html;
-    }
-
-    async handleHttpRequest(req) {
+    async handleGET(req) {
         return {
             mime: mkMime('text/plain'),
-            data: 'WebApp Request Handler Stub.',
+            data: '',
+        };
+    }
+      
+
+    async handlePOST(req) {
+        return {
+            mime: mkMime('text/plain'),
+            data: '',
         };
     }
 
+    async handleHttpRequest(req) {
+        if (req.method() == 'GET') {
+            if (req.hasParameters()) {
+                return await this.handleGet(req);
+            }
+            else {
+                let doc = await this.buildDoc(req);
+                let html = Config.html == 'visual' ? doc.toVisual() : doc.toCompact();
+
+                return {
+                    mime: mkMime('text/html'),
+                    data: html,
+                };
+            }
+        }
+        else if (req.method() == 'POST') {
+            return await this.handlePost(req);
+        }
+    }
+
     async init() {
+        await super.init();
+        let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
+        let cssPath = PATH.join(__dirname, 'webApp.css');
+        this.css = (await execShell(`node ${minifyPath} ${cssPath}`)).stdout.trim();
     }
 });

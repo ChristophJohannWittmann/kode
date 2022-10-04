@@ -22,10 +22,18 @@
 
 
 /*****
+ * A web extension is a programming unit or module that provides a dynamic way
+ * to handle HTTP requests.  As the framework loads and module references are
+ * analyzed, if the analyzed reference is a javascript file and has this text
+ * embedded as a line of code, 'javascript-web-extension';, it'll be treated as
+ * a web extension, which means it's compiled and added as a web-extension
+ * resource.  This base class provides both the overall web-extension framwork
+ * and some basic common features that are required for all web extensions.
 *****/
-register(class WebExtension {
+register(class WebExtension extends Emitter {
     constructor() {
-        this.allowSocket = false;
+        super();
+        this.useSocket = false;
     }
 
     async handle(req, rsp) {
@@ -41,6 +49,13 @@ register(class WebExtension {
         }
     }
 
+    async handleHttpRequest(req) {
+        return {
+            mime: mkMime('text/plain'),
+            data: '',
+        };
+    }
+
     async init() {
     }
 
@@ -48,11 +63,7 @@ register(class WebExtension {
         return Reflect.getPrototypeOf(this).constructor.name;
     }
 
-    async handleHttpRequest(req) {
-        return {
-            mime: mkMime('text/plain'),
-            data: 'WebExtension Default Handler Result.',
-        };
+    onWebSocket(webSocket) {
     }
 
     async upgrade(httpReq, socket, headPacket) {
@@ -74,6 +85,7 @@ register(class WebExtension {
             }
         
             socket.write(headers.join('\r\n'));
+            this.onWebSocket(webSocket);
         }
     }
 });
