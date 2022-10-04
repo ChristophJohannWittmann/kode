@@ -70,7 +70,7 @@ class Attribute extends Node {
     constructor(name, value) {
         super('attribute');
         this.name = name;
-        this.value = value.toString();
+        this.value = value;
     }
 
     copy() {
@@ -78,11 +78,21 @@ class Attribute extends Node {
     }
 
     toCompact() {
-        return ` ${this.name}="${this.value}"`
+        if (this.value !== undefined) {
+            return ` ${this.name}="${this.value}"`
+        }
+        else {
+            return ` ${this.name}`            
+        }
     }
 
     toVisual() {
-        return ` ${this.name}="${this.value}"`
+        if (this.value !== undefined) {
+            return ` ${this.name}="${this.value}"`
+        }
+        else {
+            return ` ${this.name}`            
+        }
     }
 }
 

@@ -41,7 +41,7 @@ register(class Addon {
 
     async build() {
         try {
-            if (FS.existsSync(this.builtPath)) {
+            if (await pathExists(this.builtPath)) {
                 await FILES.rm(this.builtPath);
             }
 
@@ -59,11 +59,11 @@ register(class Addon {
         this.buildPath = PATH.join(this.path, 'build');
         this.builtPath = PATH.join(this.path, '.built');
 
-        if (!FS.existsSync(this.buildPath)) {
+        if (!await pathExists(this.buildPath)) {
             return false;
         }
 
-        if (!FS.existsSync(this.builtPath)) {
+        if (!await pathExists(this.builtPath)) {
             return false;
         }
 

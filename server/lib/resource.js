@@ -48,9 +48,7 @@ class Resource {
                 if (code.match(/'javascript-web-extension';/m)) {
                     this.webExtension = true;
                     this.value = require(this.path);
-                    // Can't do this here in the primary.
-                    // There's something uninitialized!
-                    //await this.value.init();
+                    await this.value.init();
                 }
             }
 
@@ -116,7 +114,7 @@ singleton(class ResourceLibrary {
         if ('path' in reference) {
             let absPath = PATH.isAbsolute(reference.path) ? reference.path : PATH.join(reference.modulePath, reference.path);
 
-            if (FS.existsSync(absPath)) {
+            if (await pathExists(absPath)) {
                 let stats = await FILES.stat(absPath);
 
                 if (stats.isFile()) {
@@ -142,7 +140,7 @@ singleton(class ResourceLibrary {
                     for (let dirPath of await recurseDirectories(absPath)) {
                         let indexPath = PATH.join(dirPath, 'index.html');
 
-                        if (FS.existsSync(indexPath)) {
+                        if (await pathExists(indexPath)) {
                             let stats = await FILES.stat(indexPath);
 
                             if (stats.isFile()) {

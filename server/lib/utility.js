@@ -39,6 +39,26 @@ register(async function execShell(script) {
 
 
 /*****
+ * As suspected, don't use FS.existsSync() within an async function.  You don't
+ * know what the timing of things will be.  In my case, in code embedded way
+ * down, all of the timing associated with things were screwed up.  This little
+ * wrapper makes our FS.existsSync() call to be safe and asyncronous.
+*****/
+register(async function pathExists(path) {
+    return new Promise(async (ok, fail) => {
+        try {
+            let handle = await FILES.open(path);
+            await handle.close();
+            ok(true);
+        }
+        catch (e) {
+            ok(false);
+        }
+    });
+});
+
+
+/*****
  * For each of the passed relative or absolute paths, recurse each directory
  * to generate an array of the absolute paths to all files in the directory
  * and its subdirectory tree.  The directory and subdirectory are not included

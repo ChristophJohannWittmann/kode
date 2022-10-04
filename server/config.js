@@ -31,7 +31,7 @@
 *****/
 singleton(class Config {
     async loadModule(path) {
-        if (FS.existsSync(path)) {
+        if (await pathExists(path)) {
             try {
                 let stats = await FILES.stat(path);
 
@@ -63,7 +63,7 @@ singleton(class Config {
     }
     
     async loadSystem(path) {
-        if (!path || !FS.existsSync(path)) {
+        if (!path || !await pathExists(path)) {
             return false;
         }
         
@@ -75,7 +75,7 @@ singleton(class Config {
         
         let configurationFilePath = PATH.join(path, 'config.json');
      
-        if (!FS.existsSync(configurationFilePath)) {
+        if (!await pathExists(configurationFilePath)) {
             return false;
         }
      

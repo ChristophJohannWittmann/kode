@@ -82,7 +82,6 @@ register(class WebApp extends WebExtension {
             else {
                 let doc = await this.buildDoc(req);
                 let html = Config.html == 'visual' ? doc.toVisual() : doc.toCompact();
-                console.log(html);
 
                 return {
                     mime: mkMime('text/html'),

@@ -45,11 +45,11 @@ register(class Module {
     }
     
     async load() {
-        if (FS.existsSync(this.path)) {
+        if (await pathExists(this.path)) {
             let stats = await FILES.stat(this.path);
 
             if (stats.isDirectory()) {
-                if (FS.existsSync(this.configPath)) {
+                if (await pathExists(this.configPath)) {
                     stats = await FILES.stat(this.configPath);
 
                     if (stats.isFile()) {

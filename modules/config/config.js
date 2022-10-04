@@ -48,6 +48,7 @@ exports = module.exports = new (class ConfigApp extends WebApp {
                 htmlElement('a',
                     htmlAttribute('href', 'https://google.com'),
                     htmlAttribute('target', '_blank'),
+                    htmlAttribute('senescense'),
                     htmlText('Click here for Google')
                 )
             )
