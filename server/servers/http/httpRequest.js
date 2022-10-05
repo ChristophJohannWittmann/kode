@@ -88,6 +88,15 @@ register(class HttpRequest {
         return this.requestBody.data;
     }
 
+    cipher() {
+        if ('getCipher' in this.httpReq.socket) {
+            return this.httpReq.socket.getCipher();
+        }
+        else {
+            return '';
+        }
+    }
+
     encoding() {
         if ('content-encoding' in this.headers()) {
             return this.header('content-encoding');
@@ -115,11 +124,11 @@ register(class HttpRequest {
     }
 
     host() {
-        return this.parsedUrl.host;
+        return this.parsedUrl.host !== null ? this.parsedUrl.host : '';
     }
 
     hostname() {
-        return this.parsedUrl.hostname;
+        return this.parsedUrl.hostname !== null ? this.parsedUrl.hostname : '';
     }
 
     href() {
@@ -217,7 +226,7 @@ register(class HttpRequest {
     }
 
     path() {
-        return this.parsedUrl.path;
+        return this.httpReq.path !== null ? this.httpReq.path : '';
     }
 
     pathname() {
@@ -239,19 +248,19 @@ register(class HttpRequest {
     }
 
     protocol() {
-        return this.parsedUrl.protocol;
+        return this.parsedUrl.protocol !== null ? this.parsedUrl.protocol : '';
     }
 
     query() {
-        return this.parsedUrl.query;
+        return this.parsedUrl.query !== null ? this.parsedUrl.query : '';
     }
 
     search() {
-        return this.parsedUrl.search;
+        return this.parsedUrl.search !== null ? this.parsedUrl.search : '';
     }
 
     url() {
-        return this.httpReq.url;
+        return this.httpReq.url !== null ? this.httpReq.url : '';
     }
 
     userAgent() {

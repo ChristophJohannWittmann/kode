@@ -37,7 +37,7 @@ exports = module.exports = new (class ConfigApp extends WebApp {
                 htmlElement('script', 
                 htmlText(`
                 window.session = "${this.session}";
-                alert(window.session);
+                console.log(window.session);
                 `))
             ),
             htmlElement('body',

@@ -111,6 +111,23 @@ if (CLUSTER.isWorker) {
             else {
                 rsp.endError(404);
             }
+
+            new Promise(async (ok, fail) => {
+                let entry = mkDboHttpLog({
+                    ipAddr: req.host(),
+                    cipher: req.cipher(),
+                    method: req.method(),
+                    url: req.url(),
+                    headers: req.headers(),
+                    status: rsp.status,
+                });
+
+                let dbc = await dbConnect('#INET');
+                await dbc.startTransaction();
+                await entry.save(dbc);
+                await dbc.commit();
+                await dbc.free();
+            });
         }
 
         port() {

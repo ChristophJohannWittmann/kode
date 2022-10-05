@@ -159,7 +159,7 @@ global.dbText = {
     name: () => 'dbText',
     init: () => '',
     check: value => {
-        return value.toString();
+        return value !== null ? value.toString() : '';
     }
 };
 

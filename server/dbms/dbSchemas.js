@@ -128,48 +128,48 @@ mkDbSchema(
     '#INET',
     true,
     {
-        name: 'dnsDomain',
+        name: 'domain',
         columns: [
-            { name: 'domain',       type: dbText, size: 200 },
+            { name: 'name',         type: dbText, size: 200 },
             { name: 'tld',          type: dbText, size:  20 },
             { name: 'isVerified',   type: dbBool            },
             { name: 'lastVerified', type: dbTime            },
         ],
         indexes: [
-            'domain:asc',
+            'name:asc',
             'tld:asc',
+        ]
+    },
+    {
+        name: 'httpLog',
+        columns: [
+            { name: 'ipAddr',       type: dbText, size:  50 },
+            { name: 'cipher',       type: dbText, size:  50 },
+            { name: 'method',       type: dbText, size:  20 },
+            { name: 'url',          type: dbText, size: 400 },
+            { name: 'headers',      type: dbJson, size: 900 },
+            { name: 'status',       type: dbInt32           },
+        ],
+        indexes: [
+            'ipAddr:asc',
+            'method:asc',
+            'url:asc',
+            'status:asc',
         ]
     },
     {
         name: 'smtpAddr',
         columns: [
             { name: 'domainOid',    type: dbInt64           },
+            { name: 'user',         type: dbText, size: 200 },
             { name: 'addr',         type: dbText, size: 200 },
             { name: 'verified',     type: dbBool            },
             { name: 'lastVerified', type: dbTime            },
         ],
         indexes: [
             'domainOid:asc',
+            'user:asc',
             'addr:asc',
-        ]
-    },
-    {
-        name: 'uri',
-        columns: [
-            { name: 'ownerType',    type: dbText, size:   20 },
-            { name: 'ownerOid',     type: dbInt64            },
-            { name: 'scheme',       type: dbText, size:   10 },
-            { name: 'host',         type: dbText, size:   20 },
-            { name: 'user',         type: dbText, size:  200 },
-            { name: 'domainOid',    type: dbInt64            },
-            { name: 'query',        type: dbText, size: 1000 },
-            { name: 'fragment',     type: dbText, size: 1000 },
-            { name: 'uri',          type: dbText, size:  200 },
-            { name: 'verified',     type: dbBool             },
-            { name: 'lastVerified', type: dbTime             },
-        ],
-        indexes: [
-            'ownerType:asc, ownerOid:asc',
         ]
     },
 ).registerClass();
