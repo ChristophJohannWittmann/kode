@@ -40,7 +40,7 @@
 register(class WebApp extends WebExtension {
     constructor() {
         super();
-        this.authenticate = false;
+        this.authenticated = false;
         this.clientFramework = [];
         this.clientApplication = [];
         this.serverApplication = [];
@@ -64,8 +64,7 @@ register(class WebApp extends WebExtension {
             mime: mkMime('text/plain'),
             data: '',
         };
-    }
-      
+    } 
 
     async handlePOST(req) {
         return {
@@ -77,9 +76,10 @@ register(class WebApp extends WebExtension {
     async handleHttpRequest(req) {
         if (req.method() == 'GET') {
             if (req.hasParameters()) {
-                return await this.handleGet(req);
+                return await this.handleGET(req);
             }
             else {
+                this.session = await Ipc.queryPrimary({ messageName: '#SentinelCreateSession' });
                 let doc = await this.buildDoc(req);
                 let html = Config.html == 'visual' ? doc.toVisual() : doc.toCompact();
 
@@ -90,12 +90,12 @@ register(class WebApp extends WebExtension {
             }
         }
         else if (req.method() == 'POST') {
-            return await this.handlePost(req);
+            return await this.handlePOST(req);
         }
     }
 
-    async init() {
-        await super.init();
+    async init(module) {
+        await super.init(module);
         this.css = await this.buildCss();
     }
 

@@ -33,8 +33,9 @@ class Resource {
         string: buffer => buffer.toString(),
     };
 
-    constructor(reference) {
+    constructor(reference, module) {
         return new Promise(async (ok, fail) => {
+            this.module = module;
             this.expires = null;
             this.oneTime = false;
             this.url = reference.expandedUrl;
@@ -48,7 +49,7 @@ class Resource {
                 if (code.match(/'javascript-web-extension';/m)) {
                     this.webExtension = true;
                     this.value = require(this.path);
-                    await this.value.init();
+                    await this.value.init(this.module);
                 }
             }
 
@@ -170,13 +171,13 @@ singleton(class ResourceLibrary {
         }
     }
     
-    async register(reference) {
+    async register(reference, module) {
         for (let ref of await this.expandReference(reference)) {
             if (ref.expandedUrl in this.urls) {
                 logPrimary(`    ERROR: "Duplicate URL ignored"  URL: "${ref.expandedUrl}"`);
             }
             else {
-                let resource = await (new Resource(ref));
+                let resource = await (new Resource(ref, module));
                 this.urls[resource.url] = resource;
 
                 if (resource.webExtension) {

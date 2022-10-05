@@ -28,13 +28,17 @@ exports = module.exports = new (class ConfigApp extends WebApp {
     constructor() {
         super();
         this.useSocket = true;
-        this.authenticate = true;
     }
 
     async buildDoc(req) {
         return htmlDocument(
             htmlElement('head',
-                htmlElement('style', htmlText(this.css))
+                htmlElement('style', htmlText(this.css)),
+                htmlElement('script', 
+                htmlText(`
+                window.session = "${this.session}";
+                alert(window.session);
+                `))
             ),
             htmlElement('body',
                 htmlAttribute('class', 'font3'),
@@ -48,14 +52,13 @@ exports = module.exports = new (class ConfigApp extends WebApp {
                 htmlElement('a',
                     htmlAttribute('href', 'https://google.com'),
                     htmlAttribute('target', '_blank'),
-                    htmlAttribute('senescense'),
                     htmlText('Click here for Google')
                 )
             )
         );
     }
 
-    async handleGet(req) {        
+    async handleGET(req) {        
         return {
             mime: mkMime('text/plain'),
             data: 'The configuration App'
@@ -69,7 +72,7 @@ exports = module.exports = new (class ConfigApp extends WebApp {
         };
     }
 
-    async init() {
-        await super.init();
+    async init(module) {
+        await super.init(module);
     }
 })();

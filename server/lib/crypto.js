@@ -37,7 +37,10 @@ register(class Crypto {
 
             hash.on('readable', () => {
                 let hashValue = hash.read();
-                ok({ hash: hashValue.toString('base64'), salt: salt });
+
+                if (hashValue) {
+                    ok({ hash: hashValue.toString('base64'), salt: salt });
+                }
             });
 
             hash.write(value);
@@ -61,14 +64,22 @@ register(class Crypto {
 
             hash.on('readable', () => {
                 let hashValue = hash.read();
-                ok(hashValue.toString('base64'));
+
+                if (hashValue) {
+                    ok(hashValue.toString('base64'));
+                }
             });
 
             hash.write(value);
             hash.end();
         });
     }
-  
+    
+    
+    /*****
+     * An easy-to-use random number generator.  Use this internally or for
+     * other framework code.
+    *****/
     static random(min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }

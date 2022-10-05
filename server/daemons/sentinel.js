@@ -23,11 +23,28 @@
 
 /*****
 *****/
+class Session {
+    constructor(id) {
+        this.id = id;
+        this.state = 'anon';
+    }
+
+    async upgrade(user) {
+        this.state = 'signed'
+        this.org = null;
+        this.user = null;
+        this.grants = {};
+    }
+}
+
+
+/*****
+*****/
 singleton(class Sentinel extends Daemon {
     constructor() {
         super();
         this.sessions = {};
-        this.nextSessionNumber = 1;
+        this.expiring = [];
         
         this.permissions = mkSet(
             'sys',
@@ -53,6 +70,14 @@ singleton(class Sentinel extends Daemon {
     }
 
     async onCreateSession(message) {
+        let id = await Crypto.digestUnsalted('sha256', (new Date()).toString());
+
+        while (id in this.sessions) {
+            id = await Crypto.digestUnsalted('sha256', (new Date()).toString());
+        }
+
+        let session = new Session(id);
+        Message.reply(message, session.id);
     }
 
     async onListPermissions(message) {

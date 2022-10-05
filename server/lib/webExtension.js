@@ -57,8 +57,13 @@ register(class WebExtension extends Emitter {
         };
     }
 
-    async init() {
+    async init(module) {
+        this.module = module;
         await Ipc.queryPrimary({ messageName: '#SentinelAddPermissions', permissions: this.permissions });
+    }
+
+    moduleName() {
+        this.module.namespace;
     }
 
     name() {
