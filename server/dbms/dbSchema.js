@@ -364,7 +364,7 @@ register(class DbSchema {
 
     registerClass() {
         for (let table of this.tableArray) {
-            defineDboType(table);
+            defineDboType(table, this.name);
         }
 
         this.registered = true;

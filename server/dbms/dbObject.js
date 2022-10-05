@@ -29,7 +29,7 @@
  * feature to register classes and function that simplify programmatic use of
  * the DBMS tables and records.
 *****/
-register(function defineDboType(schemaTable) {
+register(function defineDboType(schemaTable, schemaName) {
     const tableName = `_${toSnakeCase(schemaTable.name)}`;
     const className = `Dbo${schemaTable.name[0].toUpperCase()}${schemaTable.name.substr(1)}`;
 
@@ -46,6 +46,24 @@ register(function defineDboType(schemaTable) {
         name: column.name,
         type: column.type,
     }));
+
+    async function closeDbc(dbc) {
+        if (dbc['#OnDemand']) {
+            await dbc.commit();
+            await dbc.free();
+            delete dbc['#OnDemand'];
+        }
+    }
+
+    async function openDbc(dbc) {
+        if (!dbc) {
+            dbc = await dbConnect(schemaName);
+            await dbc.startTransaction();
+            dbc['#OnDemand'] = true;
+        }
+
+        return dbc;
+    }
     
     eval(`
     register(class ${className} {
@@ -69,9 +87,13 @@ register(function defineDboType(schemaTable) {
         }
 
         async erase(dbc) {
-            await dbc.query("DELETE FROM ${tableName} WHERE _oid=" + this.oid);
-            this.oid = 0;
-            return this;
+            if (this.oid > 0) {
+                dbc = await openDbc(dbc);
+                await dbc.query("DELETE FROM ${tableName} WHERE _oid=" + this.oid);
+                this.oid = 0;
+                await closeDbc(dbc);
+                return this;
+            };
         }
 
         init() {
@@ -101,9 +123,12 @@ register(function defineDboType(schemaTable) {
 
             let result = await dbc.query(sql.join(' '), true);
             this.oid = result.data;
+            await closeDbc(dbc);
         }
 
         async save(dbc) {
+            dbc = await openDbc(dbc);
+
             if (this.oid == 0) {
                 await this.insert(dbc);
             }
@@ -149,15 +174,20 @@ register(function defineDboType(schemaTable) {
     });
 
     register(async function erase${className}(dbc, where) {
+        dbc = await openDbc(dbc);
+
         if (typeof where == 'string') {
             await dbc.query("DELETE FROM ${tableName} WHERE " + where);
         }
         else if (typeof where == 'number' || typeof where == 'bigint') {
             await dbc.query("DELETE FROM ${tableName} WHERE _oid=" + where);
         }
+
+        await closeDbc(dbc);
     });
 
     register(async function get${className}(dbc, oid) {
+        dbc = await openDbc(dbc);
         let sql = ['SELECT'];
         sql.push('${Object.keys(fwdMap).map(key => "_" + toSnakeCase(key)).join(',')}');
         sql.push('FROM ${tableName}');
@@ -174,14 +204,17 @@ register(function defineDboType(schemaTable) {
                 data[toCamelCase(entry[0])] = dbcType.decode(entry[1]);
             });
 
+            await closeDbc(dbc);
             return mk${className}(data);
         }
         else {
+            await closeDbc(dbc);
             return mk${className}();
         }
     });
 
     register(async function select${className}(dbc, where, order) {
+        dbc = await openDbc(dbc);
         let sql = ['SELECT'];
         sql.push('${Object.keys(fwdMap).map(key => "_" + toSnakeCase(key)).join(',')}');
         sql.push('FROM ${tableName}');
@@ -205,14 +238,17 @@ register(function defineDboType(schemaTable) {
                 array.push(mk${className}(data));
             }
 
+            await closeDbc(dbc);
             return array;
         }
         else {
+            await closeDbc(dbc);
             return [];
         }
     });
 
     register(async function selectOne${className}(dbc, where, order) {
+        dbc = await openDbc(dbc);
         let sql = ['SELECT'];
         sql.push('${Object.keys(fwdMap).map(key => "_" + toSnakeCase(key)).join(',')}');
         sql.push('FROM ${tableName}');
@@ -231,14 +267,17 @@ register(function defineDboType(schemaTable) {
                 data[toCamelCase(entry[0])] = dbcType.decode(entry[1]);
             });
 
+            await closeDbc(dbc);
             return (mk${className}(data));
         }
         else {
+            await closeDbc(dbc);
             return [];
         }
     });
 
     register(async function update${className}(dbc, changes, where) {
+        dbc = await openDbc(dbc);
         let updated = mkTime();
         let dbcTypes = dbc.dbClass().dbTypes();
         let sql = ['UPDATE ${tableName}'];
@@ -266,6 +305,7 @@ register(function defineDboType(schemaTable) {
         }
 
         let result = await dbc.query(sql.join(' '));
+        await closeDbc(dbc);
     });
     `);
 });

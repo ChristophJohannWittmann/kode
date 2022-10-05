@@ -117,7 +117,6 @@ require('./dbms/pgClient.js');
 require('./dbms/dbSchema.js');
 require('./dbms/dbSchemaAnalyzer.js');
 require('./dbms/dbObject.js');
-require('./dbms/dbSchemas.js');
 
 require('./cluster.js');
 require('./addon.js');
@@ -225,6 +224,7 @@ async function prepareDbms() {
     }
 
     await onSingletons();
+    require('./dbms/dbSchemas.js');
     namespace();
  
     logPrimary('[ Loading Modules ]');
