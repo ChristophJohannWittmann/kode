@@ -327,33 +327,38 @@ register(class DbSchema {
     static schemas = {};
 
     constructor(name, defined, ...tableDefs) {
-        this.name = name;
-        this.tableMap = {};
-        this.tableArray = [];
-        this.registered = false;
+        if (!defined || name.startsWith('#')) {
+            this.name = name;
+            this.tableMap = {};
+            this.tableArray = [];
+            this.registered = false;
 
-        if (defined && this.name in DbSchema.schemas) {
-            throw new Error(`Duplicate DB schema name: ${this.name}`);
+            if (defined && this.name in DbSchema.schemas) {
+                throw new Error(`Duplicate DB schema name: ${this.name}`);
+            }
+            else {
+                if (defined) {
+                    DbSchema.schemas[this.name] = this;
+                }
+                
+                for (let tableDef of tableDefs) {
+                    if (defined) {
+                        tableDef.columns.unshift({ name: 'updated', type: dbTime });
+                        tableDef.columns.unshift({ name: 'created', type: dbTime });
+                        tableDef.columns.unshift({ name: 'oid',     type: dbKey  });
+                        tableDef.indexes.unshift('updated:asc');
+                        tableDef.indexes.unshift('created:asc');
+                        tableDef.indexes.unshift('oid:asc');
+                    }
+
+                    let schemaTable = new DbSchemaTable(this, tableDef);
+                    this.tableArray.push(schemaTable);
+                    this.tableMap[schemaTable.name] = schemaTable;
+                }
+            }
         }
         else {
-            if (defined) {
-                DbSchema.schemas[this.name] = this;
-            }
-            
-            for (let tableDef of tableDefs) {
-                if (defined) {
-                    tableDef.columns.unshift({ name: 'updated', type: dbTime });
-                    tableDef.columns.unshift({ name: 'created', type: dbTime });
-                    tableDef.columns.unshift({ name: 'oid',     type: dbKey  });
-                    tableDef.indexes.unshift('updated:asc');
-                    tableDef.indexes.unshift('created:asc');
-                    tableDef.indexes.unshift('oid:asc');
-                }
-
-                let schemaTable = new DbSchemaTable(this, tableDef);
-                this.tableArray.push(schemaTable);
-                this.tableMap[schemaTable.name] = schemaTable;
-            }
+            throw new Error(`Schema name required to begin with "#": "${name}"`);
         }
     }
 

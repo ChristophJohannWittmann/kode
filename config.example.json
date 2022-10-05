@@ -30,6 +30,11 @@
             "database": "postgres"
         }
     },
+    "schemas": {
+        "#USER": "main",
+        "#CONTACT": "main",
+        "#INET": "main"
+    },
     "servers": {
         "http": {
             "type": "HttpServer",

@@ -35,7 +35,6 @@ register(class Module {
         this.status = 'ok';
         this.prefix = '(ok      )';
         this.error = '';
-        this.schemas = {};
     }
 
     info() {
@@ -59,15 +58,6 @@ register(class Module {
                                 for (let reference of this.config.references) {
                                     reference.modulePath = this.path;
                                     await ResourceLibrary.register(reference, this);
-                                }
-                            }
-
-                            for (let mapping of this.config.schemas) {
-                                if (mapping.schemaName in this.schemas) {
-                                    throw new Error(`Duplicate mapping for schema "${mapping.schemaName}"`);
-                                }
-                                else {
-                                    this.schemas[mapping.schemaName] = mapping.configName;
                                 }
                             }
 

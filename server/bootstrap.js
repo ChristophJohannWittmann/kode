@@ -148,19 +148,14 @@ require('./servers/http.js');
 async function prepareDbms() {
     let configMap = {};
 
-    for (let module of Config.moduleArray) {
-        if ('schemas' in module.config) {
-            for (let instance of module.config.schemas) {
-                if (!(instance.schemaName in DbSchema.schemas)) {
-                    throw new Error(`Undefined DBMS schema name: ${instance.schemaName}`);
-                }
+    for (let schemaName in Config.schemas) {
+        let configName = Config.schemas[schemaName];
 
-                if (!(instance.configName in configMap)) {
-                    configMap[instance.configName] = mkSet();
-                }
-
-                configMap[instance.configName].set(instance.schemaName);
-            }
+        if (configName in configMap) {
+            configMap[configName].set(schemaName);
+        }
+        else {
+            configMap[configName] = mkSet(schemaName);
         }
     }
 

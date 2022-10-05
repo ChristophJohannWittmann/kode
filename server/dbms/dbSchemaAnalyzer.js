@@ -34,6 +34,7 @@ class DbDatabaseDiff {
     constructor(settings, isUpgrade) {
         this.settings = settings;
         this.isUpgrade = isUpgrade;
+        this.sized = dbSized(this.settings);
     }
     
     async downgrade() {
@@ -58,6 +59,7 @@ class DbTableDiff {
         this.settings = settings;
         this.isUpgrade = isUpgrade;
         this.tableInfo = tableInfo
+        this.sized = dbSized(this.settings);
     }
     
     async downgrade() {
@@ -77,9 +79,19 @@ class DbTableDiff {
             let dbc = await dbConnect(this.settings);
 
             let columns = this.tableInfo.columnArray.map(columnDef => {
-                let name = `_${toSnakeCase(columnDef.name)}`;
-                let type = dbc.types()[columnDef.type.name()].type();
-                return `${name} ${type}`;
+                if (this.sized) {
+                    // TODO *** SIZED
+                    /*
+                    let name = `_${toSnakeCase(columnDef.name)}`;
+                    let type = dbTypes(this.settings)[columnDef.type.name()];
+                    return `${name} ${type.type()}`;
+                    */
+                }
+                else {
+                    let name = `_${toSnakeCase(columnDef.name)}`;
+                    let type = dbTypes(this.settings)[columnDef.type.name()];
+                    return `${name} ${type.type()}`;
+                }
             }).join(', ');
 
             await dbc.query(`CREATE TABLE _${toSnakeCase(this.tableInfo.name)} (${columns});`);
@@ -102,6 +114,7 @@ class DbColumnDiff {
         this.settings = settings;
         this.isUpgrade = isUpgrade;
         this.columnInfo = columnInfo;
+        this.sized = dbSized(this.settings);
     }
     
     async downgrade() {
@@ -119,8 +132,17 @@ class DbColumnDiff {
     async upgrade() {
         if (this.isUpgrade) {
             let dbc = await dbConnect(this.settings);
-            let type = dbc.types()[this.columnInfo.type.name()].type();
-            dbc.query(`ALTER TABLE _${toSnakeCase(this.columnInfo.table.name)} ADD COLUMN _${toSnakeCase(this.columnInfo.name)} ${type};`);
+            let type;
+
+            if (this.sized) {
+                // TODO *** SIZED
+                //type = dbc.types()[this.columnInfo.type.name()].type();
+            }
+            else {
+                type = dbTypes(this.settings)[this.columnInfo.type.name()];
+            }
+
+            dbc.query(`ALTER TABLE _${toSnakeCase(this.columnInfo.table.name)} ADD COLUMN _${toSnakeCase(this.columnInfo.name)} ${type.type()};`);
             await dbc.free();
         }
     }
@@ -131,6 +153,7 @@ class DbIndexDiff {
         this.settings = settings;
         this.isUpgrade = isUpgrade;
         this.indexInfo = indexInfo;
+        this.sized = dbSized(this.settings);
     }
     
     async downgrade() {

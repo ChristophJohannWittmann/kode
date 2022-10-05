@@ -98,7 +98,13 @@ global.DbClient = class DbClient {
 *****/
 register(async function dbConnect(config) {
     if (typeof config == 'string') {
-        this.config = Config.databases[config];
+        if (config.startsWith('#')) {
+            let configName = Config.schemas[config];
+            this.config = Config.databases[configName];
+        }
+        else {
+            this.config = Config.databases[config];
+        }
     }
     else if (typeof config == 'object') {
         this.config = config;

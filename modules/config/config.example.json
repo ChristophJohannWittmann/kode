@@ -1,9 +1,6 @@
 {
     "active": true,
     "ns": "config",
-    "schemas": [
-        { "schemaName": "#USER", "configName": "main" }
-    ],
     "references": [
         { "url": "/config", "type": "app", "path": "./config.js" }
     ]

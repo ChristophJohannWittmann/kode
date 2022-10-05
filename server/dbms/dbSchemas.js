@@ -81,42 +81,6 @@ mkDbSchema(
             'name:asc',
         ]
     },
-    {
-        name: 'phone',
-        columns: [
-            { name: 'ownerType',   type: dbText, size:   20 },
-            { name: 'ownerOid',    type: dbInt64            },
-            { name: 'country',     type: dbText, size:   10 },
-            { name: 'region',      type: dbText, size:   20 },
-            { name: 'number',      type: dbText, size:  200 },
-            { name: 'unformatted', type: dbText, size:  200 },
-            { name: 'formatted',   type: dbText, size:  200 },
-        ],
-        indexes: [
-            'ownerType:asc, ownerOid:asc',
-            'unformatted:asc',
-        ]
-    },
-    {
-        name: 'address',
-        columns: [
-            { name: 'ownerType',    type: dbText, size:  20 },
-            { name: 'ownerOid',     type: dbInt64           },
-            { name: 'street',       type: dbText, size: 100 },
-            { name: 'building',     type: dbText, size:  50 },
-            { name: 'suite',        type: dbText, size:  50 },
-            { name: 'poBox',        type: dbText, size:  20 },
-            { name: 'city',         type: dbText, size: 100 },
-            { name: 'region',       type: dbText, size: 100 },
-            { name: 'postalCode',   type: dbText, size:  20 },
-            { name: 'countryCode',  type: dbText, size:   6 },
-            { name: 'verified',     type: dbBool            },
-            { name: 'lastVerified', type: dbTime            },
-        ],
-        indexes: [
-            'ownerType:asc, ownerOid:asc',
-        ]
-    },
 ).registerClass();
 
 mkDbSchema(
