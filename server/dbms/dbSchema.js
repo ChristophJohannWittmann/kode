@@ -325,6 +325,7 @@ global.dbTimeArray = {
 *****/
 register(class DbSchema {
     static schemas = {};
+    static tables = {};
 
     constructor(name, defined, ...tableDefs) {
         if (!defined || name.startsWith('#')) {
@@ -332,17 +333,18 @@ register(class DbSchema {
             this.tableMap = {};
             this.tableArray = [];
             this.registered = false;
+            this.defined = defined;
 
-            if (defined && this.name in DbSchema.schemas) {
+            if (this.defined && this.name in DbSchema.schemas) {
                 throw new Error(`Duplicate DB schema name: ${this.name}`);
             }
             else {
-                if (defined) {
+                if (this.defined) {
                     DbSchema.schemas[this.name] = this;
                 }
                 
                 for (let tableDef of tableDefs) {
-                    if (defined) {
+                    if (this.defined) {
                         tableDef.columns.unshift({ name: 'updated', type: dbTime });
                         tableDef.columns.unshift({ name: 'created', type: dbTime });
                         tableDef.columns.unshift({ name: 'oid',     type: dbKey  });
@@ -380,6 +382,15 @@ class DbSchemaTable {
         this.columnArray = [];
         this.indexMap = {};
         this.indexArray = [];
+
+        if (this.schema.defined) {
+            if (this.name in DbSchema.tables) {
+                throw new Error(`Duplicate DBMS table name: ${this.name}`);
+            }
+            else {
+                DbSchema.tables[this.name] = this;
+            }
+        }
   
         tableDef.columns.forEach(columnDef => {
             if (columnDef.name in this.columnMap) {

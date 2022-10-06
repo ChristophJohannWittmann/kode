@@ -33,8 +33,8 @@
 register(class WebExtension extends Emitter {
     constructor() {
         super();
-        this.permissions = [];
         this.useSocket = false;
+        this.permissions = mkSet();
     }
 
     async handle(req, rsp) {
@@ -62,7 +62,7 @@ register(class WebExtension extends Emitter {
         await Ipc.queryPrimary({ messageName: '#SentinelAddPermissions', permissions: this.permissions });
     }
 
-    moduleName() {
+    moduleNamespace() {
         this.module.namespace;
     }
 

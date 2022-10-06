@@ -65,6 +65,7 @@ global.URL       = require('url');
  * Imported NPM Modules, which are enumerated in the package.json directory
  * for the framework.
 *****/
+global.npmBeautify  = require('js-beautify');
 global.npmPG        = require('pg');
 global.npmGZIP      = require('node-gzip');
 
@@ -86,6 +87,7 @@ global.env = {
     hostname:       OS.hostname(),
     network:        OS.networkInterfaces(),
     memory:         ({ free: OS.freemem(), total: OS.totalmem() }),
+    pid:            PROC.pid,
     kodePath:       PATH.join(__dirname, '..'),
     addonPath:      PATH.join(__dirname, './addons'),
     nodeModulePath: PATH.join(__dirname, '../node_modules'),

@@ -40,7 +40,6 @@
 register(class WebApp extends WebExtension {
     constructor() {
         super();
-        this.authenticated = false;
         this.clientFramework = [];
         this.clientApplication = [];
         this.serverApplication = [];
@@ -52,19 +51,12 @@ register(class WebApp extends WebExtension {
         return (await execShell(`node ${minifyPath} ${cssPath}`)).stdout.trim();
     }
 
-    async buildDoc(req) {
+    async buildDoc(opts, values) {
         return htmlDocument(
             htmlElement('head'),
             htmlElement('body'),
         );
     }
-
-    async handleGET(req) {
-        return {
-            mime: mkMime('text/plain'),
-            data: '',
-        };
-    } 
 
     async handlePOST(req) {
         return {
@@ -75,19 +67,14 @@ register(class WebApp extends WebExtension {
 
     async handleHttpRequest(req) {
         if (req.method() == 'GET') {
-            if (req.hasParameters()) {
-                return await this.handleGET(req);
-            }
-            else {
-                this.session = await Ipc.queryPrimary({ messageName: '#SentinelCreateSession' });
-                let doc = await this.buildDoc(req);
-                let html = Config.html == 'visual' ? doc.toVisual() : doc.toCompact();
+            let session = await Ipc.queryPrimary({ messageName: '#SentinelCreateSession' });
+            let doc = await this.buildDoc(req, { session: session });
+            let html = Config.html == 'visual' ? await doc.toVisual() : await doc.toCompact();
 
-                return {
-                    mime: mkMime('text/html'),
-                    data: html,
-                };
-            }
+            return {
+                mime: mkMime('text/html'),
+                data: html,
+            };
         }
         else if (req.method() == 'POST') {
             return await this.handlePOST(req);

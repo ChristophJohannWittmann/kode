@@ -117,3 +117,17 @@ register(async function recurseFiles(...args) {
   
     return files;
 });
+
+
+/*****
+ * Write data to a temporary file and have the temporary file path returned.
+ * Optionally, apply an extension to the filename.  Some applications like to
+ * have the associated extension in the filename.
+*****/
+let tempId = 1;
+
+register(async function writeTemp(content, ext) {
+    let path = ext ? `PID${env.pid}U${tempId++}.${ext}` : `PID${env.pid}U${tempId++}`;
+    await FILES.writeFile(path, content);
+    return path;
+});

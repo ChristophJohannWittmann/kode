@@ -26,7 +26,7 @@
 class Session {
     constructor(id) {
         this.id = id;
-        this.state = 'anon';
+        this.state = 'anonymous';
     }
 
     async upgrade(user) {
@@ -53,7 +53,7 @@ singleton(class Sentinel extends Daemon {
     }
 
     async onAddPermissions(message) {
-        for (let permission of message.permissions) {
+        for (let permission of message.permissions.array()) {
             this.permissions.set(permission);
         }
 

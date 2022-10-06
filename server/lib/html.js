@@ -57,12 +57,35 @@ class Text extends Node {
         return new Text(this.text);
     }
 
-    toCompact() {
+    async toCompact() {
         return `${this.text}`;
     }
 
-    toVisual(indent) {
+    async toVisual(indent) {
         return `${indent}${this.text}\n`;
+    }
+}
+
+class Script extends Node {
+    constructor(code) {
+        super('text');
+        this.code = code;
+    }
+
+    copy() {
+        return new Script(this.code);
+    }
+
+    async toCompact() {
+        let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
+        let jsPath = await writeTemp(this.code, 'js');
+        return (await execShell(`node ${minifyPath} ${jsPath}`)).stdout.trim();
+    }
+
+    async toVisual(indent) {
+        return npmBeautify.js(this.code, { indent_size: 2 }).split('\n').map(line => {
+            return `${indent}${line}`;
+        }).join('\n') + '\n';
     }
 }
 
@@ -77,7 +100,7 @@ class Attribute extends Node {
         return new Attribute(this.name, this.value);
     }
 
-    toCompact() {
+    async toCompact() {
         if (this.value !== undefined) {
             return ` ${this.name}="${this.value}"`
         }
@@ -86,7 +109,7 @@ class Attribute extends Node {
         }
     }
 
-    toVisual() {
+    async toVisual() {
         if (this.value !== undefined) {
             return ` ${this.name}="${this.value}"`
         }
@@ -132,12 +155,12 @@ class Element extends Node {
         return copy;
     }
 
-    toCompact() {
+    async toCompact() {
         let tag = [`<${this.tagName}`];
 
         for (let child of this.children) {
             if (child.type == 'attribute') {
-                tag.push(child.toCompact());
+                tag.push(await child.toCompact());
             }
         }
 
@@ -145,7 +168,7 @@ class Element extends Node {
 
         for (let child of this.children) {
             if (child.type != 'attribute') {
-                tag.push(child.toCompact());
+                tag.push(await child.toCompact());
             }
         }
 
@@ -156,7 +179,7 @@ class Element extends Node {
         return tag.join('');
     }
 
-    toVisual(indent) {
+    async toVisual(indent) {
         let tag = [
             `${indent}`,
             `<${this.tagName}`,
@@ -164,7 +187,7 @@ class Element extends Node {
 
         for (let child of this.children) {
             if (child.type == 'attribute') {
-                tag.push(child.toVisual());
+                tag.push(await child.toVisual());
             }
         }
 
@@ -172,7 +195,7 @@ class Element extends Node {
 
         for (let child of this.children) {
             if (child.type != 'attribute') {
-                tag.push(child.toVisual(indent + '  '));
+                tag.push(await child.toVisual(indent + '  '));
             }
         }
 
@@ -203,12 +226,12 @@ class Document extends Node {
         return copy;
     }
 
-    toCompact() {
-        return '<!DOCTYPE html>' + this.html.toCompact('');
+    async toCompact() {
+        return '<!DOCTYPE html>' + await this.html.toCompact('');
     }
 
-    toVisual() {
-        return '<!DOCTYPE html>\n' + this.html.toVisual('');
+    async toVisual() {
+        return '<!DOCTYPE html>\n' + await this.html.toVisual('');
     }
 }
 
@@ -247,4 +270,8 @@ register(function htmlAttribute(name, value) {
 
 register(function htmlText(value) {
     return new Text(value);
+});
+
+register(function htmlScript(code) {
+    return new Script(code);
 });

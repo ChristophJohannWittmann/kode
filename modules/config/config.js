@@ -35,10 +35,15 @@ exports = module.exports = new (class ConfigApp extends WebApp {
             htmlElement('head',
                 htmlElement('style', htmlText(this.css)),
                 htmlElement('script', 
-                htmlText(`
-                window.session = "${this.session}";
-                console.log(window.session);
-                `))
+                    htmlScript(`
+                        window.session = "${this.session}";
+                        console.log(window.session);
+
+                        if (true) {
+                            console.log('hello');
+                        }
+                    `)
+                )
             ),
             htmlElement('body',
                 htmlAttribute('class', 'font3'),
@@ -58,21 +63,10 @@ exports = module.exports = new (class ConfigApp extends WebApp {
         );
     }
 
-    async handleGET(req) {        
-        return {
-            mime: mkMime('text/plain'),
-            data: 'The configuration App'
-        };
-    }
-
     async handlePOST(req) {
         return {
             mime: mkMime('text/plain'),
             data: 'The configuration App'
         };
-    }
-
-    async init(module) {
-        await super.init(module);
     }
 })();

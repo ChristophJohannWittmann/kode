@@ -89,27 +89,36 @@ if (CLUSTER.isWorker) {
         async handle(httpReq, httpRsp) {
             let req = await mkHttpRequest(this, httpReq);
             let rsp = await mkHttpResponse(this, httpRsp, req);
-            let resource = await ResourceLibrary.get(req.pathname());
 
-            if (resource) {
-                if (resource.webExtension) {
-                    await resource.value.handle(req, rsp);
-                }
-                else {
-                    let content = await resource.get(rsp.encoding);
+            if (req.method() in { GET:0, POST:0 }) {
+                let resource = await ResourceLibrary.get(req.pathname());
 
-                    if (content.error) {
-                        rsp.mime = mkMime('text/plain');
-                        rsp.end(`Error while fetching ${req.url()}`);
+                if (resource) {
+                    if (resource.webExtension) {
+                        await resource.value.handle(req, rsp);
+                    }
+                    else if (req.method() == 'GET') {
+                        let content = await resource.get(rsp.encoding);
+
+                        if (content.error) {
+                            rsp.mime = mkMime('text/plain');
+                            rsp.end(`Error while fetching ${req.url()}`);
+                        }
+                        else {
+                            rsp.mime = content.mime;
+                            rsp.end(content.value);
+                        }
                     }
                     else {
-                        rsp.mime = content.mime;
-                        rsp.end(content.value);
+                        rsp.endError(405);
                     }
+                }
+                else {
+                    rsp.endError(404);
                 }
             }
             else {
-                rsp.endError(404);
+                rsp.endError(405);
             }
 
             await mkDboHttpLog({
