@@ -48,7 +48,7 @@ class Resource {
 
                 if (code.match(/'javascript-web-extension';/m)) {
                     this.webExtension = true;
-                    this.value = require(this.path);
+                    this.value = new require(this.path)();
                     this.value.module = module;
                 }
             }

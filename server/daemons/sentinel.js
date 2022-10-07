@@ -26,11 +26,11 @@
 class Session {
     constructor(id) {
         this.id = id;
-        this.state = 'anonymous';
+        this.state = 'unauth';
     }
 
     async upgrade(user) {
-        this.state = 'signed'
+        this.state = 'anon'
         this.org = null;
         this.user = null;
         this.grants = {};
@@ -51,7 +51,7 @@ singleton(class Sentinel extends Daemon {
             'user',
         );
     }
-
+    /*
     async onAddPermissions(message) {
         for (let permission of message.permissions.array()) {
             this.permissions.set(permission);
@@ -59,6 +59,7 @@ singleton(class Sentinel extends Daemon {
 
         Message.reply(message, 'ok');
     }
+    */
 
     async onAuthenticate(message) {
     }

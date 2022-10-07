@@ -96,6 +96,7 @@
                     let makerName = `mk${func.name}`;
                     let makerFunc = (...args) => Reflect.construct(func, args);
                     nsObject[makerName] = makerFunc;
+                    return makerFunc;
                 }
                 else {
                     throw new Error(`register(), class name must start with an upper-case letter: ${func.name}`);

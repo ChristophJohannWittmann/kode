@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="${description}">
+        <meta name="description" content="${description}">${links}
         <title>${title}</title>
         <style>
             ${css}
@@ -11,11 +11,9 @@
     </head>
     <script>
         window.session = '${session}';
-
-        function onLoaded() {
-        }
+        function load() {}
     </script>
-    <body onload="onLoaded()">
+    <body onload="load()">
         <h1>Hello Basic App</h1>
     </body>
 </html>

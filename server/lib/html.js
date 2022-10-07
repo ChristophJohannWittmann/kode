@@ -62,13 +62,13 @@ class Text extends Node {
     }
 
     async toVisual(indent) {
-        return `${indent}${this.text}\n`;
+        return `${indent ? indent : ''}${this.text}\n`;
     }
 }
 
 class Script extends Node {
     constructor(code) {
-        super('text');
+        super('code');
         this.code = code;
     }
 
@@ -181,7 +181,7 @@ class Element extends Node {
 
     async toVisual(indent) {
         let tag = [
-            `${indent}`,
+            `${indent ? indent : ''}`,
             `<${this.tagName}`,
         ];
 

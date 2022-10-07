@@ -19,6 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
 *****/
+'javascript-web-extension';
+
+
+/*****
+*****/
+let clientFramework;
+
+async function loadClientFramework() {
+    if (!clientFramework) {
+    }
+}
 
 
 /*****
@@ -37,40 +48,69 @@
  * the sub class is created.  Thereafter, that instance is used repeatedly for
  * handling HTTP and web socket requests.
 *****/
-register(class WebApp extends WebExtension {
-    static clientFramework = null;
-
+exports = module.exports = register(class WebApp extends WebExtension {
     constructor() {
         super();
         this.webSockets = {};
+        this.permissions = [];
     }
 
     async buildCSS(path) {
-        path = path ? path : PATH.join(env.kodePath, 'server/lib/webApp.css');
         this.visualCss = (await FILES.readFile(path)).toString();
         let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
         this.compactCss = (await execShell(`node ${minifyPath} ${path}`)).stdout.trim();
     }
 
     async buildHTML(path) {
-        path = path ? path : PATH.join(env.kodePath, 'server/lib/webApp.html');
         this.visualHtml = (await FILES.readFile(path)).toString();
         let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
         this.compactHtml = (await execShell(`node ${minifyPath} ${path}`)).stdout.trim();
     }
 
-    description() {
-        return 'Web application description.';
+    async buildLinks() {
+        let links = [];
+        this.links = '';
+
+        if ('favicons' in this.module.config) {
+            for (let favicon of this.module.config.favicons) {
+                switch (favicon.type) {
+                    case 'icon':
+                        let parsed = PATH.parse(favicon.href);
+                        let mime = mkMime(parsed.ext);
+
+                        links.push(
+                            await htmlElement('link',
+                                htmlAttribute('rel', favicon.type),
+                                htmlAttribute('type', mime.code),
+                                htmlAttribute('href', favicon.href)
+                            ).toCompact()
+                        );
+                        break;
+
+                    case 'shortcut icon':
+                        links.push(
+                            await htmlElement('link',
+                                htmlAttribute('rel', favicon.type),
+                                htmlAttribute('href', favicon.href)
+                            ).toCompact()
+                        );
+                        break;
+                }
+            }
+        }
+
+        if (links.length) {
+            this.links = `\n        ${links.join('\n        ')}`;
+        }
     }
 
     async handleGET(req) {
-        let session = await Ipc.queryPrimary({ messageName: '#SentinelCreateSession' });
-
         let doc = mkTextTemplate(Config.html == 'visual' ? this.visualHtml : this.compactHtml).set({
             css: this.compactCss,
-            title: this.title(),
-            description: this.description(),
-            session: session,
+            title: this.module.config.title,
+            description: this.module.config.description,
+            session: '',
+            links: this.links,
         });
 
         return {
@@ -88,25 +128,25 @@ register(class WebApp extends WebExtension {
 
     async init(cssPath, htmlPath) {
         await super.init();
-        await this.buildCSS(cssPath);
-        await this.buildHTML(htmlPath);
-        await WebApp.loadClientFramework();
+        await loadClientFramework();
+        await this.buildLinks();
+
+        if (this.module.config.css) {
+            await this.buildCSS(this.module.config.css);
+        }
+        else {
+            await this.buildCSS(PATH.join(env.kodePath, 'server/lib/webApp.css'));
+        }
+
+        if (this.module.config.html) {
+            await this.buildHTML(this.module.config.html);
+        }
+        else {
+            await this.buildHTML(PATH.join(env.kodePath, 'server/lib/webApp.html'));
+        }
     }
 
-    async loadClientApp(...args) {
-    }
-
-    static async loadClientFramework() {
-    }
-
-    async loadServerApp(...args) {
-    }
-
-    async onWebSocket(webSocket) {
+    async onWebSocket(req, webSocket) {
         //this.webSockets[webSocket.id] = webSocket;
-    }
-
-    title() {
-        return 'Web Application';
     }
 });

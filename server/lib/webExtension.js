@@ -19,6 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
 *****/
+'javascript-web-extension';
 
 
 /*****
@@ -30,13 +31,9 @@
  * resource.  This base class provides both the overall web-extension framwork
  * and some basic common features that are required for all web extensions.
 *****/
-register(class WebExtension extends Emitter {
+exports = module.exports = register(class WebExtension extends Emitter {
     constructor() {
         super();
-    }
-
-    description() {
-        return 'Web extension description.';
     }
 
     async handleGET(req) {
@@ -70,7 +67,7 @@ register(class WebExtension extends Emitter {
             }
         }
         catch (e) {
-            let text = `Web Extension HTTP Error: Extension "${this.name()}".`;
+            let text = `Web Extension HTTP Error: Extension "${this.module.config.title}".`;
             log(text, e);
             rsp.end(await compress(rsp.encoding, text));
         }
@@ -79,16 +76,11 @@ register(class WebExtension extends Emitter {
     async init() {
     }
 
-    name() {
-        return Reflect.getPrototypeOf(this).constructor.name;
-    }
-
-    title() {
-        return 'Web Extension';
+    async onWebSocket(req, webSocket) {
     }
 
     async upgrade(httpReq, socket, headPacket) {
-        if (Reflect.has(this, 'onWebScoekt')) {
+        if (this.module.config.websocket) {
             let secureKey = httpReq.headers['sec-websocket-key'];
             let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
             let webSocket = mkWebSocket(socket, req.headers['sec-websocket-extensions'], headPacket);
@@ -106,7 +98,7 @@ register(class WebExtension extends Emitter {
             }
         
             socket.write(headers.join('\r\n'));
-            await this.onWebSocket(webSocket);
+            await this.onWebSocket(mkHttpReq(httpReq), webSocket);
         }
     }
 });
