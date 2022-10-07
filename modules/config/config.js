@@ -27,46 +27,20 @@
 exports = module.exports = new (class ConfigApp extends WebApp {
     constructor() {
         super();
-        this.useSocket = true;
     }
 
-    async buildDoc(req) {
-        return htmlDocument(
-            htmlElement('head',
-                htmlElement('style', htmlText(this.css)),
-                htmlElement('script', 
-                    htmlScript(`
-                        window.session = "${this.session}";
-                        console.log(window.session);
-
-                        if (true) {
-                            console.log('hello');
-                        }
-                    `)
-                )
-            ),
-            htmlElement('body',
-                htmlAttribute('class', 'font3'),
-                htmlElement('h1',
-                    htmlText('Config Application Page')
-                ),
-                htmlElement('div',
-                    htmlAttribute('class', 'lite'),
-                    htmlText('Wow')
-                ),
-                htmlElement('a',
-                    htmlAttribute('href', 'https://google.com'),
-                    htmlAttribute('target', '_blank'),
-                    htmlText('Click here for Google')
-                )
-            )
-        );
+    description() {
+        return 'A GUI-based application for managing "config.json" files.';
     }
 
-    async handlePOST(req) {
-        return {
-            mime: mkMime('text/plain'),
-            data: 'The configuration App'
-        };
+    async init() {
+        await super.init();
+        await this.loadServerApp();
+        await this.loadClientApp();
+        //await Ipc.queryPrimary({ messageName: '#SentinelAddPermissions', permissions: this.permissions });
+    }
+
+    title() {
+        return 'Server Configuration';
     }
 })();

@@ -33,15 +33,41 @@
 register(class WebExtension extends Emitter {
     constructor() {
         super();
-        this.useSocket = false;
-        this.permissions = mkSet();
     }
 
-    async handle(req, rsp) {
+    description() {
+        return 'Web extension description.';
+    }
+
+    async handleGET(req) {
+        return {
+            mime: mkMime('text/plain'),
+            data: '',
+        };
+    }
+
+    async handlePOST(req) {
+        return {
+            mime: mkMime('text/plain'),
+            data: '',
+        };
+    }
+
+    async handleRequest(req, rsp) {
         try {
-            let result = await this.handleHttpRequest(req, rsp);
-            rsp.mime = result.mime;
-            rsp.end(await compress(rsp.encoding, result.data));
+            if (req.method() == 'GET') {
+                let result = await this.handleGET(req, rsp);
+                rsp.mime = result.mime;
+                rsp.end(await compress(rsp.encoding, result.data));
+            }
+            else if (req.method() == 'POST') {
+                let result = await this.handlePOST(req, rsp);
+                rsp.mime = result.mime;
+                rsp.end(await compress(rsp.encoding, result.data));
+            }
+            else {
+                rsp.endError(405);
+            }
         }
         catch (e) {
             let text = `Web Extension HTTP Error: Extension "${this.name()}".`;
@@ -50,31 +76,19 @@ register(class WebExtension extends Emitter {
         }
     }
 
-    async handleHttpRequest(req) {
-        return {
-            mime: mkMime('text/plain'),
-            data: '',
-        };
-    }
-
-    async init(module) {
-        this.module = module;
-        await Ipc.queryPrimary({ messageName: '#SentinelAddPermissions', permissions: this.permissions });
-    }
-
-    moduleNamespace() {
-        this.module.namespace;
+    async init() {
     }
 
     name() {
         return Reflect.getPrototypeOf(this).constructor.name;
     }
 
-    async onWebSocket(webSocket) {
+    title() {
+        return 'Web Extension';
     }
 
     async upgrade(httpReq, socket, headPacket) {
-        if (this.allowSocket) {
+        if (Reflect.has(this, 'onWebScoekt')) {
             let secureKey = httpReq.headers['sec-websocket-key'];
             let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
             let webSocket = mkWebSocket(socket, req.headers['sec-websocket-extensions'], headPacket);

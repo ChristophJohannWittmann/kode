@@ -95,7 +95,7 @@ if (CLUSTER.isWorker) {
 
                 if (resource) {
                     if (resource.webExtension) {
-                        await resource.value.handle(req, rsp);
+                        await resource.value.handleRequest(req, rsp);
                     }
                     else if (req.method() == 'GET') {
                         let content = await resource.get(rsp.encoding);

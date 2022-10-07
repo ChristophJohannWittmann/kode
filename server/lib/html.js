@@ -83,7 +83,7 @@ class Script extends Node {
     }
 
     async toVisual(indent) {
-        return npmBeautify.js(this.code, { indent_size: 2 }).split('\n').map(line => {
+        return npmBEAUTIFY.js(this.code, { indent_size: 2 }).split('\n').map(line => {
             return `${indent}${line}`;
         }).join('\n') + '\n';
     }

@@ -49,7 +49,7 @@ class Resource {
                 if (code.match(/'javascript-web-extension';/m)) {
                     this.webExtension = true;
                     this.value = require(this.path);
-                    await this.value.init(this.module);
+                    this.value.module = module;
                 }
             }
 
@@ -102,7 +102,8 @@ class Resource {
 singleton(class ResourceLibrary {
     constructor() {
         this.urls = {};
-        this.webExtensions = [];
+        this.webExtensionMap = {};
+        this.webExtensionArray = [];
     }
 
     deregister(url) {
@@ -181,7 +182,9 @@ singleton(class ResourceLibrary {
                 this.urls[resource.url] = resource;
 
                 if (resource.webExtension) {
-                    this.webExtensions.push(resource);
+                    this.webExtensionArray.push(resource);
+                    this.webExtensionMap[resource.url] = resource;
+                    await resource.value.init();
                 }
             }
         }

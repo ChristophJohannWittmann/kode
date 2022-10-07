@@ -38,54 +38,75 @@
  * handling HTTP and web socket requests.
 *****/
 register(class WebApp extends WebExtension {
+    static clientFramework = null;
+
     constructor() {
         super();
-        this.clientFramework = [];
-        this.clientApplication = [];
-        this.serverApplication = [];
+        this.webSockets = {};
     }
 
-    async buildCss() {
+    async buildCSS(path) {
+        path = path ? path : PATH.join(env.kodePath, 'server/lib/webApp.css');
+        this.visualCss = (await FILES.readFile(path)).toString();
         let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
-        let cssPath = PATH.join(__dirname, 'webApp.css');
-        return (await execShell(`node ${minifyPath} ${cssPath}`)).stdout.trim();
+        this.compactCss = (await execShell(`node ${minifyPath} ${path}`)).stdout.trim();
     }
 
-    async buildDoc(opts, values) {
-        return htmlDocument(
-            htmlElement('head'),
-            htmlElement('body'),
-        );
+    async buildHTML(path) {
+        path = path ? path : PATH.join(env.kodePath, 'server/lib/webApp.html');
+        this.visualHtml = (await FILES.readFile(path)).toString();
+        let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
+        this.compactHtml = (await execShell(`node ${minifyPath} ${path}`)).stdout.trim();
+    }
+
+    description() {
+        return 'Web application description.';
+    }
+
+    async handleGET(req) {
+        let session = await Ipc.queryPrimary({ messageName: '#SentinelCreateSession' });
+
+        let doc = mkTextTemplate(Config.html == 'visual' ? this.visualHtml : this.compactHtml).set({
+            css: this.compactCss,
+            title: this.title(),
+            description: this.description(),
+            session: session,
+        });
+
+        return {
+            mime: mkMime('text/html'),
+            data: doc.toString(),
+        };
     }
 
     async handlePOST(req) {
         return {
             mime: mkMime('text/plain'),
-            data: '',
+            data: ''
         };
     }
 
-    async handleHttpRequest(req) {
-        if (req.method() == 'GET') {
-            let session = await Ipc.queryPrimary({ messageName: '#SentinelCreateSession' });
-            let doc = await this.buildDoc(req, { session: session });
-            let html = Config.html == 'visual' ? await doc.toVisual() : await doc.toCompact();
-
-            return {
-                mime: mkMime('text/html'),
-                data: html,
-            };
-        }
-        else if (req.method() == 'POST') {
-            return await this.handlePOST(req);
-        }
+    async init(cssPath, htmlPath) {
+        await super.init();
+        await this.buildCSS(cssPath);
+        await this.buildHTML(htmlPath);
+        await WebApp.loadClientFramework();
     }
 
-    async init(module) {
-        await super.init(module);
-        this.css = await this.buildCss();
+    async loadClientApp(...args) {
+    }
+
+    static async loadClientFramework() {
+    }
+
+    async loadServerApp(...args) {
     }
 
     async onWebSocket(webSocket) {
+        //this.webSockets[webSocket.id] = webSocket;
+    }
+
+    title() {
+        return 'Web Application';
     }
 });

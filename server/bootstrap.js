@@ -35,6 +35,7 @@ require('../framework/language.js');
 require('../framework/message.js');
 require('../framework/mime.js');
 require('../framework/set.js');
+require('../framework/textTemplate.js');
 require('../framework/time.js');
 require('../framework/calendars/gregorian.js');
 require('../framework/utility.js');
@@ -65,7 +66,7 @@ global.URL       = require('url');
  * Imported NPM Modules, which are enumerated in the package.json directory
  * for the framework.
 *****/
-global.npmBeautify  = require('js-beautify');
+global.npmBEAUTIFY  = require('pg');
 global.npmPG        = require('pg');
 global.npmGZIP      = require('node-gzip');
 
