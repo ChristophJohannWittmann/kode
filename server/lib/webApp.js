@@ -71,8 +71,8 @@ exports = module.exports = register(class WebApp extends WebExtension {
         let links = [];
         this.links = '';
 
-        if ('favicons' in this.module.config) {
-            for (let favicon of this.module.config.favicons) {
+        if ('favicons' in this.config) {
+            for (let favicon of this.config.favicons) {
                 switch (favicon.type) {
                     case 'icon':
                         let parsed = PATH.parse(favicon.href);
@@ -107,8 +107,8 @@ exports = module.exports = register(class WebApp extends WebExtension {
     async handleGET(req) {
         let doc = mkTextTemplate(Config.html == 'visual' ? this.visualHtml : this.compactHtml).set({
             css: this.compactCss,
-            title: this.module.config.title,
-            description: this.module.config.description,
+            title: this.config.title,
+            description: this.config.description,
             session: '',
             links: this.links,
         });
@@ -131,15 +131,15 @@ exports = module.exports = register(class WebApp extends WebExtension {
         await loadClientFramework();
         await this.buildLinks();
 
-        if (this.module.config.css) {
-            await this.buildCSS(this.module.config.css);
+        if (this.config.css) {
+            await this.buildCSS(this.config.css);
         }
         else {
             await this.buildCSS(PATH.join(env.kodePath, 'server/lib/webApp.css'));
         }
 
-        if (this.module.config.html) {
-            await this.buildHTML(this.module.config.html);
+        if (this.config.html) {
+            await this.buildHTML(this.config.html);
         }
         else {
             await this.buildHTML(PATH.join(env.kodePath, 'server/lib/webApp.html'));

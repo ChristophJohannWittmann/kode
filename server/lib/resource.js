@@ -50,6 +50,7 @@ class Resource {
                     this.webExtension = true;
                     this.value = new require(this.path)();
                     this.value.module = module;
+                    this.value.config = reference;
                 }
             }
 
