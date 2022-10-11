@@ -114,7 +114,22 @@ register(class HttpResponse {
         delete this.httpHeaders[headerName.toLowerCase()];
     }
 
-    async end(content) {
+    async end(...args) {
+        let content;
+
+        if (args.length > 2) {
+            this.status = args[0];
+            this.mime = mkMime(args[1]);
+            content = args[2];
+        }
+        else if (args.length == 2) {
+            this.mime = mkMime(args[1]);
+            content = args[1];
+        }
+        else if (args.length == 1) {
+            content = args[0];
+        }
+
         this.setHeader('Content-Language', this.language.code());
 
         if (this.mime.type == 'string') {
@@ -125,6 +140,7 @@ register(class HttpResponse {
         }
 
         if (this.encoding) {
+            content = this.preEncoded ? content : await compress(this.encoding, content);
             this.setHeader('Content-Encoding', this.encoding);
         }
 
@@ -134,13 +150,13 @@ register(class HttpResponse {
         this.httpRsp.end(content);
     }
 
-    endError(status) {
-        this.status = status;
-        this.mime = mkMime('text/plain');
-        this.end(HttpResponse.statusCodes[this.status].text);
+    endStatus(status) {
+        this.end(status, 'text/plain', HttpResponse.statusCodes[this.status].text);
     }
 
     setEncoding() {
+        this.preEncoded = false;
+
         for (let encoding of Object.values(this.req.acceptEncoding())) {
             let { value, quality } = encoding;
 

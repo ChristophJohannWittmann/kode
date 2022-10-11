@@ -105,6 +105,20 @@ singleton(class ResourceLibrary {
         this.urls = {};
         this.webExtensionMap = {};
         this.webExtensionArray = [];
+
+        const builtinModule = {
+            active: true,
+            path: '',
+            config: {},
+            configPath: '',
+            status: 'ok',
+            prefix: '(ok      )',
+            error: '',
+        };
+
+        [
+            { url: '/CLIENTFRAMEWORK.js', path: PATH.join(env.kodePath, 'server/webExtensions/clientFramework.js') }
+        ].forEach(builtinReference => this.register(builtinReference, builtinModule));
     }
 
     deregister(url) {
@@ -115,7 +129,7 @@ singleton(class ResourceLibrary {
 
     async expandReference(reference) {
         if ('path' in reference) {
-            let absPath = PATH.isAbsolute(reference.path) ? reference.path : PATH.join(reference.modulePath, reference.path);
+            let absPath = PATH.isAbsolute(reference.path) ? reference.path : PATH.join(env.kodePath, 'server', reference.path);
 
             if (await pathExists(absPath)) {
                 let stats = await FILES.stat(absPath);

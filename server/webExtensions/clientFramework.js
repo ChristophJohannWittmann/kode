@@ -28,4 +28,11 @@ exports = module.exports = register(class ClientFramework extends WebExtension {
     constructor() {
         super();
     }
+
+    async init() {
+    }
+
+    async handleGET(req, rsp) {
+        rsp.endStatus(204);
+    }
 });

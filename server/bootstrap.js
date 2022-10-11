@@ -114,9 +114,9 @@ require('./lib/ipc.js');
 require('./lib/logging.js');
 require('./lib/module.js');
 require('./lib/pool.js');
-require('./lib/resource.js');
 require('./lib/server.js');
 require('./lib/utility.js');
+require('./lib/resource.js');
 require('./lib/webExtension.js');
 require('./lib/webSocket.js');
 

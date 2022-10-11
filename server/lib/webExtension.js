@@ -36,40 +36,30 @@ exports = module.exports = register(class WebExtension extends Emitter {
         super();
     }
 
-    async handleGET(req) {
-        return {
-            mime: mkMime('text/plain'),
-            data: '',
-        };
+    async handleGET(req, rsp) {
+        rsp.endStatus(404);
     }
 
-    async handlePOST(req) {
-        return {
-            mime: mkMime('text/plain'),
-            data: '',
-        };
+    async handlePOST(req, rsp) {
+        rsp.endStatus(404);
     }
 
     async handleRequest(req, rsp) {
         try {
             if (req.method() == 'GET') {
-                let result = await this.handleGET(req, rsp);
-                rsp.mime = result.mime;
-                rsp.end(await compress(rsp.encoding, result.data));
+                await this.handleGET(req, rsp);
             }
             else if (req.method() == 'POST') {
-                let result = await this.handlePOST(req, rsp);
-                rsp.mime = result.mime;
-                rsp.end(await compress(rsp.encoding, result.data));
+                await this.handlePOST(req, rsp);
             }
             else {
-                rsp.endError(405);
+                rsp.endStatus(405);
             }
         }
         catch (e) {
-            let text = `Web Extension HTTP Error: Extension "${this.module.config.title}".`;
-            log(text, e);
-            rsp.end(await compress(rsp.encoding, text));
+            let diagnostic = `Web Extension HTTP Error: Extension "${this.module.config.title}".`;
+            log(diagnostic, e);
+            rsp.end(500, 'text/plain', diagnostic);
         }
     }
 

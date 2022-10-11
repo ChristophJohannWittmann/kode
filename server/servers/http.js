@@ -105,6 +105,7 @@ if (CLUSTER.isWorker) {
                             rsp.end(`Error while fetching ${req.url()}`);
                         }
                         else {
+                            rsp.preEncoded = true;
                             rsp.mime = content.mime;
                             rsp.end(content.value);
                         }

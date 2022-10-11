@@ -104,7 +104,7 @@ exports = module.exports = register(class WebApp extends WebExtension {
         }
     }
 
-    async handleGET(req) {
+    async handleGET(req, rsp) {
         let doc = mkTextTemplate(Config.html == 'visual' ? this.visualHtml : this.compactHtml).set({
             css: this.compactCss,
             title: this.config.title,
@@ -113,17 +113,11 @@ exports = module.exports = register(class WebApp extends WebExtension {
             links: this.links,
         });
 
-        return {
-            mime: mkMime('text/html'),
-            data: doc.toString(),
-        };
+        rsp.end(200, 'text/html', await doc.toString());
     }
 
-    async handlePOST(req) {
-        return {
-            mime: mkMime('text/plain'),
-            data: ''
-        };
+    async handlePOST(req, rsp) {
+        rsp.endStatus(404);
     }
 
     async init(cssPath, htmlPath) {
