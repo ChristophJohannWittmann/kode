@@ -135,14 +135,14 @@ exports = module.exports = register(class WebApp extends WebExtension {
             await this.buildCSS(this.config.css);
         }
         else {
-            await this.buildCSS(PATH.join(env.kodePath, 'server/lib/webApp.css'));
+            await this.buildCSS(PATH.join(env.kodePath, 'server/webExtensions/webApp.css'));
         }
 
         if (this.config.html) {
             await this.buildHTML(this.config.html);
         }
         else {
-            await this.buildHTML(PATH.join(env.kodePath, 'server/lib/webApp.html'));
+            await this.buildHTML(PATH.join(env.kodePath, 'server/webExtensions/webApp.html'));
         }
     }
 

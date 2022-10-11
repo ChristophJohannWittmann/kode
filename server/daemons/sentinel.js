@@ -47,6 +47,7 @@ singleton(class Sentinel extends Daemon {
         this.expiring = [];
         
         this.permissions = mkSet(
+            'config',
             'sys',
             'user',
         );

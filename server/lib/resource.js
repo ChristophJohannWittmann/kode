@@ -160,7 +160,7 @@ singleton(class ResourceLibrary {
                 }
             }
             else {
-                logPrimary(`    ERROR: "File Not Found"  PATH: "${path}"`);
+                logPrimary(`    ERROR: "File Not Found"  PATH: "${reference.path}"`);
             }
         }
 

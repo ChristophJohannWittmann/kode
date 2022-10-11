@@ -104,15 +104,20 @@ global.env = {
 *****/
 require('./config.js');
 
+require('./lib/addon.js');
 require('./lib/auth.js');
+require('./lib/cluster.js');
 require('./lib/compression.js');
 require('./lib/crypto.js');
 require('./lib/html.js');
+require('./lib/ipc.js');
+require('./lib/logging.js');
+require('./lib/module.js');
 require('./lib/pool.js');
 require('./lib/resource.js');
+require('./lib/server.js');
 require('./lib/utility.js');
 require('./lib/webExtension.js');
-require('./lib/webApp.js');
 require('./lib/webSocket.js');
 
 require('./dbms/dbClient.js');
@@ -121,15 +126,11 @@ require('./dbms/dbSchema.js');
 require('./dbms/dbSchemaAnalyzer.js');
 require('./dbms/dbObject.js');
 
-require('./cluster.js');
-require('./addon.js');
-require('./ipc.js');
-require('./logging.js');
-require('./module.js');
-require('./server.js');
+require('./webExtensions/clientFramework.js');
+require('./webExtensions/webApp.js');
 
 if (CLUSTER.isPrimary) {
-    require('./daemon.js');
+    require('./lib/daemon.js');
     require('./daemons/events.js');
     require('./daemons/sentinel.js');
 }

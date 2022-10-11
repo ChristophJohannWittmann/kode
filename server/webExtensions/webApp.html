@@ -8,11 +8,12 @@
         <style>
             ${css}
         </style>
+        <script src="CLIENTFRAMEWORK.js">
+        <script>
+            window.session = '${session}';
+            function load() {}
+        </script>
     </head>
-    <script>
-        window.session = '${session}';
-        function load() {}
-    </script>
     <body onload="load()">
         <h1>Hello Basic App</h1>
     </body>
