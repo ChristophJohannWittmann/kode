@@ -29,55 +29,55 @@
 *****/
 register(class StyleSheet {
     constructor(cssStyleSheet) {
-        this.cssObject = cssStyleSheet;
+        this.cssGroup = cssStyleSheet;
     }
 
     createRule(cssText, index) {
-        let ruleList = mkCssRuleList(this, this.cssObject.cssRules);
-        let ruleIndex = this.cssObject.insertRule(cssText, index);
-        let cssRule = this.cssObject.cssRules.item(ruleIndex);
+        let ruleList = mkCssRuleList(this.cssGroup, this.cssGroup.cssRules);
+        let ruleIndex = this.cssGroup.insertRule(cssText, index);
+        let cssRule = this.cssGroup.cssRules.item(ruleIndex);
         let ctor = Reflect.getPrototypeOf(cssRule).constructor;
-        return CssMakers.get(ctor)(this, cssRule);
+        return CssMakers.get(ctor)(this.cssGroup, cssRule);
     }
 
     enabled() {
-        return !this.cssObject.disable;
+        return !this.cssGroup.disable;
     }
 
     href() {
-        return this.cssObject.href;
+        return this.cssGroup.href;
     }
 
     language() {
-        return this.cssObject.type();
+        return this.cssGroup.type();
     }
 
     media() {
-        return this.cssObject.media;
+        return this.cssGroup.media;
     }
 
     ownerNode() {
-        return this.cssObject.ownerNode;
+        return this.cssGroup.ownerNode;
     }
 
     parentStyleSheet() {
-        return mkStyleSheet(this.cssObject.parentStyleSheet);
+        return mkStyleSheet(this.cssGroup.parentStyleSheet);
     }
 
     rule(index) {
-        return mkCssRuleList(this, this.cssObject.cssRules).item(index);
+        return mkCssRuleList(this.cssGroup, this.cssGroup.cssRules).item(index);
     }
 
     rules() {
-        return mkCssRuleList(this, this.cssObject.cssRules);
+        return mkCssRuleList(this.cssGroup, this.cssGroup.cssRules);
     }
 
     [Symbol.iterator]() {
-        return mkCssRuleList(this, this.cssObject.cssRules)[Symbol.iterator]();
+        return mkCssRuleList(this.cssGroup, this.cssGroup.cssRules)[Symbol.iterator]();
     }
 
     title() {
-        return this.cssObject.title;
+        return this.cssGroup.title;
     }
 });
 
@@ -88,15 +88,15 @@ register(class StyleSheet {
  * list in a recursive fashion.  Note that we also have the means here to 
 *****/
 register(class CssRuleList {
-    constructor(cssOwner, cssRuleList) {
-        this.cssOwner = cssOwner;
+    constructor(cssGroup, cssRuleList) {
+        this.cssGroup = cssGroup;
         this.cssRuleList = cssRuleList;
     }
 
     item(index) {
         let cssRule = this.cssRuleList.item(index);
         let ctor = Reflect.getPrototypeOf(cssRule).constructor;
-        return CssMakers.get(ctor)(this, cssRule);
+        return CssMakers.get(ctor)(this.cssGroup, cssRule);
     }
 
     length() {
@@ -123,14 +123,14 @@ register(class CssRuleList {
  * style subclasses.  
 *****/
 register(class CssRule {
-    constructor(cssOwner, cssRule) {
-        this.cssOwner = cssOwner;
+    constructor(cssGroup, cssRule) {
+        this.cssGroup = cssGroup;
         this.cssRule = cssRule;
     }
 
     index() {
-        for (let i = 0; i < this.cssOwner.cssObject.length; i++) {
-            if (Object.is(this.cssRule, this.cssOwner.cssObject.item(i))) {
+        for (let i = 0; i < this.cssGroup.length; i++) {
+            if (Object.is(this.cssRule, this.cssGroup.item(i))) {
                 return i;
             }
         }
@@ -141,7 +141,7 @@ register(class CssRule {
     }
 
     remove() {
-        this.cssOwner.cssObject.deleteRule(this.index());
+        this.cssGroup.deleteRule(this.index());
     }
 
     ruleList() {
@@ -167,21 +167,28 @@ register(class CssRule {
  * index is.
 *****/
 register(class CssGroupingRule extends CssRule {
-    constructor(cssOwner, cssRule) {
-        super(cssOwner, cssRule);
-        this.cssObject = this.cssOwner;
+    constructor(cssGroup, cssRule) {
+        super(cssGroup, cssRule);
+    }
+
+    createRule(cssText, index) {
+        let ruleList = mkCssRuleList(this.cssGroup, this.cssGroup.cssRules);
+        let ruleIndex = this.cssGroup.insertRule(cssText, index);
+        let cssRule = this.cssGroup.cssRules.item(ruleIndex);
+        let ctor = Reflect.getPrototypeOf(cssRule).constructor;
+        return CssMakers.get(ctor)(this.cssGroup, cssRule);
     }
 
     rule(index) {
-        return mkCssRuleList(this, this.cssRule.cssRules).item(index);
+        return mkCssRuleList(this.cssGroup, this.cssRule.cssRules).item(index);
     }
 
     rules() {
-        return mkCssRuleList(this, this.cssRule.cssRules);
+        return mkCssRuleList(this.cssGroup, this.cssRule.cssRules);
     }
 
     [Symbol.iterator]() {
-        return mkCssRuleList(this, this.cssRule.cssRules)[Symbol.iterator]();
+        return mkCssRuleList(this.cssGroup, this.cssRule.cssRules)[Symbol.iterator]();
     }
 });
 
@@ -193,8 +200,8 @@ register(class CssGroupingRule extends CssRule {
  * rule without being a grouping rule.
 *****/
 register(class CssConditionRule extends CssGroupingRule {
-    constructor(cssOwner, cssRule) {
-        super(cssOwner, cssRule);
+    constructor(cssGroup, cssRule) {
+        super(cssGroup, cssRule);
     }
 });
 
@@ -206,56 +213,60 @@ register(class CssConditionRule extends CssGroupingRule {
  * also CssGroupingRules and consequently are CSS rule containers.
 *****/
 register(class CssCounterStyleRule extends CssRule {
-    constructor(cssOwner, cssRule) {
-        super(cssOwner, cssRule);
+    constructor(cssGroup, cssRule) {
+        super(cssGroup, cssRule);
     }
 });
 
 register(class CssFontFaceRule extends CssRule {
-    constructor(cssOwner, cssRule) {
-        super(cssOwner, cssRule);
+    constructor(cssGroup, cssRule) {
+        super(cssGroup, cssRule);
     }
 });
 
 register(class CssImportRule extends CssRule {
-    constructor(cssOwner, cssRule) {
-        super(cssOwner, cssRule);
+    constructor(cssGroup, cssRule) {
+        super(cssGroup, cssRule);
     }
 });
 
 register(class CssKeyframeRule extends CssRule {
-    constructor(cssOwner, cssRule) {
-        super(cssOwner, cssRule);
+    constructor(cssGroup, cssRule) {
+        super(cssGroup, cssRule);
     }
 });
 
 register(class CssKeyframesRule extends CssRule {
-    constructor(cssOwner, cssRule) {
-        super(cssOwner, cssRule);
+    constructor(cssGroup, cssRule) {
+        super(cssGroup, cssRule);
     }
 });
 
 register(class CssMediaRule extends CssConditionRule {
-    constructor(cssOwner, cssRule) {
-        super(cssOwner, cssRule);
+    constructor(cssGroup, cssRule) {
+        super(cssGroup, cssRule);
     }
 });
 
 register(class CssNamespaceRule extends CssRule {
-    constructor(cssOwner, cssRule) {
-        super(cssOwner, cssRule);
+    constructor(cssGroup, cssRule) {
+        super(cssGroup, cssRule);
     }
 });
 
 register(class CssPageRule extends CssRule {
-    constructor(cssOwner, cssRule) {
-        super(cssOwner, cssRule);
+    constructor(cssGroup, cssRule) {
+        super(cssGroup, cssRule);
     }
 });
 
 register(class CssStyleRule extends CssRule {
-    constructor(cssOwner, cssRule) {
-        super(cssOwner, cssRule);
+    constructor(cssGroup, cssRule) {
+        super(cssGroup, cssRule);
+    }
+
+    styles() {
+        return Object.keys(this.cssRule.style);
     }
 
     style() {
@@ -265,7 +276,7 @@ register(class CssStyleRule extends CssRule {
 
 register(class CssSupportsRule extends CssConditionRule {
     constructor(ruleList, cssRule) {
-        super(cssOwner, cssRule);
+        super(cssGroup, cssRule);
     }
 });
 
