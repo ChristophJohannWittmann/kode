@@ -25,6 +25,10 @@
 *****/
 register(class ViewBox extends Widget {
     constructor() {
-        super();
+        super('div');
+    }
+
+    static initClassStyle(classStyle) {
+        Widget.initClassStyle(classStyle);
     }
 });

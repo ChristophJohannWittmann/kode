@@ -72,6 +72,16 @@ register(class StyleSheet {
         return mkCssRuleList(this.cssGroup, this.cssGroup.cssRules);
     }
 
+    search(selector) {
+        for (let styleRule of this) {
+            if (styleRule.type() == 'CssStyleRule') {
+                if (styleRule.selector() == selector) {
+                    return styleRule;
+                }
+            }
+        }
+    }
+
     [Symbol.iterator]() {
         return mkCssRuleList(this.cssGroup, this.cssGroup.cssRules)[Symbol.iterator]();
     }
@@ -224,17 +234,29 @@ register(class CssCounterStyleRule extends CssRule {
     constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
     }
+
+    type() {
+        return 'CssCounterStyleRule';
+    }
 });
 
 register(class CssFontFaceRule extends CssRule {
     constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
     }
+
+    type() {
+        return 'CssFontFaceRule';
+    }
 });
 
 register(class CssImportRule extends CssRule {
     constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
+    }
+
+    type() {
+        return 'CssImportRule';
     }
 });
 
@@ -245,6 +267,10 @@ register(class CssKeyframeRule extends CssRule {
 
     keyText() {
         return this.cssRule.keyText;
+    }
+
+    type() {
+        return 'CssKeyframeRule';
     }
 });
 
@@ -260,6 +286,10 @@ register(class CssKeyframesRule extends CssRule {
     name() {
         return this.cssRule.name;
     }
+
+    type() {
+        return 'CssKeyframesRule';
+    }
 });
 
 register(class CssMediaRule extends CssConditionRule {
@@ -269,6 +299,10 @@ register(class CssMediaRule extends CssConditionRule {
 
     media() {
         return this.cssRule.media;
+    }
+
+    type() {
+        return 'CssMediaRule';
     }
 });
 
@@ -284,6 +318,10 @@ register(class CssNamespaceRule extends CssRule {
     prefix() {
         return this.cssRule.prefix;
     }
+
+    type() {
+        return 'CssNamespaceRule';
+    }
 });
 
 register(class CssPageRule extends CssRule {
@@ -293,6 +331,10 @@ register(class CssPageRule extends CssRule {
 
     selector() {
         return this.cssRule.selectorText;
+    }
+
+    type() {
+        return 'CssPageRule';
     }
 });
 
@@ -308,11 +350,19 @@ register(class CssStyleRule extends CssRule {
     style() {
         return this.cssRule.style;
     }
+
+    type() {
+        return 'CssStyleRule';
+    }
 });
 
 register(class CssSupportsRule extends CssConditionRule {
     constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
+    }
+
+    type() {
+        return 'CssSupportsRule';
     }
 });
 

@@ -39,6 +39,9 @@ function reduce(arg) {
     else if (arg instanceof HtmlText) {
         return arg.node;
     }
+    else if (arg instanceof Widget) {
+        return arg.htmlElement.node;
+    }
     else {
         throw new Error(`Unsupported argument type: ${arg}`);
     }

@@ -25,6 +25,6 @@
 *****/
 register(class View extends Widget {
     constructor() {
-        super();
+        super('div');
     }
 });

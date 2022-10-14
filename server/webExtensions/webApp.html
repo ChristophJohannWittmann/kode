@@ -15,22 +15,10 @@
             async function load() {
                 window.win = mkWindow(window);
                 window.doc = win.doc();
-
-                /*
-                let body = doc.body();
-                let h1 = body.query('h1');
-                h1.insertAfter(htmlElement('div').append(htmlText('Dynamic Text')));
-
-                let styleSheet = doc.getStyleSheet('webapp');
-
-                let rule = styleSheet.createRule('@keyframes slidein {from {transform: translateX(0%);}to {transform: translateX(100%);}}');
-
-                console.log(rule);
-                */
+                doc.body().append(mkViewBox());
             }
         </script>
     </head>
     <body onload="load()">
-        <h1>Hello Basic App</h1>
     </body>
 </html>
