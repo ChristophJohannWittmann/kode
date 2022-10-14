@@ -128,6 +128,10 @@ register(class CssRule {
         this.cssRule = cssRule;
     }
 
+    cssText() {
+        return this.cssRule.cssText;
+    }
+
     index() {
         for (let i = 0; i < this.cssGroup.length; i++) {
             if (Object.is(this.cssRule, this.cssGroup.item(i))) {
@@ -150,10 +154,6 @@ register(class CssRule {
 
     styleSheet() {
         return this.ruleList.styleSheet;
-    }
-
-    text() {
-        return this.cssRule.cssText;
     }
 });
 
@@ -179,6 +179,10 @@ register(class CssGroupingRule extends CssRule {
         return CssMakers.get(ctor)(this.cssGroup, cssRule);
     }
 
+    parentStyleSheet() {
+        return mkStyleSheet(this.cssGroup.parentStyleSheet);
+    }
+
     rule(index) {
         return mkCssRuleList(this.cssGroup, this.cssRule.cssRules).item(index);
     }
@@ -202,6 +206,10 @@ register(class CssGroupingRule extends CssRule {
 register(class CssConditionRule extends CssGroupingRule {
     constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
+    }
+
+    conditionText() {
+        return this.cssRule.conditionText;
     }
 });
 
@@ -234,11 +242,23 @@ register(class CssKeyframeRule extends CssRule {
     constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
     }
+
+    keyText() {
+        return this.cssRule.keyText;
+    }
 });
 
 register(class CssKeyframesRule extends CssRule {
     constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
+    }
+
+    rules() {
+        return mkCssRuleList(this.cssRule, this.cssRule.cssRules);
+    }
+
+    name() {
+        return this.cssRule.name;
     }
 });
 
@@ -246,17 +266,33 @@ register(class CssMediaRule extends CssConditionRule {
     constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
     }
+
+    media() {
+        return this.cssRule.media;
+    }
 });
 
 register(class CssNamespaceRule extends CssRule {
     constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
     }
+
+    namespaceURI() {
+        return this.cssRule.namespaceURI;
+    }
+
+    prefix() {
+        return this.cssRule.prefix;
+    }
 });
 
 register(class CssPageRule extends CssRule {
     constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
+    }
+
+    selector() {
+        return this.cssRule.selectorText;
     }
 });
 
@@ -265,8 +301,8 @@ register(class CssStyleRule extends CssRule {
         super(cssGroup, cssRule);
     }
 
-    styles() {
-        return Object.keys(this.cssRule.style);
+    selector() {
+        return this.cssRule.selectorText;
     }
 
     style() {
@@ -275,7 +311,7 @@ register(class CssStyleRule extends CssRule {
 });
 
 register(class CssSupportsRule extends CssConditionRule {
-    constructor(ruleList, cssRule) {
+    constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
     }
 });

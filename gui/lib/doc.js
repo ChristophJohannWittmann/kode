@@ -30,10 +30,75 @@ register(class Document extends Emitter {
     constructor(doc) {
         super();
         this.doc = doc;
+
+        [
+            'scroll',
+            'visibilitychange',
+            'wheel',
+            'animationcancel',
+            'animationend',
+            'animationiteration',
+            'animationstart',
+            'copy',
+            'cut',
+            'paste',
+            'drag',
+            'dragend',
+            'dragenter',
+            'dragleave',
+            'dragover',
+            'dragstart',
+            'drop',
+            'fullscreenchange',
+            'fullscreenerror',
+            'keydown',
+            'keyup',
+            'DOMContentLoaded',
+            'readystatechange',
+            'gotpointercapture',
+            'lostpointercapture',
+            'pointercancel',
+            'pointerdown',
+            'pointerenter',
+            'pointerleave',
+            'pointerlockchange',
+            'poointerlockerror',
+            'pointermove',
+            'pointerout',
+            'pointerover',
+            'pointerup',
+            'selectchange',
+            'touchcancel',
+            'touchend',
+            'touchmove',
+            'touchstart',
+            'transitioncancel',
+            'transitionend',
+            'transitionrun',
+            'transitionstart',
+        ].forEach(eventName => this.doc.addEventListener(eventName, event => {
+            this.send({ messageName: eventName, event: event });
+        }));
+    }
+
+    activeElement() {
+        return this.doc.activeElement;
     }
 
     body() {
         return mkHtmlElement(this.doc.body);
+    }
+
+    characterSet() {
+        return this.doc.characterSet;
+    }
+
+    cookies() {
+        return [];
+    }
+
+    direction() {
+        return this.doc.dir;
     }
 
     getStyleSheet(title) {
@@ -65,8 +130,24 @@ register(class Document extends Emitter {
         return mkHtmlElement(this.doc.head);
     }
 
+    hidden() {
+        return this.doc.hidden;
+    }
+
     html() {
         return mkHtmlElement(this.doc.documentElement);
+    }
+
+    location() {
+        return this.doc.location;
+    }
+
+    readyState() {
+        return this.doc.readyState;
+    }
+
+    referer() {
+        return this.doc.referer;
     }
 
     query(selector) {

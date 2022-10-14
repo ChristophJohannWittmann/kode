@@ -23,6 +23,10 @@
 
 /*****
 *****/
+register(class Widget {
+    constructor() {
+    }
+});
 /**
  *
 $(class $BuilderNode {

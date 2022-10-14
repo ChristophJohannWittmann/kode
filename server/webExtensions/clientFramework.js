@@ -23,6 +23,10 @@
 
 
 /*****
+ * The array of files and directory, from which to include client files and to
+ * load them into the client application framework.  These files only represent
+ * the client files belonging to the framework itself.  Each application will
+ * also need to 
 *****/
 const clientFrameworkPaths = [
     'framework/core.js',
@@ -34,6 +38,11 @@ const clientFrameworkPaths = [
 
 
 /*****
+ * A web extension whose purpose is to construct the webapp client framework
+ * and to download the appropriate encoding of that framework on demand.  The
+ * registered function buildClientLibrary() is reponsible for searching and
+ * compiling the final product, which is cached in memory in the individual
+ * process for performance purposes.
 *****/
 exports = module.exports = register(class ClientFramework extends WebExtension {
     constructor() {
@@ -41,39 +50,7 @@ exports = module.exports = register(class ClientFramework extends WebExtension {
     }
 
     async init() {
-        let raw = [];
-        let fileArray = [];
-        let fileSet = mkSet();
-
-        for (let path of clientFrameworkPaths) {
-            let absPath = PATH.join(env.kodePath, path);
-
-            if (!fileSet.has(absPath)) {
-                fileSet.set(absPath);
-                fileArray.push(absPath);
-            }
-        }
-
-        for (let path of fileArray) {
-            let stats = await FILES.stat(path);
-
-            if (path.endsWith('.js') && stats.isFile()) {
-                let code = Config.minify ? await minify(path) : (await FILES.readFile(path)).toString();
-                raw.push(code);
-            }
-            else if (stats.isDirectory()) {
-                for (let filePath of await recurseFiles(path)) {
-                    stats = await FILES.stat(filePath);
-
-                    if (filePath.endsWith('.js') && stats.isFile()) {
-                        let code = Config.minify ? await minify(filePath) : (await FILES.readFile(filePath)).toString();
-                        raw.push(code);
-                    }
-                }
-            }
-
-            this.framework = { '': raw.join('') };
-        }
+        this.framework = { '': await buildClientLibrary(clientFrameworkPaths) };
     }
 
     async handleGET(req, rsp) {

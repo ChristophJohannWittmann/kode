@@ -14,25 +14,19 @@
 
             async function load() {
                 window.win = mkWindow(window);
-                window.doc = mkDocument(document);
+                window.doc = win.doc();
 
+                /*
                 let body = doc.body();
                 let h1 = body.query('h1');
                 h1.insertAfter(htmlElement('div').append(htmlText('Dynamic Text')));
 
                 let styleSheet = doc.getStyleSheet('webapp');
-                let mediaRule = styleSheet.rule(4);
 
-                for (let rule of mediaRule) {
-                    console.log(rule);
-                }
+                let rule = styleSheet.createRule('@keyframes slidein {from {transform: translateX(0%);}to {transform: translateX(100%);}}');
 
-                let rule = styleSheet.createRule('body {}');
-                rule.style().color = 'blue';
-
-                setTimeout(() => {
-                    rule.remove();
-                }, 2000);
+                console.log(rule);
+                */
             }
         </script>
     </head>

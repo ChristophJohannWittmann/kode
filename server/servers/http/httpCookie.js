@@ -23,20 +23,7 @@
 
 /*****
 *****/
-register(class Cookie {  
-    constructor(doc, info) {
+register(class HttpCookie {
+    constructor() {
     }
-});
-
-
-/*****
-*****/
-register(function httpCookie() {
-});
-
-
-/*****
-*****/
-register(function parseCookies(cookieString) {
-    return [];
 });

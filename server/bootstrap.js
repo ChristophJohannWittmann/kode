@@ -175,6 +175,7 @@ async function prepareDbms() {
     require('./lib/addon.js');
     require('./lib/auth.js');
     require('./lib/binary.js');
+    require('./lib/clientLibraryBuilder.js');
     require('./lib/cluster.js');
     require('./lib/compression.js');
     require('./lib/crypto.js');
