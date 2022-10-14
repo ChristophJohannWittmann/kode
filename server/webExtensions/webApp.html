@@ -5,13 +5,35 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="${description}">${links}
         <title>${title}</title>
-        <style>
+        <style title="${cssTitle}">
             ${css}
         </style>
         <script src="CLIENTFRAMEWORK.js"></script>
         <script>
             window.session = '${session}';
-            function load() {}
+
+            async function load() {
+                window.win = mkWindow(window);
+                window.doc = mkDocument(document);
+
+                let body = doc.body();
+                let h1 = body.query('h1');
+                h1.insertAfter(htmlElement('div').append(htmlText('Dynamic Text')));
+
+                let styleSheet = doc.getStyleSheet('webapp');
+                let mediaRule = styleSheet.rule(4);
+
+                for (let rule of mediaRule) {
+                    console.log(rule);
+                }
+
+                let rule = styleSheet.createRule('body {}');
+                rule.style().color = 'blue';
+
+                setTimeout(() => {
+                    rule.remove();
+                }, 2000);
+            }
         </script>
     </head>
     <body onload="load()">

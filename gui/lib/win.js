@@ -21,46 +21,15 @@
 *****/
 
 
-{
-    const langs = {};
-    const locales = {};
-    
-    let lang;
-    let locale;
-    
-    
-    /*****
-    *****/
-    register(function regLanguage(code) {
-    });
-    
-    
-    /*****
-    *****/
-    register(function regLocale(code) {
-    });
-    
-    
-    /*****
-    *****/
-    register(function setLanguage(code, key, value) {
-    });
-    
-    
-    /*****
-    *****/
-    register(function setLocale(code, key, value) {
-    });
-    
-    
-    /*****
-    *****/
-    register(function lang(code) {
-    });
-    
-    
-    /*****
-    *****/
-    register(function locale(code) {
-    });
-}
+/*****
+*****/
+register(class Window extends Emitter {  
+    constructor(win) {
+        super();
+        this.win = win;
+    }
+
+    location() {
+        return window.location;
+    }
+});

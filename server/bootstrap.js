@@ -30,7 +30,6 @@
 *****/
 require('../framework/core.js');
 require('../framework/activeData.js');
-require('../framework/binaryServer.js');
 require('../framework/language.js');
 require('../framework/message.js');
 require('../framework/mime.js');
@@ -66,7 +65,6 @@ global.URL       = require('url');
  * Imported NPM Modules, which are enumerated in the package.json directory
  * for the framework.
 *****/
-global.npmBEAUTIFY  = require('pg');
 global.npmPG        = require('pg');
 global.npmGZIP      = require('node-gzip');
 
@@ -96,46 +94,6 @@ global.env = {
     daemonPath:     PATH.join(__dirname, './daemons'),
     serverPath:     PATH.join(__dirname, './servers'),
 };
-
-
-/*****
- * Include the code in the /server project directory.  Like other kode code,
- * each nodejs module will place the appropriate names into the global namespace.
-*****/
-require('./config.js');
-
-require('./lib/addon.js');
-require('./lib/auth.js');
-require('./lib/cluster.js');
-require('./lib/compression.js');
-require('./lib/crypto.js');
-require('./lib/html.js');
-require('./lib/ipc.js');
-require('./lib/logging.js');
-require('./lib/module.js');
-require('./lib/pool.js');
-require('./lib/server.js');
-require('./lib/utility.js');
-require('./lib/resource.js');
-require('./lib/webExtension.js');
-require('./lib/webSocket.js');
-
-require('./dbms/dbClient.js');
-require('./dbms/pgClient.js');
-require('./dbms/dbSchema.js');
-require('./dbms/dbSchemaAnalyzer.js');
-require('./dbms/dbObject.js');
-
-require('./webExtensions/clientFramework.js');
-require('./webExtensions/webApp.js');
-
-if (CLUSTER.isPrimary) {
-    require('./lib/daemon.js');
-    require('./daemons/events.js');
-    require('./daemons/sentinel.js');
-}
-
-require('./servers/http.js');
 
 
 /*****
@@ -208,12 +166,46 @@ async function prepareDbms() {
  * instructed to stop with a system-wide #Stop message.
 *****/
 (async () => {
-    global.npmMinify = await import('minify');
-
-    logPrimary(`\n[ Booting Server at ${(new Date()).toISOString()} ]`);
-    await onSingletons();
+    require('./config.js');
+    require('./lib/utility.js');
+    require('./lib/logging.js');
     await Config.loadSystem(env.kodePath);
+    logPrimary(`\n[ Booting Server at ${(new Date()).toISOString()} ]`);
+
+    require('./lib/addon.js');
+    require('./lib/auth.js');
+    require('./lib/binary.js');
+    require('./lib/cluster.js');
+    require('./lib/compression.js');
+    require('./lib/crypto.js');
+    require('./lib/html.js');
+    require('./lib/ipc.js');
+    require('./lib/module.js');
+    require('./lib/pool.js');
+    require('./lib/server.js');
+    require('./lib/utility.js');
+    require('./lib/resource.js');
+    require('./lib/webExtension.js');
+    require('./lib/webSocket.js');
+
+    require('./dbms/dbClient.js');
+    require('./dbms/pgClient.js');
+    require('./dbms/dbSchema.js');
+    require('./dbms/dbSchemaAnalyzer.js');
+    require('./dbms/dbObject.js');
+
+    require('./webExtensions/clientFramework.js');
+    require('./webExtensions/webApp.js');
+
+    if (CLUSTER.isPrimary) {
+        require('./lib/daemon.js');
+        require('./daemons/events.js');
+        require('./daemons/sentinel.js');
+    }
+
+    require('./servers/http.js');
  
+    await onSingletons();
     logPrimary('[ Loading Addons ]');
     Config.addonMap = {};
     Config.addonArray = [];

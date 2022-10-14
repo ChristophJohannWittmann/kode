@@ -101,11 +101,11 @@ html {
 /***********************************************
  * Font
  ***********************************************/
-.font1 { font-size:  20px; }
-.font2 { font-size:  18px; }
-.font3 { font-size:  16px; }
-.font4 { font-size:  14px; }
-.font5 { font-size:  12px; }
+.font1 { font-size:  20px!important; }
+.font2 { font-size:  18px!important; }
+.font3 { font-size:  16px!important; }
+.font4 { font-size:  14px!important; }
+.font5 { font-size:  12px!important; }
 .bold { font-weight: bold; }
 .normal { font-weight: normal; }
 .light { font-weight: light; }

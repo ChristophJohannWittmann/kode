@@ -43,56 +43,66 @@ register(class Emitter {
     }
 
     off(messageName, func) {
-        (Array.isArray(messageName) ? messageName : [messageName]).forEach(messageName => {
-            let handler = this.handlers[messageName];
-            
-            if (handler && handler.map.has(func)) {
-                for (let i = 0; i < handler.thunks.length; i++) {
-                    let thunk = handler.thunks[i];
-                    
-                    if (Object.is(func, thunk.func)) {
-                        handler.thunks.splice(i, 1);
-                        break;
-                    }
-                }
+        if ('#HANDLER' in func) {
+            (Array.isArray(messageName) ? messageName : [messageName]).forEach(messageName => {
+                let handler = this.handlers[messageName];
                 
-                handler.map.delete(func);
-            }
-        });
+                if (handler && (func['#HANDLER'] in handler.map)) {
+                    for (let i = 0; i < handler.thunks.length; i++) {
+                        let thunk = handler.thunks[i];
+                        
+                        if (func['#HANDLER'] === thunk.func['#HANDLER']) {
+                            handler.thunks.splice(i, 1);
+                            break;
+                        }
+                    }
+                    
+                    delete handler.map[func['#HANDLER']];
+                }
+            });
+        }
     }
 
     on(messageName, func, filter) {
+        if (!('#HANDLER' in func)) {
+            func['#HANDLER'] = Symbol('handler');
+        }
+
         (Array.isArray(messageName) ? messageName : [messageName]).forEach(messageName => {
             if (messageName in this.handlers) {
                 var handler = this.handlers[messageName];
             }
             else {
-                var handler = { map: new WeakMap(), thunks: [] };
+                var handler = { map: {}, thunks: [] };
                 this.handlers[messageName] = handler;
             }
             
-            if (!handler.map.has(func)) {
-                let thunk = {func: func, once: false, filter: filter ? filter : false };
+            if (!(func['#HANDLER'] in handler.map)) {
+                let thunk = { func: func, once: false, filter: filter ? filter : false };
                 handler.thunks.push(thunk);
-                handler.map.set(func, thunk);
+                handler.map[func['#HANDLER']] = thunk;
             }
         });
     }
 
     once(messageName, func, filter) {
+        if (!('#HANDLER' in func)) {
+            func['#HANDLER'] = Symbol('handler');
+        }
+
         (Array.isArray(messageName) ? messageName : [messageName]).forEach(messageName => {
             if (messageName in this.handlers) {
                 var handler = this.handlers[messageName];
             }
             else {
-                var handler = { map: new WeakMap(), thunks: [] };
+                var handler = { map: {}, thunks: [] };
                 this.handlers[messageName] = handler;
             }
             
-            if (!handler.map.has(func)) {
-                let thunk = {func: func, once: true, filter: filter ? filter : false };
+            if (!(func['#HANDLER'] in handler.map)) {
+                let thunk = { func: func, once: true, filter: filter ? filter : false };
                 handler.thunks.push(thunk);
-                handler.map.set(func, thunk);
+                handler.map[func['#HANDLER']] = thunk;
             }
         });
     }
@@ -123,12 +133,12 @@ register(class Emitter {
             }
 
             thunks.forEach(thunk => {
-                if (typeof thunk.filter != 'function' || thunk.filter(message)) {
-                    thunk.func(message);
-                }
-                
                 if (!thunk.once) {
                     handler.thunks.push(thunk);
+                }
+
+                if (typeof thunk.filter != 'function' || thunk.filter(message)) {
+                    thunk.func(message);
                 }
             });
         }

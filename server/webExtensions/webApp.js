@@ -23,16 +23,6 @@
 
 
 /*****
-*****/
-let clientFramework;
-
-async function loadClientFramework() {
-    if (!clientFramework) {
-    }
-}
-
-
-/*****
  * A webapp is just one specific type of web extension and probably the most
  * frequencly employed.  A webapp is an extension with specific behavior: (1)
  * an undecorated GET results in responding with a dynamically built HTML doc,
@@ -57,14 +47,12 @@ exports = module.exports = register(class WebApp extends WebExtension {
 
     async buildCSS(path) {
         this.visualCss = (await FILES.readFile(path)).toString();
-        let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
-        this.compactCss = (await execShell(`node ${minifyPath} ${path}`)).stdout.trim();
+        this.compactCss = await minify(path);
     }
 
     async buildHTML(path) {
         this.visualHtml = (await FILES.readFile(path)).toString();
-        let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
-        this.compactHtml = (await execShell(`node ${minifyPath} ${path}`)).stdout.trim();
+        this.compactHtml = await minify(path);
     }
 
     async buildLinks() {
@@ -105,8 +93,9 @@ exports = module.exports = register(class WebApp extends WebExtension {
     }
 
     async handleGET(req, rsp) {
-        let doc = mkTextTemplate(Config.html == 'visual' ? this.visualHtml : this.compactHtml).set({
+        let doc = mkTextTemplate(Config.minify ? this.compactHtml : this.visualHtml).set({
             css: this.compactCss,
+            cssTitle: 'webapp',
             title: this.config.title,
             description: this.config.description,
             session: '',
@@ -117,12 +106,11 @@ exports = module.exports = register(class WebApp extends WebExtension {
     }
 
     async handlePOST(req, rsp) {
-        rsp.endStatus(404);
+        rsp.endStatus(204);
     }
 
     async init(cssPath, htmlPath) {
         await super.init();
-        await loadClientFramework();
         await this.buildLinks();
 
         if (this.config.css) {

@@ -24,15 +24,64 @@
 
 /*****
 *****/
+const clientFrameworkPaths = [
+    'framework/core.js',
+    'framework',
+    'gui/lib',
+    'gui/widgets',
+    'gui/views',
+];
+
+
+/*****
+*****/
 exports = module.exports = register(class ClientFramework extends WebExtension {
     constructor() {
         super();
     }
 
     async init() {
+        let raw = [];
+        let fileArray = [];
+        let fileSet = mkSet();
+
+        for (let path of clientFrameworkPaths) {
+            let absPath = PATH.join(env.kodePath, path);
+
+            if (!fileSet.has(absPath)) {
+                fileSet.set(absPath);
+                fileArray.push(absPath);
+            }
+        }
+
+        for (let path of fileArray) {
+            let stats = await FILES.stat(path);
+
+            if (path.endsWith('.js') && stats.isFile()) {
+                let code = Config.minify ? await minify(path) : (await FILES.readFile(path)).toString();
+                raw.push(code);
+            }
+            else if (stats.isDirectory()) {
+                for (let filePath of await recurseFiles(path)) {
+                    stats = await FILES.stat(filePath);
+
+                    if (filePath.endsWith('.js') && stats.isFile()) {
+                        let code = Config.minify ? await minify(filePath) : (await FILES.readFile(filePath)).toString();
+                        raw.push(code);
+                    }
+                }
+            }
+
+            this.framework = { '': raw.join('') };
+        }
     }
 
     async handleGET(req, rsp) {
-        rsp.endStatus(204);
+        if (!(rsp.encoding in this.framework)) {
+            this.framework[rsp.encoding] = await compress(rsp.encoding, this.framework['']);
+        }
+
+        rsp.preEncoded = true;
+        rsp.end(this.framework[rsp.encoding]);
     }
 });

@@ -36,21 +36,12 @@ exports = module.exports = register(class WebExtension extends Emitter {
         super();
     }
 
-    async handleGET(req, rsp) {
-        rsp.endStatus(404);
-    }
-
-    async handlePOST(req, rsp) {
-        rsp.endStatus(404);
-    }
-
     async handleRequest(req, rsp) {
         try {
-            if (req.method() == 'GET') {
-                await this.handleGET(req, rsp);
-            }
-            else if (req.method() == 'POST') {
-                await this.handlePOST(req, rsp);
+            let handlerName = `handle${req.method()}`;
+
+            if (handlerName in this && typeof this[handlerName] == 'function') {
+                await this[handlerName](req, rsp);
             }
             else {
                 rsp.endStatus(405);
@@ -66,29 +57,28 @@ exports = module.exports = register(class WebExtension extends Emitter {
     async init() {
     }
 
-    async onWebSocket(req, webSocket) {
-    }
-
     async upgrade(httpReq, socket, headPacket) {
-        if (this.module.config.websocket) {
-            let secureKey = httpReq.headers['sec-websocket-key'];
-            let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
-            let webSocket = mkWebSocket(socket, req.headers['sec-websocket-extensions'], headPacket);
+        if (this.config.websocket) {
+            if (Reflect.has(this, 'onWebSocket')) {
+                let secureKey = httpReq.headers['sec-websocket-key'];
+                let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
+                let webSocket = mkWebSocket(socket, req.headers['sec-websocket-extensions'], headPacket);
+                
+                let headers = [
+                    'HTTP/1.1 101 Switching Protocols',
+                    'Upgrade: websocket',
+                    'Connection: upgrade',
+                    `Sec-WebSocket-Accept: ${hash}`,
+                    '\r\n'
+                ];
+      
+                if (webSocket.secWebSocketExtensions()) {
+                    headers.append(`Sec-WebSocket-Extensions: ${webSocket.secWebSocketExtensions()}`);
+                }
             
-            let headers = [
-                'HTTP/1.1 101 Switching Protocols',
-                'Upgrade: websocket',
-                'Connection: upgrade',
-                `Sec-WebSocket-Accept: ${hash}`,
-                '\r\n'
-            ];
-  
-            if (webSocket.secWebSocketExtensions()) {
-                headers.append(`Sec-WebSocket-Extensions: ${webSocket.secWebSocketExtensions()}`);
+                socket.write(headers.join('\r\n'));
+                await this.onWebSocket(mkHttpReq(httpReq), webSocket);
             }
-        
-            socket.write(headers.join('\r\n'));
-            await this.onWebSocket(mkHttpReq(httpReq), webSocket);
         }
     }
 });

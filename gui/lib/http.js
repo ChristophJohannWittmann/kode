@@ -3,7 +3,7 @@
 
 
 /**
- */
+ *
 $(class $Http {
     static _converters = {
         'application/json': rsp=>$fromJson(rsp),
@@ -60,7 +60,7 @@ $(class $Http {
 
 
 /**
- */
+ *
 $(class $WebSocket {
     static _socket = null;
     static _socketServerName = '';
@@ -209,3 +209,4 @@ $(class $WebSocket {
         return $WebSocket;
     }
 });
+*/

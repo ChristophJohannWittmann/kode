@@ -39,6 +39,17 @@ register(async function execShell(script) {
 
 
 /*****
+ * This function will minify a file based on the content extension of either
+ * .js, .css, or .html.  The returned product is nicely compactified and minified
+ * to ensure maximum performance over give bandwidth.
+*****/
+register(async function minify(path) {
+    let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
+    return (await execShell(`node ${minifyPath} ${path}`)).stdout.trim();
+});
+
+
+/*****
  * As suspected, don't use FS.existsSync() within an async function.  You don't
  * know what the timing of things will be.  In my case, in code embedded way
  * down, all of the timing associated with things were screwed up.  This little

@@ -29,7 +29,7 @@
  * framework buffer is JSON transferable so that buffers can be easily sent
  * between processes, cluster hosts, and the application clients.
 *****/
-register(class Buffer {
+register(class Binary {
     constructor(value, encoding) {
         this.set(value, encoding);
     }
@@ -51,7 +51,7 @@ register(class Buffer {
                     }
                     break;
 
-                case: 'b64':
+                case 'b64':
                 case 'base64':
                     let binary = atob(value);
                     this.jsArray = (new TextEncoder()).encode(binary);
@@ -79,6 +79,7 @@ register(class Buffer {
   
                 return bytes.join('');
 
+            case 'b64':
             case 'base64':
                 let string = (new TextDecoder()).decode(this.jsArray);
                 return btoa(string);

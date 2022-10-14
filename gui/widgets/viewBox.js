@@ -3,7 +3,7 @@
 
 
 /**
- */
+ *
 $(class $ViewBoxWidget extends Cls$Widget {
     constructor(...views) {
         super('div', 'FMWK-viewbox-widget');
@@ -49,3 +49,4 @@ $(class $ViewBoxWidget extends Cls$Widget {
         }
     }
 });
+*/
