@@ -23,8 +23,23 @@
 
 /*****
 *****/
-register(class SignInWidget extends Widget {
+register(class SignInWidget extends GridLayoutWidget {
     constructor() {
-        super();
+        super(
+            [
+                { width: '*' },
+                { width: '*' },
+                { width: '*' },
+            ],
+            [
+                { height: '*' },
+                { height: '*' },
+                { height: '*' },
+            ]
+        );
+    }
+
+    static initializeWidgetClass() {
+        console.log('SignInWidget Initializer');
     }
 });

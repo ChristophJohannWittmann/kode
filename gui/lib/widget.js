@@ -25,7 +25,7 @@
 *****/
 register(class Widget extends Emitter {
     static nextId = 1;
-    static styles = {};
+    static initialized = mkSet();
 
     constructor(tagName) {
         super();
@@ -34,34 +34,47 @@ register(class Widget extends Emitter {
         this.type = Reflect.getPrototypeOf(this).constructor;
         this.typeName = Reflect.getPrototypeOf(this).constructor.name;
         this.style = styleSheet.createRule(`#${this.selector} {}`);
-        let classStyleName = `wstyle-${Reflect.getPrototypeOf(this).constructor.name.toLowerCase()}`;
 
-        if (classStyleName in Widget.styles) {
-            this.classStyle = Widget.styles[classStyleName];
-        }
-        else {
-            this.classStyle = styleSheet.search(`.${classStyleName}`);
+        let clss = Reflect.getPrototypeOf(this).constructor;
+        console.log(classHierarchyList(this));
 
-            if (!this.classStyle) {
-                this.classStyle = styleSheet.createRule(`.${classStyleName} {}`);
+        while (true) {
+            if (!Widget.initialized.has(clss.name)) {
+                if ('initializeWidgetClass' in clss) {
+                    clss.initializeWidgetClass();
+                }
+
+                Widget.initialized.set(clss.name);
+                let match = clss.toString().match(/extends[ \t\n\r]+([A-Za-z0-9_]+)[ \t\n\r]+\{/m);
+
+                if (match) {
+                    if (match[1] in window) {
+                        if (match[1] != 'Widget') {
+                            clss = window[match[1]];
+                            continue;
+                        }
+                    }
+                }
+
+                break;
             }
-
-            let clss = Reflect.getPrototypeOf(this).constructor;
-
-            if ('initClassStyle' in clss) {
-                clss.initClassStyle(this.classStyle);
-            }
-
-            Widget.styles[classStyleName] = this.classStyle;
         }
 
         this.htmlElement = htmlElement(tagName)
         .setAttribute('id', this.selector)
         .setClassName('widget')
-        .setClassName(`${classStyleName}`);
+        .setClassName(`${this.classStyleName()}`);
     }
 
-    static initialize() {
+    classStyleName() {
+        return `.wstyle-${this.typeName.toLowerCase()}`;
+    }
+
+    classStyleSelector() {
+        return `wstyle-${this.typeName.toLowerCase()}`;
+    }
+
+    static initializeWidgetClass() {
         Widget.style = styleSheet.createRule(`.widget {
             height: 100%;
             width: 100%;

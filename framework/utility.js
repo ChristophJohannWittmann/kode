@@ -129,6 +129,60 @@ register(function binarySearch(array, func, value) {
 
 
 /*****
+*****/
+register(function classHierarchyList(object) {
+    let stack = [];
+
+    if (typeof object == 'object') {
+        let clss = Reflect.getPrototypeOf(object).constructor;
+
+        while (true) {
+            stack.unshift(clss);
+            let match = clss.toString().match(/extends[ \t\n\r]+([A-Za-z0-9_]+)[ \t\n\r]+\{/m);
+
+            if (match) {
+                if (match[1] in global) {
+                    clss = global[match[1]];
+                    continue;
+                }
+            }
+
+            break;
+        }
+    }
+
+    return stack;
+});
+
+
+/*****
+*****/
+register(function classHierarchyStack(object) {
+    let stack = [];
+
+    if (typeof object == 'object') {
+        let clss = Reflect.getPrototypeOf(object).constructor;
+
+        while (true) {
+            stack.push(clss);
+            let match = clss.toString().match(/extends[ \t\n\r]+([A-Za-z0-9_]+)[ \t\n\r]+\{/m);
+
+            if (match) {
+                if (match[1] in global) {
+                    clss = global[match[1]];
+                    continue;
+                }
+            }
+
+            break;
+        }
+    }
+
+    return stack;
+});
+
+
+/*****
  * This utility provides a robust algorithm for deeply cloning any javascript
  * value, including objects and arrays with circular references.  When viewing
  * this code below, remember that javascript non-object values, NOVs, are

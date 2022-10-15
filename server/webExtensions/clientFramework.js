@@ -32,6 +32,7 @@ const clientFrameworkPaths = [
     'framework/core.js',
     'framework',
     'gui/lib',
+    'gui/widgets/gridLayout.js',
     'gui/widgets',
     'gui/views',
 ];

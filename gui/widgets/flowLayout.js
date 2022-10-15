@@ -23,8 +23,8 @@
 
 /*****
 *****/
-register(class ViewBoxWidget extends Widget {
+register(class FlowLayoutWidget extends Widget {
     constructor() {
-        super('div');
+        super('span');
     }
 });
