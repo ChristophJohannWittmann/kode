@@ -35,28 +35,13 @@ register(class Widget extends Emitter {
         this.typeName = Reflect.getPrototypeOf(this).constructor.name;
         this.style = styleSheet.createRule(`#${this.selector} {}`);
 
-        let clss = Reflect.getPrototypeOf(this).constructor;
-        console.log(classHierarchyList(this));
-
-        while (true) {
-            if (!Widget.initialized.has(clss.name)) {
+        for (let clss of classHierarchyList(this)) {
+            if (!(clss.name in { Emitter:0, Widget:0 })) {
                 if ('initializeWidgetClass' in clss) {
                     clss.initializeWidgetClass();
                 }
 
                 Widget.initialized.set(clss.name);
-                let match = clss.toString().match(/extends[ \t\n\r]+([A-Za-z0-9_]+)[ \t\n\r]+\{/m);
-
-                if (match) {
-                    if (match[1] in window) {
-                        if (match[1] != 'Widget') {
-                            clss = window[match[1]];
-                            continue;
-                        }
-                    }
-                }
-
-                break;
             }
         }
 

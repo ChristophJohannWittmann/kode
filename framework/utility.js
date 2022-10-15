@@ -129,6 +129,10 @@ register(function binarySearch(array, func, value) {
 
 
 /*****
+ * classHeirarchyList() and classHierarchyStack() return the class hierarchy
+ * list or stack for the specified object.  Stack means it's in reverse order,
+ * which means from subclass to super class.  List is the opposite order, which
+ * is from super clas to subclass.
 *****/
 register(function classHierarchyList(object) {
     let stack = [];
@@ -156,6 +160,10 @@ register(function classHierarchyList(object) {
 
 
 /*****
+ * classHeirarchyList() and classHierarchyStack() return the class hierarchy
+ * list or stack for the specified object.  Stack means it's in reverse order,
+ * which means from subclass to super class.  List is the opposite order, which
+ * is from super clas to subclass.
 *****/
 register(function classHierarchyStack(object) {
     let stack = [];
