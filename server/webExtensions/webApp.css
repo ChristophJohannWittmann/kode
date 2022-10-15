@@ -1,24 +1,6 @@
 /***********************************************
  * Color Schemes
  ***********************************************/
-@media (prefers-color-scheme: normal) {
-    :root {
-        color-scheme: light dark;
-        --background1: white;
-        --background2: whitessmoke;
-        --background3: aliceblue;
-        --color1: black;
-        --color2: dimgray;
-        --color3: gainsboro;
-        --border1: solid black 1px;
-        --border2: solid dimgray 2px;
-        --border3: solid aliceblue 2px;
-        --outline1: dotted gainsboro 1px;
-        --outline2: solid dimgray 1px;
-    }
-    .lite {}
-    .dark { display: none; }
-}
 @media (prefers-color-scheme: light) {
     :root {
         color-scheme: light dark;
@@ -84,23 +66,6 @@
 
 
 /***********************************************
- * Overall Styles
- ***********************************************/
-html {
-    height: 100%;
-    width: 100%;
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-}
-
-body {
-    height: 100%;
-    width: 100%;
-    margin: 0px;
-    padding:  0px;
-}
-
-
-/***********************************************
  * Font
  ***********************************************/
 .font1 { font-size:  20px!important; }
@@ -111,20 +76,3 @@ body {
 .bold { font-weight: bold; }
 .normal { font-weight: normal; }
 .light { font-weight: light; }
-
-
-/***********************************************
- * Box
- ***********************************************/
-.box1 {}
-
-
-/***********************************************
- * Widge Styles
- ***********************************************/
-.widget {
-    height:  100%;
-    width:  100%;
-}
-.wstyle-viewbox {
-}

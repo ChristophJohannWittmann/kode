@@ -3,22 +3,14 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="${description}">${links}
+        <meta name="description" content="${description}">
+        <meta name="color-scheme" content="dark light">${links}
         <title>${title}</title>
         <style title="${cssTitle}">
             ${css}
         </style>
         <script src="CLIENTFRAMEWORK.js"></script>
-        <script>
-            window.session = '${session}';
-
-            async function load() {
-                window.win = mkWindow(window);
-                window.doc = win.doc();
-                doc.body().append(mkViewBox());
-            }
-        </script>
     </head>
-    <body onload="load()">
+    <body onload="bootstrap()">
     </body>
 </html>

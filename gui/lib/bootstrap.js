@@ -22,13 +22,30 @@
 
 
 /*****
+ * This is the startup or bootstrap function for the client framework code.
+ * This is called when the body has been loaded with the onload="bootstrop()"
+ * HTML attribute.  This ensures a standard environment initialization accross
+ * web applications and a standard initiialization sequence.
 *****/
-register(class ViewBox extends Widget {
-    constructor() {
-        super('div');
-        this.htmlElement.append(htmlElement('h1').append(htmlText('Hello ViewBox')));
-    }
+register(function bootstrap() {
+    window.win = mkWindow(window);
+    window.doc = win.doc();
+    window.styleSheet = doc.getStyleSheet('webapp');
+    Widget.initialize();
 
-    static initClassStyle(classStyle) {
-    }
+    styleSheet.createRule(`html {
+        color: var(--color1);
+        background-color: var(--background1);
+        font-family: Avenir, Helvetica, Arial, sans-serif;
+    }`);
+
+    styleSheet.createRule(`* {
+        height: 100%;
+        width: 100%;
+        margin: 0px;
+        padding:  0px;
+    }`);
+
+    doc.body().append(mkViewBox());
+
 });

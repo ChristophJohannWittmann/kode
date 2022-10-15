@@ -342,6 +342,8 @@ register(class HtmlElement extends HtmlNode {
         if ('EMITTER' in this.node) {
             this.node.EMITTER.off(messageName, handler);
         }
+
+        return this;
     }
 
     on(mesageName, handler) {
@@ -358,6 +360,7 @@ register(class HtmlElement extends HtmlNode {
         }
 
         this.node.EMITTER.on(mesageName, handler);
+        return this;
     }
 
     once(mesageName, handler) {
@@ -374,6 +377,7 @@ register(class HtmlElement extends HtmlNode {
         }
 
         this.node.EMITTER.once(mesageName, handler);
+        return this;
     }
 
     prepend(...args) {
@@ -432,6 +436,7 @@ register(class HtmlElement extends HtmlNode {
 
     setClassName(className) {
         this.node.classList.add(className);
+        return this;
     }
 
     setData(name, value) {

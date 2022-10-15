@@ -22,6 +22,23 @@
 
 
 /*****
+ * This utility is frequently used when bootstriping the appliation servers an
+ * may also be useful in a number of application code area.  It's task is to
+ * first detect whether the passed path argument is absolute or relative and
+ * then to interpret and return an absolute path, which can be used for finding
+ * files on the server.
+*****/
+register(function absolutePath(base, path) {
+    if (PATH.isAbsolute(path)) {
+        return path;
+    }
+    else {
+        return PATH.join(base, path);
+    }
+});
+
+
+/*****
  * Wrap the Promise-based function from the child_process builtin module to make
  * it ready as an asynchronous or async call: await execShell('ls -l');
 *****/

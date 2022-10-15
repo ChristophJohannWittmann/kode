@@ -98,7 +98,6 @@ exports = module.exports = register(class WebApp extends WebExtension {
             cssTitle: 'webapp',
             title: this.config.title,
             description: this.config.description,
-            session: '',
             links: this.links,
         });
 

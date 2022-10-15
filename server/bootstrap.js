@@ -175,7 +175,6 @@ async function prepareDbms() {
     require('./lib/addon.js');
     require('./lib/auth.js');
     require('./lib/binary.js');
-    require('./lib/clientLibraryBuilder.js');
     require('./lib/cluster.js');
     require('./lib/compression.js');
     require('./lib/crypto.js');
@@ -196,6 +195,7 @@ async function prepareDbms() {
     require('./dbms/dbObject.js');
 
     require('./webExtensions/clientFramework.js');
+    require('./webExtensions/clientLibraryBuilder.js');
     require('./webExtensions/webApp.js');
 
     if (CLUSTER.isPrimary) {

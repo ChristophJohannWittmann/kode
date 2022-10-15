@@ -33,32 +33,38 @@ register(class Widget extends Emitter {
         this.selector = `widget${this.widgetId}`;
         this.type = Reflect.getPrototypeOf(this).constructor;
         this.typeName = Reflect.getPrototypeOf(this).constructor.name;
-        this.style = doc.getStyleSheet('webapp').createRule(`#${this.selector} {}`);
+        this.style = styleSheet.createRule(`#${this.selector} {}`);
         let classStyleName = `wstyle-${Reflect.getPrototypeOf(this).constructor.name.toLowerCase()}`;
 
         if (classStyleName in Widget.styles) {
             this.classStyle = Widget.styles[classStyleName];
         }
         else {
-            let styleSheet = doc.getStyleSheet('webapp');
             this.classStyle = styleSheet.search(`.${classStyleName}`);
 
             if (!this.classStyle) {
                 this.classStyle = styleSheet.createRule(`.${classStyleName} {}`);
             }
 
-            Reflect.getPrototypeOf(this).constructor.initClassStyle(this.classStyle);
+            let clss = Reflect.getPrototypeOf(this).constructor;
+
+            if ('initClassStyle' in clss) {
+                clss.initClassStyle(this.classStyle);
+            }
+
             Widget.styles[classStyleName] = this.classStyle;
         }
 
-        this.htmlElement = htmlElement(tagName);
-        this.htmlElement.setAttribute('id', this.selector);
-        this.htmlElement.setClassName('widget');
-        this.htmlElement.setClassName(`${classStyleName}`);
+        this.htmlElement = htmlElement(tagName)
+        .setAttribute('id', this.selector)
+        .setClassName('widget')
+        .setClassName(`${classStyleName}`);
     }
 
-    static initClassStyle(classStyle) {
-        classStyle.style().height = '100%';
-        classStyle.style().width = '100%';
+    static initialize() {
+        Widget.style = styleSheet.createRule(`.widget {
+            height: 100%;
+            width: 100%;
+        }`);
     }
 });

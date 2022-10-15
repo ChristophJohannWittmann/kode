@@ -34,7 +34,7 @@ register(class StyleSheet {
 
     createRule(cssText, index) {
         let ruleList = mkCssRuleList(this.cssGroup, this.cssGroup.cssRules);
-        let ruleIndex = this.cssGroup.insertRule(cssText, index);
+        let ruleIndex = this.cssGroup.insertRule(cssText, index ? index : ruleList.length());
         let cssRule = this.cssGroup.cssRules.item(ruleIndex);
         let ctor = Reflect.getPrototypeOf(cssRule).constructor;
         return CssMakers.get(ctor)(this.cssGroup, cssRule);

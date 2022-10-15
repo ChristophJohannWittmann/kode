@@ -39,7 +39,7 @@ register(async function buildClientLibrary(paths) {
     let fileSet = mkSet();
 
     for (let path of paths) {
-        let absPath = PATH.join(env.kodePath, path);
+        let absPath = absolutePath(env.kodePath, path);
 
         if (!fileSet.has(absPath)) {
             fileSet.set(absPath);
