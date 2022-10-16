@@ -28,7 +28,7 @@
  * web applications and a standard initiialization sequence.
 *****/
 register(function bootstrap() {
-    window.win = mkWindow(window);
+    window.win = mkWin(window);
     window.doc = win.doc();
     window.styleSheet = doc.getStyleSheet('webapp');
     Widget.initializeWidgetClass();

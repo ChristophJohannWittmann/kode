@@ -27,7 +27,7 @@
  * wrapper object.  Our mission here is to allow application developers to cleanly
  * analyze and modify stylesheets from within application code.
 *****/
-register(class StyleSheet {
+register(class CssStyleSheet {
     constructor(cssStyleSheet) {
         this.cssGroup = cssStyleSheet;
     }
@@ -61,7 +61,7 @@ register(class StyleSheet {
     }
 
     parentStyleSheet() {
-        return mkStyleSheet(this.cssGroup.parentStyleSheet);
+        return mkCssStyleSheet(this.cssGroup.parentStyleSheet);
     }
 
     rule(index) {
@@ -190,7 +190,7 @@ register(class CssGroupingRule extends CssRule {
     }
 
     parentStyleSheet() {
-        return mkStyleSheet(this.cssGroup.parentStyleSheet);
+        return mkCssStyleSheet(this.cssGroup.parentStyleSheet);
     }
 
     rule(index) {

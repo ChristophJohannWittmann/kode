@@ -22,27 +22,12 @@
 
 
 /*****
- * A daemon is by definition a service that runs in the application's primary
- * process.  A daemon must extend class Daemon and must be defined as a single
- * class.  The daemon is automatically loaded as part of the based server load.
- * A daemon can also be defined in a module if the preceeding rules are observed.
- * When the Daemon-based single instance is created, all properties from the
- * object instance that (a) begin with "on" and (b) are javascript functions
- * will be integrated into the Daemon by registering message handlers for each
- * of those functions.
- * 
+ * A worker is a browser worker thread, which can be useful for avoiding a freeze
+ * up of the GUI interface in certain times.  This wrapper will help to facilitate
+ * both simplified usage of the worker itself as well as provide integration into
+ * the client application framework.
 *****/
-register(class Daemon extends NonJsonable {
+register(class WebWorker {  
     constructor() {
-        super();
-        let suffix = Reflect.getPrototypeOf(this).constructor.name;
-
-        for (let propertyName of Object.getOwnPropertyNames(Reflect.getPrototypeOf(this))) {
-            if (propertyName.startsWith('on') && typeof this[propertyName] == 'function') {
-                let messageName = `#${suffix}${propertyName.substr(2)}`;
-                Ipc.on(messageName, async message => await this[propertyName](message));
-                on(messageName, async message => await this[propertyName](message));
-            }
-        }
     }
 });

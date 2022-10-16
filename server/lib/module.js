@@ -62,57 +62,57 @@ register(class Module {
                             }
 
                             if (this.status == 'ok') {
-                                Config.moduleMap[this.namespace] = this;
+                                Config.moduleMap[this.container] = this;
                                 Config.moduleArray.push(this);
                             }
                         }
                         catch (e) {
                             this.error = e;
                             this.status = 'error';
-                            this.prefix = '(error   )';
+                            this.prefix = '(error    )';
                             log(`\n${this.error.stack.toString()}`);
                         }
                     }
                     else {
                         this.status = 'fail';
-                        this.prefix = '(config  )';
+                        this.prefix = '(config   )';
                     }
                 }
                 else {
                     this.status = 'fail';
-                    this.prefix = '(path    )';
+                    this.prefix = '(path     )';
                 }
             }
             else {
                 this.status = 'fail';
-                this.prefix = '(dir     )';
+                this.prefix = '(dir      )';
             }
         }
         else {
             this.status = 'fail';
-            this.prefix = '(notfound)';
+            this.prefix = '(notfound )';
         }
     }
 
     async validate() {
-        if (this.status == 'ok' && 'ns' in this.config) {
-            if (this.config.ns in Config.moduleMap) {
-                this.status = 'dupname';
-                this.prefix = '(dupname )';
+        if (this.status == 'ok' && 'container' in this.config) {
+            if (this.config.container in Config.moduleMap) {
+                this.status = 'duplicate';
+                this.prefix = '(duplicate)';
             }
             else {
-                this.namespace = this.config.ns;
+                this.container = this.config.container;
             }
         }
         else {
-            this.status = 'noname';
-            this.prefix = '(noname  )';
+            this.status = 'container';
+            this.prefix = '(container )';
         }
 
         if (this.status == 'ok' && 'active' in this.config && typeof this.config.active == 'boolean') {
             if (!this.config.active) {
                 this.status = 'inactive';
-                this.prefix = '(inactive)';
+                this.prefix = '(inactive )';
             }
         }
     }

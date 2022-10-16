@@ -348,7 +348,7 @@ class PgClient {
         await pg.connect();
         let result = await pg.query(`SELECT datname FROM pg_database`);
         await pg.close();
-        return mkSet(result.data.map(row => row.datname));
+        return mkStringSet(result.data.map(row => row.datname));
     }
     
     static async dbSchema(settings) {

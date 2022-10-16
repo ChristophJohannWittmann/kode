@@ -27,7 +27,7 @@
  * Set.  This class may be somewhat slower, but it's API is much more like that
  * of an array and is much more modern that the js engine's Set.
 *****/
-register(class Set extends Jsonable {
+register(class StringSet extends Jsonable {
     constructor(...args) {
         super();
         this.values = {};
@@ -55,13 +55,9 @@ register(class Set extends Jsonable {
         return array;
     }
   
-    array() {
-        return Object.keys(this.values);
-    }
-  
     clear(...args) {
         if (args.length) {
-            Set.arrayify(...args).forEach(el => delete this.values[el.toString()]);
+            StringSet.arrayify(...args).forEach(el => delete this.values[el.toString()]);
         }
         else {
             this.values = {};
@@ -74,7 +70,7 @@ register(class Set extends Jsonable {
   
     equals(...args) {
         let keys = Object.keys(this.values);
-        let array = Set.arrayify(...args);
+        let array = StringSet.arrayify(...args);
   
         if (keys.length = array.length) {
             for (let i = 0; i < array.length; i++) {
@@ -101,7 +97,7 @@ register(class Set extends Jsonable {
     }
   
     hasAll(...args) {
-        let array = Set.arrayify(...args);
+        let array = StringSet.arrayify(...args);
   
         for (let i = 0; i < array.length; i++) {
             if (!(array[i] in this.values)) {
@@ -113,7 +109,7 @@ register(class Set extends Jsonable {
     }
   
     hasAny(...args) {
-        let array = Set.arrayify(...args);
+        let array = StringSet.arrayify(...args);
   
         for (let i = 0; i < array.length; i++) {
             if (array[i] in this.values) {
@@ -125,16 +121,11 @@ register(class Set extends Jsonable {
     }
   
     intersect(...args) {
-        let intersection = mkSet(this.values);
-  
-        args.forEach(arg => {
-            let set = new Set(arg);
-            let array = intersection.array();
-            
-            for (let i = 0; i < array.length; i++) {
-                if (!set.hasAll(array[i])) {
-                    intersection.clear(array[i]);
-                }
+        let intersection = mkStringSet();
+
+        args.froEach(arg => {
+            if (this.has(arg)) {
+                intersection.set(arg);
             }
         });
   
@@ -143,7 +134,7 @@ register(class Set extends Jsonable {
   
     isSubsetOf(...args) {
         let superset = {};
-        Set.arrayify(...args).forEach(el => superset[el] = '');
+        StringSet.arrayify(...args).forEach(el => superset[el] = '');
         let keys = Object.keys(this.values);
   
         for (let i = 0; i < keys.length; i++) {
@@ -168,10 +159,14 @@ register(class Set extends Jsonable {
     }
   
     set(...args) {
-        Set.arrayify(...args).forEach(el => this.values[el.toString()] = '');
+        StringSet.arrayify(...args).forEach(el => this.values[el.toString()] = '');
+    }
+
+    [Symbol.iterator]() {
+        return Object.keys(this.values)[Symbol.iterator]();
     }
   
     union(...args) {
-        return mkSet(...args);
+        return mkStringSet(...args);
     }
 });

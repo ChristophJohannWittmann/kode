@@ -313,7 +313,7 @@ register(class HtmlElement extends HtmlNode {
     }
 
     getClassNames() {
-        let set = mkSet();
+        let set = mkStringSet();
 
         for (let key of this.node.classList.keys()) {
             set.set(key)
@@ -327,7 +327,7 @@ register(class HtmlElement extends HtmlNode {
     }
 
     hasAttribute(name) {
-        return mkSet(this.node.getAttributeNames()).has(name);
+        return mkStringSet(this.node.getAttributeNames()).has(name);
     }
 
     hasClassName(className) {

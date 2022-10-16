@@ -120,7 +120,7 @@ class Attribute extends Node {
 }
 
 class Element extends Node {
-    static voids = mkSet(
+    static voids = mkStringSet(
         'area',
         'base',
         'br',

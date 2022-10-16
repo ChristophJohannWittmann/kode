@@ -33,7 +33,7 @@ require('../framework/activeData.js');
 require('../framework/language.js');
 require('../framework/message.js');
 require('../framework/mime.js');
-require('../framework/set.js');
+require('../framework/stringSet.js');
 require('../framework/textTemplate.js');
 require('../framework/time.js');
 require('../framework/calendars/gregorian.js');
@@ -116,7 +116,7 @@ async function prepareDbms() {
             configMap[configName].set(schemaName);
         }
         else {
-            configMap[configName] = mkSet(schemaName);
+            configMap[configName] = mkStringSet(schemaName);
         }
     }
 
@@ -124,7 +124,7 @@ async function prepareDbms() {
         let settings = Config.databases[configName];
         let tableMap = {};
 
-        for (let schemaName of configMap[configName].array()) {
+        for (let schemaName of configMap[configName]) {
             let schema = DbSchema.schemas[schemaName];
 
             for (let tableDef of schema.tableArray) {
@@ -222,7 +222,6 @@ async function prepareDbms() {
 
     await onSingletons();
     require('./dbms/dbSchemas.js');
-    namespace();
  
     logPrimary('[ Loading Modules ]');
     Config.moduleMap = {};
@@ -237,7 +236,7 @@ async function prepareDbms() {
         }
     }
 
-    await onSingletons(); 
+    await onSingletons();
 
     for (let modulePath of Config.modules) {
         let module = mkModule(modulePath);

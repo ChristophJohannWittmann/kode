@@ -21,7 +21,7 @@
 *****/
 
 
-(async () => {
+(() => {
     /*****
      * Since "global" instance defined on the browser, this code will ensure
      * that "global" is defined and can be used in the rest of the core of the
@@ -34,47 +34,32 @@
     catch (e) {
         global.platform = 'server';
     }
-
-    global.JsDate = Date;
  
  
     /*****
-     * Set the state of the closure such that register() and singleton() will
-     * use the global namespace for registering items within the framework. Note
-     * that the Jsonable class is also defined and hard-coded with a namespace
-     * of GLOBAL.
+     * Current object specifies where new objects will be registered.  The
+     * framework objects are registered directly to the global object, while
+     * it is highly recommened that all other modules specify an object, in
+     * which to register classes and functions.
     *****/
-    nsName = 'GLOBAL';
-    nsObject = global[nsName] = global;
+    let container = global;
 
-    const jsonables = {};
-    eval(`jsonables[nsName] = class Jsonable { NAMESPACE() { return 'GLOBAL'; }}`);
-    global.Jsonable = jsonables[nsName];
- 
- 
-    /*****
-     * Set the current namespace for defining application objects.  When called
-     * without an argument, there is no ability to define additional objects
-     * with the API.  After the framewokr has been loaded, that's what happens.
-     * For each application or module, as loading begins, a call must be made
-     * to namespace() to set that value for the following code.
-    *****/
-    global.namespace = name => {
-        if (name === undefined) {
-            nsName = null;
-            nsObject = null;
-            delete global.Jsonable;
+    global.container = function(name) {
+        if (name in global) {
+            throw new Error(`setContainer(), name already exists: ${name}`);
         }
-        else if (name in global || name == 'global' || name == 'window') {
-            throw new Error(`Namespace ${name} is not available for use!`);
-        }
-        else {
-            nsName = name;
-            nsObject = global[nsName] = new Object();
-            eval(`jsonables[nsName] = class Jsonable { NAMESPACE() { return '${nsName}'; }}`);
-            global.Jsonable = jsonables[nsName];
-        }
+
+        global[name] = {};
+        container = global[name];
     }
+
+    /*****
+     * Symbols used for tagging constructors, singletons and other objects as
+     * part of the coding framework.
+    *****/
+    const SymbolCtor = Symbol('ctor');
+    const SymbolJsonable = Symbol('jsonable');
+    const SymbolSingleton = Symbol('singleton');
  
  
     /*****
@@ -84,33 +69,34 @@
      * functions, they are just added to the namespace for use later on.
     *****/
     global.register = func => {
-        if (!nsObject) {
-            throw new Error(`No declared namespace.`);
-        }
- 
         if (typeof func == 'function' && func.name) {
-            if (func.toString().startsWith('class')) {
-                if (func.name.match(/^[A-Z]/)) {
-                    nsObject[`${func.name}`] = func;
-
-                    let makerName = `mk${func.name}`;
-                    let makerFunc = (...args) => Reflect.construct(func, args);
-                    nsObject[makerName] = makerFunc;
-                    return makerFunc;
+            if (!(func.name in container)) {
+                if (func.toString().startsWith('class')) {
+                    if (func.name.match(/^[A-Z]/)) {
+                        let makerName = `mk${func.name}`;
+                        func[SymbolCtor] = container === global ? makerName : `${container}.${makerName}`;
+                        let makerFunc = (...args) => Reflect.construct(func, args);
+                        container[makerName] = makerFunc;
+                        container[`${func.name}`] = func;
+                        return makerFunc;
+                    }
+                    else {
+                        throw new Error(`register(), class name must start with an upper-case letter: ${func.name}`);
+                    }
                 }
                 else {
-                    throw new Error(`register(), class name must start with an upper-case letter: ${func.name}`);
+                    if (func.name.match(/^[a-z]/)) {
+                        container[`${func.name}`] = (...args) => {
+                            return Reflect.apply(func, container, args);
+                        };
+                    }
+                    else {
+                        throw new Error(`register(), function name must start with an lower-case letter: ${func.name}`);
+                    }
                 }
             }
             else {
-                if (func.name.match(/^[a-z]/)) {
-                    nsObject[`${func.name}`] = (...args) => {
-                        return Reflect.apply(func, nsObject, args);
-                    };
-                }
-                else {
-                    throw new Error(`register(), function name must start with an lower-case letter: ${func.name}`);
-                }
+                throw new Error(`register(), name already exists in container: ${func.name}`);
             }
         }
         else {
@@ -133,40 +119,42 @@
         let waiting = [];
         let singletons = 0;
  
-        global.singleton = func => {
-            if (!nsObject) {
-                throw new Error(`No declared namespace.`);
-            }
- 
+        global.singleton = func => { 
             if (typeof func == 'function' && func.name) {
-                if (func.toString().startsWith('class')) {
-                    if (func.name.match(/^[A-Z]/)) {
-                        return new Promise(async (ok, fail) => {
-                            singletons++;
-                            let obj = new func();
-                            
-                            if (obj instanceof Promise) {
-                                nsObject[func.name] = await obj;
-                            }
-                            else {
-                                nsObject[func.name] = obj;
-                            }
-                            
-                            singletons--;
-                            
-                            if (singletons == 0) {
-                                for (let waiter of waiting) {
-                                    waiter();
+                if (!(func.name in container)) {
+                    if (func.toString().startsWith('class')) {
+                        if (func.name.match(/^[A-Z]/)) {
+                            return new Promise(async (ok, fail) => {
+                                singletons++;
+                                let obj = new func();
+                                obj[SymbolSingleton] = true;
+                                
+                                if (obj instanceof Promise) {
+                                    container[func.name] = await obj;
+                                }
+                                else {
+                                    container[func.name] = obj;
                                 }
                                 
-                                waiting = [];
-                            }
-                            
-                            ok(nsObject[func.name]);
-                        });
+                                singletons--;
+                                
+                                if (singletons == 0) {
+                                    for (let waiter of waiting) {
+                                        waiter();
+                                    }
+                                    
+                                    waiting = [];
+                                }
+                                
+                                ok(container[func.name]);
+                            });
+                        }
+                        else {
+                            throw new Error(`singleton(), class name must start with an upper-case letter: ${func.name}`);
+                        }
                     }
                     else {
-                        throw new Error(`register(), class name must start with an upper-case letter: ${func.name}`);
+                        throw new Error(`singleton(), name already exists in container: ${func.name}`);
                     }
                 }
                 else {
@@ -193,74 +181,178 @@
  
  
     /*****
-     * There are times when we want to pass a Jsonable to another process or
-     * the client but we don't need to implement that class at the other end.
-     * The fromJson() function will call this function to create a class stub
-     * Jsonable.  What's useful about this is that when the other end json's
-     * the object, upon receipt, it will be unjsoned into an object of the
-     * original class.
+     * There are three levels of Jsonability: (1) fully jsonable, (2) partially
+     * jsonable, and (3) not jsonable.  Fully jsonable means that an object is
+     * restored at the endpoint be creating a new instance of the specified objet.
+     * Hence, all of the methods and features are restored.  Partial jsonables
+     * can be sent, but only a generic object will be sent.  Finally, a non-
+     * jsonable will not be converted to JSON.  For instance, Emitters are marked
+     * as non-jsonable.
     *****/
-    global.stub = (ns, ctor) => {
-        if (!(ns in global)) {
-            global[ns] = new Object();
+    register(class Jsonable {
+        constructor() {
+            this[SymbolJsonable] = true;
         }
+    });
 
-        let prevName = nsName;
-        let prevObject = nsObject;
- 
-        nsName = ns;
-        nsObject = global[ns];
-        global.Jsonable = jsonables[ns];
- 
-        eval(`
-            global.register(class ${ctor.substr(2)} extends Jsonable {
-                constructor() {
-                    super();
-                }
-            });
-        `);
- 
-        nsName = prevName;
-        nsObject = prevObject;
-        global.Jsonable = jsonables[nsName];
-    }
- 
- 
+    register(class NonJsonable {
+        constructor() {
+            this[SymbolJsonable] = false;
+        }
+    });
+
+
     /*****
-     * By having a global registry of symbols, we have created the foundation
-     * for having unique symbols in each namespace and can then serialized
-     * symbols and deserialize them and retain their uniqueness.
+     * The framework's toJson() and fromJson() functions are required in many
+     * instances with regards to messaging.  The type and instance information is
+     * retained for the core framework objects as well as objects of registered
+     * classes.  This is accomplished by taking objects of specific types and
+     * generating JSON "escape sequences" that are picked up at the receiving end
+     * to recreate and exact copy of the original.  Theese functions DO NOT WORK
+     * where objects have circular references such a self-referencing trees. Notice
+     * the user of the Data prototype modifier.  That's because Dates are converted
+     * to strings before they even reach the strinigier function.
     *****/
-    const SYMBOLS = Symbol('SYMBOLS');
- 
-    global.mkSymbol = (...args) => {
-        let ns;
-        let description;
- 
-        if (args.length == 1) {
-            ns = nsName;
-            description = args[0];
-        }
-        else if (args.length == 2) {
-            [ ns, description ] = args;
-        }
-        else {
-            return;
-        }
- 
-        if (!(ns in global)) {
-            global[ns] = new Object();
-            global[ns][SYMBOLS] = new Object();
-        }
- 
-        if (!(SYMBOLS in global[ns])) {
-            global[ns][SYMBOLS] = new Object();
-        }
- 
-        if (!(description in global[ns][SYMBOLS])) {
-            global[ns][SYMBOLS][description] = Symbol(`${ns}#${description}`);
-        }
- 
-        return global[ns][SYMBOLS][description];
+    Date.prototype.toJSON = function() {
+        return { '#DATE': this.valueOf() };
     };
+
+    register(function toJson(value, humanReadable) {
+        return JSON.stringify(value, (key, value) => {
+            if (value === null) {
+                return { '#NULL': 0 };
+            }
+            else if (Number.isNaN(value)) {
+                return { '#NAN': 0 };
+            }
+            else if (typeof value == 'symbol') {                
+                return undefined;
+            }
+            else if (value instanceof Date) {
+                return { '#DATE': value.valueOf() };
+            }
+            else if (value instanceof Time) {
+                return { '#TIME': value.time() };
+            }
+            else if (value instanceof RegExp) {
+                return { '#REGEX': value.toString() };
+            }
+            else if (typeof value == 'function') {
+                return { '#FUNC': mkBinary(value.toString()).toString('base64') };
+            }
+            else if (typeof value == 'bigint') {
+                return { '#BIG': value.toString() };
+            }
+            else if (value instanceof Buffer) {
+                return { '#BUFFER': value.toString()('base64') };
+            }
+            else if (value instanceof Binary) {
+                return { '#BINARY': value.toString('base64') };
+            }
+            else if (typeof value == 'object') {
+                if (ActiveData.isActiveData(value)) {
+                    let obj = new Object({ '#ACTIVE': 'ActiveData' });
+                    Object.assign(obj, ActiveData.value(value));
+                    return obj;
+                }
+                else if (value[SymbolSingleton]) {
+                    return undefined;
+                }
+                else if (value[SymbolJsonable] === false) {
+                    return undefined;
+                }
+                else if (value[SymbolJsonable]) {
+                    let obj = new Object();
+                    obj['#CTOR'] = Reflect.getPrototypeOf(value).constructor[SymbolCtor];
+                    Object.assign(obj, value);
+                    delete obj[SymbolJsonable];
+                    return obj;
+                }
+                else {
+                    return value;
+                }
+            }
+     
+            return value;
+        }, humanReadable ? 4 : 0);
+    });
+
+
+    /*****
+     * The framework's toJson() and fromJson() functions are required in many
+     * instances with regards to messaging.  The type and instance information is
+     * retained for the core framework objects as well as objects of registered
+     * classes.  This is accomplished by taking objects of specific types and
+     * generating JSON "escape sequences" that are picked up at the receiving end
+     * to recreate and exact copy of the original.  Theese functions DO NOT WORK
+     * where objects have circular references such a self-referencing trees.
+    *****/
+    register(function fromJson(json) {
+        return JSON.parse(json, (key, value) => {
+            if (typeof value == 'object' && !Array.isArray(value)) {
+                if ('#NULL' in value) {
+                    return null;
+                }
+                else if ('#NAN' in value) {
+                    return NaN;
+                }
+                else if ('#DATE' in value) {
+                    return new Date(value['#DATE']);
+                }
+                else if ('#TIME' in value) {
+                    return mkTime(value['#TIME']);
+                }
+                else if ('#REGEX' in value) {
+                    return new RegExp(value['#REGEX']);
+                }
+                else if ('#FUNC' in value) {
+                    return mkBinary(value['#FUNC'], 'base64').toString();
+                }
+                else if ('#BUFFER' in value) {
+                    return mkBinary(value['#BUFFER'], 'base64');
+                }
+                else if ('#BIG' in value) {
+                    return BigInt(value['#BIG']);
+                }
+                else if ('#ACTIVE' in value) {
+                    delete value['#ACTIVE'];
+                    return mkActiveData(value);
+                }
+                else if ('#CTOR' in value) {
+                    let maker = global;
+
+                    for (let key of value['#CTOR'].split('.')) {
+                        if (key in maker) {
+                            maker = maker[key];
+                        }
+                        else {
+                            maker = null;
+                            break;
+                        }
+                    }
+
+                    if (maker) {
+                        return maker(value);
+                    }
+                    else {
+                        let instance;
+
+                        eval(`
+                            register(class ${maker.name.substr(2)} extends Jsonable {
+                                constructor(value) {
+                                    Object.assign(this, value);
+                                }
+                            });
+
+                            instance = ${maker.name}(value);
+                        `);
+
+                        return instance;
+                    }
+                }
+            }
+     
+            return value;
+        }
+    )});
 })();

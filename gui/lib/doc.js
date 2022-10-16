@@ -26,7 +26,7 @@
  * is to simplifiy the complexity and histority mess associated with the long
  * history of the document API.
 *****/
-register(class Document extends Emitter {
+register(class Doc extends Emitter {
     constructor(doc) {
         super();
         this.doc = doc;
@@ -112,7 +112,7 @@ register(class Document extends Emitter {
             return null;
         }
         else {
-            return mkStyleSheet(this.doc.styleSheets[0]);
+            return mkCssStyleSheet(this.doc.styleSheets[0]);
         }
     }
 
@@ -120,7 +120,7 @@ register(class Document extends Emitter {
         let styleSheets = [];
 
         for (let sheet of this.doc.styleSheets) {
-            styleSheets.push(mkStyleSheet(sheet));
+            styleSheets.push(mkCssStyleSheet(sheet));
         }
 
         return styleSheets;

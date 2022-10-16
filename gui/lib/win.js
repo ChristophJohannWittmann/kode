@@ -28,7 +28,7 @@
  * our window wrapper.  One of the key features is that the framework window is
  * an Emitter and will send messages for all registerd window events.
 *****/
-register(class Window extends Emitter {  
+register(class Win extends Emitter {  
     constructor(win) {
         super();
         this.win = win;
@@ -100,7 +100,7 @@ register(class Window extends Emitter {
     }
 
     doc() {
-        return mkDocument(this.win.document);
+        return mkDoc(this.win.document);
     }
 
     focus() {
@@ -212,17 +212,5 @@ register(class Window extends Emitter {
 
     viewport() {
         return this.win.visualViewport;
-    }
-});
-
-
-/*****
- * A worker is a browser worker thread, which can be useful for avoiding a freeze
- * up of the GUI interface in certain times.  This wrapper will help to facilitate
- * both simplified usage of the worker itself as well as provide integration into
- * the client application framework.
-*****/
-register(class Worker {  
-    constructor() {
     }
 });

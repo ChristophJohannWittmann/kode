@@ -29,8 +29,9 @@
  * IpcEmitter, ClusterEmitter, and WebSocketEmitter.  On the client, the only
  * additional emitter class is the WebSocketEmitter.
 *****/
-register(class Emitter {
+register(class Emitter extends NonJsonable {
     constructor() {
+        super();
         this.handlers = {};
     }
   

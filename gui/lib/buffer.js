@@ -22,14 +22,14 @@
 
 
 /*****
- * There are two variants of Binary.  In the server, Buffer wraps the builtin
+ * There are two variants of Biuffer.  In the server, Buffer wraps the builtin
  * Buffer class by providing some additional features.  On the browser, it's
  * a class the implements the same features based on a uint8 array.  This makes
  * coding buffers the same on both the client and server.  Additionally, the
  * framework buffer is JSON transferable so that buffers can be easily sent
  * between processes, cluster hosts, and the application clients.
 *****/
-register(class Binary {
+register(class Buffer {
     constructor(value, encoding) {
         this.set(value, encoding);
     }

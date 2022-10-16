@@ -46,7 +46,7 @@ singleton(class Sentinel extends Daemon {
         this.sessions = {};
         this.expiring = [];
         
-        this.permissions = mkSet(
+        this.permissions = mkStringSet(
             'config',
             'sys',
             'user',
@@ -54,7 +54,7 @@ singleton(class Sentinel extends Daemon {
     }
     /*
     async onAddPermissions(message) {
-        for (let permission of message.permissions.array()) {
+        for (let permission of message.permissions {
             this.permissions.set(permission);
         }
 

@@ -25,7 +25,7 @@
 *****/
 register(class Widget extends Emitter {
     static nextId = 1;
-    static initialized = mkSet();
+    static initialized = mkStringSet();
 
     constructor(tagName) {
         super();

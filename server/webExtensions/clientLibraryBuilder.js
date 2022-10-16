@@ -36,7 +36,7 @@
 register(async function buildClientLibrary(paths) {
     let raw = [];
     let fileArray = [];
-    let fileSet = mkSet();
+    let fileSet = mkStringSet();
 
     for (let path of paths) {
         let absPath = absolutePath(env.kodePath, path);
@@ -58,7 +58,7 @@ register(async function buildClientLibrary(paths) {
             for (let filePath of await recurseFiles(path)) {
                 stats = await FILES.stat(filePath);
 
-                if (filePath.endsWith('.js') && stats.isFile()) {
+                if (filePath.endsWith('.js') && stats.isFile() && !fileSet.has(filePath)) {
                     let code = Config.minify ? await minify(filePath) : (await FILES.readFile(filePath)).toString();
                     raw.push(code);
                 }
