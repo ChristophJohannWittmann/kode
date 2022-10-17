@@ -25,7 +25,7 @@
 *****/
 register(class Widget extends Emitter {
     static nextId = 1;
-    static initialized = mkStringSet();
+    static initialized = {};
 
     constructor(tagName) {
         super();
@@ -36,23 +36,34 @@ register(class Widget extends Emitter {
         this.style = styleSheet.createRule(`#${this.selector} {}`);
 
         for (let clss of classHierarchyList(this)) {
-            if (!(clss.name in { Emitter:0, Widget:0 })) {
-                if ('initializeWidgetClass' in clss) {
-                    clss.initializeWidgetClass();
-                }
+            if (clss.name != 'Emitter') {
+                if (!(clss.name in Widget.initialized)) {
+                    let classStyle = doc.getStyleSheet('webapp').createRule(`${this.classStyleSelector()} {}`);
 
-                Widget.initialized.set(clss.name);
+                    Widget.initialized[clss.name] = {
+                        classStyle: classStyle,
+                    };
+
+                    if ('initializeWidgetClass' in clss) {
+                        clss.initializeWidgetClass(classStyle);
+                    }
+                }
             }
         }
 
         this.htmlElement = htmlElement(tagName)
         .setAttribute('id', this.selector)
         .setClassName('widget')
+        .setClassName(this.classStyleName())
         .setClassName(`${this.classStyleName()}`);
     }
 
     classStyleName() {
         return `.wstyle-${this.typeName.toLowerCase()}`;
+    }
+
+    classStyle() {
+        return Widget.initialized[this.typeName].classStyle;
     }
 
     classStyleSelector() {

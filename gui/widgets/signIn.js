@@ -37,10 +37,8 @@ register(class SignInWidget extends GridLayoutWidget {
                 { height: '*' },
             ]
         );
-        this.htmlElement.append(htmlText('It works!'));
     }
 
-    static initializeWidgetClass() {
-        console.log('SignInWidget Initializer');
+    static initializeWidgetClass(classStyle) {
     }
 });

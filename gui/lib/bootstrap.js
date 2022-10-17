@@ -31,7 +31,6 @@ register(function bootstrap() {
     window.win = mkWin(window);
     window.doc = win.doc();
     window.styleSheet = doc.getStyleSheet('webapp');
-    Widget.initializeWidgetClass();
 
     styleSheet.createRule(`html {
         color: var(--color1);
@@ -47,4 +46,5 @@ register(function bootstrap() {
     }`);
 
     doc.body().append(mkSignInWidget());
+    console.log(doc.getStyleSheet('webapp').rules());
 });

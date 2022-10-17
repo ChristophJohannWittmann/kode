@@ -26,49 +26,30 @@
 register(class GridLayoutWidget extends Widget {
     constructor(rows, cols) {
         super('div');
-        this.setRowGap = 0;
-        this.setColGap = 0;
-        this.setRows(rows);
-        this.setCols(cols);
+
+        this.setGeometry({
+            rows: rows,
+            rowGap: '0px',
+            cols: cols,
+            colGap: '0px',
+        });
+    }
+
+    changeDimensions(dRows, dCols) {
+    }
+
+    changeGap(dRow, dCol) {
     }
 
     clearAt(rowIndex, colIndex) {
     }
 
-    computeColGeometry() {
-    }
-
-    computeRowGeometry() {
-    }
-
-    configureRow(index, width) {
-    }
-
-    configureCol(index, height) {
-    }
-
-    static initializeWidgetClass() {
-        console.log('Grid Layout Initializer');
+    static initializeWidgetClass(classStyle) {
     }
 
     setAt(rowIndex, colIndex, item) {
     }
 
-    setColGap(colGap) {
-        this.colGap = colGap;
-    }
-
-    setCols(cols) {
-        this.cols = clone(cols);
-        this.computeColGeometry();
-    }
-
-    setRowGap(rowGap) {
-        this.rowGap = rowGap;
-    }
-
-    setRows(rows) {
-        this.rows = clone(rows);
-        this.computeRowGeometry()
+    setGeometry(opts) {
     }
 });
