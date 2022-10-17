@@ -25,20 +25,14 @@
 *****/
 register(class SignInWidget extends GridLayoutWidget {
     constructor() {
-        super(
-            [
-                { width: '*' },
-                { width: '*' },
-                { width: '*' },
-            ],
-            [
-                { height: '*' },
-                { height: '*' },
-                { height: '*' },
-            ]
-        );
+        super({
+            rows: 3,
+            rowGap: '0px',
+            cols: 3,
+            colGap: '0px',
+        });
     }
 
-    static initializeWidgetClass(classStyle) {
+    static initialize(classData) {
     }
 });

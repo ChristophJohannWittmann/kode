@@ -24,15 +24,9 @@
 /*****
 *****/
 register(class GridLayoutWidget extends Widget {
-    constructor(rows, cols) {
+    constructor(opts) {
         super('div');
-
-        this.setGeometry({
-            rows: rows,
-            rowGap: '0px',
-            cols: cols,
-            colGap: '0px',
-        });
+        this.setGeometry(opts);
     }
 
     changeDimensions(dRows, dCols) {
@@ -44,12 +38,14 @@ register(class GridLayoutWidget extends Widget {
     clearAt(rowIndex, colIndex) {
     }
 
-    static initializeWidgetClass(classStyle) {
+    static initialize(classData) {
     }
 
     setAt(rowIndex, colIndex, item) {
     }
 
     setGeometry(opts) {
+        if (opts) {
+        }
     }
 });

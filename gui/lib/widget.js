@@ -31,46 +31,16 @@ register(class Widget extends Emitter {
         super();
         this.widgetId = Widget.nextId++;
         this.selector = `widget${this.widgetId}`;
-        this.type = Reflect.getPrototypeOf(this).constructor;
-        this.typeName = Reflect.getPrototypeOf(this).constructor.name;
-        this.style = styleSheet.createRule(`#${this.selector} {}`);
-
-        for (let clss of classHierarchyList(this)) {
-            if (clss.name != 'Emitter') {
-                if (!(clss.name in Widget.initialized)) {
-                    let classStyle = doc.getStyleSheet('webapp').createRule(`${this.classStyleSelector()} {}`);
-
-                    Widget.initialized[clss.name] = {
-                        classStyle: classStyle,
-                    };
-
-                    if ('initializeWidgetClass' in clss) {
-                        clss.initializeWidgetClass(classStyle);
-                    }
-                }
-            }
-        }
+        this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
+        this.classData = WidgetClassManager.fromInstance(this);
 
         this.htmlElement = htmlElement(tagName)
         .setAttribute('id', this.selector)
         .setClassName('widget')
-        .setClassName(this.classStyleName())
-        .setClassName(`${this.classStyleName()}`);
+        .setClassName(this.classData.styleName);
     }
 
-    classStyleName() {
-        return `.wstyle-${this.typeName.toLowerCase()}`;
-    }
-
-    classStyle() {
-        return Widget.initialized[this.typeName].classStyle;
-    }
-
-    classStyleSelector() {
-        return `wstyle-${this.typeName.toLowerCase()}`;
-    }
-
-    static initializeWidgetClass() {
+    static initializeWidgets() {
         Widget.style = styleSheet.createRule(`.widget {
             height: 100%;
             width: 100%;

@@ -42,16 +42,44 @@
      * it is highly recommened that all other modules specify an object, in
      * which to register classes and functions.
     *****/
+    let chain = '';
     let container = global;
 
-    global.container = function(name) {
-        if (name in global) {
-            throw new Error(`setContainer(), name already exists: ${name}`);
+    global.getContainer = function(links) {
+        let container = global;
+
+        if (links !== undefined) {
+            for (let link of links.split('.')) {
+                if (!(link in container)) {
+                    container[link] = new Object();
+                }
+
+                container = container[link];
+            }
         }
 
-        global[name] = {};
-        container = global[name];
+        return container;
     }
+
+    global.setContainer = function(links) {
+        chain = [];
+        container = global;
+
+        if (links !== undefined) {
+            for (let link of links.split('.')) {
+                chain.push(link);
+
+                if (!(link in container)) {
+                    container[link] = new Object();
+                }
+
+                container = container[link];
+            }
+        }
+
+        chain = chain.join('.');
+    }
+
 
     /*****
      * Symbols used for tagging constructors, singletons and other objects as
@@ -74,8 +102,13 @@
                 if (func.toString().startsWith('class')) {
                     if (func.name.match(/^[A-Z]/)) {
                         let makerName = `mk${func.name}`;
-                        func[SymbolCtor] = container === global ? makerName : `${container}.${makerName}`;
-                        let makerFunc = (...args) => Reflect.construct(func, args);
+                        func[SymbolCtor] = { container: chain, maker: makerName };
+
+                        let makerFunc = (...args) => {
+                            let made = Reflect.construct(func, args);
+                            return made;
+                        };
+
                         container[makerName] = makerFunc;
                         container[`${func.name}`] = func;
                         return makerFunc;
@@ -319,36 +352,25 @@
                     return mkActiveData(value);
                 }
                 else if ('#CTOR' in value) {
-                    let maker = global;
+                    let ctorContainer = getContainer(value['#CTOR'].container);
 
-                    for (let key of value['#CTOR'].split('.')) {
-                        if (key in maker) {
-                            maker = maker[key];
-                        }
-                        else {
-                            maker = null;
-                            break;
-                        }
-                    }
-
-                    if (maker) {
-                        return maker(value);
-                    }
-                    else {
-                        let instance;
+                    if (!(value['#CTOR'].maker in ctorContainer)) {
+                        let restoreChainTo = chain;
+                        setContainer(value['#CTOR'].container);
 
                         eval(`
-                            register(class ${maker.name.substr(2)} extends Jsonable {
+                            register(class ${value['#CTOR'].maker.substr(2)} extends Jsonable {
                                 constructor(value) {
+                                    super();
                                     Object.assign(this, value);
                                 }
                             });
-
-                            instance = ${maker.name}(value);
                         `);
 
-                        return instance;
+                        setContainer(restoreChainTo);
                     }
+
+                    return ctorContainer[value['#CTOR'].maker](value);
                 }
             }
      

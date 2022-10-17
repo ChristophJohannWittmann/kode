@@ -134,19 +134,25 @@ register(function binarySearch(array, func, value) {
  * which means from subclass to super class.  List is the opposite order, which
  * is from super clas to subclass.
 *****/
-register(function classHierarchyList(object) {
-    let stack = [];
+function enumerateClassHierarchy(arg, method) {
+    let ctor;
+    let classes = [];
 
-    if (typeof object == 'object') {
-        let clss = Reflect.getPrototypeOf(object).constructor;
+    if (typeof arg == 'object') {
+        ctor = Reflect.getPrototypeOf(arg).constructor;
+    }
+    else if (typeof arg == 'function' && arg.toString.startsWith('class')) {
+        ctor = arg;
+    }
 
+    if (ctor) {
         while (true) {
-            stack.unshift(clss);
-            let match = clss.toString().match(/extends[ \t\n\r]+([A-Za-z0-9_]+)[ \t\n\r]+\{/m);
+            classes[method](ctor);
+            let match = ctor.toString().match(/extends[ \t\n\r]+([A-Za-z0-9_]+)[ \t\n\r]+\{/m);
 
             if (match) {
                 if (match[1] in global) {
-                    clss = global[match[1]];
+                    eval(`ctor = ${match[1]}`);
                     continue;
                 }
             }
@@ -155,38 +161,15 @@ register(function classHierarchyList(object) {
         }
     }
 
-    return stack;
+    return classes;
+}
+
+register(function classHierarchyList(arg) {
+    return enumerateClassHierarchy(arg, 'unshift');
 });
 
-
-/*****
- * classHeirarchyList() and classHierarchyStack() return the class hierarchy
- * list or stack for the specified object.  Stack means it's in reverse order,
- * which means from subclass to super class.  List is the opposite order, which
- * is from super clas to subclass.
-*****/
-register(function classHierarchyStack(object) {
-    let stack = [];
-
-    if (typeof object == 'object') {
-        let clss = Reflect.getPrototypeOf(object).constructor;
-
-        while (true) {
-            stack.push(clss);
-            let match = clss.toString().match(/extends[ \t\n\r]+([A-Za-z0-9_]+)[ \t\n\r]+\{/m);
-
-            if (match) {
-                if (match[1] in global) {
-                    clss = global[match[1]];
-                    continue;
-                }
-            }
-
-            break;
-        }
-    }
-
-    return stack;
+register(function classHierarchyStack(arg) {
+    return enumerateClassHierarchy(arg, 'push');
 });
 
 

@@ -45,6 +45,9 @@ register(function bootstrap() {
         padding:  0px;
     }`);
 
+    Widget.initializeWidgets();
+    // -- test code
     doc.body().append(mkSignInWidget());
     console.log(doc.getStyleSheet('webapp').rules());
+    // --
 });
