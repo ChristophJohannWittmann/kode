@@ -49,14 +49,6 @@ register(class GridLayoutWidget extends Widget {
         return this.cells[this.index(row, col)];
     }
 
-    static initialize(classData) {
-        classData.style.change(`{
-            height: 100%;
-            width: 100%;
-            display: grid;
-        }`);
-    }
-
     [Symbol.iterator]() {
         return this.cells[Symbol.iterator]();
     }
@@ -74,22 +66,26 @@ register(class GridLayoutWidget extends Widget {
 
             let cols = [];
             for (let i = 0; i < this.cols; i++) cols.push('auto');
-            this.styleRule.set({ gridTemplateColumns: cols.join(' ')});
 
+            this.styleRule.set({
+                display: 'grid',
+                gridTemplateColumns: `${cols.join(' ')}`,
+            });
 
             for (let i = 0; i < this.rows; i++) {
                 for (let j = 0; j < this.cols; j++) {
                     let placeholder = mkWidget('div');
                     placeholder.htmlElement.append(htmlText(this.index(i, j).toString()));
-
-                    placeholder.setFlex('h', 'cc');
-                    placeholder.setClassName('border2');
-                    placeholder.setClassName('border-r40');
+                    placeholder.setClassName('flex-h-cc');
+                    placeholder.setClassName('border-2');
+                    placeholder.setClassName('border-radius-2');
 
                     this.cells.push(placeholder);
                     this.htmlElement.append(placeholder);
                 }
             }
+        }
+        else {
         }
     }
 });

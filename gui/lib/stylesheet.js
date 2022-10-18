@@ -344,25 +344,9 @@ register(class CssStyleRule extends CssRule {
     }
 
     change(values) {
-        if (typeof values == 'object') {
-            for (let entry of Object.entries(values)) {
-                let [ name, value ] = entry;
-                this.cssRule.style[name] = value;
-            }
-        }
-        else if (typeof values == 'string') {
-            let index0 = values.indexOf('{');
-            let index1 = values.indexOf('}');
-            let rules = values.substring(index0+1, index1-1).trim();
-
-            for (let setting of rules.split(';')) {
-                let parts = setting.split(':');
-
-                if (parts.length == 2) {
-                    let [ property, value ] = parts;
-                    this.cssRule.style[toCamelCase(property.trim())] = value.trim();
-                }
-            }
+        for (let entry of Object.entries(values)) {
+            let [ name, value ] = entry;
+            this.cssRule.style[name] = value;
         }
 
         return this;

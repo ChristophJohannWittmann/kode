@@ -31,7 +31,6 @@ register(function bootstrap() {
     window.win = mkWin(window);
     window.doc = win.doc();
     window.styleSheet = doc.getStyleSheet('webapp');
-    Widget.initializeWidgets();
     // doc.body().append(mkViewBox());
 
     // -- test code

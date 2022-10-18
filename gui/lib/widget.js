@@ -33,8 +33,6 @@ register(class Widget extends Emitter {
         this.widgetId = Widget.nextId++;
         this.selector = `widget${this.widgetId}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
-        this.classData = WidgetClassManager.fromInstance(this);
-        this.flexName = null;
 
         if (!tagName) {
             throw new Error(`Widget.ctor, tagName argument must be provided.`);
@@ -43,8 +41,12 @@ register(class Widget extends Emitter {
         this.htmlElement = htmlElement(tagName);
         this.htmlElement.setAttribute('id', this.selector);
         this.htmlElement.setClassName('widget');
-        this.htmlElement.setClassName(this.classData.styleName);
         this.brand(this.htmlElement);
+    }
+
+    append(...args) {
+        this.htmlElement.append(...args);
+        return this;
     }
 
     brand(arg) {
@@ -53,235 +55,40 @@ register(class Widget extends Emitter {
         return this;
     }
 
-    clearFlex() {
-        if (this.flexName) {
-            this.htmlElement.clearClassName(this.flexName);
-            this.flexName = null;
-        }
+    clear() {
+        this.htmlElement.clear();
+        return this;
     }
 
-    static initialize(classData) {
-        createBorderStyles(classData);
-        createFlexStyles(classData);
+    clearClassName(className) {
+        this.htmlElement.clearClassName(className);
+        return this;
     }
 
-    static initializeWidgets() {
-        Widget.style = styleSheet.createRule(`.widget {
-            height: 100%;
-            width: 100%;
-        }`);
+    getClassNames() {
+        return this.htmlElement.getClassNames();
+    }
+
+    hasClassName(className) {
+        return this.htmlElement.hasClassName(className);
+    }
+
+    prepend(...args) {
+        this.htmlElement.prepend(...args);
+        return this;
     }
 
     setClassName(className) {
         this.htmlElement.setClassName(className);
+        return this;
     }
 
-    setFlex(dir, align) {
-        let flexName;
+    tagName() {
+        return this.htmlElement.tagName();
+    }
 
-        if (dir in { h:0, v:0}) {
-            switch (align) {
-                case 'ss':
-                case 'cs':
-                case 'es':
-                case 'sc':
-                case 'cc':
-                case 'ec':
-                case 'se':
-                case 'ce':
-                case 'ee':
-                    flexName = `flex-${dir}-${align}`;
-                    break;
-            }
-        }
-
-        if (flexName) {
-            if (this.flexName) {
-                this.htmlElement.clearClassName(this.flexName);
-            }
-
-            this.flexName = flexName;
-            this.htmlElement.setClassName(this.flexName);
-        }
+    toggleClassName(className) {
+        this.htmlElement.toggleClassName(className);
+        return this;
     }
 });
-
-
-/*****
-*****/
-function createBorderStyles(classData) {
-    classData.createStyleRule(`.border-none {
-        border: none;
-    }`);
-
-    classData.createStyleRule(`.border-1-thin {
-        border: var(--border1);
-    }`);
-}
-
-
-/*****
-*****/
-function createFlexStyles(classData) {
-    classData.createStyleRule(`.flex-h-ss {
-        display: flex;
-        flex-direction: row;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        align-items: flex-start;
-    }`);
-
-    classData.createStyleRule(`.flex-h-cs {
-        display: flex;
-        flex-direction: row;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: flex-start;
-    }`);
-
-    classData.createStyleRule(`.flex-h-es {
-        display: flex;
-        flex-direction: row;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        align-items: flex-start;
-    }`);
-
-    classData.createStyleRule(`.flex-h-sc {
-        display: flex;
-        flex-direction: row;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        align-items: center;
-    }`);
-
-    classData.createStyleRule(`.flex-h-cc {
-        display: flex;
-        flex-direction: row;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-    }`);
-
-    classData.createStyleRule(`.flex-h-ec {
-        display: flex;
-        flex-direction: row;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        align-items: center;
-    }`);
-
-    classData.createStyleRule(`.flex-h-se {
-        display: flex;
-        flex-direction: row;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        align-items: flex-end;
-    }`);
-
-    classData.createStyleRule(`.flex-h-ce {
-        display: flex;
-        flex-direction: row;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: flex-end;
-    }`);
-
-    classData.createStyleRule(`.flex-h-ee {
-        display: flex;
-        flex-direction: row;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        align-items: flex-end;
-    }`);
-
-    classData.createStyleRule(`.flex-v-ss {
-        display: flex;
-        flex-direction: column;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        align-items: flex-start;
-    }`);
-
-    classData.createStyleRule(`.flex-v-cs {
-        display: flex;
-        flex-direction: column;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: flex-start;
-    }`);
-
-    classData.createStyleRule(`.flex-v-es {
-        display: flex;
-        flex-direction: column;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        align-items: flex-start;
-    }`);
-
-    classData.createStyleRule(`.flex-v-sc {
-        display: flex;
-        flex-direction: column;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        align-items: center;
-    }`);
-
-    classData.createStyleRule(`.flex-v-cc {
-        display: flex;
-        flex-direction: column;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: center;
-    }`);
-
-    classData.createStyleRule(`.flex-v-ec {
-        display: flex;
-        flex-direction: column;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        align-items: center;
-    }`);
-
-    classData.createStyleRule(`.flex-v-se {
-        display: flex;
-        flex-direction: column;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        align-items: flex-end;
-    }`);
-
-    classData.createStyleRule(`.flex-v-ce {
-        display: flex;
-        flex-direction: column;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: center;
-        align-items: flex-end;
-    }`);
-
-    classData.createStyleRule(`.flex-v-ee {
-        display: flex;
-        flex-direction: column;
-        flex-basis: auto;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        align-items: flex-end;
-    }`);
-}

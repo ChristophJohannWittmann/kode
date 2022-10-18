@@ -9,7 +9,7 @@
         --color1: black;
         --color2: dimgray;
         --border1: solid black 1px;
-        --border2: solid dimgray 2px;
+        --border2: solid dimgray 1px;
         --outline1: dotted gainsboro 1px;
         --outline2: dotted dimgray 1px;
     }
@@ -24,7 +24,7 @@
         --color1: white;
         --color2: gainsboro;
         --border1: solid white 1px;
-        --border2: solid gainsboro 2px;
+        --border2: solid gainsboro 1px;
         --outline1: dotted dimgray 1px;
         --outline2: dotted whitesmoke 1px;
     }
@@ -81,26 +81,176 @@ html {
 .border-none {
     border: none;
 }
-.border1 {
+.border-1 {
     border: var(--border1);
 }
-.border2 {
+.border-2 {
     border: var(--border2);
 }
-.border-rnone {
+.border-radius-none {
     border-radius:  none;
 }
-.border-r20 {
-    border-radius:  20px;
+.border-radius-1 {
+    border-radius:  10px;
 }
-.border-r40 {
-    border-radius:  40px;
+.border-radius-2 {
+    border-radius:  20px;
 }
 
 
 /***********************************************
  * Flex
  ***********************************************/
+.flex-h-ss {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+.flex-h-cs {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+}
+.flex-h-es {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+.flex-h-sc {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+.flex-h-cc {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+.flex-h-ec {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+}
+.flex-h-se {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+.flex-h-ce {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+}
+.flex-h-ee {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+.flex-v-ss {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+.flex-v-cs {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+}.flex-v-es {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+.flex-v-sc {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+.flex-v-cc {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+.flex-v-ec {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+}
+.flex-v-se {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+.flex-v-ce {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+}
+.flex-v-ee {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+
+/***********************************************
+ * Basic Widget Styling
+ ***********************************************/
+.widget {
+}
 
 
 /***********************************************

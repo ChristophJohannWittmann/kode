@@ -35,37 +35,5 @@ register(class SignInWidget extends Widget {
         });
 
         this.htmlElement.append(this.grid);
-
-        // *************************************
-        // *************************************
-
-        let content = mkWidget('div');
-        content.htmlElement.append(htmlText('Hello Widget'));
-
-        content.styleRule.set(`{
-            text-align: center;
-            vertical-lign: middle;
-            font-weight: bold;
-            font-size: 20px;
-        }`);
-
-        this.grid.setAt(1, 1, content);
-
-        setTimeout(() => {
-            for (let cell of this.grid) {
-                cell.setFlex('h', 'ee');
-            }
-        }, 1000);
-
-        // *************************************
-        // *************************************
-    }
-
-    static initialize(classData) {
-        /*
-        classData.style.set({
-           backgroundColor: 'whitesmoke',
-        });
-        */
     }
 });
