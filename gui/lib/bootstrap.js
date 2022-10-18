@@ -31,23 +31,12 @@ register(function bootstrap() {
     window.win = mkWin(window);
     window.doc = win.doc();
     window.styleSheet = doc.getStyleSheet('webapp');
-
-    styleSheet.createRule(`html {
-        color: var(--color1);
-        background-color: var(--background1);
-        font-family: Avenir, Helvetica, Arial, sans-serif;
-    }`);
-
-    styleSheet.createRule(`* {
-        height: 100%;
-        width: 100%;
-        margin: 0px;
-        padding:  0px;
-    }`);
-
     Widget.initializeWidgets();
+    // doc.body().append(mkViewBox());
+
     // -- test code
-    doc.body().append(mkSignInWidget());
-    console.log(doc.getStyleSheet('webapp').rules());
+    let w = mkSignInWidget();
+    doc.body().append(w);
+    //console.log(doc.getStyleSheet('webapp').rules());
     // --
 });

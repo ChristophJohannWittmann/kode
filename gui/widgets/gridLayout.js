@@ -35,17 +35,61 @@ register(class GridLayoutWidget extends Widget {
     changeGap(dRow, dCol) {
     }
 
+    clear() {
+    }
+
     clearAt(rowIndex, colIndex) {
     }
 
-    static initialize(classData) {
+    index(row, col) {
+        return this.rows*row + col;
     }
 
-    setAt(rowIndex, colIndex, item) {
+    item(row, col) {
+        return this.cells[this.index(row, col)];
+    }
+
+    static initialize(classData) {
+        classData.style.change(`{
+            height: 100%;
+            width: 100%;
+            display: grid;
+        }`);
+    }
+
+    [Symbol.iterator]() {
+        return this.cells[Symbol.iterator]();
+    }
+
+    setAt(rowIndex, colIndex, arg) {
     }
 
     setGeometry(opts) {
         if (opts) {
+            this.cells = [];
+            this.rows = opts.rows ? opts.rows : 1;
+            this.cols = opts.cols ? opts.cols : 1;
+            this.rowGap = opts.rowGap ? opts.rowGap : '0px';
+            this.colGap = opts.colGap ? opts.colGap : '0px';
+
+            let cols = [];
+            for (let i = 0; i < this.cols; i++) cols.push('auto');
+            this.styleRule.set({ gridTemplateColumns: cols.join(' ')});
+
+
+            for (let i = 0; i < this.rows; i++) {
+                for (let j = 0; j < this.cols; j++) {
+                    let placeholder = mkWidget('div');
+                    placeholder.htmlElement.append(htmlText(this.index(i, j).toString()));
+
+                    placeholder.setFlex('h', 'cc');
+                    placeholder.setClassName('border2');
+                    placeholder.setClassName('border-r40');
+
+                    this.cells.push(placeholder);
+                    this.htmlElement.append(placeholder);
+                }
+            }
         }
     }
 });

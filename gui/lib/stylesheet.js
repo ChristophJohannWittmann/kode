@@ -343,11 +343,50 @@ register(class CssStyleRule extends CssRule {
         super(cssGroup, cssRule);
     }
 
+    change(values) {
+        if (typeof values == 'object') {
+            for (let entry of Object.entries(values)) {
+                let [ name, value ] = entry;
+                this.cssRule.style[name] = value;
+            }
+        }
+        else if (typeof values == 'string') {
+            let index0 = values.indexOf('{');
+            let index1 = values.indexOf('}');
+            let rules = values.substring(index0+1, index1-1).trim();
+
+            for (let setting of rules.split(';')) {
+                let parts = setting.split(':');
+
+                if (parts.length == 2) {
+                    let [ property, value ] = parts;
+                    this.cssRule.style[toCamelCase(property.trim())] = value.trim();
+                }
+            }
+        }
+
+        return this;
+    }
+
+    clear() {
+        while (this.cssRule.style.length) {
+            let property = this.cssRule.style.item(0);
+            this.cssRule.style.removeProperty(property);
+        }
+
+        return this;
+    }
+
     selector() {
         return this.cssRule.selectorText;
     }
 
-    style() {
+    set(values) {
+        this.clear();
+        return this.change(values);
+    }
+
+    settings(values) {
         return this.cssRule.style;
     }
 

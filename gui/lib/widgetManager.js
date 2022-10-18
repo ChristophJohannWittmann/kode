@@ -58,7 +58,6 @@ register(class WidgetClassData extends NonJsonable {
         let rule = this.styleSheet.createRule(ruleText);
         this.styleRules.push(rule);
         return rule;
-
     }
 });
 
@@ -74,7 +73,6 @@ singleton(class WidgetClassManager extends NonJsonable {
     constructor() {
         super();
         this.classes= {};
-        this.classes['Widget'] = {};
         this.classes['Emitter'] = {};
         this.classes['NonJsonable'] = {};
     }

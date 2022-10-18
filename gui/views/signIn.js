@@ -23,16 +23,49 @@
 
 /*****
 *****/
-register(class SignInWidget extends GridLayoutWidget {
+register(class SignInWidget extends Widget {
     constructor() {
-        super({
+        super('div');
+
+        this.grid = mkGridLayoutWidget({
             rows: 3,
             rowGap: '0px',
             cols: 3,
             colGap: '0px',
         });
+
+        this.htmlElement.append(this.grid);
+
+        // *************************************
+        // *************************************
+
+        let content = mkWidget('div');
+        content.htmlElement.append(htmlText('Hello Widget'));
+
+        content.styleRule.set(`{
+            text-align: center;
+            vertical-lign: middle;
+            font-weight: bold;
+            font-size: 20px;
+        }`);
+
+        this.grid.setAt(1, 1, content);
+
+        setTimeout(() => {
+            for (let cell of this.grid) {
+                cell.setFlex('h', 'ee');
+            }
+        }, 1000);
+
+        // *************************************
+        // *************************************
     }
 
     static initialize(classData) {
+        /*
+        classData.style.set({
+           backgroundColor: 'whitesmoke',
+        });
+        */
     }
 });

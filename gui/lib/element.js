@@ -22,11 +22,11 @@
 
 
 /*****
- * Reduction means to convert the passed element into either a standard DOM Text
- * object or a standard HTMLElement object.  An acceptable argument must be either
- * of those two or one of the wrapper types, HtmlText or HtmlElement.
+ * Normalization means to convert the passed element into either a standard DOM
+ * Text object or a standard HTMLElement object.  An acceptable argument must
+ * be either of those two or one of the wrapper types, HtmlText or HtmlElement.
 *****/
-function reduce(arg) {
+register(function reducio(arg) {
     if (arg instanceof HTMLElement) {
         return arg;
     }
@@ -45,7 +45,7 @@ function reduce(arg) {
     else {
         throw new Error(`Unsupported argument type: ${arg}`);
     }
-}
+});
 
 
 /*****
@@ -86,12 +86,12 @@ register(class HtmlNode {
   
             if (nextSibling) {
                 for (let arg of args) {
-                    this.node.parentNode.insertBefore(reduce(arg), nextSibling);
+                    this.node.parentNode.insertBefore(reducio(arg), nextSibling);
                 }
             }
             else {
                 for (let arg of args) {
-                    this.node.parentNode.appendChild(reduce(arg));
+                    this.node.parentNode.appendChild(reducio(arg));
                 }
             }
         }
@@ -102,7 +102,7 @@ register(class HtmlNode {
     insertBefore(...args) {
         if (this.node.parentNode) {
             for (let arg of args) {
-                this.node.parentNode.insertBefore(reduce(arg), this.node);
+                this.node.parentNode.insertBefore(reducio(arg), this.node);
             }
         }
 
@@ -188,11 +188,11 @@ register(class HtmlNode {
             let inserted;
 
             if (args.length) {
-                inserted = reduce(args[0]);
+                inserted = reducio(args[0]);
                 this.node.parentNode.replaceChild(inserted, this.node);
 
                 for (let i = 1; i < args.length; i++) {
-                    let node = reduce(args[i]);
+                    let node = reducio(args[i]);
                     inserted.insertAfter(node, inserted);
                     inserted = node;
                 }
@@ -211,7 +211,7 @@ register(class HtmlNode {
 *****/
 register(class HtmlText extends HtmlNode {
     constructor(arg) {
-        super(reduce(arg));
+        super(reducio(arg));
     }
 
     copy() {
@@ -234,12 +234,12 @@ register(class HtmlText extends HtmlNode {
 *****/
 register(class HtmlElement extends HtmlNode {
     constructor(arg) {
-        super(reduce(arg));
+        super(reducio(arg));
     }
 
     append(...args) {
         for (let arg of args) {
-            this.node.appendChild(reduce(arg));
+            this.node.appendChild(reducio(arg));
         }
 
         return this;
@@ -380,17 +380,25 @@ register(class HtmlElement extends HtmlNode {
         return this;
     }
 
+    owningWidget() {
+        if (Widget.widgetKey in this.htmlElement) {
+            return this.htmlElement[Widget.widgetKey];
+        }
+
+        return null;
+    }
+
     prepend(...args) {
         if (this.node.childNodes.length) {
             let beforeChild = this.node.firstChild;
 
             for (let arg of args) {
-                this.node.insertBefore(reduce(arg), beforeChild);
+                this.node.insertBefore(reducio(arg), beforeChild);
             }
         }
         else {
             for (let arg of args) {
-                this.node.appendChild(reduce(arg));
+                this.node.appendChild(reducio(arg));
             }
         }
 

@@ -6,15 +6,12 @@
         color-scheme: light dark;
         --background1: white;
         --background2: whitessmoke;
-        --background3: aliceblue;
         --color1: black;
         --color2: dimgray;
-        --color3: gainsboro;
         --border1: solid black 1px;
         --border2: solid dimgray 2px;
-        --border3: solid aliceblue 2px;
         --outline1: dotted gainsboro 1px;
-        --outline2: solid dimgray 1px;
+        --outline2: dotted dimgray 1px;
     }
     .lite {}
     .dark { display: none; }
@@ -24,18 +21,31 @@
         color-scheme: light dark;
         --background1: dimgray;
         --background2: gray;
-        --background3: silver;
         --color1: white;
         --color2: gainsboro;
-        --color3: azure;
         --border1: solid white 1px;
         --border2: solid gainsboro 2px;
-        --border3: solid azure 2px;
         --outline1: dotted dimgray 1px;
-        --outline2: solid whitesmoke 1px;
+        --outline2: dotted whitesmoke 1px;
     }
     .lite { display: none; }
     .dark {}
+}
+
+
+/***********************************************
+ * Standardize the Baseline
+ ***********************************************/
+html {
+    color: var(--color1);
+    background-color: var(--background1);
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+}
+* {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding:  0px;
 }
 
 
@@ -63,6 +73,34 @@
     screenML {}
     screenL  {}
 }
+
+
+/***********************************************
+ * Borders
+ ***********************************************/
+.border-none {
+    border: none;
+}
+.border1 {
+    border: var(--border1);
+}
+.border2 {
+    border: var(--border2);
+}
+.border-rnone {
+    border-radius:  none;
+}
+.border-r20 {
+    border-radius:  20px;
+}
+.border-r40 {
+    border-radius:  40px;
+}
+
+
+/***********************************************
+ * Flex
+ ***********************************************/
 
 
 /***********************************************
