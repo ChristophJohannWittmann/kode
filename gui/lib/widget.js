@@ -33,7 +33,7 @@
  * has an owingWidget() method that returns either the widget or null if not part
  * of a widget.
 *****/
-register(class Widget extends WidgetEmitter {
+register(class Widget extends Emitter {
     static nextId = 1;
     static initialized = {};
     static widgetKey = Symbol('widget');
@@ -52,8 +52,6 @@ register(class Widget extends WidgetEmitter {
         this.htmlElement.setAttribute('id', this.selector);
         this.htmlElement.setClassName('widget');
         this.brand(this.htmlElement);
-
-        this.nonNativeEvents = mkStringSet('Widget.Changed');
     }
 
     append(...widgets) {
@@ -107,6 +105,33 @@ register(class Widget extends WidgetEmitter {
 
     hasClassName(className) {
         return this.htmlElement.hasClassName(className);
+    }
+
+    off(messageName, handler) {
+        if (messageName.startsWith('html.')) {
+            this.htmlElement.off(messageName.substr(5), handler)
+        }
+        else {
+            super.off(messageName, handler);
+        }
+    }
+
+    on(messageName, handler, filter) {
+        if (messageName.startsWith('html.')) {
+            this.htmlElement.on(messageName.substr(5), handler, filter)
+        }
+        else {
+            super.on(messageName, handler, filter);
+        }
+    }
+
+    once(messageName, handler, filter) {
+        if (messageName.startsWith('html.')) {
+            this.htmlElement.once(messageName.substr(5), handler, filter)
+        }
+        else {
+            super.once(messageName, handler, filter);
+        }
     }
 
     prepend(...widgets) {

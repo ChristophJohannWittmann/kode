@@ -36,6 +36,5 @@ register(function bootstrap() {
 
     // -- test code
     appStack.push(mkSignInWidget());
-    appStack.top().on('mousemove', message => console.log(message));
     // --
 });

@@ -33,7 +33,6 @@ register(class StackWidget extends Widget {
     constructor() {
         super('div');
         this.stack = [];
-        this.nonNativeEvents.set('StackWidget.Changed');
     }
 
     contains(widget) {

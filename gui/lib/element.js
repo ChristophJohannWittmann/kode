@@ -353,10 +353,16 @@ register(class HtmlElement extends HtmlNode {
         }
 
         if (!(mesageName in this.node.LISTENERS)) {
-            this.node.addEventListener(mesageName, event => this.node.EMITTER.send({
-                messageName: event.type,
-                event: event,
-            }));
+            this.node.addEventListener(mesageName, event => {
+                if (Object.is(event.target, this.node)) {
+                    this.node.EMITTER.send({
+                        messageName: event.type,
+                        htmlElement: this,
+                        widget: this[Widget.widgetKey],
+                        event: event,
+                    });
+                }
+            });
         }
 
         this.node.EMITTER.on(mesageName, handler);
@@ -370,10 +376,16 @@ register(class HtmlElement extends HtmlNode {
         }
 
         if (!(mesageName in this.node.LISTENERS)) {
-            this.node.addEventListener(mesageName, event => this.node.EMITTER.send({
-                messageName: event.type,
-                event: event,
-            }));
+            this.node.addEventListener(mesageName, event => {
+                if (Object.is(event.target, this.node)) {
+                    this.node.EMITTER.send({
+                        messageName: event.type,
+                        htmlElement: this,
+                        widget: this[Widget.widgetKey],
+                        event: event,
+                    });
+                }
+            });
         }
 
         this.node.EMITTER.once(mesageName, handler);

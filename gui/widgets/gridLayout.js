@@ -76,6 +76,11 @@ register(class GridLayoutWidget extends Widget {
                 for (let j = 0; j < this.cols; j++) {
                     let placeholder = mkWidget('div');
                     placeholder.htmlElement.append(htmlText(this.index(i, j).toString()));
+
+                    if (i == 1 && j == 1) {
+                        placeholder.on('html.mousemove', message => console.log(message));
+                    }
+
                     placeholder.setClassName('flex-h-cc');
                     placeholder.setClassName('border-2');
                     placeholder.setClassName('border-radius-2');
