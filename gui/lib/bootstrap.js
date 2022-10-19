@@ -31,11 +31,11 @@ register(function bootstrap() {
     window.win = mkWin(window);
     window.doc = win.doc();
     window.styleSheet = doc.getStyleSheet('webapp');
-    // doc.body().append(mkViewBox());
+    window.appStack = mkStackWidget();
+    doc.body().append(appStack);
 
     // -- test code
-    let w = mkSignInWidget();
-    doc.body().append(w);
-    //console.log(doc.getStyleSheet('webapp').rules());
+    appStack.push(mkSignInWidget());
+    appStack.top().on('mousemove', message => console.log(message));
     // --
 });

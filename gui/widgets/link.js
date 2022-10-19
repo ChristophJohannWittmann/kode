@@ -23,8 +23,8 @@
 
 /*****
 *****/
-register(class ViewBoxWidget extends Widget {
+register(class LinkWidget extends Widget {
     constructor() {
-        super('div');
+        super('a');
     }
 });

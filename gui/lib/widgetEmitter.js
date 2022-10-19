@@ -22,14 +22,13 @@
 
 
 /*****
+ * A worker is a browser worker thread, which can be useful for avoiding a freeze
+ * up of the GUI interface in certain times.  This wrapper will help to facilitate
+ * both simplified usage of the worker itself as well as provide integration into
+ * the client application framework.
 *****/
-register(class SignInWidget extends GridLayoutWidget {
+register(class WidgetEmitter extends Emitter {  
     constructor() {
-        super({
-            rows: 3,
-            rowGap: '0px',
-            cols: 3,
-            colGap: '0px',
-        });
+        super();
     }
 });

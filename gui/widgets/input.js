@@ -23,8 +23,9 @@
 
 /*****
 *****/
-register(class ViewWidget extends Widget {
-    constructor() {
-        super('div');
+register(class InputWidget extends Widget {
+    constructor(type) {
+        super('input');
+        this.htmlElement.type = type;
     }
 });

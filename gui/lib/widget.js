@@ -22,8 +22,18 @@
 
 
 /*****
+ * From a framework perspective, the widget is the fundamental building block for
+ * the GUI.  Widgets wrap HTML element, events, data, and other programming logic
+ * into functional GUI units.  This base class, Widget, should be considered
+ * to be abstract, although it can technically used on its own.  The basic widget
+ * requires external logic to dynamically populate the Widgets components.  We
+ * prefer to subclass and add features within the subclass to encapsulate the
+ * needed GUI features.  HTML Elements belonging to a widget are braned with a
+ * symbol property that refers back to the owning widget.  The HtmlElement class
+ * has an owingWidget() method that returns either the widget or null if not part
+ * of a widget.
 *****/
-register(class Widget extends Emitter {
+register(class Widget extends WidgetEmitter {
     static nextId = 1;
     static initialized = {};
     static widgetKey = Symbol('widget');
@@ -42,10 +52,21 @@ register(class Widget extends Emitter {
         this.htmlElement.setAttribute('id', this.selector);
         this.htmlElement.setClassName('widget');
         this.brand(this.htmlElement);
+
+        this.nonNativeEvents = mkStringSet('Widget.Changed');
     }
 
-    append(...args) {
-        this.htmlElement.append(...args);
+    append(...widgets) {
+        let filtered = widgets.filter(w => w instanceof Widget);
+        this.htmlElement.append(...filtered);
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'append',
+            widget: this,
+            widgets: filtered,
+        });
+
         return this;
     }
 
@@ -57,11 +78,26 @@ register(class Widget extends Emitter {
 
     clear() {
         this.htmlElement.clear();
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'clear',
+            widget: this,
+        });
+
         return this;
     }
 
     clearClassName(className) {
         this.htmlElement.clearClassName(className);
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'clearClassName',
+            widget: this,
+            className: className,
+        });
+
         return this;
     }
 
@@ -73,13 +109,55 @@ register(class Widget extends Emitter {
         return this.htmlElement.hasClassName(className);
     }
 
-    prepend(...args) {
-        this.htmlElement.prepend(...args);
+    prepend(...widgets) {
+        let filtered = widgets.filter(w => w instanceof Widget);
+        this.htmlElement.prepend(...filtered);
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'prepend',
+            widget: this,
+            widgets: filtered,
+        });
+
+        return this;
+    }
+
+    remove() {
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'remove',
+            widget: this,
+        });
+
+        this.htmlElement.remove();
+        return this;
+    }
+
+    replace(...widgets) {
+        let filtered = widgets.filter(w => w instanceof Widget);
+        this.htmlElement.replace(...filtered);
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'replace',
+            widget: this,
+            widgets: filtered,
+        });
+
         return this;
     }
 
     setClassName(className) {
         this.htmlElement.setClassName(className);
+
+        this.send({
+            messageName: 'Widget.Changed',
+            tyype: 'setClassName',
+            widget: this,
+            className: className,
+        });
+
         return this;
     }
 
@@ -89,6 +167,24 @@ register(class Widget extends Emitter {
 
     toggleClassName(className) {
         this.htmlElement.toggleClassName(className);
+
+        if (this.hasClassName(className)) {
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'setClassName',
+                widget: this,
+                className: className,
+            });
+        }
+        else {
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'clearClassName',
+                widget: this,
+                className: className,
+            });
+        }
+
         return this;
     }
 });

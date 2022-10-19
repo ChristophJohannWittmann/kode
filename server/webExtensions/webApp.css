@@ -8,10 +8,10 @@
         --background2: whitessmoke;
         --color1: black;
         --color2: dimgray;
-        --border1: solid black 1px;
-        --border2: solid dimgray 1px;
-        --outline1: dotted gainsboro 1px;
-        --outline2: dotted dimgray 1px;
+        --border1: black;
+        --border2: dimgray;
+        --outline1: gainsboro;
+        --outline2: dimgray;
     }
     .lite {}
     .dark { display: none; }
@@ -23,29 +23,13 @@
         --background2: gray;
         --color1: white;
         --color2: gainsboro;
-        --border1: solid white 1px;
-        --border2: solid gainsboro 1px;
-        --outline1: dotted dimgray 1px;
-        --outline2: dotted whitesmoke 1px;
+        --border1: white;
+        --border2: gainsboro;
+        --outline1: dimgray;
+        --outline2: whitesmoke;
     }
     .lite { display: none; }
     .dark {}
-}
-
-
-/***********************************************
- * Standardize the Baseline
- ***********************************************/
-html {
-    color: var(--color1);
-    background-color: var(--background1);
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-}
-* {
-    height: 100%;
-    width: 100%;
-    margin: 0px;
-    padding:  0px;
 }
 
 
@@ -76,16 +60,45 @@ html {
 
 
 /***********************************************
+ * Standardize the Baseline
+ ***********************************************/
+html {
+    color: var(--color1);
+    background-color: var(--background1);
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+}
+* {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding:  0px;
+}
+
+
+/***********************************************
+ * Font
+ ***********************************************/
+.font-size-1 { font-size:  20px!important; }
+.font-size-2 { font-size:  18px!important; }
+.font-size-3 { font-size:  16px!important; }
+.font-size-4 { font-size:  14px!important; }
+.font-size-5 { font-size:  12px!important; }
+.font-weight-bold { font-weight: bold; }
+.font-weight-normal { font-weight: normal; }
+.font-weight-light { font-weight: light; }
+
+
+/***********************************************
  * Borders
  ***********************************************/
 .border-none {
     border: none;
 }
 .border-1 {
-    border: var(--border1);
+    border: solid var(--border1) 1px;
 }
 .border-2 {
-    border: var(--border2);
+    border: solid var(--border2) 1px;
 }
 .border-radius-none {
     border-radius:  none;
@@ -250,17 +263,6 @@ html {
  * Basic Widget Styling
  ***********************************************/
 .widget {
+    height: 100%;
+    width: 100%;
 }
-
-
-/***********************************************
- * Font
- ***********************************************/
-.font1 { font-size:  20px!important; }
-.font2 { font-size:  18px!important; }
-.font3 { font-size:  16px!important; }
-.font4 { font-size:  14px!important; }
-.font5 { font-size:  12px!important; }
-.bold { font-weight: bold; }
-.normal { font-weight: normal; }
-.light { font-weight: light; }

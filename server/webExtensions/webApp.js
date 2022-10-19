@@ -55,12 +55,6 @@ exports = module.exports = register(class WebApp extends WebExtension {
         this.compactHtml = await minify(path);
     }
 
-    async buildPage() {
-    }
-
-    async buildSignIn() {
-    }
-
     async buildLinks() {
         let links = [];
         this.links = '';
