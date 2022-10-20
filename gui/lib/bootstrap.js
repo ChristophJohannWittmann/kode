@@ -35,6 +35,6 @@ register(function bootstrap() {
     doc.body().append(appStack);
 
     // -- test code
-    appStack.push(mkSignInWidget());
+    appStack.push(mkSignInView());
     // --
 });

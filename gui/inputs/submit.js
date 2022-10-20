@@ -23,8 +23,8 @@
 
 /*****
 *****/
-register(class FlowLayoutWidget extends Widget {
+register(class SubmitInput extends InputWidget {
     constructor() {
-        super('div');
+        super('submit');
     }
 });

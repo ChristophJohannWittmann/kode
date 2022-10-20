@@ -22,9 +22,18 @@
 
 
 /*****
+ * The HTML Element widget is a static widget whose job is to wrap a single
+ * HTML in a widget.  Perhaps the most important feature is its ability to take
+ * the outer HTML of an element and compile that into a DOM tree as well as
+ * accepting an single DOM HTMLElement object.
 *****/
-register(class FlowLayoutWidget extends Widget {
-    constructor() {
-        super('div');
+register(class HtmlElementWidget extends Widget {
+    constructor(arg) {
+        if (typeof arg == 'string') {
+            super(htmlImport(arg));
+        }
+        else {
+            super(arg);
+        }
     }
 });

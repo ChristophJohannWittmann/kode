@@ -22,75 +22,166 @@
 
 
 /*****
+ * The grid layout widget employs the use of the more recent display: grid;
+ * Once constructed, the geometry is static and there are no features to change
+ * this.  To dynamically change the grid geometry, you need to construct and
+ * initialize a replacement grid layout widget and place it on the document.
 *****/
 register(class GridLayoutWidget extends Widget {
+    static placeholderKey = Symbol('placeholder');
+
     constructor(opts) {
         super('div');
-        this.setGeometry(opts);
+        this.cells = [];
+
+        if (Array.isArray(opts.rows)) {
+            this.rows = opts.rows;
+        }
+        else if (typeof opts.rows == 'number' && i > 0) {
+            let autos = [];
+            for (let i = 0; i < opts.rows; i++) autos.push('auto');
+            this.rows = autos.join(' ');
+        }
+        else {
+            this.rows = ['auto'];
+        }
+
+        if (Array.isArray(opts.cols)) {
+            this.cols = opts.cols;
+        }
+        else if (typeof opts.cols == 'number' && i > 0) {
+            let autos = [];
+            for (let i = 0; i < opts.cols; i++) autos.push('auto');
+            this.cols = autos.join(' ');
+        }
+        else {
+            this.cols = ['auto'];
+        }
+
+        if (typeof opts.rowGap == 'number') {
+            this.rowGap = `${opts.rowGap}px`;
+        }
+        else if (typeof opts.rowGap == 'string') {
+            this.rowGap = opts.rowGap;
+        }
+        else {
+            this.rowGap = '0px';
+        }
+
+        if (typeof opts.colGap == 'number') {
+            this.colGap = `${opts.colGap}px`;
+        }
+        else if (typeof opts.colGap == 'string') {
+            this.colGap = opts.colGap;
+        }
+        else {
+            this.colGap = '0px';
+        }
+
+        this.styleRule.set({
+            display: 'grid',
+            gridTemplateRows: `${this.rows.join(' ')}`,
+            gridTemplateColumns: `${this.cols.join(' ')}`,
+            rowGap: `${this.rowGap}`,
+            columnGap: `${this.colGap}`,
+        });
+
+        for (let i = 0; i < this.rows.length; i++) {
+            for (let j = 0; j < this.cols.length; j++) {
+                let placeholder = mkWidget('div');
+                placeholder[GridLayoutWidget.placeholderKey] = true;
+                this.cells.push(placeholder);
+                this.append(placeholder);
+            }
+        }
     }
 
-    changeDimensions(dRows, dCols) {
-    }
-
-    changeGap(dRow, dCol) {
+    calcIndex(rowIndex, colIndex) {
+        return this.rows.length*rowIndex + colIndex;
     }
 
     clear() {
+        for (let i = 0; i < this.cells.length; i++) {
+            if (!this.cells[i][GridLayoutWidget.placeholderKey]) {
+                let placeholder = mkWidget('div');
+                placeholder[GridLayoutWidget.placeholderKey] = true;
+                this.cells[i].replace(placeholder);
+                this.cells[i] = placeholder;
+            }
+        }
     }
 
     clearAt(rowIndex, colIndex) {
+        let index = this.calcIndex(rowIndex, colIndex);
+
+        if (!this.cells[GridLayoutWidget.placeholderKey]) {
+            let placeholder = mkWidget('div');
+            placeholder[GridLayoutWidget.placeholderKey] = true;
+            this.cells[index].replace(placeholder);
+            this.cells[index] = placeholder;
+        }
     }
 
-    index(row, col) {
-        return this.rows*row + col;
+    clearColGap() {
+        this.colGap = '0px';
+        this.styleRule.settings().colGap = this.colGap;
+        return this;
     }
 
-    item(row, col) {
-        return this.cells[this.index(row, col)];
+    clearRowGap() {
+        this.colGap = '0px';
+        this.styleRule.settings().colGap = this.colGap;
+        return this;
+    }
+
+    getAt(rowIndex, colIndex) {
+        return this.cells[this.calcIndex(rowIndex, colIndex)];
+    }
+
+    setAt(rowIndex, colIndex, widget) {
+        if (widget) {
+            let index = this.calcIndex(rowIndex, colIndex);
+            this.cells[index].replace(widget);
+            this.cells[index] = widget;
+        }
+        else {
+            this.clearAt(rowIndex, colIndex);
+        }
+
+        return this;
+    }
+
+    setColGap(gap) {
+        if (typeof gap == 'number') {
+            this.colGap = `${gap}px`;
+        }
+        else if (typeof gap == 'string') {
+            this.colGap = gap;
+        }
+        else {
+            this.colGap = '0px';
+        }
+
+        this.styleRule.settings().colGap = this.colGap;
+        return this;
+    }
+
+    setRowGap(gap) {
+        if (typeof gap == 'number') {
+            this.rowGap = `${gap}px`;
+        }
+        else if (typeof gap == 'string') {
+            this.rowGap = gap;
+        }
+        else {
+            this.rowGap = '0px';
+        }
+
+        this.styleRule.settings().rowGap = this.rowGap;
+        return this;
     }
 
     [Symbol.iterator]() {
         return this.cells[Symbol.iterator]();
-    }
-
-    setAt(rowIndex, colIndex, arg) {
-    }
-
-    setGeometry(opts) {
-        if (opts) {
-            this.cells = [];
-            this.rows = opts.rows ? opts.rows : 1;
-            this.cols = opts.cols ? opts.cols : 1;
-            this.rowGap = opts.rowGap ? opts.rowGap : '0px';
-            this.colGap = opts.colGap ? opts.colGap : '0px';
-
-            let cols = [];
-            for (let i = 0; i < this.cols; i++) cols.push('auto');
-
-            this.styleRule.set({
-                display: 'grid',
-                gridTemplateColumns: `${cols.join(' ')}`,
-            });
-
-            for (let i = 0; i < this.rows; i++) {
-                for (let j = 0; j < this.cols; j++) {
-                    let placeholder = mkWidget('div');
-                    placeholder.htmlElement.append(htmlText(this.index(i, j).toString()));
-
-                    if (i == 1 && j == 1) {
-                        placeholder.on('html.mousemove', message => console.log(message));
-                    }
-
-                    placeholder.setClassName('flex-h-cc');
-                    placeholder.setClassName('border-2');
-                    placeholder.setClassName('border-radius-2');
-
-                    this.cells.push(placeholder);
-                    this.htmlElement.append(placeholder);
-                }
-            }
-        }
-        else {
-        }
     }
 });

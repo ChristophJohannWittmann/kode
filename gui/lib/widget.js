@@ -38,20 +38,22 @@ register(class Widget extends Emitter {
     static initialized = {};
     static widgetKey = Symbol('widget');
 
-    constructor(tagName) {
+    constructor(arg) {
         super();
         this.widgetId = Widget.nextId++;
         this.selector = `widget${this.widgetId}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
 
-        if (!tagName) {
-            throw new Error(`Widget.ctor, tagName argument must be provided.`);
+        if (typeof arg == 'string') {
+            this.htmlElement = htmlElement(arg);
+            this.htmlElement.setAttribute('id', this.selector);
+            this.htmlElement.setClassName('widget');
+            this.brand(this.htmlElement);
         }
-
-        this.htmlElement = htmlElement(tagName);
-        this.htmlElement.setAttribute('id', this.selector);
-        this.htmlElement.setClassName('widget');
-        this.brand(this.htmlElement);
+        else {
+            this.htmlElement = mkHtmlElement(reducio(arg));
+            this.brand(this.htmlElement);
+        }
     }
 
     append(...widgets) {
@@ -66,6 +68,9 @@ register(class Widget extends Emitter {
         });
 
         return this;
+    }
+
+    bind(activeData, method) {
     }
 
     brand(arg) {

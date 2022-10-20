@@ -27,5 +27,10 @@ register(class InputWidget extends Widget {
     constructor(type) {
         super('input');
         this.htmlElement.type = type;
+        this.setClassName('input-widget');
+    }
+
+    inputType() {
+        return this.htmlElement.type;
     }
 });

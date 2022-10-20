@@ -23,8 +23,8 @@
 
 /*****
 *****/
-register(class FlowLayoutWidget extends Widget {
+register(class WeekInput extends InputWidget {
     constructor() {
-        super('div');
+        super('week');
     }
 });

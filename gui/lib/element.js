@@ -477,7 +477,9 @@ register(class HtmlElement extends HtmlNode {
 
 /*****
  * Global functions for creating new DOM nodes.  These functions create new,
- * independent nodes, unlike the wrapper classes provided above.
+ * independent nodes, unlike the wrapper classes provided above.  The elements
+ * they create are uninitialized, which means the caller needs to perform a
+ * bit of setup before the returned nodes are useful.
 *****/
 register(function htmlText(data) {
     return mkHtmlText(document.createTextNode(data));
@@ -491,3 +493,61 @@ register(function htmlElement(arg) {
         return mkHtmlElement(document.createElement(arg.toLowerCase()));
     }
 });
+
+
+/*****
+ * This is a nice little tricky thing for creating an HTML element from HTML
+ * text.  The first point is that this won't work unless the HTML passsed to
+ * this function is the outer HTML for a single HEML element.  It doesn't work
+ * on fragments.  The second point is that we need first create an element with
+ * the proper tagName and then attach that tag to our <COMPILER></COMPILER>
+ * HTML element.  Next, set the outer HTML equal to the outerHtml paramrter.
+ * The browser compiles it and replaces the original stub with a new stub.
+ * That's why we need to then fetch the first child from either the parent or
+ * the <COMPILER></COMPILER> HTML element.
+*****/
+(() => {
+    const compilerElement = document.createElement('COMPILER');
+    document.documentElement.appendChild(compilerElement);
+
+    const requiredParents = {
+        'td': ['table', 'tr'],
+        'th': ['table', 'tr'],
+        'tr': ['table'],
+    };
+
+    register(function htmlImport(outerHtml) {
+        const match = outerHtml.match(/< *([0-9A-Za-z]+)/);
+
+        if (match) {
+            let tagName = match[1];
+
+            if (tagName in requiredParents) {
+                let parent;
+
+                requiredParents[tagName].forEach(tagName => {
+                    let element = document.createElement(tagName);
+                    parent ? parent.appendChild(element) : compilerElement.appendChild(element);
+                    parent = element;
+                });
+
+                let stub = document.createElement(tagName);
+                parent.appendChild(stub);
+                stub.outerHTML = outerHtml;
+                parent.appendChild(stub);
+                stub = parent.children[0];
+                parent.replaceChildren();
+                compilerElement.replaceChildren();
+                return mkHtmlElement(stub);                
+            }
+            else {
+                let stub = document.createElement(tagName);
+                compilerElement.appendChild(stub);
+                stub.outerHTML = outerHtml;
+                stub = compilerElement.children[0];
+                compilerElement.replaceChildren();
+                return mkHtmlElement(stub);
+            }
+        }
+    });
+})();

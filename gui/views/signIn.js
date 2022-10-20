@@ -23,13 +23,43 @@
 
 /*****
 *****/
-register(class SignInWidget extends GridLayoutWidget {
+register(class SignInView extends GridLayoutWidget {
     constructor() {
         super({
-            rows: 3,
+            rows: ['auto', '600px', 'auto'],
             rowGap: '0px',
-            cols: 3,
+            cols: ['auto', '500px', 'auto'],
             colGap: '0px',
         });
+
+        /*
+        this.signIn = new SignInWidget();
+        //this.signIn.append(mkTextInput());
+
+        this.signIn.append()
+
+        let div = htmlElement('div');
+        div.append(htmlText('Hello HTML Widget'));
+        this.signIn.append(mkWidget(div));
+
+        this.setAt(1, 1, this.signIn);
+        */
+
+        let w = mkHtmlElementWidget(`<div>
+            <h1>A big title</h1>
+            <h3>A smaller title</h3>
+        </div>`);
+
+        this.setAt(1, 1, w);
     }
 });
+
+
+/*****
+*****/
+class SignInWidget extends Widget {
+    constructor() {
+        super('div');
+        this.setClassName('colors2');
+    }
+}

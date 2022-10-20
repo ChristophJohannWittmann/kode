@@ -23,8 +23,8 @@
 
 /*****
 *****/
-register(class FlowLayoutWidget extends Widget {
+register(class DateTimeInput extends InputWidget {
     constructor() {
-        super('div');
+        super('datetime-local');
     }
 });

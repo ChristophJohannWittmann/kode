@@ -23,8 +23,8 @@
 
 /*****
 *****/
-register(class FlowLayoutWidget extends Widget {
+register(class CheckboxInput extends InputWidget {
     constructor() {
-        super('div');
+        super('checkbox');
     }
 });

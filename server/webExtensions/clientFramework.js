@@ -34,6 +34,7 @@ const clientFrameworkPaths = [
     'gui/lib',
     'gui/widgets/gridLayout.js',
     'gui/widgets',
+    'gui/inputs',
     'gui/views',
 ];
 

@@ -23,8 +23,8 @@
 
 /*****
 *****/
-register(class FlowLayoutWidget extends Widget {
+register(class TimeInput extends InputWidget {
     constructor() {
-        super('div');
+        super('time');
     }
 });
