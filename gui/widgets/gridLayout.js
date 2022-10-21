@@ -91,10 +91,14 @@ register(class GridLayoutWidget extends Widget {
             for (let j = 0; j < this.cols.length; j++) {
                 let placeholder = mkWidget('div');
                 placeholder[GridLayoutWidget.PlaceholderKey] = true;
+                placeholder.setClassNames('fill');
                 this.cells.push(placeholder);
                 this.append(placeholder);
             }
         }
+    }
+
+    bind() {
     }
 
     calcIndex(rowIndex, colIndex) {
@@ -187,5 +191,8 @@ register(class GridLayoutWidget extends Widget {
 
     [Symbol.iterator]() {
         return this.cells[Symbol.iterator]();
+    }
+
+    unbind() {
     }
 });

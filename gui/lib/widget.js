@@ -69,6 +69,37 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    bind(activeData, key, initialValue) {
+        let recv = message => {
+            if (!this.bindingSuppress) {
+                this.bindingRecv();
+            }
+
+            this.bindingSuppress = false;
+        };
+
+        if (initialValue !== undefined) {
+            activeData[key] = initialValue;
+        }
+        else if (!ActiveData.has(key)) {
+            activeData[key] = '';
+        }
+
+        ActiveData.on(activeData, recv, message => message.key == key);
+        this.binding = { activeData: activeData, key: key, recv: recv };
+        this.set(activeData[key]);
+        return this;
+    }
+
+    bindAttribute(activeData, key, initialValue) {
+    }
+
+    bindHandler(activeData, key, initialValue) {
+    }
+
+    bindStyle(activeData, key, initialValue) {
+    }
+
     bindingRecv() {
         if (this.binding) {
             this.set(this.binding.activeData[this.binding.key]);
@@ -81,30 +112,6 @@ register(class Widget extends Emitter {
         if (this.binding) {
             this.bindingSuppress = true;
             this.binding.activeData[this.binding.key] = value;
-        }
-
-        return this;
-    }
-
-    bindingStart(activeData, key) {
-        let recv = message => {
-            if (!this.bindingSuppress) {
-                this.bindingRecv();
-            }
-
-            this.bindingSuppress = false;
-        };
-
-        ActiveData.on(activeData, recv, message => message.key == key);
-        this.binding = { activeData: activeData, key: key, recv: recv };
-        this.set(activeData[key]);
-        return this;
-    }
-
-    bindingStop() {
-        if (this.binding) {
-            ActiveData.off(this.binding.activeData, this.binding.recv);
-            this.binding = null;
         }
 
         return this;
@@ -176,6 +183,10 @@ register(class Widget extends Emitter {
 
     getClassNames() {
         return this.htmlElement.getClassNames();
+    }
+
+    hasAttribute(name) {
+        return this.htmlElement.hasAttribute();
     }
 
     hasClassName(className) {
@@ -311,6 +322,15 @@ register(class Widget extends Emitter {
                 widget: this,
                 className: className,
             });
+        }
+
+        return this;
+    }
+
+    unbind() {
+        if (this.binding) {
+            ActiveData.off(this.binding.activeData, this.binding.recv);
+            this.binding = null;
         }
 
         return this;

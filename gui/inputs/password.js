@@ -26,5 +26,6 @@
 register(class PasswordInput extends InputWidget {
     constructor() {
         super('password');
+        this.setClassName('text-input');
     }
 });

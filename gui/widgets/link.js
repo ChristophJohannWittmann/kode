@@ -22,9 +22,79 @@
 
 
 /*****
+ * A link widget is a wrapper for an HTML anchor or "a" element.  It's one of
+ * primary functional elements of an HTML document.  In essence, we like to make
+ * links look either like (a) traidtional/old-style browser links, link-1 style
+ * or (2) likea push button, link-2.  By default, link-1 style is chosen.
 *****/
 register(class LinkWidget extends Widget {
+    static referrerPolicyEnum = mkStringSet(
+        'no-referrer',
+        'no-referrer-when-downgrade',
+        'origin',
+        'origin-when-cross-origin',
+        'same-origin',
+        'strict-origin',
+        'strict-origin-when-cross-origin',
+        'unsafe-url',
+    );
+
+    static targetEnum = mkStringSet(
+        '_blank',
+        '_parent',
+        '_self',
+        '_top',
+    );
+
     constructor() {
         super('a');
+        this.setAttribute('target', '_self');
+        this.setAttribute('referrerpolicy', 'no-referrer');
+        this.setClassName('link-1');
+    }
+
+    getDownload() {
+        return this.hasAttribute('download');
+    }
+
+    getHref() {
+        return this.getAttribute('href');
+    }
+
+    getReferrerPolicy() {
+        return this.getAttribute('referrerpolicy');
+    }
+
+    getTarget() {
+        return this.getAttribute('target');
+    }
+
+    setDownload() {
+        if (!this.hasAttribute('download')) {
+            this.setAttribute('download');
+        }
+
+        return this;
+    }
+
+    setHref(value) {
+        this.setAttribute('href', value);
+        return this;
+    }
+
+    setReferrerPolicy(value) {
+        if (LinkWidget.referrerPolicyEnum.has(value)) {
+            this.setAttribute('target', value);
+        }
+
+        return this;
+    }
+
+    setTarget(value) {
+        if (LinkWidget.targetEnum.has(value)) {
+            this.setAttribute('target', value);
+        }
+
+        return this;
     }
 });

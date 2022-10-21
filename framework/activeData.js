@@ -220,6 +220,14 @@ register(class ActiveData {
 
         return false;
     }
+
+    static has(proxy, key) {
+        if (typeof proxy == 'object' && proxy[ActiveData.nakedKey] !== undefined) {
+            return key in proxy[ActiveData.nakedKey];
+        }
+  
+        return ActiveData;
+    }
  
     static isActiveData(arg) {
         if (typeof arg == 'object') {

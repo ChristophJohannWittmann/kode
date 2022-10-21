@@ -27,9 +27,5 @@ register(class TextInput extends InputWidget {
     constructor() {
         super('text');
         this.setClassName('text-input');
-
-        this.on('html.input', message => {
-            this.bindingSend(message.event.target.value);
-        });
     }
 });

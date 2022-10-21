@@ -32,28 +32,32 @@ register(class SignInView extends GridLayoutWidget {
             colGap: '0px',
         });
 
-        this.credentials = mkActiveData({
-            username: '',
-            password: '',
-        });
+        const credentials = mkActiveData();
 
         this.panel = mkGridLayoutWidget({
-            rows: ['auto', '20px', '15px', '20px', 'auto'],
-            rowGap: '4px',
+            rows: ['5fr', 'auto', '8px', 'auto', '25px', 'auto', '4fr'],
             cols: ['80px', '250px'],
-            colGap: '0px',
         });
 
         this.panel.setClassNames('flex-h-cc border-1 border-radius-2 colors-2');
 
-        let usernameInput = mkTextInput().bindingStart(this.credentials, 'username');
-        let passwordInput = mkPasswordInput().bindingStart(this.credentials, 'password');
+        let usernameInput = mkTextInput().bind(credentials, 'username', 'chris.wittmann@infosearch.online');
+        let passwordInput = mkPasswordInput().bind(credentials, 'password', 'mybeautifulpassword');
 
         this.panel.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
         this.panel.setAt(1, 1, usernameInput);
 
         this.panel.setAt(3, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
         this.panel.setAt(3, 1, passwordInput);
+
+        this.panel.setAt(5, 1, mkLinkWidget()
+            .setHref('https://google.com')
+            .set('Click to open Google')
+            .setClassName('font-size-3')
+            .setTarget('_blank')
+        );
+
+        this.panel.getAt(5, 1).on('html.click', message => console.log(credentials));
 
         this.setAt(1, 1, this.panel);
     }

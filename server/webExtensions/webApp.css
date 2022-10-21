@@ -4,16 +4,21 @@
 @media (prefers-color-scheme: light) {
     :root {
         color-scheme: light dark;
-        --background1: white;
-        --background2: whitesmoke;
-        --background3: gainsboro;
         --color1: dimgray;
-        --color2: darkslategray;
+        --color2: #808000;
         --color3: darkorange;
-        --border1: black;
-        --border2: dimgray;
+        --background1: #FFFFFF;
+        --background2: #FAFAF6;
+        --background3: gainsboro;
+        --border1: #000000;
+        --border2: #FFD700;
+        --border3: #FFD700;
         --outline1: gainsboro;
+        --outline1a:  gainsboro;
         --outline2: dimgray;
+        --outline2a:  gainsboro;
+        --outline3: dimgray;
+        --outline3a:  gainsboro;
     }
     .lite {}
     .dark { display: none; }
@@ -33,6 +38,64 @@
     }
     .lite { display: none; }
     .dark {}
+}
+
+
+/***********************************************
+ * Colors
+ ***********************************************/
+.color-1 { color: var(--color1); }
+.color-2 { color: var(--color2); }
+.color-3 { color: var(--color3); }
+.backcolor-1 { background-color: : var(--background1); }
+.backcolor-2 { background-color: : var(--background2); }
+.backcolor-3 { background-color: : var(--background3); }
+.bordercolor-1 { border-color: var(--border1); }
+.bordercolor-2 { border-color: var(--border2); }
+.bordercolor-3 { border-color: var(--border3); }
+.outlinecolor-1 { outline-color: var(--outline1); }
+.outlinecolor-2 { outline-color: var(--outline2); }
+.outlinecolor-3 { outline-color: var(--outline3); }
+.colors-1 {
+    color:  var(--color1);
+    background-color: var(--background1);
+    border-color: var(--border1);
+    outline-color: var(--outline1);
+}
+.colors-2 {
+    color:  var(--color2);
+    background-color: var(--background2);
+    border-color: var(--border2);
+    outline-color: var(--outline2);
+}
+.colors-3 {
+    color:  var(--color3);
+    background-color: var(--background3);
+    border-color: var(--border3);
+    outline-color: var(--outline3);
+}
+
+
+/***********************************************
+ * Baseline Style Settings
+ ***********************************************/
+html {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding:  0px;
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+}
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding:  0px;
+    color: var(--color1);
+    background-color: var(--background1);
+    border-color:  var(--border1);
+    outline-color: var(--outline1);
 }
 
 
@@ -63,29 +126,6 @@
 
 
 /***********************************************
- * Baseline Style Settings
- ***********************************************/
-html {
-    height: 100%;
-    width: 100%;
-    margin: 0px;
-    padding:  0px;
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    font-size: 16px;
-}
-body {
-    height: 100%;
-    width: 100%;
-    margin: 0px;
-    padding:  0px;
-    color: var(--color1);
-    background-color: var(--background1);
-    border-color:  var(--border1);
-    outline-color: var(--outline1);
-}
-
-
-/***********************************************
  * Fill Available Space
  ***********************************************/
 .fill {
@@ -98,20 +138,6 @@ body {
 .fill-width {
     width:  100%;
 }
-
-
-/***********************************************
- * Font
- ***********************************************/
-.font-size-1 { font-size:  10px!important; }
-.font-size-2 { font-size:  12px!important; }
-.font-size-3 { font-size:  14px!important; }
-.font-size-4 { font-size:  18px!important; }
-.font-size-5 { font-size:  22px!important; }
-.font-size-6 { font-size:  24px!important; }
-.font-weight-bold { font-weight: bold; }
-.font-weight-normal { font-weight: normal; }
-.font-weight-light { font-weight: light; }
 
 
 /***********************************************
@@ -138,20 +164,17 @@ body {
 
 
 /***********************************************
- * Colors
+ * Font
  ***********************************************/
-.colors-1 {
-    color:  var(--color1);
-    background-color: var(--background1);
-    border-color: var(--border1);
-    outline-color: var(--outline1);
-}
-.colors-2 {
-    color:  var(--color2);
-    background-color: var(--background2);
-    border-color: var(--border2);
-    outline-color: var(--outline2);
-}
+.font-size-1 { font-size:  10px!important; }
+.font-size-2 { font-size:  12px!important; }
+.font-size-3 { font-size:  14px!important; }
+.font-size-4 { font-size:  18px!important; }
+.font-size-5 { font-size:  22px!important; }
+.font-size-6 { font-size:  24px!important; }
+.font-weight-bold { font-weight: bold; }
+.font-weight-normal { font-weight: normal; }
+.font-weight-light { font-weight: light; }
 
 
 /***********************************************

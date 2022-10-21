@@ -31,5 +31,13 @@ register(class InputWidget extends Widget {
         super('input');
         this.htmlElement.setAttribute('type', type);
         this.setClassName('input-1');
+
+        this.on('html.input', message => {
+            this.bindingSend(message.event.target.value);
+        });
+    }
+
+    set(value) {
+        this.setAttribute('value', value);
     }
 });
