@@ -210,6 +210,16 @@ register(class ActiveData {
   
         return ActiveData;
     }
+
+    static is(arg1, arg2) {
+        if (typeof arg1 == 'object' && typeof arg2 == 'object') {
+            if (arg1[ActiveData.idKey] && arg2[ActiveData.idKey]) {
+                return arg1[ActiveData.idKey] == arg2[ActiveData.idKey];
+            }
+        }
+
+        return false;
+    }
  
     static isActiveData(arg) {
         if (typeof arg == 'object') {

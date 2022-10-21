@@ -33,6 +33,7 @@ register(class StackWidget extends Widget {
     constructor() {
         super('div');
         this.stack = [];
+        this.setClassName('fill');
     }
 
     contains(widget) {

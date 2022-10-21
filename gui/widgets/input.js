@@ -22,15 +22,14 @@
 
 
 /*****
+ * Base value for derived input types.  There's very little functionality here.
+ * Primarily, it enforces the widget hierachy and ensures that initialization is
+ * consistently performed via this constructor.
 *****/
 register(class InputWidget extends Widget {
     constructor(type) {
         super('input');
-        this.htmlElement.type = type;
-        this.setClassName('input-widget');
-    }
-
-    inputType() {
-        return this.htmlElement.type;
+        this.htmlElement.setAttribute('type', type);
+        this.setClassName('input-1');
     }
 });

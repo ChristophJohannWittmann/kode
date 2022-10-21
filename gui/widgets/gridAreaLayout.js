@@ -22,10 +22,6 @@
 
 
 /*****
- * The grid layout widget employs the use of the more recent display: grid;
- * Once constructed, the geometry is static and there are no features to change
- * this.  To dynamically change the grid geometry, you need to construct and
- * initialize a replacement grid layout widget and place it on the document.
 *****/
 register(class GridAreaLayoutWidget extends Widget {
     static placeholderKey = Symbol('placeholder');
@@ -33,6 +29,4 @@ register(class GridAreaLayoutWidget extends Widget {
     constructor(opts) {
         super('div');
     }
-
-    //https://www.w3schools.com/css/tryit.asp?filename=trycss_grid_layout_named
 });

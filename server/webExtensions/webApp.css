@@ -5,11 +5,11 @@
     :root {
         color-scheme: light dark;
         --background1: white;
-        --background2: lightskyblue;
-        --background3: whitesmoke;
+        --background2: whitesmoke;
+        --background3: gainsboro;
         --color1: dimgray;
-        --color2: darkorange;
-        --color3: firebrick;
+        --color2: darkslategray;
+        --color3: darkorange;
         --border1: black;
         --border2: dimgray;
         --outline1: gainsboro;
@@ -63,7 +63,7 @@
 
 
 /***********************************************
- * Standardize the Baseline
+ * Baseline Style Settings
  ***********************************************/
 html {
     height: 100%;
@@ -71,6 +71,7 @@ html {
     margin: 0px;
     padding:  0px;
     font-family: Avenir, Helvetica, Arial, sans-serif;
+    font-size: 16px;
 }
 body {
     height: 100%;
@@ -85,13 +86,29 @@ body {
 
 
 /***********************************************
+ * Fill Available Space
+ ***********************************************/
+.fill {
+    height: 100%;
+    width: 100%;
+}
+.fill-height {
+    height:  100%;
+}
+.fill-width {
+    width:  100%;
+}
+
+
+/***********************************************
  * Font
  ***********************************************/
-.font-size-1 { font-size:  20px!important; }
-.font-size-2 { font-size:  18px!important; }
-.font-size-3 { font-size:  16px!important; }
-.font-size-4 { font-size:  14px!important; }
-.font-size-5 { font-size:  12px!important; }
+.font-size-1 { font-size:  10px!important; }
+.font-size-2 { font-size:  12px!important; }
+.font-size-3 { font-size:  14px!important; }
+.font-size-4 { font-size:  18px!important; }
+.font-size-5 { font-size:  22px!important; }
+.font-size-6 { font-size:  24px!important; }
 .font-weight-bold { font-weight: bold; }
 .font-weight-normal { font-weight: normal; }
 .font-weight-light { font-weight: light; }
@@ -123,13 +140,13 @@ body {
 /***********************************************
  * Colors
  ***********************************************/
-.colors1 {
+.colors-1 {
     color:  var(--color1);
     background-color: var(--background1);
     border-color: var(--border1);
     outline-color: var(--outline1);
 }
-.colors2 {
+.colors-2 {
     color:  var(--color2);
     background-color: var(--background2);
     border-color: var(--border2);
@@ -286,13 +303,10 @@ body {
 
 
 /***********************************************
- * Widget Related Styles
+ * Input Styles
  ***********************************************/
-.widget {
-    height: 100%;
-    width: 100%;
-}
-.input-widget {
-    height: auto;
-    width: auto;
+.input-1 {
+    font-size: 12px;
+    line-height: 20px;
+    height: 30px;
 }

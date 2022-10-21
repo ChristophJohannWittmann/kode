@@ -230,16 +230,6 @@ register(class CssConditionRule extends CssGroupingRule {
  * more interestng CssConditionRule.  Rules derived from CssConditionRule are
  * also CssGroupingRules and consequently are CSS rule containers.
 *****/
-register(class CssCounterStyleRule extends CssRule {
-    constructor(cssGroup, cssRule) {
-        super(cssGroup, cssRule);
-    }
-
-    type() {
-        return 'CssCounterStyleRule';
-    }
-});
-
 register(class CssFontFaceRule extends CssRule {
     constructor(cssGroup, cssRule) {
         super(cssGroup, cssRule);
@@ -396,7 +386,6 @@ register(class CssSupportsRule extends CssConditionRule {
  * types supported by the DOM specification and by this software.
 *****/
 const CssMakers = new WeakMap();
-CssMakers.set(CSSCounterStyleRule, mkCssCounterStyleRule);
 CssMakers.set(CSSFontFaceRule, mkCssFontFaceRule);
 CssMakers.set(CSSImportRule, mkCssImportRule);
 CssMakers.set(CSSKeyframeRule, mkCssKeyframeRule);

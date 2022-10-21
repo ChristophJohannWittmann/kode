@@ -26,40 +26,35 @@
 register(class SignInView extends GridLayoutWidget {
     constructor() {
         super({
-            rows: ['auto', '600px', 'auto'],
+            rows: ['auto', '350px', 'auto'],
             rowGap: '0px',
-            cols: ['auto', '500px', 'auto'],
+            cols: ['auto', '400px', 'auto'],
             colGap: '0px',
         });
 
-        /*
-        this.signIn = new SignInWidget();
-        //this.signIn.append(mkTextInput());
+        this.credentials = mkActiveData({
+            username: '',
+            password: '',
+        });
 
-        this.signIn.append()
+        this.panel = mkGridLayoutWidget({
+            rows: ['auto', '20px', '15px', '20px', 'auto'],
+            rowGap: '4px',
+            cols: ['80px', '250px'],
+            colGap: '0px',
+        });
 
-        let div = htmlElement('div');
-        div.append(htmlText('Hello HTML Widget'));
-        this.signIn.append(mkWidget(div));
+        this.panel.setClassNames('flex-h-cc border-1 border-radius-2 colors-2');
 
-        this.setAt(1, 1, this.signIn);
-        */
+        let usernameInput = mkTextInput().bindingStart(this.credentials, 'username');
+        let passwordInput = mkPasswordInput().bindingStart(this.credentials, 'password');
 
-        let w = mkHtmlElementWidget(`<div>
-            <h1>A big title</h1>
-            <h3>A smaller title</h3>
-        </div>`);
+        this.panel.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
+        this.panel.setAt(1, 1, usernameInput);
 
-        this.setAt(1, 1, w);
+        this.panel.setAt(3, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
+        this.panel.setAt(3, 1, passwordInput);
+
+        this.setAt(1, 1, this.panel);
     }
 });
-
-
-/*****
-*****/
-class SignInWidget extends Widget {
-    constructor() {
-        super('div');
-        this.setClassName('colors2');
-    }
-}

@@ -43,7 +43,7 @@ register(function reducio(arg) {
         return arg.htmlElement.node;
     }
     else {
-        throw new Error(`Unsupported argument type: ${arg}`);
+        return document.createTextNode(arg);
     }
 });
 
@@ -61,7 +61,7 @@ register(class HtmlNode {
     }
 
     dir() {
-        console.dir(this._node);
+        console.dir(this.node);
         return this;
     }
 
@@ -277,6 +277,11 @@ register(class HtmlElement extends HtmlNode {
         return this;
     }
 
+    clearClassNames() {
+        this.node.className = '';
+        return this;
+    }
+
     clearData(key) {
         delete this.node.dataset[name];
         return this;
@@ -338,6 +343,10 @@ register(class HtmlElement extends HtmlNode {
         return key in this.node.dataset;
     }
 
+    innerHtml() {
+        return this.node.innerHTML;
+    }
+
     off(messageName, handler) {
         if ('EMITTER' in this.node) {
             this.node.EMITTER.off(messageName, handler);
@@ -392,9 +401,13 @@ register(class HtmlElement extends HtmlNode {
         return this;
     }
 
+    outerHtml() {
+        return this.node.outerHTML;
+    }
+
     owningWidget() {
-        if (Widget.widgetKey in this.htmlElement) {
-            return this.htmlElement[Widget.widgetKey];
+        if (Widget.widgetKey in this.node) {
+            return this.node[Widget.widgetKey];
         }
 
         return null;
@@ -456,6 +469,11 @@ register(class HtmlElement extends HtmlNode {
 
     setClassName(className) {
         this.node.classList.add(className);
+        return this;
+    }
+
+    setClassNames(classNames) {
+        this.node.className = classNames;
         return this;
     }
 

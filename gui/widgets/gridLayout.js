@@ -28,7 +28,7 @@
  * initialize a replacement grid layout widget and place it on the document.
 *****/
 register(class GridLayoutWidget extends Widget {
-    static placeholderKey = Symbol('placeholder');
+    static PlaceholderKey = Symbol('placeholder');
 
     constructor(opts) {
         super('div');
@@ -84,12 +84,13 @@ register(class GridLayoutWidget extends Widget {
             gridTemplateColumns: `${this.cols.join(' ')}`,
             rowGap: `${this.rowGap}`,
             columnGap: `${this.colGap}`,
+            height: '100%',
         });
 
         for (let i = 0; i < this.rows.length; i++) {
             for (let j = 0; j < this.cols.length; j++) {
                 let placeholder = mkWidget('div');
-                placeholder[GridLayoutWidget.placeholderKey] = true;
+                placeholder[GridLayoutWidget.PlaceholderKey] = true;
                 this.cells.push(placeholder);
                 this.append(placeholder);
             }
@@ -97,29 +98,37 @@ register(class GridLayoutWidget extends Widget {
     }
 
     calcIndex(rowIndex, colIndex) {
-        return this.rows.length*rowIndex + colIndex;
+        return this.cols.length*rowIndex + colIndex;
     }
 
     clear() {
-        for (let i = 0; i < this.cells.length; i++) {
-            if (!this.cells[i][GridLayoutWidget.placeholderKey]) {
-                let placeholder = mkWidget('div');
-                placeholder[GridLayoutWidget.placeholderKey] = true;
-                this.cells[i].replace(placeholder);
-                this.cells[i] = placeholder;
+        for (let i = 0; i < this.rows.length; i++) {
+            for (let j = 0; j < this.cols.length; j++) {
+                let index = this.calcIndex(i, j);
+
+                if (!this.cells[index][GridLayoutWidget.PlaceholderKey]) {
+                    let placeholder = mkWidget('div');
+                    placeholder[GridLayoutWidget.PlaceholderKey] = true;
+                    this.cells[index].replace(placeholder);
+                    this.cells[index] = placeholder;
+                }
             }
         }
+
+        return this;
     }
 
     clearAt(rowIndex, colIndex) {
         let index = this.calcIndex(rowIndex, colIndex);
 
-        if (!this.cells[GridLayoutWidget.placeholderKey]) {
+        if (!this.cells[index][GridLayoutWidget.PlaceholderKey]) {
             let placeholder = mkWidget('div');
-            placeholder[GridLayoutWidget.placeholderKey] = true;
+            placeholder[GridLayoutWidget.PlaceholderKey] = true;
             this.cells[index].replace(placeholder);
             this.cells[index] = placeholder;
         }
+
+        return this;
     }
 
     clearColGap() {
@@ -135,19 +144,14 @@ register(class GridLayoutWidget extends Widget {
     }
 
     getAt(rowIndex, colIndex) {
-        return this.cells[this.calcIndex(rowIndex, colIndex)];
+        let index = this.calcIndex(rowIndex, colIndex);
+        return this.cells[index];
     }
 
     setAt(rowIndex, colIndex, widget) {
-        if (widget) {
-            let index = this.calcIndex(rowIndex, colIndex);
-            this.cells[index].replace(widget);
-            this.cells[index] = widget;
-        }
-        else {
-            this.clearAt(rowIndex, colIndex);
-        }
-
+        let index = this.calcIndex(rowIndex, colIndex);
+        this.cells[index].replace(widget);
+        this.cells[index] = widget
         return this;
     }
 

@@ -38,45 +38,96 @@ register(class Widget extends Emitter {
     static initialized = {};
     static widgetKey = Symbol('widget');
 
-    constructor(arg) {
+    constructor(tagName) {
         super();
+        this.binding = null;
+        this.bindingSuppress = false;
         this.widgetId = Widget.nextId++;
         this.selector = `widget${this.widgetId}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
 
-        if (typeof arg == 'string') {
-            this.htmlElement = htmlElement(arg);
+        if (typeof tagName == 'string') {
+            this.htmlElement = htmlElement(tagName);
             this.htmlElement.setAttribute('id', this.selector);
-            this.htmlElement.setClassName('widget');
             this.brand(this.htmlElement);
         }
         else {
-            this.htmlElement = mkHtmlElement(reducio(arg));
-            this.brand(this.htmlElement);
+            throw new Error(`mkWidget(), expecting a tagName string: ${tagName}`);
         }
     }
 
-    append(...widgets) {
-        let filtered = widgets.filter(w => w instanceof Widget);
-        this.htmlElement.append(...filtered);
+    append(...args) {
+        this.htmlElement.append(...args);
 
         this.send({
             messageName: 'Widget.Changed',
             type: 'append',
             widget: this,
-            widgets: filtered,
+            widgets: args,
         });
 
         return this;
     }
 
-    bind(activeData, method) {
+    bindingRecv() {
+        if (this.binding) {
+            this.set(this.binding.activeData[this.binding.key]);
+        }
+
+        return this;
+    }
+
+    bindingSend(value) {
+        if (this.binding) {
+            this.bindingSuppress = true;
+            this.binding.activeData[this.binding.key] = value;
+        }
+
+        return this;
+    }
+
+    bindingStart(activeData, key) {
+        let recv = message => {
+            if (!this.bindingSuppress) {
+                this.bindingRecv();
+            }
+
+            this.bindingSuppress = false;
+        };
+
+        ActiveData.on(activeData, recv, message => message.key == key);
+        this.binding = { activeData: activeData, key: key, recv: recv };
+        this.set(activeData[key]);
+        return this;
+    }
+
+    bindingStop() {
+        if (this.binding) {
+            ActiveData.off(this.binding.activeData, this.binding.recv);
+            this.binding = null;
+        }
+
+        return this;
     }
 
     brand(arg) {
         let htmlElement = reducio(arg);
         htmlElement[Widget.widgetKey] = this;
         return this;
+    }
+
+    childAt(index) {
+        let children = this.htmlElement.children();
+
+        if (index >= 0 && index < children.length) {
+            let child = children[index];
+
+            if (child instanceof HtmlElement) {
+                return child.owningWidget();
+            }
+        }
+
+        return null;
     }
 
     clear() {
@@ -88,6 +139,11 @@ register(class Widget extends Emitter {
             widget: this,
         });
 
+        return this;
+    }
+
+    clearAttribute(name) {
+        this.htmlElement.clearAttribute(name);
         return this;
     }
 
@@ -104,12 +160,31 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    clearClassNames() {
+        this.htmlElement.clearClassNames();
+        return this;
+    }
+
+    dir() {
+        this.htmlElement.dir();
+        return this;
+    }
+
+    getAttribute(name) {
+        return this.htmlElement.getAttribute(name);
+    }
+
     getClassNames() {
         return this.htmlElement.getClassNames();
     }
 
     hasClassName(className) {
         return this.htmlElement.hasClassName(className);
+    }
+
+    log() {
+        this.htmlElement.log();
+        return this;
     }
 
     off(messageName, handler) {
@@ -139,15 +214,14 @@ register(class Widget extends Emitter {
         }
     }
 
-    prepend(...widgets) {
-        let filtered = widgets.filter(w => w instanceof Widget);
-        this.htmlElement.prepend(...filtered);
+    prepend(...args) {
+        this.htmlElement.prepend(...args);
 
         this.send({
             messageName: 'Widget.Changed',
             type: 'prepend',
             widget: this,
-            widgets: filtered,
+            widgets: args,
         });
 
         return this;
@@ -178,6 +252,25 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    set(...args) {
+        this.clear();
+        this.htmlElement.append(...args);
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'set',
+            widget: this,
+            widgets: args,
+        });
+
+        return this;
+    }
+
+    setAttribute(name, value) {
+        this.htmlElement.setAttribute(name, value);
+        return this;
+    }
+
     setClassName(className) {
         this.htmlElement.setClassName(className);
 
@@ -188,6 +281,11 @@ register(class Widget extends Emitter {
             className: className,
         });
 
+        return this;
+    }
+
+    setClassNames(classNames) {
+        this.htmlElement.setClassNames(classNames);
         return this;
     }
 
