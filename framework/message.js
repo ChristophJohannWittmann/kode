@@ -33,6 +33,7 @@ register(class Emitter extends NonJsonable {
     constructor() {
         super();
         this.handlers = {};
+        this.silent = false;
     }
   
     length(messageName) {
@@ -119,30 +120,40 @@ register(class Emitter extends NonJsonable {
         return trap.promise;
     }
 
-    send(message) {
-        if (!(message instanceof Message)) {
-            message = mkMessage(message);
-        }
+    resume() {
+        this.silent = false;
+    }
 
-        if (message.messageName in this.handlers) {
-            let handler = this.handlers[message.messageName];
-            let thunks = handler.thunks;
-            handler.thunks = [];
-  
-            if ('#Trap' in message) {
-                Trap.setExpected(message['#Trap'], thunks.length);
+    send(message) {
+        if (!this.silent) {
+            if (!(message instanceof Message)) {
+                message = mkMessage(message);
             }
 
-            thunks.forEach(thunk => {
-                if (!thunk.once) {
-                    handler.thunks.push(thunk);
+            if (message.messageName in this.handlers) {
+                let handler = this.handlers[message.messageName];
+                let thunks = handler.thunks;
+                handler.thunks = [];
+      
+                if ('#Trap' in message) {
+                    Trap.setExpected(message['#Trap'], thunks.length);
                 }
 
-                if (typeof thunk.filter != 'function' || thunk.filter(message)) {
-                    thunk.func(message);
-                }
-            });
+                thunks.forEach(thunk => {
+                    if (!thunk.once) {
+                        handler.thunks.push(thunk);
+                    }
+
+                    if (typeof thunk.filter != 'function' || thunk.filter(message)) {
+                        thunk.func(message);
+                    }
+                });
+            }
         }
+    }
+
+    silence() {
+        this.silent = true;
     }
 });
 

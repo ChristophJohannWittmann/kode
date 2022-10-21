@@ -40,8 +40,7 @@ register(class Widget extends Emitter {
 
     constructor(tagName) {
         super();
-        this.binding = null;
-        this.bindingSuppress = false;
+        this.id = Widget.nextId++;
         this.widgetId = Widget.nextId++;
         this.selector = `widget${this.widgetId}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
@@ -61,58 +60,9 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            type: 'append',
+            type: 'value',
             widget: this,
-            widgets: args,
         });
-
-        return this;
-    }
-
-    bind(activeData, key, initialValue) {
-        let recv = message => {
-            if (!this.bindingSuppress) {
-                this.bindingRecv();
-            }
-
-            this.bindingSuppress = false;
-        };
-
-        if (initialValue !== undefined) {
-            activeData[key] = initialValue;
-        }
-        else if (!ActiveData.has(key)) {
-            activeData[key] = '';
-        }
-
-        ActiveData.on(activeData, recv, message => message.key == key);
-        this.binding = { activeData: activeData, key: key, recv: recv };
-        this.set(activeData[key]);
-        return this;
-    }
-
-    bindAttribute(activeData, key, initialValue) {
-    }
-
-    bindHandler(activeData, key, initialValue) {
-    }
-
-    bindStyle(activeData, key, initialValue) {
-    }
-
-    bindingRecv() {
-        if (this.binding) {
-            this.set(this.binding.activeData[this.binding.key]);
-        }
-
-        return this;
-    }
-
-    bindingSend(value) {
-        if (this.binding) {
-            this.bindingSuppress = true;
-            this.binding.activeData[this.binding.key] = value;
-        }
 
         return this;
     }
@@ -142,7 +92,7 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            type: 'clear',
+            type: 'value',
             widget: this,
         });
 
@@ -151,6 +101,15 @@ register(class Widget extends Emitter {
 
     clearAttribute(name) {
         this.htmlElement.clearAttribute(name);
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'attribute',
+            widget: this,
+            name: name,
+            value: '',
+        });
+
         return this;
     }
 
@@ -159,9 +118,10 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            type: 'clearClassName',
+            type: 'attribute',
             widget: this,
-            className: className,
+            name: 'className',
+            value: '',
         });
 
         return this;
@@ -169,12 +129,25 @@ register(class Widget extends Emitter {
 
     clearClassNames() {
         this.htmlElement.clearClassNames();
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'attribute',
+            widget: this,
+            name: 'className',
+            value: '',
+        });
+
         return this;
     }
 
     dir() {
         this.htmlElement.dir();
         return this;
+    }
+
+    get() {
+        return this.htmlElement.getInnerHtml();
     }
 
     getAttribute(name) {
@@ -230,9 +203,8 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            type: 'prepend',
+            type: 'value',
             widget: this,
-            widgets: args,
         });
 
         return this;
@@ -255,30 +227,30 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            type: 'replace',
+            type: 'value',
             widget: this,
-            widgets: filtered,
         });
 
         return this;
     }
 
-    set(...args) {
+    set(innerHtml) {
         this.clear();
-        this.htmlElement.append(...args);
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'set',
-            widget: this,
-            widgets: args,
-        });
-
+        this.htmlElement.setInnerHtml(innerHtml);
         return this;
     }
 
     setAttribute(name, value) {
         this.htmlElement.setAttribute(name, value);
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'attribute',
+            widget: this,
+            name: name,
+            value: value,
+        });
+
         return this;
     }
 
@@ -287,9 +259,10 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            tyype: 'setClassName',
+            type: 'attribute',
             widget: this,
-            className: className,
+            name: 'className',
+            value: className,
         });
 
         return this;
@@ -297,6 +270,15 @@ register(class Widget extends Emitter {
 
     setClassNames(classNames) {
         this.htmlElement.setClassNames(classNames);
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'attribute',
+            widget: this,
+            name: 'className',
+            value: classNames,
+        });
+
         return this;
     }
 
@@ -307,32 +289,23 @@ register(class Widget extends Emitter {
     toggleClassName(className) {
         this.htmlElement.toggleClassName(className);
 
-        if (this.hasClassName(className)) {
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'setClassName',
-                widget: this,
-                className: className,
-            });
-        }
-        else {
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'clearClassName',
-                widget: this,
-                className: className,
-            });
-        }
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'attribute',
+            widget: this,
+            name: 'className',
+            value: this.hasClassName() ? className : '',
+        });
 
         return this;
     }
 
-    unbind() {
-        if (this.binding) {
-            ActiveData.off(this.binding.activeData, this.binding.recv);
-            this.binding = null;
+    unbind(activeData) {
+        if (activeData) {
+            Binding.unbind(activeData, this);
         }
-
-        return this;
+        else {
+            Binding.unbindWidget(this);
+        }
     }
 });

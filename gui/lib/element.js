@@ -331,6 +331,10 @@ register(class HtmlElement extends HtmlNode {
         return this.node.dataset[key];
     }
 
+    getInnerHtml() {
+        return this.node.innerHTML;
+    }
+
     hasAttribute(name) {
         return mkStringSet(this.node.getAttributeNames()).has(name);
     }
@@ -341,10 +345,6 @@ register(class HtmlElement extends HtmlNode {
 
     hasData(key) {
         return key in this.node.dataset;
-    }
-
-    innerHtml() {
-        return this.node.innerHTML;
     }
 
     off(messageName, handler) {
@@ -479,6 +479,11 @@ register(class HtmlElement extends HtmlNode {
 
     setData(name, value) {
         this.node.dataset[name] = value;
+        return this;
+    }
+
+    setInnerHtml(innerHtml) {
+        this.node.innerHTML = innerHtml;
         return this;
     }
 

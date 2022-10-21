@@ -35,7 +35,7 @@
  * purposes rather than string keys to avoid naming collisions.
 *****/
 register(class ActiveData {
-    static id = 1;
+    static nextId = 1;
     static idKey = Symbol('id');
     static pathKey = Symbol('Path');
     static nakedKey = Symbol('Naked');
@@ -173,7 +173,7 @@ register(class ActiveData {
             activeData = new Object();
         }
  
-        activeData[ActiveData.idKey] = ActiveData.id++;
+        activeData[ActiveData.idKey] = ActiveData.nextId++;
         activeData[ActiveData.proxyKey] = new Proxy(activeData, ActiveData.proxy);
  
         if (naked) {
@@ -211,6 +211,14 @@ register(class ActiveData {
         return ActiveData;
     }
 
+    static id(proxy) {
+        if (typeof proxy == 'object' && proxy[ActiveData.nakedKey] !== undefined) {
+            return proxy[ActiveData.nakedKey][ActiveData.idKey];
+        }
+  
+        return null;
+    }
+
     static is(arg1, arg2) {
         if (typeof arg1 == 'object' && typeof arg2 == 'object') {
             if (arg1[ActiveData.idKey] && arg2[ActiveData.idKey]) {
@@ -226,7 +234,7 @@ register(class ActiveData {
             return key in proxy[ActiveData.nakedKey];
         }
   
-        return ActiveData;
+        return false;
     }
  
     static isActiveData(arg) {
@@ -237,8 +245,8 @@ register(class ActiveData {
         return false;
     }
   
-    static off(activeData, handler, filter) {
-        activeData[ActiveData.emitterKey].off('ActiveData', handler, filter);
+    static off(activeData, handler) {
+        activeData[ActiveData.emitterKey].off('ActiveData', handler);
         return ActiveData;
     }
  

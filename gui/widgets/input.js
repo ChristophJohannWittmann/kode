@@ -33,11 +33,13 @@ register(class InputWidget extends Widget {
         this.setClassName('input-1');
 
         this.on('html.input', message => {
-            this.bindingSend(message.event.target.value);
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'attribute',
+                widget: this,
+                name: 'value',
+                value: message.event.target.value,
+            });
         });
-    }
-
-    set(value) {
-        this.setAttribute('value', value);
     }
 });

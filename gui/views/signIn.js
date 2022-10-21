@@ -41,8 +41,8 @@ register(class SignInView extends GridLayoutWidget {
 
         this.panel.setClassNames('flex-h-cc border-1 border-radius-2 colors-2');
 
-        let usernameInput = mkTextInput().bind(credentials, 'username', 'chris.wittmann@infosearch.online');
-        let passwordInput = mkPasswordInput().bind(credentials, 'password', 'mybeautifulpassword');
+        let usernameInput = mkInputBinding(mkTextInput(), credentials, 'username', 'chris.wittmann@infosearch.online');
+        let passwordInput = mkInputBinding(mkPasswordInput(), credentials, 'password', 'MyBeautifulP@ssw0rd');
 
         this.panel.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
         this.panel.setAt(1, 1, usernameInput);
@@ -50,6 +50,10 @@ register(class SignInView extends GridLayoutWidget {
         this.panel.setAt(3, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
         this.panel.setAt(3, 1, passwordInput);
 
+        let div = mkInnerHtmlBinding(mkWidget('div'), credentials, 'username');;
+        this.panel.setAt(5, 1, div);
+
+        /*
         this.panel.setAt(5, 1, mkLinkWidget()
             .setHref('https://google.com')
             .set('Click to open Google')
@@ -58,6 +62,7 @@ register(class SignInView extends GridLayoutWidget {
         );
 
         this.panel.getAt(5, 1).on('html.click', message => console.log(credentials));
+        */
 
         this.setAt(1, 1, this.panel);
     }
