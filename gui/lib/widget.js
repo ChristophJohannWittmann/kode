@@ -77,8 +77,8 @@ register(class Widget extends Emitter {
         return this;
     }
 
-    bindInput(activeData, key) {
-        mkInputBinding(this, activeData, key);
+    bindValue(activeData, key) {
+        mkValueBinding(this, activeData, key);
         return this;
     }
 

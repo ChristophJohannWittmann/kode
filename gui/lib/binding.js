@@ -93,14 +93,14 @@ class Binding {
                         binding.onWidgetChanged(message.value);
                     }
                 }
-                else if (binding instanceof InputBinding) {
-                    if (message.type == 'attribute' && message.name == 'value') {
-                        binding.onWidgetChanged(message.value);
-                    }
-                }
                 else if (binding instanceof InnerHtmlBinding) {
                     if (message.type == 'innerHTML') {
                         binding.onWidgetChanged(message.widget.get());
+                    }
+                }
+                else if (binding instanceof ValueBinding) {
+                    if (message.type == 'attribute' && message.name == 'value') {
+                        binding.onWidgetChanged(message.value);
                     }
                 }
             }
@@ -240,11 +240,12 @@ register(class AttributeBinding extends Binding {
 
 
 /*****
- * An inner Html binding is a binding between the widget's inner Html content
- * and a key of an active data object.  This is a one-way pipeline from the
- * active data object to the widget.  The pupose of such bindins is NOT for
- * supporting data input, it's for automatically updating text/html on the
- * given widget.
+ * An InnerHtml binding is a direct binding between the inner HTML of a widget
+ * and a key of an active data object.  Inner HTML bindings are bidirectional.
+ * A change to the widget updates the active Data object, and a change in the
+ * activeData will update it's widgets.  This is primarily usee to display
+ * active data values on a view and for building virtual user-input types not
+ * based on standard HTML date-entry elements such as input and select.
 *****/
 register(class InnerHtmlBinding extends Binding {
     constructor(widget, activeData, key) {
@@ -269,13 +270,13 @@ register(class InnerHtmlBinding extends Binding {
 
 
 /*****
- * An Input binding is a direct binding between the value attribute of a widget
- * and a key of an active data object.  Input bindings are bidirectional.
+ * A value binding is a direct binding between the value attribute of a widget
+ * and a key of an active data object.  Value bindings are bidirectional.
  * A change to the widget updates the active Data object, and a change in the
  * activeData will update it's widgets.  Note that atempting to bind a widget
  * to two different active Data keys will provide garbage.
 *****/
-register(class InputBinding extends Binding {
+register(class ValueBinding extends Binding {
     constructor(widget, activeData, key) {
         super(widget, activeData, key);
         this.widget.silence();

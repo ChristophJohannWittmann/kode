@@ -23,7 +23,7 @@
 
 /*****
 *****/
-register(class FlowLayoutWidget extends Widget {
+register(class FlowLayout extends Widget {
     constructor() {
         super('div');
     }

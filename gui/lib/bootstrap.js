@@ -31,7 +31,7 @@ register(function bootstrap() {
     window.win = mkWin(window);
     window.doc = win.doc();
     window.styleSheet = doc.getStyleSheet('webapp');
-    window.appStack = mkStackWidget();
+    window.appStack = mkViewStack();
     doc.body().append(appStack);
 
     // -- test code

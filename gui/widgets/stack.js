@@ -29,7 +29,7 @@
  * To be honest, another widget will be created to perform the user-elements
  * needed 
 *****/
-register(class StackWidget extends Widget {
+register(class ViewStack extends Widget {
     constructor() {
         super('div');
         this.stack = [];

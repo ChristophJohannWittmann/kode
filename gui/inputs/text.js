@@ -26,6 +26,6 @@
 register(class TextInput extends InputWidget {
     constructor() {
         super('text');
-        this.setClassName('text-input');
+        this.setClassName('text-input-1');
     }
 });

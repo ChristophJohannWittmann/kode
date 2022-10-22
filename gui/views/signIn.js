@@ -23,7 +23,7 @@
 
 /*****
 *****/
-register(class SignInView extends GridLayoutWidget {
+register(class SignInView extends GridLayout {
     constructor() {
         super({
             rows: ['auto', '350px', 'auto'],
@@ -38,21 +38,18 @@ register(class SignInView extends GridLayoutWidget {
         });
 
         const panel = this.setAt(1, 1,
-            mkGridLayoutWidget({
+            mkGridLayout({
                 rows: ['5fr', 'auto', '8px', 'auto', '25px', 'auto', '4fr'],
                 cols: ['80px', '250px'],
             })
             .setClassNames('flex-h-cc border-1 border-radius-2 colors-2')
         );
 
-        let usernameInput = mkTextInput().bindInput(credentials, 'username');
-        let passwordInput = mkPasswordInput().bindInput(credentials, 'password');
-
         panel.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
-        panel.setAt(1, 1, usernameInput);
+        panel.setAt(1, 1, mkTextInput().bindValue(credentials, 'username').setAutocomplete('username'));
 
         panel.setAt(3, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
-        panel.setAt(3, 1, passwordInput);
+        panel.setAt(3, 1, mkPasswordInput().bindValue(credentials, 'password'));
 
         const forgotPassword = panel.setAt(5, 1, mkLink()
             .setHref('https://google.com')

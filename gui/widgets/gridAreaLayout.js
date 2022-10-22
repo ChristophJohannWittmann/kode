@@ -23,7 +23,7 @@
 
 /*****
 *****/
-register(class GridAreaLayoutWidget extends Widget {
+register(class GridAreaLayout extends Widget {
     static placeholderKey = Symbol('placeholder');
 
     constructor(opts) {
