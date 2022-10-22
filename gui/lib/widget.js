@@ -60,10 +60,25 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            type: 'value',
+            type: 'innerHTML',
             widget: this,
         });
 
+        return this;
+    }
+
+    bind(activeData, key) {
+        mkInnerHtmlBinding(this, activeData, key);
+        return this;
+    }
+
+    bindAttribute(activeData, key, attributeName) {
+        mkAttributeBinding(this, activeData, key, attributeName);
+        return this;
+    }
+
+    bindInput(activeData, key) {
+        mkInputBinding(this, activeData, key);
         return this;
     }
 
@@ -92,7 +107,7 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            type: 'value',
+            type: 'innerHTML',
             widget: this,
         });
 
@@ -203,7 +218,7 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            type: 'value',
+            type: 'innerHTML',
             widget: this,
         });
 
@@ -211,32 +226,48 @@ register(class Widget extends Emitter {
     }
 
     remove() {
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'remove',
-            widget: this,
-        });
+        let parent = this.htmlElement.parent();
 
-        this.htmlElement.remove();
+        if (parent) {
+            this.htmlElement.remove();
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'innerHTML',
+                widget: parent.owningWidget(),
+            });
+        }
+
         return this;
     }
 
     replace(...widgets) {
-        let filtered = widgets.filter(w => w instanceof Widget);
-        this.htmlElement.replace(...filtered);
+        let parent = this.htmlElement.parent();
 
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'value',
-            widget: this,
-        });
+        if (parent) {
+            let filtered = widgets.filter(w => w instanceof Widget);
+            this.htmlElement.replace(...filtered);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'innerHTML',
+                widget: parent.owningWidget(),
+            });
+        }
 
         return this;
     }
 
     set(innerHtml) {
-        this.clear();
+        this.htmlElement.clear();
         this.htmlElement.setInnerHtml(innerHtml);
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'innerHTML',
+            widget: this,
+        });
+
         return this;
     }
 

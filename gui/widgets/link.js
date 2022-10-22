@@ -27,7 +27,7 @@
  * links look either like (a) traidtional/old-style browser links, link-1 style
  * or (2) likea push button, link-2.  By default, link-1 style is chosen.
 *****/
-register(class LinkWidget extends Widget {
+register(class Link extends Widget {
     static referrerPolicyEnum = mkStringSet(
         'no-referrer',
         'no-referrer-when-downgrade',
@@ -83,7 +83,7 @@ register(class LinkWidget extends Widget {
     }
 
     setReferrerPolicy(value) {
-        if (LinkWidget.referrerPolicyEnum.has(value)) {
+        if (Link.referrerPolicyEnum.has(value)) {
             this.setAttribute('target', value);
         }
 
@@ -91,7 +91,7 @@ register(class LinkWidget extends Widget {
     }
 
     setTarget(value) {
-        if (LinkWidget.targetEnum.has(value)) {
+        if (Link.targetEnum.has(value)) {
             this.setAttribute('target', value);
         }
 

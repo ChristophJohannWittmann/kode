@@ -32,38 +32,35 @@ register(class SignInView extends GridLayoutWidget {
             colGap: '0px',
         });
 
-        const credentials = mkActiveData();
-
-        this.panel = mkGridLayoutWidget({
-            rows: ['5fr', 'auto', '8px', 'auto', '25px', 'auto', '4fr'],
-            cols: ['80px', '250px'],
+        const credentials = mkActiveData({
+            username: 'chris.wittmann@infosearch.online',
+            password: 'a very unbreakable password',
         });
 
-        this.panel.setClassNames('flex-h-cc border-1 border-radius-2 colors-2');
+        const panel = this.setAt(1, 1,
+            mkGridLayoutWidget({
+                rows: ['5fr', 'auto', '8px', 'auto', '25px', 'auto', '4fr'],
+                cols: ['80px', '250px'],
+            })
+            .setClassNames('flex-h-cc border-1 border-radius-2 colors-2')
+        );
 
-        let usernameInput = mkInputBinding(mkTextInput(), credentials, 'username', 'chris.wittmann@infosearch.online');
-        let passwordInput = mkInputBinding(mkPasswordInput(), credentials, 'password', 'MyBeautifulP@ssw0rd');
+        let usernameInput = mkTextInput().bindInput(credentials, 'username');
+        let passwordInput = mkPasswordInput().bindInput(credentials, 'password');
 
-        this.panel.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
-        this.panel.setAt(1, 1, usernameInput);
+        panel.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
+        panel.setAt(1, 1, usernameInput);
 
-        this.panel.setAt(3, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
-        this.panel.setAt(3, 1, passwordInput);
+        panel.setAt(3, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
+        panel.setAt(3, 1, passwordInput);
 
-        let div = mkInnerHtmlBinding(mkWidget('div'), credentials, 'username');;
-        this.panel.setAt(5, 1, div);
-
-        /*
-        this.panel.setAt(5, 1, mkLinkWidget()
+        const forgotPassword = panel.setAt(5, 1, mkLink()
             .setHref('https://google.com')
             .set('Click to open Google')
             .setClassName('font-size-3')
             .setTarget('_blank')
         );
 
-        this.panel.getAt(5, 1).on('html.click', message => console.log(credentials));
-        */
-
-        this.setAt(1, 1, this.panel);
+        forgotPassword.on('html.click', message => console.log(credentials));
     }
 });

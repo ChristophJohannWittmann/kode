@@ -36,7 +36,7 @@ class Binding {
     static byActiveData = {};
     static silentWidget = null;
 
-    constructor(widget, activeData, key, initialValue) {
+    constructor(widget, activeData, key) {
         this.id = Binding.nextId++;
         this.widget = widget;
         this.activeData = activeData;
@@ -61,10 +61,7 @@ class Binding {
             ActiveData.on(this.activeData, handler);
         }
 
-        if (initialValue !== undefined) {
-            this.activeData[key] = initialValue;
-        }
-        else if (!ActiveData.has(this.activeData, key)) {
+        if (!ActiveData.has(this.activeData, key)) {
             this.activeData[key] = '';
         }
 
@@ -99,6 +96,11 @@ class Binding {
                 else if (binding instanceof InputBinding) {
                     if (message.type == 'attribute' && message.name == 'value') {
                         binding.onWidgetChanged(message.value);
+                    }
+                }
+                else if (binding instanceof InnerHtmlBinding) {
+                    if (message.type == 'innerHTML') {
+                        binding.onWidgetChanged(message.widget.get());
                     }
                 }
             }
@@ -215,13 +217,12 @@ class Binding {
  * to two different active Data keys will provide garbage.
 *****/
 register(class AttributeBinding extends Binding {
-    constructor(widget, activeData, key, attributeName, initialValue) {
-        super(widget, activeData, key, initialValue);
+    constructor(widget, activeData, key, attributeName) {
+        super(widget, activeData, key);
         this.attributeName = attributeName;
         this.widget.silence();
         this.widget.setAttribute(this.attributeName, this.activeData[key]);
         this.widget.resume();
-        return widget;
     }
 
     onActiveDataChanged() {
@@ -246,18 +247,23 @@ register(class AttributeBinding extends Binding {
  * given widget.
 *****/
 register(class InnerHtmlBinding extends Binding {
-    constructor(widget, activeData, key, initialValue) {
-        super(widget, activeData, key, initialValue);
+    constructor(widget, activeData, key) {
+        super(widget, activeData, key);
         this.widget.silence();
         this.widget.set(this.activeData[key]);
         this.widget.resume();
-        return widget;
     }
 
     onActiveDataChanged() {
         Binding.silentWidget = this.widget;
         this.widget.set(this.activeData[this.key]);
         Binding.silentWidget = null;
+    }
+
+    onWidgetChanged(value) {
+        Binding.silentWidget = this.widget;
+        this.activeData[this.key] = value;
+        Binding.silentWidget = this.null;
     }
 });
 
@@ -270,12 +276,11 @@ register(class InnerHtmlBinding extends Binding {
  * to two different active Data keys will provide garbage.
 *****/
 register(class InputBinding extends Binding {
-    constructor(widget, activeData, key, initialValue) {
-        super(widget, activeData, key, initialValue);
+    constructor(widget, activeData, key) {
+        super(widget, activeData, key);
         this.widget.silence();
         this.widget.setAttribute('value', this.activeData[key]);
         this.widget.resume();
-        return widget;
     }
 
     onActiveDataChanged() {

@@ -152,11 +152,14 @@ register(class GridLayoutWidget extends Widget {
         return this.cells[index];
     }
 
+    set(innerHtml) {
+    }
+
     setAt(rowIndex, colIndex, widget) {
         let index = this.calcIndex(rowIndex, colIndex);
         this.cells[index].replace(widget);
         this.cells[index] = widget
-        return this;
+        return widget;
     }
 
     setColGap(gap) {
@@ -191,8 +194,5 @@ register(class GridLayoutWidget extends Widget {
 
     [Symbol.iterator]() {
         return this.cells[Symbol.iterator]();
-    }
-
-    unbind() {
     }
 });

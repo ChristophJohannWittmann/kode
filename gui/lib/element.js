@@ -409,8 +409,11 @@ register(class HtmlElement extends HtmlNode {
         if (Widget.widgetKey in this.node) {
             return this.node[Widget.widgetKey];
         }
-
-        return null;
+        else {
+            let widget = mkWidget('DUMMY');
+            widget.htmlElement = this;
+            return widget;
+        }
     }
 
     prepend(...args) {
