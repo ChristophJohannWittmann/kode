@@ -23,7 +23,7 @@
 
 /*****
 *****/
-register(class GridAreaLayout extends Widget {
+register(class WGridAreaLayout extends Widget {
     static placeholderKey = Symbol('placeholder');
 
     constructor(opts) {

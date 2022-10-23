@@ -27,7 +27,7 @@
  * directly created and is only mean to be a base class for widgets that create
  * and wrap this specific list of standard HTML input types.
 *****/
-register(class EditableBase extends Widget {
+register(class EditableBaseWidget extends Widget {
     static Autocompletes = mkStringSet(
         'additional-name',
         'address-level1',
@@ -93,11 +93,20 @@ register(class EditableBase extends Widget {
         return this.getAttribute('autocomplete');
     }
 
+    getAutofocus() {
+        return this.getAttribute('autofocus');
+    }
+
     setAutocomplete(value) {
-        if (typeof value == 'string' && InputWidget.Autocompletes.has(value)) {
+        if (typeof value == 'string' && EditableBaseWidget.Autocompletes.has(value)) {
             this.setAttribute('autocomplete', value);
         }
 
+        return this;
+    }
+
+    setAutofocus() {
+        this.setAttribute('autofocus');
         return this;
     }
 });

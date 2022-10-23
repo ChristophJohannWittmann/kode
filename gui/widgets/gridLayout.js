@@ -27,7 +27,7 @@
  * this.  To dynamically change the grid geometry, you need to construct and
  * initialize a replacement grid layout widget and place it on the document.
 *****/
-register(class GridLayout extends Widget {
+register(class WGridLayout extends Widget {
     static PlaceholderKey = Symbol('placeholder');
 
     constructor(opts) {
@@ -90,7 +90,7 @@ register(class GridLayout extends Widget {
         for (let i = 0; i < this.rows.length; i++) {
             for (let j = 0; j < this.cols.length; j++) {
                 let placeholder = mkWidget('div');
-                placeholder[GridLayout.PlaceholderKey] = true;
+                placeholder[WGridLayout.PlaceholderKey] = true;
                 placeholder.setClassNames('fill');
                 this.cells.push(placeholder);
                 this.append(placeholder);
@@ -110,9 +110,9 @@ register(class GridLayout extends Widget {
             for (let j = 0; j < this.cols.length; j++) {
                 let index = this.calcIndex(i, j);
 
-                if (!this.cells[index][GridLayout.PlaceholderKey]) {
+                if (!this.cells[index][WGridLayout.PlaceholderKey]) {
                     let placeholder = mkWidget('div');
-                    placeholder[GridLayout.PlaceholderKey] = true;
+                    placeholder[WGridLayout.PlaceholderKey] = true;
                     this.cells[index].replace(placeholder);
                     this.cells[index] = placeholder;
                 }
@@ -125,9 +125,9 @@ register(class GridLayout extends Widget {
     clearAt(rowIndex, colIndex) {
         let index = this.calcIndex(rowIndex, colIndex);
 
-        if (!this.cells[index][GridLayout.PlaceholderKey]) {
+        if (!this.cells[index][WGridLayout.PlaceholderKey]) {
             let placeholder = mkWidget('div');
-            placeholder[GridLayout.PlaceholderKey] = true;
+            placeholder[WGridLayout.PlaceholderKey] = true;
             this.cells[index].replace(placeholder);
             this.cells[index] = placeholder;
         }

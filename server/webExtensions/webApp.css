@@ -4,21 +4,14 @@
 @media (prefers-color-scheme: light) {
     :root {
         color-scheme: light dark;
-        --color1: dimgray;
-        --color2: #808000;
-        --color3: darkorange;
+
+        --color1: #555555;
+        --color1-hover: #FF4500;
         --background1: #FFFFFF;
-        --background2: #FAFAF6;
-        --background3: gainsboro;
-        --border1: #000000;
-        --border2: #FFD700;
-        --border3: #FFD700;
-        --outline1: gainsboro;
-        --outline1a:  gainsboro;
-        --outline2: dimgray;
-        --outline2a:  gainsboro;
-        --outline3: dimgray;
-        --outline3a:  gainsboro;
+        --border1: #4682B4;
+        --link1: #556B2F;
+        --outline1: #266294;
+        --outline1-focus: #266294;
     }
     .lite {}
     .dark { display: none; }
@@ -26,15 +19,6 @@
 @media (prefers-color-scheme: dark) {
     :root {
         color-scheme: light dark;
-        --background1: dimgray;
-        --background2: gray;
-        --color1: white;
-        --color2: gainsboro;
-        --color3: firebrick;
-        --border1: white;
-        --border2: gainsboro;
-        --outline1: dimgray;
-        --outline2: whitesmoke;
     }
     .lite { display: none; }
     .dark {}
@@ -42,60 +26,32 @@
 
 
 /***********************************************
- * Colors
- ***********************************************/
-.color-1 { color: var(--color1); }
-.color-2 { color: var(--color2); }
-.color-3 { color: var(--color3); }
-.backcolor-1 { background-color: : var(--background1); }
-.backcolor-2 { background-color: : var(--background2); }
-.backcolor-3 { background-color: : var(--background3); }
-.bordercolor-1 { border-color: var(--border1); }
-.bordercolor-2 { border-color: var(--border2); }
-.bordercolor-3 { border-color: var(--border3); }
-.outlinecolor-1 { outline-color: var(--outline1); }
-.outlinecolor-2 { outline-color: var(--outline2); }
-.outlinecolor-3 { outline-color: var(--outline3); }
-.colors-1 {
-    color:  var(--color1);
-    background-color: var(--background1);
-    border-color: var(--border1);
-    outline-color: var(--outline1);
-}
-.colors-2 {
-    color:  var(--color2);
-    background-color: var(--background2);
-    border-color: var(--border2);
-    outline-color: var(--outline2);
-}
-.colors-3 {
-    color:  var(--color3);
-    background-color: var(--background3);
-    border-color: var(--border3);
-    outline-color: var(--outline3);
-}
-
-
-/***********************************************
- * Baseline Style Settings
+ * HTML
  ***********************************************/
 html {
-    height: 100%;
-    width: 100%;
-    margin: 0px;
-    padding:  0px;
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    font-size: 16px;
-}
-body {
-    height: 100%;
-    width: 100%;
-    margin: 0px;
-    padding:  0px;
-    color: var(--color1);
-    background-color: var(--background1);
-    border-color:  var(--border1);
-    outline-color: var(--outline1);
+    --radius1: 4px;
+    --radius2: 10px;
+    --radius2: 20px;
+    --padding-1: 3px;
+    --padding-2: 6px;
+    --padding-3: 10px;
+    --padding-4: 12px;
+    --margin-1: 3px;
+    --margin-2: 6px;
+    --margin-3: 10px;
+    --margin-4: 12px;
+    --font-size-1: 8px;
+    --font-size-2: 10px;
+    --font-size-3: 12px;
+    --font-size-4: 14px;
+    --font-size-5: 16px;
+    --font-size-6: 18px;
+    --font-size-7: 20px;
+    --font-size-8: 24px;
+    --font-size-9: 28px;
+    --font-family-1: Avenir, Helvetica, Arial, sans-serif;
+    --font-family-2: Courier, Courier New;
+    --font-family-3: Times New Romas;
 }
 
 
@@ -126,7 +82,15 @@ body {
 
 
 /***********************************************
- * Fill Available Space
+ * Stubborn HTML Elements
+ ***********************************************/
+a, input, select, textarea, button {
+    font-family: inherit;
+}
+
+
+/***********************************************
+ * Fill
  ***********************************************/
 .fill {
     height: 100%;
@@ -141,40 +105,18 @@ body {
 
 
 /***********************************************
- * Borders
+ * Boxes
  ***********************************************/
-.border-none {
-    border: none;
-}
-.border-1 {
-    border: solid var(--border1) 1px;
-}
-.border-2 {
-    border: solid var(--border2) 1px;
-}
-.border-radius-none {
-    border-radius:  none;
-}
-.border-radius-1 {
-    border-radius:  10px;
-}
-.border-radius-2 {
-    border-radius:  20px;
-}
-
-
-/***********************************************
- * Font
- ***********************************************/
-.font-size-1 { font-size:  10px!important; }
-.font-size-2 { font-size:  12px!important; }
-.font-size-3 { font-size:  14px!important; }
-.font-size-4 { font-size:  18px!important; }
-.font-size-5 { font-size:  22px!important; }
-.font-size-6 { font-size:  24px!important; }
-.font-weight-bold { font-weight: bold; }
-.font-weight-normal { font-weight: normal; }
-.font-weight-light { font-weight: light; }
+.padding-none { padding: 0px; }
+.padding-1 { padding: var(--padding-1); }
+.padding-2 { padding: var(--padding-2); }
+.padding-3 { padding: var(--padding-3); }
+.padding-4 { padding: var(--padding-4); }
+.margin-none { margin: 0px; }
+.margin-1 { margin: var(--margin-1); }
+.margin-2 { margin: var(--margin-2); }
+.margin-3 { margin: var(--margin-3); }
+.margin-4 { margin: var(--margin-4); }
 
 
 /***********************************************
@@ -326,17 +268,491 @@ body {
 
 
 /***********************************************
- * widget Styles
+ * Font
  ***********************************************/
-.link-1 {
+.font-family-1 { font-family: var(--font-family-1); }
+.font-family-2 { font-family: var(--font-family-2); }
+.font-family-3 { font-family: var(--font-family-3); }
+.font-size-1 { font-size:  var(--font-size-1); }
+.font-size-2 { font-size:  var(--font-size-2); }
+.font-size-3 { font-size:  var(--font-size-3); }
+.font-size-4 { font-size:  var(--font-size-4); }
+.font-size-5 { font-size:  var(--font-size-5); }
+.font-size-6 { font-size:  var(--font-size-6); }
+.font-size-7 { font-size:  var(--font-size-7); }
+.font-size-7 { font-size:  var(--font-size-7); }
+.font-bold { font-weight: bold; }
+.font-normal { font-weight: normal; }
+.font-light { font-weight: light; }
+
+
+/***********************************************
+ * Colors
+ ***********************************************/
+.color-1 { color: var(--color1); }
+.color-2 { color: var(--color2); }
+.color-3 { color: var(--color3); }
+.color-4 { color: var(--color4); }
+.backcolor-1 { background-color: : var(--background1); }
+.backcolor-2 { background-color: : var(--background2); }
+.backcolor-3 { background-color: : var(--background3); }
+.backcolor-4 { background-color: : var(--background4); }
+.colors-1 {
+    color:  var(--color1);
+    background-color: var(--background1);
+}
+.colors-2 {
+    color:  var(--color2);
+    background-color: var(--background2);
+}
+.colors-3 {
+    color:  var(--color3);
+    background-color: var(--background3);
+}
+.colors-4 {
+    color:  var(--color4);
+    background-color: var(--background4);
 }
 
 
 /***********************************************
- * Input Styles
+ * Border
  ***********************************************/
-.text-input-1 {
-    font-size: 12px;
-    line-height: 20px;
-    height: 30px;
+.border-none {
+    border: none;
+}
+.border-1 { 
+    border-style: solid;
+    border-color: var(--border1);
+    border-width: 1px;
+    border-radius: none;
+}
+.border-1-r1 { 
+    border-style: solid;
+    border-color: var(--border1);
+    border-width: 1px;
+    border-radius: var(--radius1);
+}
+.border-1-r2 { 
+    border-style: solid;
+    border-color: var(--border1);
+    border-width: 1px;
+    border-radius: var(--radius2);
+}
+.border-1-r3 { 
+    border-style: solid;
+    border-color: var(--border1);
+    border-width: 1px;
+    border-radius: var(--radius3);
+}
+.border-2 { 
+    border-style: solid;
+    border-color: var(--border2);
+    border-width: 1px;
+    border-radius: none;
+}
+.border-2-r1 { 
+    border-style: solid;
+    border-color: var(--border2);
+    border-width: 1px;
+    border-radius: var(--radius1);
+}
+.border-2-r2 { 
+    border-style: solid;
+    border-color: var(--border2);
+    border-width: 1px;
+    border-radius: var(--radius2);
+}
+.border-2-r3 { 
+    border-style: solid;
+    border-color: var(--border2);
+    border-width: 1px;
+    border-radius: var(--radius3);
+}
+.border-3 { 
+    border-style: solid;
+    border-color: var(--border3);
+    border-width: 1px;
+    border-radius: none;
+}
+.border-3-r1 { 
+    border-style: solid;
+    border-color: var(--border3);
+    border-width: 1px;
+    border-radius: var(--radius1);
+}
+.border-3-r2 { 
+    border-style: solid;
+    border-color: var(--border3);
+    border-width: 1px;
+    border-radius: var(--radius2);
+}
+.border-3-r3 { 
+    border-style: solid;
+    border-color: var(--border3);
+    border-width: 1px;
+    border-radius: var(--radius3);
+}
+.border-4 { 
+    border-style: solid;
+    border-color: var(--border4);
+    border-width: 1px;
+    border-radius: none;
+}
+.border-4-r1 { 
+    border-style: solid;
+    border-color: var(--border4);
+    border-width: 1px;
+    border-radius: var(--radius1);
+}
+.border-4-r2 { 
+    border-style: solid;
+    border-color: var(--border4);
+    border-width: 1px;
+    border-radius: var(--radius2);
+}
+.border-4-r3 { 
+    border-style: solid;
+    border-color: var(--border4);
+    border-width: 1px;
+    border-radius: var(--radius3);
+}
+
+
+/***********************************************
+ * Outline
+ ***********************************************/
+.outline-none {
+    outline: none;
+}
+.outline-1 { 
+    outline-style: solid;
+    outline-color: var(--outline1);
+    outline-width: 1px;
+}
+.outline-1:focus {
+    outline-style: solid;
+    outline-color: var(--outline1-focus);
+    outline-width: 3px;
+}
+.outline-2 { 
+    outline-style: solid;
+    outline-color: var(--outline2);
+    outline-width: 1px;
+}
+.outline-2:focus { 
+    outline-style: solid;
+    outline-color: var(--outline2-focus);
+    outline-width: 2px;
+}
+.outline-3 { 
+    outline-style: solid;
+    outline-color: var(--outline3);
+    outline-width: 1px;
+}
+.outline-3:focus { 
+    outline-style: solid;
+    outline-color: var(--outline3-focus);
+    outline-width: 2px;
+}
+.outline-4 { 
+    outline-style: solid;
+    outline-color: var(--outline4);
+    outline-width: 1px;
+}
+.outline-4:focus { 
+    outline-style: solid;
+    outline-color: var(--outline4-focus);
+    outline-width: 2px;
+}
+
+
+/***********************************************
+ * Input
+ ***********************************************/
+input.input-color-1 {
+    color: var(--color1);
+    background-color: var(--background1);
+    border-color: var(--border1);
+    outline-color: transparent;
+}
+input.input-color-1:focus {
+    border-color: transparent;
+    outline-color: var(--outline1);
+}
+input.input-color-2 {
+    color: var(--color1);
+    background-color: var(--background1);
+    border-color: var(--border2);
+    outline-color: transparent;
+}
+input.input-color-2:focus {
+    border-color: transparent;
+    outline-color: var(--outline2);
+}
+input.input-color-3 {
+    color: var(--color1);
+    background-color: var(--background1);
+    border-color: var(--border3);
+    outline-color: transparent;
+}
+input.input-color-3:focus {
+    border-color: transparent;
+    outline-color: var(--outline3);
+}
+input.input-color-4 {
+    color: var(--color1);
+    background-color: var(--background1);
+    border-color: var(--border4);
+    outline-color: transparent;
+}
+input.input-color-4:focus {
+    border-color: transparent;
+    outline-color: var(--outline4);
+}
+input.input-1 {
+    font-size: var(--font-size-1);
+    line-height: calc(var(--font-size-1) + 6px);
+    height: calc(var(--font-size-1) + 14px);
+    border-style:  solid;
+    border-width: 1px;
+    border-radius: var(--radius1);
+}
+input.input-1:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-width: 2px;
+}
+input.input-2 {
+    font-size: var(--font-size-2);
+    line-height: calc(var(--font-size-2) + 6px);
+    height: calc(var(--font-size-2) + 14px);
+    border-style:  solid;
+    border-width: 1px;
+    border-radius: var(--radius1);
+}
+input.input-2:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-width: 2px;
+}
+input.input-3 {
+    font-size: var(--font-size-3);
+    line-height: calc(var(--font-size-3) + 6px);
+    height: calc(var(--font-size-3) + 14px);
+    border-style:  solid;
+    border-width: 1px;
+    border-radius: var(--radius1);
+}
+input.input-3:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-width: 2px;
+}
+input.input-4 {
+    font-size: var(--font-size-4);
+    line-height: calc(var(--font-size-4) + 6px);
+    height: calc(var(--font-size-4) + 14px);
+    border-style:  solid;
+    border-width: 1px;
+    border-radius: var(--radius1);
+}
+input.input-4:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-width: 2px;
+}
+input.input-5 {
+    font-size: var(--font-size-5);
+    line-height: calc(var(--font-size-5) + 6px);
+    height: calc(var(--font-size-5) + 14px);
+    border-style:  solid;
+    border-width: 1px;
+    border-radius: var(--radius1);
+}
+input.input-5:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-width: 2px;
+}
+input.input-6 {
+    font-size: var(--font-size-6);
+    line-height: calc(var(--font-size-6) + 6px);
+    height: calc(var(--font-size-6) + 14px);
+    border-style:  solid;
+    border-width: 1px;
+    border-radius: var(--radius1);
+}
+input.input-6:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-width: 2px;
+}
+input.input-7 {
+    font-size: var(--font-size-7);
+    line-height: calc(var(--font-size-7) + 6px);
+    height: calc(var(--font-size-7) + 14px);
+    border-style:  solid;
+    border-width: 1px;
+    border-radius: var(--radius2);
+}
+input.input-7:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-width: 2px;
+}
+input.input-8 {
+    font-size: var(--font-size-8);
+    line-height: calc(var(--font-size-8) + 6px);
+    height: calc(var(--font-size-8) + 14px);
+    border-style:  solid;
+    border-width: 1px;
+    border-radius: var(--radius2);
+}
+input.input-8:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-width: 2px;
+}
+input.input-9 {
+    font-size: var(--font-size-9);
+    line-height: calc(var(--font-size-9) + 6px);
+    height: calc(var(--font-size-9) + 14px);
+    border-style:  solid;
+    border-width: 1px;
+    border-radius: var(--radius2);
+}
+input.input-9:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-width: 2px;
+}
+
+
+/***********************************************
+ * Link
+ ***********************************************/
+a.link-color-1, a.link-color-1:active, a.link-color-1:visited {
+    color: var(--link1);
+    border: none;
+    outline-style: solid;
+    outline-color: transparent;
+    outline-width: 2px;
+}
+a.link-color-1:hover {
+    color: var(--color1-hover);
+}
+a.link-color-1:focus {
+    outline-color: var(--outline1-focus);
+}
+a.link-color-2, a.link-color-2:active, a.link-color-2:visited {
+    color: var(--link2);
+    border: none;
+    outline-style: solid;
+    outline-color: transparent;
+    outline-width: 2px;
+}
+a.link-color-2:hover {
+    color: var(--color2-hover);
+}
+a.link-color-2:focus {
+    outline-color: var(--outline2-focus);
+}
+a.link-color-3, a.link-color-3:active, a.link-color-3:visited {
+    color: var(--link3);
+    border: none;
+    outline-style: solid;
+    outline-color: transparent;
+    outline-width: 2px;
+}
+a.link-color-3:hover {
+    color: var(--color3-hover);
+}
+a.link-color-3:focus {
+    outline-color: var(--outline3-focus);
+}
+a.link-color-4, a.link-color-4:active, a.link-color-4:visited {
+    color: var(--link4);
+    border: none;
+    outline-style: solid;
+    outline-color: transparent;
+    outline-width: 2px;
+}
+a.link-color-4:hover {
+    color: var(--color4-hover);
+}
+a.link-color-4:focus {
+    outline-color: var(--outline4-focus);
+}
+a.link-1 {
+    font-weight: bold;
+    font-size: var(--font-size-1);
+    line-height: calc(var(--font-size-1) + 6px);
+    height: calc(var(--font-size-1) + 14px);
+    text-decoration: none;
+    border-radius: var(--radius1);
+}
+a.link-2 {
+    font-weight: bold;
+    font-size: var(--font-size-2);
+    line-height: calc(var(--font-size-2) + 6px);
+    height: calc(var(--font-size-2) + 14px);
+    text-decoration: none;
+    border-radius: var(--radius1);
+}
+a.link-3 {
+    font-weight: bold;
+    font-size: var(--font-size-3);
+    line-height: calc(var(--font-size-3) + 6px);
+    height: calc(var(--font-size-3) + 14px);
+    text-decoration: none;
+    border-radius: var(--radius1);
+}
+a.link-4 {
+    font-weight: bold;
+    font-size: var(--font-size-4);
+    line-height: calc(var(--font-size-4) + 6px);
+    height: calc(var(--font-size-4) + 14px);
+    text-decoration: none;
+    border-radius: var(--radius1);
+}
+a.link-5 {
+    font-weight: bold;
+    padding:  3px;
+    font-size: var(--font-size-5);
+    line-height: calc(var(--font-size-5) + 6px);
+    height: calc(var(--font-size-5) + 14px);
+    text-decoration: none;
+    border-radius: var(--radius1);
+}
+a.link-6 {
+    font-weight: bold;
+    font-size: var(--font-size-6);
+    line-height: calc(var(--font-size-6) + 6px);
+    height: calc(var(--font-size-6) + 14px);
+    text-decoration: none;
+    border-radius: var(--radius1);
+}
+a.link-7 {
+    font-size: var(--font-size-7);
+    line-height: calc(var(--font-size-7) + 6px);
+    height: calc(var(--font-size-7) + 14px);
+    text-decoration: none;
+    border-radius: var(--radius2);
+}
+a.link-8 {
+    font-weight: bold;
+    font-size: var(--font-size-8);
+    line-height: calc(var(--font-size-8) + 6px);
+    height: calc(var(--font-size-8) + 14px);
+    text-decoration: none;
+    border-radius: var(--radius2);
+}
+a.link-9 {
+    font-weight: bold;
+    font-size: var(--font-size-9);
+    line-height: calc(var(--font-size-9) + 6px);
+    height: calc(var(--font-size-9) + 14px);
+    text-decoration: none;
+    border-radius: var(--radius2);
 }

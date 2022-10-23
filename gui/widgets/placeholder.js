@@ -27,7 +27,7 @@
  * call, a single HTML element is constructed bound bound to an active data key.
  * This results is an autonomously changing element on the view.
 *****/
-register(class Placeholder extends Widget {
+register(class WPlaceholder extends Widget {
     constructor(activeData, key, tagName) {
         super(tagName ? tagName : 'div');
         this.bind(activeData, key);

@@ -27,7 +27,7 @@
  * consistently performed via this constructor.  There are a whole range of
  * input types that are subclasses of InputWidget.
 *****/
-register(class InputWidget extends EditableBase {
+register(class InputWidget extends EditableBaseWidget {
     constructor(type) {
         super('input');
         this.htmlElement.setAttribute('type', type);
