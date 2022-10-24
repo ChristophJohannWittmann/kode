@@ -28,5 +28,6 @@ register(class WGridAreaLayout extends Widget {
 
     constructor(opts) {
         super('div');
+        this.setClassName('fill');
     }
 });

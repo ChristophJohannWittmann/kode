@@ -5,13 +5,33 @@
     :root {
         color-scheme: light dark;
 
-        --color1: #555555;
-        --color1-hover: #FF4500;
-        --background1: #FFFFFF;
-        --border1: #4682B4;
-        --link1: #556B2F;
-        --outline1: #266294;
-        --outline1-focus: #266294;
+        --color-1: #696969;
+        --background-1: #F5F5F5;
+        --border-1: #778899;
+        --link-1: #5F9EA0;
+        --link-hover-1: #FF8C00;
+        --outline-1: #778899;
+
+        --color-2: #696969;
+        --background-2: #F5F5F5;
+        --border-2: #778899;
+        --link-2: #5F9EA0;
+        --link-hover-2: #FF8C00;
+        --outline-2: #778899;
+
+        --color-3: #696969;
+        --background-3: #F5F5F5;
+        --border-3: #778899;
+        --link-3: #5F9EA0;
+        --link-hover-3: #FF8C00;
+        --outline-3: #778899;
+
+        --color-4: #696969;
+        --background-4: #F5F5F5;
+        --border-4: #778899;
+        --link-4: #5F9EA0;
+        --link-hover-4: #FF8C00;
+        --outline-4: #778899;
     }
     .lite {}
     .dark { display: none; }
@@ -29,17 +49,17 @@
  * HTML
  ***********************************************/
 html {
-    --radius1: 4px;
-    --radius2: 10px;
-    --radius2: 20px;
-    --padding-1: 3px;
-    --padding-2: 6px;
-    --padding-3: 10px;
-    --padding-4: 12px;
+    --border-radius-1: 4px;
+    --border-radius-2: 10px;
+    --border-radius-3: 20px;
     --margin-1: 3px;
     --margin-2: 6px;
     --margin-3: 10px;
     --margin-4: 12px;
+    --padding-1: 4px;
+    --padding-2: 8px;
+    --padding-3: 10px;
+    --padding-4: 12px;
     --font-size-1: 8px;
     --font-size-2: 10px;
     --font-size-3: 12px;
@@ -49,9 +69,9 @@ html {
     --font-size-7: 20px;
     --font-size-8: 24px;
     --font-size-9: 28px;
-    --font-family-1: Avenir, Helvetica, Arial, sans-serif;
-    --font-family-2: Courier, Courier New;
-    --font-family-3: Times New Romas;
+    --font-family-sans: Avenir, Helvetica, Arial, sans-serif;
+    --font-family-serif: Times New Romas;
+    --font-family-fixed: Courier, Courier New;
 }
 
 
@@ -59,33 +79,34 @@ html {
  * Screen
  ***********************************************/
 @media screen and (max-width: 699px) {
-    screenS  {}
-    screenSM {}
-    screenM  { display: none; }
-    screenML { display: none; }
-    screenL  { display: none; }
+    .screen-s  {}
+    .screen-sm {}
+    .screen-m  { display: none; }
+    .screen-ml { display: none; }
+    .screen-l  { display: none; }
 }
-@media screen and (min-width: 700px) and (max-width: 1199px) {
-    screenS  { display: none; }
-    screenSM {}
-    screenM  {}
-    screenML {}
-    screenL  { display: none; }
+@media screen and (min-width: 700px) and (max-width: 1299px) {
+    .screen-s  { display: none; }
+    .screen-sm {}
+    .screen-m  {}
+    .screen-ml {}
+    .screen-l  { display: none; }
 }
-@media screen and (min-width: 1200px) {
-    screenS  { display: none; }
-    screenSM { display: none; }
-    screenM  { display: none; }
-    screenML {}
-    screenL  {}
+@media screen and (min-width: 1300px) {
+    .screen-s  { display: none; }
+    .screen0sm { display: none; }
+    .screen-m  { display: none; }
+    .screen-ml {}
+    .screen-l  {}
 }
 
 
 /***********************************************
- * Stubborn HTML Elements
+ * Inheritance
  ***********************************************/
-a, input, select, textarea, button {
-    font-family: inherit;
+* {
+    border-color: inherit;
+    outline-color: inherit;
 }
 
 
@@ -96,27 +117,148 @@ a, input, select, textarea, button {
     height: 100%;
     width: 100%;
 }
-.fill-height {
-    height:  100%;
-}
-.fill-width {
+.fill-x {
     width:  100%;
+}
+.fill-y {
+    height:  100%;
 }
 
 
 /***********************************************
- * Boxes
+ * Padding
  ***********************************************/
-.padding-none { padding: 0px; }
-.padding-1 { padding: var(--padding-1); }
-.padding-2 { padding: var(--padding-2); }
-.padding-3 { padding: var(--padding-3); }
-.padding-4 { padding: var(--padding-4); }
-.margin-none { margin: 0px; }
-.margin-1 { margin: var(--margin-1); }
-.margin-2 { margin: var(--margin-2); }
-.margin-3 { margin: var(--margin-3); }
-.margin-4 { margin: var(--margin-4); }
+.padding-none {
+    padding: 0px;
+}
+.padding-1 {
+    padding: var(--padding-1);
+}
+.padding-top-1 {
+    padding-top: var(--padding-1);
+}
+.padding-bottom-1 {
+    padding-bottom: var(--padding-1);
+}
+.padding-left-1 {
+    padding-left: var(--padding-1);
+}
+.padding-right-1 {
+    padding-right: var(--padding-1);
+}
+.padding-2 {
+    padding: var(--padding-2);
+}
+.padding-top-2 {
+    padding-top: var(--padding-2);
+}
+.padding-bottom-2 {
+    padding-bottom: var(--padding-2);
+}
+.padding-left-2 {
+    padding-left: var(--padding-2);
+}
+.padding-right-2 {
+    padding-right: var(--padding-2);
+}
+.padding-3 {
+    padding: var(--padding-3);
+}
+.padding-top-3 {
+    padding-top: var(--padding-3);
+}
+.padding-bottom-3 {
+    padding-bottom: var(--padding-3);
+}
+.padding-left-3 {
+    padding-left: var(--padding-3);
+}
+.padding-right-3 {
+    padding-right: var(--padding-3);
+}
+.padding-4 {
+    padding: var(--padding-4);
+}
+.padding-top-4 {
+    padding-top: var(--padding-4);
+}
+.padding-bottom-4 {
+    padding-bottom: var(--padding-4);
+}
+.padding-left-4 {
+    padding-left: var(--padding-4);
+}
+.padding-right-4 {
+    padding-right: var(--padding-4);
+}
+
+
+/***********************************************
+ * Margins
+ ***********************************************/
+.margin-none {
+    margin: 0px;
+}
+.margin-1 {
+    margin: var(--margin-1);
+}
+.margin-top-1 {
+    margin-top: var(--margin-1);
+}
+.margin-bottom-1 {
+    margin-bottom: var(--margin-1);
+}
+.margin-left-1 {
+    margin-left: var(--margin-1);
+}
+.margin-right-1 {
+    margin-right: var(--margin-1);
+}
+.margin-2 {
+    margin: var(--margin-2);
+}
+.margin-top-2 {
+    margin-top: var(--margin-2);
+}
+.margin-bottom-2 {
+    margin-bottom: var(--margin-2);
+}
+.margin-left-2 {
+    margin-left: var(--margin-2);
+}
+.margin-right-2 {
+    margin-right: var(--margin-2);
+}
+.margin-3 {
+    margin: var(--margin-3);
+}
+.margin-top-3 {
+    margin-top: var(--margin-3);
+}
+.margin-bottom-3 {
+    margin-bottom: var(--margin-3);
+}
+.margin-left-3 {
+    margin-left: var(--margin-3);
+}
+.margin-right-3 {
+    margin-right: var(--margin-3);
+}
+.margin-4 {
+    margin: var(--margin-4);
+}
+.margin-top-4 {
+    margin-top: var(--margin-4);
+}
+.margin-bottom-4 {
+    margin-bottom: var(--margin-4);
+}
+.margin-left-4 {
+    margin-left: var(--margin-4);
+}
+.margin-right-4 {
+    margin-right: var(--margin-4);
+}
 
 
 /***********************************************
@@ -270,48 +412,103 @@ a, input, select, textarea, button {
 /***********************************************
  * Font
  ***********************************************/
-.font-family-1 { font-family: var(--font-family-1); }
-.font-family-2 { font-family: var(--font-family-2); }
-.font-family-3 { font-family: var(--font-family-3); }
-.font-size-1 { font-size:  var(--font-size-1); }
-.font-size-2 { font-size:  var(--font-size-2); }
-.font-size-3 { font-size:  var(--font-size-3); }
-.font-size-4 { font-size:  var(--font-size-4); }
-.font-size-5 { font-size:  var(--font-size-5); }
-.font-size-6 { font-size:  var(--font-size-6); }
-.font-size-7 { font-size:  var(--font-size-7); }
-.font-size-7 { font-size:  var(--font-size-7); }
-.font-bold { font-weight: bold; }
-.font-normal { font-weight: normal; }
-.font-light { font-weight: light; }
+.font-size-1 {
+    font-size: var(--font-size-1);
+}
+.font-size-2 {
+    font-size: var(--font-size-2);
+}
+.font-size-3 {
+    font-size: var(--font-size-3);
+}
+.font-size-4 {
+    font-size: var(--font-size-4);
+}
+.font-size-5 {
+    font-size: var(--font-size-5);
+}
+.font-size-6 {
+    font-size: var(--font-size-6);
+}
+.font-size-7 {
+    font-size: var(--font-size-7);
+}
+.font-size-8 {
+    font-size: var(--font-size-8);
+}
+.font-size-9 {
+    font-size: var(--font-size-9);
+}
+.font-family-sans {
+    font-family: var(--font-family-sans);
+}
+.font-family-serif {
+    font-family: var(--font-family-serif);
+}
+.font-family-fixed { 
+    font-family: var(--font-family-fixed);
+}
+.font-weight-bold {
+    font-weight: bold;
+}
+.font-weight-normal {
+    font-weight: normal;
+}
+.font-weight-light {
+    font-weight: light;
+}
 
 
 /***********************************************
  * Colors
  ***********************************************/
-.color-1 { color: var(--color1); }
-.color-2 { color: var(--color2); }
-.color-3 { color: var(--color3); }
-.color-4 { color: var(--color4); }
-.backcolor-1 { background-color: : var(--background1); }
-.backcolor-2 { background-color: : var(--background2); }
-.backcolor-3 { background-color: : var(--background3); }
-.backcolor-4 { background-color: : var(--background4); }
+.color-1 {
+    color: var(--color1);
+}
+.color-2 {
+    color: var(--color2);
+}
+.color-3 {
+    color: var(--color3);
+}
+.color-4 {
+    color: var(--color4);
+}
+.backcolor-1 {
+    background-color: : var(--background-1);
+}
+.backcolor-2 {
+    background-color: : var(--background-2);
+}
+.backcolor-3 {
+    background-color: : var(--background-3);
+}
+.backcolor-4 {
+    background-color: : var(--background-4);
+}
 .colors-1 {
-    color:  var(--color1);
-    background-color: var(--background1);
+    color:  var(--color-1);
+    background-color: var(--background-1);
+    border-color: var(--border-1);
+    outline-color: var(--outline-1);
 }
 .colors-2 {
-    color:  var(--color2);
-    background-color: var(--background2);
+    color:  var(--color-2);
+    background-color: var(--background-2);
+    border-color: var(--border-2);
+    outline-color: var(--outline-2);
 }
 .colors-3 {
-    color:  var(--color3);
-    background-color: var(--background3);
+    color:  var(--color-3);
+    background-color: var(--background-3);
+    border-color: var(--border-3);
+    outline-color: var(--outline-3);
 }
 .colors-4 {
-    color:  var(--color4);
-    background-color: var(--background4);
+    color:  var(--color-4);
+    background-color: var(--background-4);
+    border-color: var(--border-4);
+    outline-color: var(--outline-4);
 }
 
 
@@ -323,436 +520,80 @@ a, input, select, textarea, button {
 }
 .border-1 { 
     border-style: solid;
-    border-color: var(--border1);
     border-width: 1px;
-    border-radius: none;
-}
-.border-1-r1 { 
-    border-style: solid;
-    border-color: var(--border1);
-    border-width: 1px;
-    border-radius: var(--radius1);
-}
-.border-1-r2 { 
-    border-style: solid;
-    border-color: var(--border1);
-    border-width: 1px;
-    border-radius: var(--radius2);
-}
-.border-1-r3 { 
-    border-style: solid;
-    border-color: var(--border1);
-    border-width: 1px;
-    border-radius: var(--radius3);
+    border-radius: var(--border-radius-1);
 }
 .border-2 { 
     border-style: solid;
-    border-color: var(--border2);
     border-width: 1px;
-    border-radius: none;
-}
-.border-2-r1 { 
-    border-style: solid;
-    border-color: var(--border2);
-    border-width: 1px;
-    border-radius: var(--radius1);
-}
-.border-2-r2 { 
-    border-style: solid;
-    border-color: var(--border2);
-    border-width: 1px;
-    border-radius: var(--radius2);
-}
-.border-2-r3 { 
-    border-style: solid;
-    border-color: var(--border2);
-    border-width: 1px;
-    border-radius: var(--radius3);
+    border-radius: var(--border-radius-1);
 }
 .border-3 { 
     border-style: solid;
-    border-color: var(--border3);
     border-width: 1px;
-    border-radius: none;
-}
-.border-3-r1 { 
-    border-style: solid;
-    border-color: var(--border3);
-    border-width: 1px;
-    border-radius: var(--radius1);
-}
-.border-3-r2 { 
-    border-style: solid;
-    border-color: var(--border3);
-    border-width: 1px;
-    border-radius: var(--radius2);
-}
-.border-3-r3 { 
-    border-style: solid;
-    border-color: var(--border3);
-    border-width: 1px;
-    border-radius: var(--radius3);
+    border-radius: var(--border-radius-1);
 }
 .border-4 { 
     border-style: solid;
-    border-color: var(--border4);
     border-width: 1px;
-    border-radius: none;
+    border-radius: var(--border-radius-1);
 }
-.border-4-r1 { 
-    border-style: solid;
-    border-color: var(--border4);
-    border-width: 1px;
-    border-radius: var(--radius1);
+.border-radius-none {
+    border-radius:  0px;
 }
-.border-4-r2 { 
-    border-style: solid;
-    border-color: var(--border4);
-    border-width: 1px;
-    border-radius: var(--radius2);
+.border-radius-1 {
+    border-radius:  var(--border-radius-1);
 }
-.border-4-r3 { 
-    border-style: solid;
-    border-color: var(--border4);
-    border-width: 1px;
-    border-radius: var(--radius3);
+.border-radius-2 {
+    border-radius:  var(--border-radius-2);
 }
-
-
-/***********************************************
- * Outline
- ***********************************************/
-.outline-none {
-    outline: none;
-}
-.outline-1 { 
-    outline-style: solid;
-    outline-color: var(--outline1);
-    outline-width: 1px;
-}
-.outline-1:focus {
-    outline-style: solid;
-    outline-color: var(--outline1-focus);
-    outline-width: 3px;
-}
-.outline-2 { 
-    outline-style: solid;
-    outline-color: var(--outline2);
-    outline-width: 1px;
-}
-.outline-2:focus { 
-    outline-style: solid;
-    outline-color: var(--outline2-focus);
-    outline-width: 2px;
-}
-.outline-3 { 
-    outline-style: solid;
-    outline-color: var(--outline3);
-    outline-width: 1px;
-}
-.outline-3:focus { 
-    outline-style: solid;
-    outline-color: var(--outline3-focus);
-    outline-width: 2px;
-}
-.outline-4 { 
-    outline-style: solid;
-    outline-color: var(--outline4);
-    outline-width: 1px;
-}
-.outline-4:focus { 
-    outline-style: solid;
-    outline-color: var(--outline4-focus);
-    outline-width: 2px;
+.border-radius-3 {
+    border-radius:  var(--border-radius-3);
 }
 
 
 /***********************************************
  * Input
  ***********************************************/
-input.input-color-1 {
-    color: var(--color1);
-    background-color: var(--background1);
-    border-color: var(--border1);
+[widgetcat=input] {
+    padding-top: var(--padding-2);
+    padding-bottom: var(--padding-2);
+    border-style: solid;
+    border-width: 1px;
+    border-radius: var(--border-radius-1);
+    outline-style: solid;
     outline-color: transparent;
-}
-input.input-color-1:focus {
-    border-color: transparent;
-    outline-color: var(--outline1);
-}
-input.input-color-2 {
-    color: var(--color1);
-    background-color: var(--background1);
-    border-color: var(--border2);
-    outline-color: transparent;
-}
-input.input-color-2:focus {
-    border-color: transparent;
-    outline-color: var(--outline2);
-}
-input.input-color-3 {
-    color: var(--color1);
-    background-color: var(--background1);
-    border-color: var(--border3);
-    outline-color: transparent;
-}
-input.input-color-3:focus {
-    border-color: transparent;
-    outline-color: var(--outline3);
-}
-input.input-color-4 {
-    color: var(--color1);
-    background-color: var(--background1);
-    border-color: var(--border4);
-    outline-color: transparent;
-}
-input.input-color-4:focus {
-    border-color: transparent;
-    outline-color: var(--outline4);
-}
-input.input-1 {
-    font-size: var(--font-size-1);
-    line-height: calc(var(--font-size-1) + 6px);
-    height: calc(var(--font-size-1) + 14px);
-    border-style:  solid;
-    border-width: 1px;
-    border-radius: var(--radius1);
-}
-input.input-1:focus {
-    border-color: transparent;
-    outline-style: solid;
     outline-width: 2px;
+    color: inherit;
+    background-color: inherit;
+    font-size:  inherit;
+    font-family:  inherit;
 }
-input.input-2 {
-    font-size: var(--font-size-2);
-    line-height: calc(var(--font-size-2) + 6px);
-    height: calc(var(--font-size-2) + 14px);
-    border-style:  solid;
-    border-width: 1px;
-    border-radius: var(--radius1);
-}
-input.input-2:focus {
+[widgetcat=input]:focus {
     border-color: transparent;
-    outline-style: solid;
-    outline-width: 2px;
-}
-input.input-3 {
-    font-size: var(--font-size-3);
-    line-height: calc(var(--font-size-3) + 6px);
-    height: calc(var(--font-size-3) + 14px);
-    border-style:  solid;
-    border-width: 1px;
-    border-radius: var(--radius1);
-}
-input.input-3:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-width: 2px;
-}
-input.input-4 {
-    font-size: var(--font-size-4);
-    line-height: calc(var(--font-size-4) + 6px);
-    height: calc(var(--font-size-4) + 14px);
-    border-style:  solid;
-    border-width: 1px;
-    border-radius: var(--radius1);
-}
-input.input-4:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-width: 2px;
-}
-input.input-5 {
-    font-size: var(--font-size-5);
-    line-height: calc(var(--font-size-5) + 6px);
-    height: calc(var(--font-size-5) + 14px);
-    border-style:  solid;
-    border-width: 1px;
-    border-radius: var(--radius1);
-}
-input.input-5:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-width: 2px;
-}
-input.input-6 {
-    font-size: var(--font-size-6);
-    line-height: calc(var(--font-size-6) + 6px);
-    height: calc(var(--font-size-6) + 14px);
-    border-style:  solid;
-    border-width: 1px;
-    border-radius: var(--radius1);
-}
-input.input-6:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-width: 2px;
-}
-input.input-7 {
-    font-size: var(--font-size-7);
-    line-height: calc(var(--font-size-7) + 6px);
-    height: calc(var(--font-size-7) + 14px);
-    border-style:  solid;
-    border-width: 1px;
-    border-radius: var(--radius2);
-}
-input.input-7:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-width: 2px;
-}
-input.input-8 {
-    font-size: var(--font-size-8);
-    line-height: calc(var(--font-size-8) + 6px);
-    height: calc(var(--font-size-8) + 14px);
-    border-style:  solid;
-    border-width: 1px;
-    border-radius: var(--radius2);
-}
-input.input-8:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-width: 2px;
-}
-input.input-9 {
-    font-size: var(--font-size-9);
-    line-height: calc(var(--font-size-9) + 6px);
-    height: calc(var(--font-size-9) + 14px);
-    border-style:  solid;
-    border-width: 1px;
-    border-radius: var(--radius2);
-}
-input.input-9:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-width: 2px;
+    outline-color: inherit;
 }
 
 
 /***********************************************
  * Link
  ***********************************************/
-a.link-color-1, a.link-color-1:active, a.link-color-1:visited {
-    color: var(--link1);
-    border: none;
+[widgetcat=link], [widgetcat=link]:active, [widgetcat=link]:visited {
+    padding: var(--padding-1);
+    border-style: none;
+    border-color: transparent;
+    border-width: 1px;
+    border-radius: var(--border-radius-1);
     outline-style: solid;
     outline-color: transparent;
     outline-width: 2px;
-}
-a.link-color-1:hover {
-    color: var(--color1-hover);
-}
-a.link-color-1:focus {
-    outline-color: var(--outline1-focus);
-}
-a.link-color-2, a.link-color-2:active, a.link-color-2:visited {
-    color: var(--link2);
-    border: none;
-    outline-style: solid;
-    outline-color: transparent;
-    outline-width: 2px;
-}
-a.link-color-2:hover {
-    color: var(--color2-hover);
-}
-a.link-color-2:focus {
-    outline-color: var(--outline2-focus);
-}
-a.link-color-3, a.link-color-3:active, a.link-color-3:visited {
-    color: var(--link3);
-    border: none;
-    outline-style: solid;
-    outline-color: transparent;
-    outline-width: 2px;
-}
-a.link-color-3:hover {
-    color: var(--color3-hover);
-}
-a.link-color-3:focus {
-    outline-color: var(--outline3-focus);
-}
-a.link-color-4, a.link-color-4:active, a.link-color-4:visited {
-    color: var(--link4);
-    border: none;
-    outline-style: solid;
-    outline-color: transparent;
-    outline-width: 2px;
-}
-a.link-color-4:hover {
-    color: var(--color4-hover);
-}
-a.link-color-4:focus {
-    outline-color: var(--outline4-focus);
-}
-a.link-1 {
-    font-weight: bold;
-    font-size: var(--font-size-1);
-    line-height: calc(var(--font-size-1) + 6px);
-    height: calc(var(--font-size-1) + 14px);
+    color:  var(--link-1);
+    background-color: var(--background-1);
     text-decoration: none;
-    border-radius: var(--radius1);
 }
-a.link-2 {
-    font-weight: bold;
-    font-size: var(--font-size-2);
-    line-height: calc(var(--font-size-2) + 6px);
-    height: calc(var(--font-size-2) + 14px);
-    text-decoration: none;
-    border-radius: var(--radius1);
+[widgetcat=link]:hover {
+    color: var(--link-hover-1);
 }
-a.link-3 {
-    font-weight: bold;
-    font-size: var(--font-size-3);
-    line-height: calc(var(--font-size-3) + 6px);
-    height: calc(var(--font-size-3) + 14px);
-    text-decoration: none;
-    border-radius: var(--radius1);
-}
-a.link-4 {
-    font-weight: bold;
-    font-size: var(--font-size-4);
-    line-height: calc(var(--font-size-4) + 6px);
-    height: calc(var(--font-size-4) + 14px);
-    text-decoration: none;
-    border-radius: var(--radius1);
-}
-a.link-5 {
-    font-weight: bold;
-    padding:  3px;
-    font-size: var(--font-size-5);
-    line-height: calc(var(--font-size-5) + 6px);
-    height: calc(var(--font-size-5) + 14px);
-    text-decoration: none;
-    border-radius: var(--radius1);
-}
-a.link-6 {
-    font-weight: bold;
-    font-size: var(--font-size-6);
-    line-height: calc(var(--font-size-6) + 6px);
-    height: calc(var(--font-size-6) + 14px);
-    text-decoration: none;
-    border-radius: var(--radius1);
-}
-a.link-7 {
-    font-size: var(--font-size-7);
-    line-height: calc(var(--font-size-7) + 6px);
-    height: calc(var(--font-size-7) + 14px);
-    text-decoration: none;
-    border-radius: var(--radius2);
-}
-a.link-8 {
-    font-weight: bold;
-    font-size: var(--font-size-8);
-    line-height: calc(var(--font-size-8) + 6px);
-    height: calc(var(--font-size-8) + 14px);
-    text-decoration: none;
-    border-radius: var(--radius2);
-}
-a.link-9 {
-    font-weight: bold;
-    font-size: var(--font-size-9);
-    line-height: calc(var(--font-size-9) + 6px);
-    height: calc(var(--font-size-9) + 14px);
-    text-decoration: none;
-    border-radius: var(--radius2);
+[widgetcat=link]:focus {
+    outline-color: inherit;
 }

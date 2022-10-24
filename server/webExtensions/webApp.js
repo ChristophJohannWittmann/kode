@@ -99,6 +99,9 @@ exports = module.exports = register(class WebApp extends WebExtension {
             title: this.config.title,
             description: this.config.description,
             links: this.links,
+            fontFamily: this.config.fontFamily,
+            fontSize: this.config.fontSize,
+            colorScheme: this.config.colorScheme,
         });
 
         rsp.end(200, 'text/html', await doc.toString());

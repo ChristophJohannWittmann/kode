@@ -22,27 +22,30 @@
 
 
 /*****
- * Base value for derived input types.  There's very little functionality here.
- * Primarily, it enforces the widget hierachy and ensures that initialization is
- * consistently performed via this constructor.  There are a whole range of
- * input types that are subclasses of InputWidget.
+ * A helper is a base class whose purpose is to provide additional features to
+ * widgets as needed.  The concept is that the widget constructor or an outside
+ * call simply creates helper subclass in order to add a specific feature subset
+ * to individual widgets as required or usefule.
 *****/
-register(class InputWidget extends Widget {
-    constructor(type) {
-        super('input');
-        this.setAttribute('type', type);
-        this.setAttribute('widgetcat', 'input');
-        mkAutoFocusHelper(this);
-        mkAutoCompleteHelper(this);
+register(class Helper {  
+    constructor(widget) {
+        this.widget = widget;
+        let prototype = Reflect.getPrototypeOf(this);
 
-        this.on('html.input', message => {
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'attribute',
-                widget: this,
-                name: 'value',
-                value: message.event.target.value,
-            });
-        });
+        for (let property of Object.getOwnPropertyNames(prototype)) {
+            if (property.startsWith('helper') && typeof prototype[property] == 'function') {
+                let propertyName = `${property[6].toLowerCase()}${property.substr(7)}`;
+
+                if (propertyName.startsWith('set')) {
+                    widget[propertyName] = (...args) => {
+                        Reflect.apply(prototype[property], widget, args);
+                        return widget;
+                    }
+                }
+                else {
+                    widget[propertyName] = (...args) => Reflect.apply(prototype[property], widget, args);
+                }
+            }
+        }
     }
 });

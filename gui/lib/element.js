@@ -197,6 +197,9 @@ register(class HtmlNode {
                     inserted = node;
                 }
             }
+            else {
+                this.node.parentNode.removeChild(this.node);
+            }
         }
 
         return this;
@@ -533,9 +536,6 @@ register(function htmlElement(arg) {
  * the <COMPILER></COMPILER> HTML element.
 *****/
 (() => {
-    const compilerElement = document.createElement('COMPILER');
-    document.documentElement.appendChild(compilerElement);
-
     const requiredParents = {
         'td': ['table', 'tr'],
         'th': ['table', 'tr'],
@@ -547,6 +547,8 @@ register(function htmlElement(arg) {
 
         if (match) {
             let tagName = match[1];
+            const compilerElement = document.createElement('div');
+            document.documentElement.appendChild(compilerElement);
 
             if (tagName in requiredParents) {
                 let parent;
@@ -564,6 +566,7 @@ register(function htmlElement(arg) {
                 stub = parent.children[0];
                 parent.replaceChildren();
                 compilerElement.replaceChildren();
+                compilerElement.replace();
                 return mkHtmlElement(stub);                
             }
             else {
@@ -572,6 +575,7 @@ register(function htmlElement(arg) {
                 stub.outerHTML = outerHtml;
                 stub = compilerElement.children[0];
                 compilerElement.replaceChildren();
+                compilerElement.replace();
                 return mkHtmlElement(stub);
             }
         }

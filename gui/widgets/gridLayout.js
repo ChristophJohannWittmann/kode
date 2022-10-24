@@ -33,6 +33,7 @@ register(class WGridLayout extends Widget {
     constructor(opts) {
         super('div');
         this.cells = [];
+        this.setClassName('fill');
 
         if (Array.isArray(opts.rows)) {
             this.rows = opts.rows;
@@ -91,7 +92,7 @@ register(class WGridLayout extends Widget {
             for (let j = 0; j < this.cols.length; j++) {
                 let placeholder = mkWidget('div');
                 placeholder[WGridLayout.PlaceholderKey] = true;
-                placeholder.setClassNames('fill');
+                placeholder.setClassName('fill');
                 this.cells.push(placeholder);
                 this.append(placeholder);
             }

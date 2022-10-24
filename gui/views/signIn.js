@@ -43,32 +43,34 @@ register(class SignInView extends WGridLayout {
                 rows: ['5fr', 'auto', '8px', 'auto', '25px', 'auto', '8px', 'auto', '3fr'],
                 cols: ['80px', '250px'],
             })
-            .setClassNames('flex-h-cc colors-1 border-2-r2')
+            .setClassName('flex-h-cc')
+            .setClassName('border-1')
+            .setClassName('border-radius-2')
         );
 
         panel.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
-        panel.setAt(1, 1, mkTextInput().bindValue(credentials, 'username')
-            .setClassNames('input-4 input-color-1')
-            .setAutocomplete('username')
-            .setAutofocus());
+        panel.setAt(1, 1, mkTextInput()
+            .bindValue(credentials, 'username'))
+            .setAutoFocus(this)
+            .setAutoComplete('email');
 
         panel.setAt(3, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
-        panel.setAt(3, 1, mkPasswordInput().bindValue(credentials, 'password'))
-            .setClassNames('input-4 input-color-1')
-            .setAutocomplete('current-password');
+        panel.setAt(3, 1, mkPasswordInput()
+            .bindValue(credentials, 'password'))
+            .setAutoComplete('current-password');
 
         const signIn = panel.setAt(5, 1, mkWLink()
             .setHref('https://google.com')
             .set('Sign In')
-            .setClassNames('flex-h-sc link-4 link-color-1 padding-1',)
             .setTarget('_blank')
+            .setClassName('flex-h-sc',)
         );
 
         const forgotPassword = panel.setAt(7, 1, mkWLink()
             .setHref('https://google.com')
             .set('Forgot Password')
-            .setClassNames('flex-h-sc link-4 link-color-1 padding-1')
             .setTarget('_blank')
+            .setClassName('flex-h-sc',)
         );
     }
 });

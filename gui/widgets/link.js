@@ -48,8 +48,10 @@ register(class WLink extends Widget {
 
     constructor() {
         super('a');
+        this.setAttribute('widgetcat', 'link');
         this.setAttribute('target', '_self');
         this.setAttribute('referrerpolicy', 'no-referrer');
+        mkAutoFocusHelper(this);
     }
 
     getDownload() {
@@ -69,10 +71,7 @@ register(class WLink extends Widget {
     }
 
     setDownload() {
-        if (!this.hasAttribute('download')) {
-            this.setAttribute('download');
-        }
-
+        this.setAttribute('download');
         return this;
     }
 

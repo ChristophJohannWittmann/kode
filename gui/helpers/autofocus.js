@@ -22,27 +22,22 @@
 
 
 /*****
- * Base value for derived input types.  There's very little functionality here.
- * Primarily, it enforces the widget hierachy and ensures that initialization is
- * consistently performed via this constructor.  There are a whole range of
- * input types that are subclasses of InputWidget.
+ * Base value for derived for data-entry widgets such as InputWidget, TextArea,
+ * and Select.  It's really just an abstract class that should never be
+ * directly created and is only mean to be a base class for widgets that create
+ * and wrap this specific list of standard HTML input types.
 *****/
-register(class InputWidget extends Widget {
-    constructor(type) {
-        super('input');
-        this.setAttribute('type', type);
-        this.setAttribute('widgetcat', 'input');
-        mkAutoFocusHelper(this);
-        mkAutoCompleteHelper(this);
+register(class AutoFocusHelper extends Helper {
 
-        this.on('html.input', message => {
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'attribute',
-                widget: this,
-                name: 'value',
-                value: message.event.target.value,
-            });
-        });
+    constructor(widget) {
+        super(widget);
+    }
+
+    helperGetAutoFocus() {
+        return this.getAttribute('autofocus');
+    }
+
+    helperSetAutoFocus() {
+        this.setAttribute('autofocus');
     }
 });

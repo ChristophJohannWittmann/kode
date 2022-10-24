@@ -49,6 +49,7 @@ register(class Widget extends Emitter {
             this.htmlElement = htmlElement(tagName);
             this.htmlElement.setAttribute('id', this.selector);
             this.brand(this.htmlElement);
+            this.setAttribute('widgetclass', `${Reflect.getPrototypeOf(this).constructor.name}`);
         }
         else {
             throw new Error(`mkWidget(), expecting a tagName string: ${tagName}`);
@@ -142,20 +143,6 @@ register(class Widget extends Emitter {
         return this;
     }
 
-    clearClassNames() {
-        this.htmlElement.clearClassNames();
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'attribute',
-            widget: this,
-            name: 'className',
-            value: '',
-        });
-
-        return this;
-    }
-
     dir() {
         this.htmlElement.dir();
         return this;
@@ -167,10 +154,6 @@ register(class Widget extends Emitter {
 
     getAttribute(name) {
         return this.htmlElement.getAttribute(name);
-    }
-
-    getClassNames() {
-        return this.htmlElement.getClassNames();
     }
 
     hasAttribute(name) {
@@ -294,20 +277,6 @@ register(class Widget extends Emitter {
             widget: this,
             name: 'className',
             value: className,
-        });
-
-        return this;
-    }
-
-    setClassNames(classNames) {
-        this.htmlElement.setClassNames(classNames);
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'attribute',
-            widget: this,
-            name: 'className',
-            value: classNames,
         });
 
         return this;

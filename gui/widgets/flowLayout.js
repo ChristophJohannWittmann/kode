@@ -26,5 +26,6 @@
 register(class WFlowLayout extends Widget {
     constructor() {
         super('div');
+        this.setClassName('fill');
     }
 });
