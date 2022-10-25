@@ -22,10 +22,45 @@
 
 
 /*****
+ * Helper to manage the min and max attributes for an HTML input widget.  This
+ * attribute is relvant to scalar types such as numbers and dates, in which a
+ * number range or date range for constraining the input acceptable values for
+ * the HMTL input element.
 *****/
-register(class TextInput extends InputWidget {
-    constructor() {
-        super('text');
-        mkAutoCompleteHelper(this);
+register(class MinMaxHelper extends Helper {
+    constructor(widget) {
+        super(widget);
+    }
+
+    helperClearMax() {
+        this.setAttribute.clearAttribute('max');
+    }
+
+    helperClearMin() {
+        this.setAttribute.clearAttribute('max');
+    }
+
+    helperGetMax() {
+        if (this.hasAttribute('max')) {
+            return this.getAttribute('max');
+        }
+
+        return null;
+    }
+
+    helperGetMin() {
+        if (this.hasAttribute('min')) {
+            return this.getAttribute('min');
+        }
+
+        return null;
+    }
+
+    helperSetMax(max) {
+        this.setAttribute('max', max);
+    }
+
+    helperSetMin(min) {
+        this.setAttribute('min', min);
     }
 });

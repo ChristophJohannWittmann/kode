@@ -22,9 +22,29 @@
 
 
 /*****
+ * A pattern is very useful to employ in place of validation.  A pattern
+ * constrains the input to a limited value pattern as expressed with regular
+ * expression syntax.  The pattern is much better than a post-entry check of
+ * the enter value because we don't really need to flag a field with a
+ * message.  The builtin browser GUI just shows us that something's not right.
 *****/
-register(class SubmitInput extends InputWidget {
-    constructor() {
-        super('submit');
+register(class PatternHelper extends Helper {
+    constructor(widget) {
+        super(widget);
+    }
+
+    helperClearPattern() {
+        this.clearAttribute('pattern');
+    }
+
+    helperGetPattern() {
+        return this.getAttribute('pattern');
+    }
+
+    helperSetPattern(pattern) {
+        if (typeof pattern == 'string') {
+        }
+        else if (pattern instanceof RegExp) {
+        }
     }
 });

@@ -22,36 +22,61 @@
 
 
 /*****
- * Wraps and manages an HTML input element.  The type is specified as a ctor
- * parameter.  This is a base class for all of the supported types of input
- * types.  It's up to each of the derived types to set the widget-style attribute
- * in the subclass constructor since there are multiple widget styles for the
- * various values supported for the type attribute.
+ * Wraps and manages an HTML input element within the framework.  Subclasses
+ * have been developed for various HTML input elements with differing type=
+ * attributes.  Not all HTML inputs have been translated because exclusions
+ * don't really make sense within the client framework: hidden, reset, and
+ * submit have NOT been implemented.  This class provides most features that
+ * are required for specific input types.  One big exception is validation.
+ * The details of configuring and validating each specific type are performed
+ * by each specific subclass.
 *****/
-register(class InputWidget extends Widget {
+register(class InputWidget extends InputBaseWidget {
     constructor(type) {
         super('input');
         this.setAttribute('type', type);
+        this.widgetStyle = 'input';
+        this.setAttribute('widget-style', this.widgetStyle);
         mkAutoFocusHelper(this);
-        mkAutoCompleteHelper(this);
 
         this.on('html.input', message => {
-            //this.valueChanged();
-
-            // ************************************
-            // DEPRECATED
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'attribute',
-                widget: this,
-                name: 'value',
-                value: message.event.target.value,
-            });
-            // ************************************
+            this.valueChanged(message.event.target.value);
         });
+    }
+
+    getEnabled() {
+        return this.getAttribute('disabled') === null;
+    }
+
+    getRequired() {
+        return this.getAttribute('required') !== null;
     }
 
     getValue() {
         return this.getAttribute('value');
+    }
+
+    setEnabled(flag) {
+        if (flag) {
+            this.clearAttribute('disabled');
+            this.setAttribute('widget-style', this.widgetStyle);
+        }
+        else {
+            this.setAttribute('disabled');
+            this.setAttribute('widget-style', `${this.widgetStyle}disabled`);
+        }
+    }
+
+    setRequired(flag) {
+        if (this.flag) {
+            this.setAttribute('required');
+        }
+        else {
+            this.clearAttribute('required');
+        }
+    }
+
+    setValue(value) {
+        this.setAttribute('value', value);
     }
 });

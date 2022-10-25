@@ -99,7 +99,7 @@ class Binding {
                     }
                 }
                 else if (binding instanceof ValueBinding) {
-                    if (message.type == 'attribute' && message.name == 'value') {
+                    if (message.type == 'value') {
                         binding.onWidgetChanged(message.value);
                     }
                 }
@@ -280,13 +280,13 @@ register(class ValueBinding extends Binding {
     constructor(widget, activeData, key) {
         super(widget, activeData, key);
         this.widget.silence();
-        this.widget.setAttribute('value', this.activeData[key]);
+        this.widget.setValue(this.activeData[key]);
         this.widget.resume();
     }
 
     onActiveDataChanged() {
         this.widget.silence();
-        this.widget.setAttribute('value', this.activeData[this.key]);
+        this.widget.setValue(this.activeData[this.key]);
         this.widget.resume();
     }
 

@@ -5,6 +5,9 @@
     :root {
         color-scheme: light dark;
 
+        --bad-color:  crimson;
+        --bad-outline:  crimson;
+
         --color-1: #696969;
         --background-1: #FFFFFF;
         --border-1: #4682B4;
@@ -569,9 +572,24 @@ html {
     font-size:  inherit;
     font-family:  inherit;
 }
+[widget-style=inputdisabled] {
+    padding-top: var(--padding-2);
+    padding-bottom: var(--padding-2);
+    border-style: solid;
+    border-width: 1px;
+    border-radius: inherit;
+    font-size:  inherit;
+    font-family:  inherit;
+    opacity: .5;
+}
 [widget-style=input]:focus {
     border-color: transparent;
     outline-color: inherit;
+}
+[widget-style=input]:invalid {
+    color: var(--bad-color);
+    border-color: transparent;
+    outline-color: var(--bad-outline);
 }
 
 

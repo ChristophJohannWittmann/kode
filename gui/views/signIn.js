@@ -32,18 +32,27 @@ register(class SignInView extends WGridLayout {
             colGap: '0px',
         });
 
-        this.setClassName('colors-2');
-
-        const credentials = mkActiveData({
+        this.credentials = mkActiveData({
             forgotPassword: false,
             username: 'chris.wittmann@infosearch.online',
             password: 'a very unbreakable password',
         });
 
-        const panel = this.setAt(1, 1,
+        this.createAuthenticatePanel();
+        this.createForgotEmailPanel();
+        this.createForgotPasswordPanel();
+
+        this.authenticatePanel.getAt(3, 0).on('Widget.Empty', message => true/* console.log(message) */);
+
+        this.setClassName('colors-2');
+        this.setAt(1, 1, this.authenticatePanel);
+    }
+
+    createAuthenticatePanel() {
+        this.authenticatePanel = this.setAt(1, 1,
             mkWGridLayout({
-                rows: ['5fr', 'auto', '8px', 'auto', '25px', 'auto', '8px', 'auto', '3fr'],
-                cols: ['80px', '250px'],
+                rows: ['6fr', 'auto', '3px', 'auto', '8px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
+                cols: ['350px'],
             })
             .setClassName('flex-h-cc')
             .setClassName('colors-1')
@@ -51,32 +60,35 @@ register(class SignInView extends WGridLayout {
             .setClassName('border-radius-2')
         );
 
-        panel.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
-        panel.setAt(1, 1, mkTextInput()
-            .bindValue(credentials, 'username'))
+        this.authenticatePanel.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
+        this.authenticatePanel.setAt(3, 0, mkEmailInput()
+            .bindValue(this.credentials, 'username'))
             .setAutoFocus(this)
             .setAutoComplete('email');
 
-        panel.setAt(3, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
-        panel.setAt(3, 1, mkPasswordInput()
-            .bindValue(credentials, 'password'))
+        this.authenticatePanel.setAt(5, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
+        this.authenticatePanel.setAt(7, 0, mkPasswordInput()
+            .bindValue(this.credentials, 'password'))
             .setAutoComplete('current-password');
 
-        panel.setAt(5, 1, mkWLink()
+        this.authenticatePanel.setAt(9, 0, mkWLink()
             .setHref('https://google.com')
             .set('Sign In')
             .setTarget('_blank')
             .setClassName('flex-h-sc',)
         );
 
-        /*
-        panel.setAt(7, 1, mkWLink()
+        this.authenticatePanel.setAt(11, 0, mkWLink()
             .setHref('https://google.com')
             .set('Forgot Password')
             .setTarget('_blank')
             .setClassName('flex-h-sc',)
         );
-        */
-        panel.setAt(7, 1, mkWPlaceholder(credentials, 'username'));
+    }
+
+    createForgotEmailPanel() {
+    }
+
+    createForgotPasswordPanel() {
     }
 });

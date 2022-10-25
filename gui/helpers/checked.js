@@ -22,9 +22,25 @@
 
 
 /*****
+ * Created specifically for radio and checkboxes for managing the "checked"
+ * status of the checking input widget.  In HTML, the checked attributes is
+ * a boolean attribute, meaning that it's preseence without a value indicates
+ * that it's set to true.
 *****/
-register(class HiddenInput extends InputWidget {
-    constructor() {
-        super('hidden');
+register(class CheckedHelper extends Helper {
+    constructor(widget) {
+        super(widget);
+    }
+
+    helperClearChecked() {
+        this.clearAttribute('checked');
+    }
+
+    helperGetChecked() {
+        return this.getAttribute('checked') !== null;
+    }
+
+    helperSetChecked() {
+        this.setAttribute('checked');
     }
 });

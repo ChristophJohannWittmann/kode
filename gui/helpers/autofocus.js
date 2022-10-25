@@ -22,10 +22,11 @@
 
 
 /*****
- * Base value for derived for data-entry widgets such as InputWidget, TextArea,
- * and Select.  It's really just an abstract class that should never be
- * directly created and is only mean to be a base class for widgets that create
- * and wrap this specific list of standard HTML input types.
+ * Autofocus is a boolean attribute that specifies browser behavior when the
+ * HTML element containing the HTML input element appaers on the display.  When
+ * in autofocus mode, the input element is automatically focused with all of
+ * the relevant and expected visual consquences.  If more than one HTML input
+ * has autofocus, the behavior is not necessarily determinate.
 *****/
 register(class AutoFocusHelper extends Helper {
 

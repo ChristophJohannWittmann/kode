@@ -22,10 +22,10 @@
 
 
 /*****
- * Base value for derived for data-entry widgets such as InputWidget, TextArea,
- * and Select.  It's really just an abstract class that should never be
- * directly created and is only mean to be a base class for widgets that create
- * and wrap this specific list of standard HTML input types.
+ * Autocomplete is a non-boolean standard HTML input attribute that provides
+ * a hint to the browser regarding how to automate completion or entry of the
+ * input.  This helper only allows autocomplete values that have been or will
+ * be standardized and are recognized by most or all browsers.
 *****/
 register(class AutoCompleteHelper extends Helper {
     static autoCompleteEnum = mkStringSet(

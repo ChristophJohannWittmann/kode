@@ -23,9 +23,8 @@
 
 /*****
 *****/
-register(class TextInput extends InputWidget {
-    constructor() {
-        super('text');
-        mkAutoCompleteHelper(this);
+register(class FormWidget extends Widget {
+    constructor(opts) {
+        super('form');
     }
 });

@@ -60,16 +60,52 @@ register(class WLink extends Widget {
         return this.hasAttribute('download');
     }
 
+    getHost() {
+        return this.htmlElement.node.host;
+    }
+
+    getHostname() {
+        return this.htmlElement.node.hostname;
+    }
+
     getHref() {
         return this.getAttribute('href');
+    }
+
+    getOrigin() {
+        return this.htmlElement.node.origin;
+    }
+
+    getPassword() {
+        return this.htmlElement.node.password;
+    }
+
+    getPathname() {
+        return this.htmlElement.node.pathname;
+    }
+
+    getPort() {
+        return this.htmlElement.node.port;
+    }
+
+    getProtocol() {
+        return this.htmlElement.node.protocol;
     }
 
     getReferrerPolicy() {
         return this.getAttribute('referrerpolicy');
     }
 
+    getSearch() {
+        return this.htmlElement.node.search;
+    }
+
     getTarget() {
         return this.getAttribute('target');
+    }
+
+    getUsername() {
+        return this.htmlElement.node.username;
     }
 
     setDownload() {

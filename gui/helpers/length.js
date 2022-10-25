@@ -22,9 +22,44 @@
 
 
 /*****
+ * Helper to manage the maxlength and minlength properties on an HTML input
+ * widget.  Maxlength specifies a length cutoff for text input type inputs.
+ * This also includes tel, email, and other indeterminate text input types.
 *****/
-register(class ResetInput extends InputWidget {
-    constructor() {
-        super('reset');
+register(class LengthHelper extends Helper {
+    constructor(widget) {
+        super(widget);
+    }
+
+    helperClearMaxLength() {
+        this.setAttribute.clearAttribute('maxlenth');
+    }
+
+    helperClearMinLength() {
+        this.setAttribute.clearAttribute('maxlength');
+    }
+
+    helperGetMaxLength() {
+        if (this.hasAttribute('maxlength')) {
+            return this.getAttribute('maxlenngth');
+        }
+
+        return null;
+    }
+
+    helperGetMinLength() {
+        if (this.hasAttribute('minlength')) {
+            return this.getAttribute('minlength');
+        }
+
+        return null;
+    }
+
+    helperSetMaxLength(maxlength) {
+        this.setAttribute('maxlength', maxlength);
+    }
+
+    helperSetMinLength(minlength) {
+        this.setAttribute('minlength', minlength);
     }
 });

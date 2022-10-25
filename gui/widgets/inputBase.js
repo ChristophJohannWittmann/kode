@@ -22,37 +22,46 @@
 
 
 /*****
+ * The InputBaseWidget is conceptually an abstract class whose primary purpose
+ * is to provide an API used by the ValueBinding class to make the binding work.
+ * All input widgets must subclass InputBaseWidget in order to integrate into
+ * the client framework.  Subclasses need to override getValue() and setValue(),
+ * and validate().  Moreover, subclasses need to call valueChanged() when it has
+ * detected a chnage in value.
 *****/
 register(class InputBaseWidget extends Widget {
     constructor(tagName) {
         super(tagName);
-        this.isValid = true;
+    }
+
+    blur() {
+        this.htmlElement.node.blur();
+    }
+
+    focus() {
+        this.htmlElement.node.focus();
+    }
+
+    getEnabled() {
+        return true;
     }
 
     getValue() {
         return null;
     }
 
-    validate() {
-        return true;
+    setEnabled(flag) {
     }
 
-    valueChanged() {
+    setValue(value) {
+    }
+
+    valueChanged(value) {
         this.send({
             messageName: 'Widget.Changed',
             type: 'value',
             widget: this,
-            value: this.getValue(),
+            value: value,
         });
-
-        if (this.validate() != this.isValid) {
-            this.isValid = !this.isValid;
-
-            this.send({
-                messageName: 'Widget.Validity',
-                widget: this,
-                validity: this.isValid,
-            });
-        }
     }
 });
