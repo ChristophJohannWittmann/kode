@@ -32,6 +32,8 @@ register(class SignInView extends WGridLayout {
             colGap: '0px',
         });
 
+        this.setClassName('colors-2');
+
         const credentials = mkActiveData({
             forgotPassword: false,
             username: 'chris.wittmann@infosearch.online',
@@ -44,6 +46,7 @@ register(class SignInView extends WGridLayout {
                 cols: ['80px', '250px'],
             })
             .setClassName('flex-h-cc')
+            .setClassName('colors-1')
             .setClassName('border-1')
             .setClassName('border-radius-2')
         );
@@ -59,18 +62,21 @@ register(class SignInView extends WGridLayout {
             .bindValue(credentials, 'password'))
             .setAutoComplete('current-password');
 
-        const signIn = panel.setAt(5, 1, mkWLink()
+        panel.setAt(5, 1, mkWLink()
             .setHref('https://google.com')
             .set('Sign In')
             .setTarget('_blank')
             .setClassName('flex-h-sc',)
         );
 
-        const forgotPassword = panel.setAt(7, 1, mkWLink()
+        /*
+        panel.setAt(7, 1, mkWLink()
             .setHref('https://google.com')
             .set('Forgot Password')
             .setTarget('_blank')
             .setClassName('flex-h-sc',)
         );
+        */
+        panel.setAt(7, 1, mkWPlaceholder(credentials, 'username'));
     }
 });

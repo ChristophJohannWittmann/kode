@@ -33,7 +33,7 @@ register(class WStack extends Widget {
     constructor() {
         super('div');
         this.stack = [];
-        this.setClassName('fill');
+        this.setAttribute('widget-style', 'view');
     }
 
     contains(widget) {

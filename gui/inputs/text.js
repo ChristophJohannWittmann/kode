@@ -26,5 +26,6 @@
 register(class TextInput extends InputWidget {
     constructor() {
         super('text');
+        this.setAttribute('widget-style', 'input');
     }
 });

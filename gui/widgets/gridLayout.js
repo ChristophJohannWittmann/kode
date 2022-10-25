@@ -33,7 +33,7 @@ register(class WGridLayout extends Widget {
     constructor(opts) {
         super('div');
         this.cells = [];
-        this.setClassName('fill');
+        this.setAttribute('widget-style', 'view');
 
         if (Array.isArray(opts.rows)) {
             this.rows = opts.rows;

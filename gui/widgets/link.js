@@ -22,10 +22,11 @@
 
 
 /*****
- * A link widget is a wrapper for an HTML anchor or "a" element.  It's one of
- * primary functional elements of an HTML document.  In essence, we like to make
- * links look either like (a) traidtional/old-style browser links, link-1 style
- * or (2) likea push button, link-2.  By default, link-1 style is chosen.
+ * The HTML "a" element or anchor is called a link with the widgetverse.  The
+ * widget-style is set to "link", which provides the UI look and feel needed for
+ * links.  Links can also be used like buttons by not setting the href, although
+ * that is discouraged since input type="button" is a stanard widget thats geared
+ * up for use as a button.
 *****/
 register(class WLink extends Widget {
     static referrerPolicyEnum = mkStringSet(
@@ -48,9 +49,10 @@ register(class WLink extends Widget {
 
     constructor() {
         super('a');
-        this.setAttribute('widgetcat', 'link');
-        this.setAttribute('target', '_self');
+        this.setAttribute('widget-style', 'link');
         this.setAttribute('referrerpolicy', 'no-referrer');
+        this.setAttribute('href', '#');
+        this.setAttribute('onclick', 'return false');
         mkAutoFocusHelper(this);
     }
 
@@ -76,7 +78,15 @@ register(class WLink extends Widget {
     }
 
     setHref(value) {
-        this.setAttribute('href', value);
+        if (value) {
+            this.setAttribute('href', value);
+            this.clearAttribute('onclick');
+        }
+        else {
+            this.setAttribute('href', '#');
+            this.setAttribute('onclick', 'return false');
+        }
+
         return this;
     }
 

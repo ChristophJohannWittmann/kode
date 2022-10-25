@@ -23,9 +23,36 @@
 
 /*****
 *****/
-register(class WFlowLayout extends Widget {
-    constructor() {
-        super('div');
-        this.setClassName('fill');
+register(class InputBaseWidget extends Widget {
+    constructor(tagName) {
+        super(tagName);
+        this.isValid = true;
+    }
+
+    getValue() {
+        return null;
+    }
+
+    validate() {
+        return true;
+    }
+
+    valueChanged() {
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'value',
+            widget: this,
+            value: this.getValue(),
+        });
+
+        if (this.validate() != this.isValid) {
+            this.isValid = !this.isValid;
+
+            this.send({
+                messageName: 'Widget.Validity',
+                widget: this,
+                validity: this.isValid,
+            });
+        }
     }
 });

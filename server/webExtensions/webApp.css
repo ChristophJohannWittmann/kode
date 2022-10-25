@@ -6,14 +6,14 @@
         color-scheme: light dark;
 
         --color-1: #696969;
-        --background-1: #F5F5F5;
-        --border-1: #778899;
-        --link-1: #5F9EA0;
+        --background-1: #FFFFFF;
+        --border-1: #4682B4;
+        --link-1: #6B8E23;
         --link-hover-1: #FF8C00;
-        --outline-1: #778899;
+        --outline-1: #4682B4;
 
         --color-2: #696969;
-        --background-2: #F5F5F5;
+        --background-2: #F0F8FF;
         --border-2: #778899;
         --link-2: #5F9EA0;
         --link-hover-2: #FF8C00;
@@ -555,12 +555,12 @@ html {
 /***********************************************
  * Input
  ***********************************************/
-[widgetcat=input] {
+[widget-style=input] {
     padding-top: var(--padding-2);
     padding-bottom: var(--padding-2);
     border-style: solid;
     border-width: 1px;
-    border-radius: var(--border-radius-1);
+    border-radius: inherit;
     outline-style: solid;
     outline-color: transparent;
     outline-width: 2px;
@@ -569,7 +569,7 @@ html {
     font-size:  inherit;
     font-family:  inherit;
 }
-[widgetcat=input]:focus {
+[widget-style=input]:focus {
     border-color: transparent;
     outline-color: inherit;
 }
@@ -578,12 +578,12 @@ html {
 /***********************************************
  * Link
  ***********************************************/
-[widgetcat=link], [widgetcat=link]:active, [widgetcat=link]:visited {
+[widget-style=link], [widgetcat=link]:active, [widgetcat=link]:visited {
     padding: var(--padding-1);
     border-style: none;
     border-color: transparent;
     border-width: 1px;
-    border-radius: var(--border-radius-1);
+    border-radius: inherit;
     outline-style: solid;
     outline-color: transparent;
     outline-width: 2px;
@@ -591,9 +591,20 @@ html {
     background-color: var(--background-1);
     text-decoration: none;
 }
-[widgetcat=link]:hover {
+[widget-style=link]:hover {
     color: var(--link-hover-1);
 }
-[widgetcat=link]:focus {
+[widget-style=link]:focus {
     outline-color: inherit;
+}
+
+
+/***********************************************
+ * View
+ ***********************************************/
+[widget-style=view] {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
 }

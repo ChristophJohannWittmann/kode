@@ -22,20 +22,24 @@
 
 
 /*****
- * Base value for derived input types.  There's very little functionality here.
- * Primarily, it enforces the widget hierachy and ensures that initialization is
- * consistently performed via this constructor.  There are a whole range of
- * input types that are subclasses of InputWidget.
+ * Wraps and manages an HTML input element.  The type is specified as a ctor
+ * parameter.  This is a base class for all of the supported types of input
+ * types.  It's up to each of the derived types to set the widget-style attribute
+ * in the subclass constructor since there are multiple widget styles for the
+ * various values supported for the type attribute.
 *****/
 register(class InputWidget extends Widget {
     constructor(type) {
         super('input');
         this.setAttribute('type', type);
-        this.setAttribute('widgetcat', 'input');
         mkAutoFocusHelper(this);
         mkAutoCompleteHelper(this);
 
         this.on('html.input', message => {
+            //this.valueChanged();
+
+            // ************************************
+            // DEPRECATED
             this.send({
                 messageName: 'Widget.Changed',
                 type: 'attribute',
@@ -43,6 +47,11 @@ register(class InputWidget extends Widget {
                 name: 'value',
                 value: message.event.target.value,
             });
+            // ************************************
         });
+    }
+
+    getValue() {
+        return this.getAttribute('value');
     }
 });
