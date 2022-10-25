@@ -32,6 +32,7 @@
 register(class InputBaseWidget extends Widget {
     constructor(tagName) {
         super(tagName);
+        mkAutoFocusHelper(this);
     }
 
     blur() {

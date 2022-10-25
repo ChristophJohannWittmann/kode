@@ -23,9 +23,8 @@
 
 /*****
 *****/
-register(class TelInput extends InputWidget {
+register(class SubmitInput extends InputWidget {
     constructor() {
-        super('tel');
-        mkPlaceholderHelper(this);
+        super('submit');
     }
 });

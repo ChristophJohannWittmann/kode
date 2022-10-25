@@ -37,7 +37,6 @@ register(class InputWidget extends InputBaseWidget {
         this.setAttribute('type', type);
         this.widgetStyle = 'input';
         this.setAttribute('widget-style', this.widgetStyle);
-        mkAutoFocusHelper(this);
 
         this.on('html.input', message => {
             this.valueChanged(message.event.target.value);

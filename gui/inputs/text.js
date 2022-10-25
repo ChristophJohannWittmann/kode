@@ -27,5 +27,8 @@ register(class TextInput extends InputWidget {
     constructor() {
         super('text');
         mkAutoCompleteHelper(this);
+        mkLengthHelper(this);
+        mkPatternHelper(this);
+        mkPlaceholderHelper(this);
     }
 });

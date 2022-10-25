@@ -27,4 +27,16 @@ register(class ImageInput extends InputWidget {
     constructor() {
         super('image');
     }
+
+    getAlt() {
+    }
+
+    getSrc() {
+    }
+
+    setAlt(text) {
+    }
+
+    setSrc(source) {
+    }
 });

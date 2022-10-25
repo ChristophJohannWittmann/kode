@@ -26,5 +26,6 @@
 register(class Search extends InputWidget {
     constructor() {
         super('search');
+        mkPlaceholderHelper(this);
     }
 });

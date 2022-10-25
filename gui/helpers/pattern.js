@@ -43,8 +43,14 @@ register(class PatternHelper extends Helper {
 
     helperSetPattern(pattern) {
         if (typeof pattern == 'string') {
+            this.setAttribute('pattern', pattern);
         }
         else if (pattern instanceof RegExp) {
+            let regex = pattern.toString().substr(1);
+            let lastIndex = regex.lastIndexOf('/');
+            regex = regex.substr(0, lastIndex);
+            regex = regex.replace(/\\\\/mg, '\\');
+            this.setAttribute('pattern', regex);
         }
     }
 });

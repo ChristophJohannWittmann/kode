@@ -408,17 +408,6 @@ register(class HtmlElement extends HtmlNode {
         return this.node.outerHTML;
     }
 
-    owningWidget() {
-        if (Widget.widgetKey in this.node) {
-            return this.node[Widget.widgetKey];
-        }
-        else {
-            let widget = mkWidget('DUMMY');
-            widget.htmlElement = this;
-            return widget;
-        }
-    }
-
     prepend(...args) {
         if (this.node.childNodes.length) {
             let beforeChild = this.node.firstChild;
@@ -500,6 +489,17 @@ register(class HtmlElement extends HtmlNode {
     toggleClassName(className) {
         this.node.classList.toggle();
         return this;
+    }
+
+    widget() {
+        if (Widget.widgetKey in this.node) {
+            return this.node[Widget.widgetKey];
+        }
+        else {
+            let widget = mkWidget('DUMMY');
+            widget.htmlElement = this;
+            return widget;
+        }
     }
 });
 

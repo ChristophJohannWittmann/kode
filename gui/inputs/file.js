@@ -27,4 +27,10 @@ register(class FileInput extends InputWidget {
     constructor() {
         super('file');
     }
+
+    getCapture() {
+    }
+
+    setCapture(flag) {
+    }
 });

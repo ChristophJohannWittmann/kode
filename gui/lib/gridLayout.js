@@ -22,18 +22,19 @@
 
 
 /*****
- * The grid layout widget employs the use of the more recent display: grid;
- * Once constructed, the geometry is static and there are no features to change
- * this.  To dynamically change the grid geometry, you need to construct and
- * initialize a replacement grid layout widget and place it on the document.
+ * A layout is a gui object that's a helper for managing child widget layouts.
+ * The concept is that the layout is constructed with two arguments: (1) the
+ * widget that will be managed, and (2) options or specifications for the layout
+ * helper object.  Then, as child widgets are added to the GUI, the manager is
+ * used to add the objects to ensure they HTML surface is structured / formatted
+ * as provided by the layout manager.  Note that the GridLayout is responsible
+ * for configuring the style rule for the individual widget based on the given
+ * row and column options during construction.
 *****/
-register(class WGridLayout extends Widget {
-    static PlaceholderKey = Symbol('placeholder');
-
-    constructor(opts) {
-        super('div');
+register(class GridLayout {  
+    constructor(widget, opts) {
+        this.widget = widget;
         this.cells = [];
-        this.setAttribute('widget-style', 'view');
 
         if (Array.isArray(opts.rows)) {
             this.rows = opts.rows;
@@ -79,7 +80,7 @@ register(class WGridLayout extends Widget {
             this.colGap = '0px';
         }
 
-        this.styleRule.set({
+        this.widget.styleRule.set({
             display: 'grid',
             gridTemplateRows: `${this.rows.join(' ')}`,
             gridTemplateColumns: `${this.cols.join(' ')}`,
@@ -91,15 +92,12 @@ register(class WGridLayout extends Widget {
         for (let i = 0; i < this.rows.length; i++) {
             for (let j = 0; j < this.cols.length; j++) {
                 let placeholder = mkWidget('div');
-                placeholder[WGridLayout.PlaceholderKey] = true;
+                placeholder[GridLayout.PlaceholderKey] = true;
                 placeholder.setClassName('fill');
                 this.cells.push(placeholder);
-                this.append(placeholder);
+                this.widget.append(placeholder);
             }
         }
-    }
-
-    bind() {
     }
 
     calcIndex(rowIndex, colIndex) {
@@ -111,7 +109,7 @@ register(class WGridLayout extends Widget {
             for (let j = 0; j < this.cols.length; j++) {
                 let index = this.calcIndex(i, j);
 
-                if (!this.cells[index][WGridLayout.PlaceholderKey]) {
+                if (!this.cells[index][GridLayout.PlaceholderKey]) {
                     let placeholder = mkWidget('div');
                     placeholder[WGridLayout.PlaceholderKey] = true;
                     this.cells[index].replace(placeholder);
@@ -126,7 +124,7 @@ register(class WGridLayout extends Widget {
     clearAt(rowIndex, colIndex) {
         let index = this.calcIndex(rowIndex, colIndex);
 
-        if (!this.cells[index][WGridLayout.PlaceholderKey]) {
+        if (!this.cells[index][GridLayout.PlaceholderKey]) {
             let placeholder = mkWidget('div');
             placeholder[WGridLayout.PlaceholderKey] = true;
             this.cells[index].replace(placeholder);
@@ -138,22 +136,19 @@ register(class WGridLayout extends Widget {
 
     clearColGap() {
         this.colGap = '0px';
-        this.styleRule.settings().colGap = this.colGap;
+        this.widget.styleRule.settings().colGap = this.colGap;
         return this;
     }
 
     clearRowGap() {
         this.colGap = '0px';
-        this.styleRule.settings().colGap = this.colGap;
+        this.widget.styleRule.settings().colGap = this.colGap;
         return this;
     }
 
     getAt(rowIndex, colIndex) {
         let index = this.calcIndex(rowIndex, colIndex);
         return this.cells[index];
-    }
-
-    set(innerHtml) {
     }
 
     setAt(rowIndex, colIndex, widget) {
@@ -174,7 +169,7 @@ register(class WGridLayout extends Widget {
             this.colGap = '0px';
         }
 
-        this.styleRule.settings().colGap = this.colGap;
+        this.widget.styleRule.settings().colGap = this.colGap;
         return this;
     }
 
@@ -189,7 +184,7 @@ register(class WGridLayout extends Widget {
             this.rowGap = '0px';
         }
 
-        this.styleRule.settings().rowGap = this.rowGap;
+        this.widget.styleRule.settings().rowGap = this.rowGap;
         return this;
     }
 

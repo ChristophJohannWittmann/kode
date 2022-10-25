@@ -23,9 +23,13 @@
 
 /*****
 *****/
-register(class SignInView extends WGridLayout {
+register(class SignInView extends Widget {
     constructor() {
-        super({
+        super('div');
+        this.setAttribute('widget-style', 'view');
+        this.setClassName('colors-2');
+
+        this.layout = mkGridLayout(this, {
             rows: ['auto', '350px', 'auto'],
             rowGap: '0px',
             cols: ['auto', '400px', 'auto'],
@@ -38,47 +42,44 @@ register(class SignInView extends WGridLayout {
             password: 'a very unbreakable password',
         });
 
-        this.createAuthenticatePanel();
-        this.createForgotEmailPanel();
-        this.createForgotPasswordPanel();
+        this.createChallengeForm();
+        this.createForgotEmailForm();
+        this.createForgotPasswordForm();
 
-        this.authenticatePanel.getAt(3, 0).on('Widget.Empty', message => true/* console.log(message) */);
-
-        this.setClassName('colors-2');
-        this.setAt(1, 1, this.authenticatePanel);
+        this.layout.setAt(1, 1, this.challengeForm);
     }
 
-    createAuthenticatePanel() {
-        this.authenticatePanel = this.setAt(1, 1,
-            mkWGridLayout({
-                rows: ['6fr', 'auto', '3px', 'auto', '8px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
-                cols: ['350px'],
-            })
-            .setClassName('flex-h-cc')
-            .setClassName('colors-1')
-            .setClassName('border-1')
-            .setClassName('border-radius-2')
-        );
+    createChallengeForm() {
+        this.challengeForm = mkFormWidget()
+        .setClassName('flex-h-cc')
+        .setClassName('colors-1')
+        .setClassName('border-1')
+        .setClassName('border-radius-2');
 
-        this.authenticatePanel.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
-        this.authenticatePanel.setAt(3, 0, mkEmailInput()
-            .bindValue(this.credentials, 'username'))
-            .setAutoFocus(this)
-            .setAutoComplete('email');
+        this.challengeLayout = mkGridLayout(this.challengeForm, {
+            rows: ['6fr', 'auto', '3px', 'auto', '8px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
+            cols: ['350px'],
+        });
 
-        this.authenticatePanel.setAt(5, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
-        this.authenticatePanel.setAt(7, 0, mkPasswordInput()
-            .bindValue(this.credentials, 'password'))
-            .setAutoComplete('current-password');
+        this.challengeLayout.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
+        this.challengeLayout.setAt(3, 0, mkEmailInput()
+        .bindValue(this.credentials, 'username'))
+        .setAutoFocus(this)
+        .setAutoComplete('email');
 
-        this.authenticatePanel.setAt(9, 0, mkWLink()
+        this.challengeLayout.setAt(5, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
+        this.challengeLayout.setAt(7, 0, mkPasswordInput()
+        .bindValue(this.credentials, 'password'))
+        .setAutoComplete('current-password');
+
+        this.challengeLayout.setAt(9, 0, mkWLink()
             .setHref('https://google.com')
             .set('Sign In')
             .setTarget('_blank')
             .setClassName('flex-h-sc',)
         );
 
-        this.authenticatePanel.setAt(11, 0, mkWLink()
+        this.challengeLayout.setAt(11, 0, mkWLink()
             .setHref('https://google.com')
             .set('Forgot Password')
             .setTarget('_blank')
@@ -86,9 +87,9 @@ register(class SignInView extends WGridLayout {
         );
     }
 
-    createForgotEmailPanel() {
+    createForgotEmailForm() {
     }
 
-    createForgotPasswordPanel() {
+    createForgotPasswordForm() {
     }
 });

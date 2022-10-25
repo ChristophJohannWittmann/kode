@@ -26,5 +26,6 @@
 register(class NumberInput extends InputWidget {
     constructor() {
         super('number');
+        mkPlaceholderHelper(this);
     }
 });

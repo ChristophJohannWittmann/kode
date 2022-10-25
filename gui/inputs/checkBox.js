@@ -26,5 +26,6 @@
 register(class CheckboxInput extends InputWidget {
     constructor() {
         super('checkbox');
+        mkCheckedHelper(this);
     }
 });

@@ -27,5 +27,7 @@ register(class PasswordInput extends InputWidget {
     constructor() {
         super('password');
         mkAutoCompleteHelper(this);
+        mkLengthHelper(this);
+        mkPlaceholderHelper(this);
     }
 });

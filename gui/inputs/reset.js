@@ -23,9 +23,8 @@
 
 /*****
 *****/
-register(class TelInput extends InputWidget {
+register(class ResetInput extends InputWidget {
     constructor() {
-        super('tel');
-        mkPlaceholderHelper(this);
+        super('reset');
     }
 });

@@ -96,7 +96,7 @@ register(class Widget extends Emitter {
             let child = children[index];
 
             if (child instanceof HtmlElement) {
-                return child.owningWidget();
+                return child.widget();
             }
         }
 
@@ -217,7 +217,7 @@ register(class Widget extends Emitter {
             this.send({
                 messageName: 'Widget.Changed',
                 type: 'innerHTML',
-                widget: parent.owningWidget(),
+                widget: parent.widget(),
             });
         }
 
@@ -234,7 +234,7 @@ register(class Widget extends Emitter {
             this.send({
                 messageName: 'Widget.Changed',
                 type: 'innerHTML',
-                widget: parent.owningWidget(),
+                widget: parent.widget(),
             });
         }
 

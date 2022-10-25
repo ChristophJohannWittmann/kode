@@ -22,12 +22,25 @@
 
 
 /*****
+ * Created specifically for radio and checkboxes for managing the "checked"
+ * status of the checking input widget.  In HTML, the checked attributes is
+ * a boolean attribute, meaning that it's preseence without a value indicates
+ * that it's set to true.
 *****/
-register(class WGridAreaLayout extends Widget {
-    static placeholderKey = Symbol('placeholder');
+register(class PlaceholderHelper extends Helper {
+    constructor(widget) {
+        super(widget);
+    }
 
-    constructor(opts) {
-        super('div');
-        this.setAttribute('widget-style', 'view');
+    helperClearPlaceholder() {
+        this.clearAttribute('placeholder');
+    }
+
+    helperGetPlaceholder() {
+        return this.getAttribute('placeholder');
+    }
+
+    helperSetPlaceholder(value) {
+        this.setAttribute('placeholder', value);
     }
 });

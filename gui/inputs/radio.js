@@ -26,5 +26,6 @@
 register(class RadioInput extends InputWidget {
     constructor() {
         super('radio');
+        mkCheckedHelper(this);
     }
 });

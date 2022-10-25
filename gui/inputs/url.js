@@ -26,5 +26,6 @@
 register(class UrlInput extends InputWidget {
     constructor() {
         super('url');
+        mkPlaceholderHelper(this);
     }
 });

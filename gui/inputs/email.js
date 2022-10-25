@@ -27,5 +27,7 @@ register(class EmailInput extends InputWidget {
     constructor() {
         super('email');
         mkAutoCompleteHelper(this);
+        mkLengthHelper(this);
+        mkPlaceholderHelper(this);
     }
 });
