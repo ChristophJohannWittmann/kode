@@ -64,7 +64,7 @@ register(class SignInView extends Widget {
         this.challengeLayout.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
         this.challengeLayout.setAt(3, 0, mkEmailInput()
         .bindValue(this.credentials, 'username'))
-        .setAutoFocus(this)
+        .setAutoFocus()
         .setAutoComplete('email');
 
         this.challengeLayout.setAt(5, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));

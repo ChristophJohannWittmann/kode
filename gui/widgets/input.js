@@ -33,49 +33,158 @@
 *****/
 register(class InputWidget extends InputBaseWidget {
     constructor(type) {
-        super('input');
+        super('input', 'input');
         this.setAttribute('type', type);
-        this.widgetStyle = 'input';
-        this.setAttribute('widget-style', this.widgetStyle);
 
         this.on('html.input', message => {
             this.valueChanged(message.event.target.value);
         });
     }
 
-    getEnabled() {
-        return this.getAttribute('disabled') === null;
-    }
-
-    getRequired() {
-        return this.getAttribute('required') !== null;
-    }
-
     getValue() {
         return this.getAttribute('value');
     }
 
-    setEnabled(flag) {
-        if (flag) {
-            this.clearAttribute('disabled');
-            this.setAttribute('widget-style', this.widgetStyle);
-        }
-        else {
-            this.setAttribute('disabled');
-            this.setAttribute('widget-style', `${this.widgetStyle}disabled`);
-        }
-    }
-
-    setRequired(flag) {
-        if (this.flag) {
-            this.setAttribute('required');
-        }
-        else {
-            this.clearAttribute('required');
-        }
-    }
-
     setValue(value) {
         this.setAttribute('value', value);
+    }
+});
+
+
+/*****
+ * A list of Widget subclass declarations for supported HTML input types.  They
+ * can be constructed directly using the mkTypeInpud() notaiton, and will wrap
+ * the underlying HTML element that's consktructed.
+*****/
+register(class ButtonInput extends InputWidget {
+    constructor() {
+        super('button');
+    }
+});
+
+register(class CheckboxInput extends InputWidget {
+    constructor() {
+        super('checkbox');
+    }
+});
+
+register(class ColorInput extends InputWidget {
+    constructor() {
+        super('color');
+    }
+});
+
+register(class DateInput extends InputWidget {
+    constructor() {
+        super('date');
+    }
+});
+
+register(class DateTimeInput extends InputWidget {
+    constructor() {
+        super('datetime-local');
+    }
+});
+
+register(class EmailInput extends InputWidget {
+    constructor() {
+        super('email');
+    }
+});
+
+register(class FileInput extends InputWidget {
+    constructor() {
+        super('file');
+    }
+});
+
+register(class HiddenInput extends InputWidget {
+    constructor() {
+        super('hidden');
+    }
+});
+
+register(class ImageInput extends InputWidget {
+    constructor() {
+        super('image');
+    }
+});
+
+register(class MonthInput extends InputWidget {
+    constructor() {
+        super('month');
+    }
+});
+
+register(class NumberInput extends InputWidget {
+    constructor() {
+        super('number');
+    }
+});
+
+register(class PasswordInput extends InputWidget {
+    constructor() {
+        super('password');
+    }
+});
+
+register(class RadioInput extends InputWidget {
+    constructor() {
+        super('radio');
+    }
+});
+
+register(class RangeInput extends InputWidget {
+    constructor() {
+        super('range');
+    }
+});
+
+register(class ResetInput extends InputWidget {
+    constructor() {
+        super('reset');
+    }
+});
+
+register(class Search extends InputWidget {
+    constructor() {
+        super('search');
+    }
+});
+
+register(class SubmitInput extends InputWidget {
+    constructor() {
+        super('submit');
+    }
+});
+
+register(class TelInput extends InputWidget {
+    constructor() {
+        super('tel');
+    }
+});
+
+register(class TextInput extends InputWidget {
+    constructor() {
+        super('text');
+    }
+});
+
+register(class TimeInput extends InputWidget {
+    constructor() {
+        super('time');
+    }
+});
+
+register(class UrlInput extends InputWidget {
+    constructor() {
+        super('url');
+        mkPlaceholderHelper(this);
+    }
+});
+
+register(class WeekInput extends InputWidget {
+    constructor() {
+        super('week');
     }
 });

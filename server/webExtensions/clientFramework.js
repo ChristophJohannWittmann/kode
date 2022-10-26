@@ -32,11 +32,7 @@ const clientFrameworkPaths = [
     'framework/core.js',
     'framework',
     'gui/lib',
-    'gui/helpers',
-    'gui/widgets/inputBase.js',
-    'gui/widgets/input.js',
     'gui/widgets',
-    'gui/inputs',
     'gui/views',
 ];
 

@@ -22,6 +22,9 @@
 
 
 /*****
+ * Wraps the standard HTML form element.  The main reason for creating this class
+ * is to generate forms that utilize the extensive validation features that now
+ * come built into web browsers.
 *****/
 register(class FormWidget extends Widget {
     constructor(opts) {

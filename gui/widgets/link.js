@@ -49,11 +49,40 @@ register(class WLink extends Widget {
 
     constructor() {
         super('a');
-        this.setAttribute('widget-style', 'link');
-        this.setAttribute('referrerpolicy', 'no-referrer');
+        this.setAttribute('widget-style', 'link')
+        .setAttribute('referrerpolicy', 'no-referrer')
+        .setAttribute('href', '#')
+        .setAttribute('onclick', 'return false');
+    }
+
+    clearAutoFocus() {
+        this.clearAttribute('autofocus');
+        return this;
+    }
+
+    clearDownload() {
+        this.clearAttribute('download');
+        return this;
+    }
+
+    clearHref() {
         this.setAttribute('href', '#');
         this.setAttribute('onclick', 'return false');
-        mkAutoFocusHelper(this);
+        return this;
+    }
+
+    clearReferrerPolicy() {
+        this.clearAttribute('referrerpolicy');
+        return this;
+    }
+
+    clearTarget() {
+        this.clearAttribute('target');
+        return this;
+    }
+
+    getAutoFocus() {
+        return this.hasAttribute('autofocus');
     }
 
     getDownload() {
@@ -108,37 +137,29 @@ register(class WLink extends Widget {
         return this.htmlElement.node.username;
     }
 
+    setAutoFocus() {
+        this.setAttribute('autofocus');
+        return this;
+    }
+
     setDownload() {
         this.setAttribute('download');
         return this;
     }
 
     setHref(value) {
-        if (value) {
-            this.setAttribute('href', value);
-            this.clearAttribute('onclick');
-        }
-        else {
-            this.setAttribute('href', '#');
-            this.setAttribute('onclick', 'return false');
-        }
-
+        this.setAttribute('href', value);
+        this.clearAttribute('onclick');
         return this;
     }
 
     setReferrerPolicy(value) {
-        if (WLink.referrerPolicyEnum.has(value)) {
-            this.setAttribute('target', value);
-        }
-
+        this.setAttribute('target', value);
         return this;
     }
 
     setTarget(value) {
-        if (WLink.targetEnum.has(value)) {
-            this.setAttribute('target', value);
-        }
-
+        this.setAttribute('target', value);
         return this;
     }
 });
