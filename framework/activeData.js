@@ -117,15 +117,13 @@ register(class ActiveData {
                         nakedActiveData.push(value);
                     }
                 }
+                else if (typeof value == 'object') {
+                    ActiveData.suppress = true;
+                    nakedActiveData[key] = new ActiveData(value, nakedActiveData, key);
+                    ActiveData.suppress = false;
+                }
                 else {
-                    if (typeof value == 'object') {
-                        ActiveData.suppress = true;
-                        nakedActiveData[key] = new ActiveData(value, nakedActiveData, key);
-                        ActiveData.suppress = false;
-                    }
-                    else {
-                        nakedActiveData[key] = value;
-                    }
+                    nakedActiveData[key] = value;
                 }
  
                 if (!ActiveData.suppress) {

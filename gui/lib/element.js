@@ -482,6 +482,10 @@ register(class HtmlElement extends HtmlNode {
         return this;
     }
 
+    [Symbol.iterator]() {
+        return this.children()[Symbol.iterator]();
+    }
+
     tagName() {
         return this.node.tagName.toLowerCase();
     }

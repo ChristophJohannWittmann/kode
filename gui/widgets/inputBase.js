@@ -30,63 +30,6 @@
  * detected a chnage in value.
 *****/
 register(class InputBaseWidget extends Widget {
-    static autoCompleteEnum = mkStringSet(
-        'additional-name',
-        'address-level1',
-        'address-level2',
-        'address-level3',
-        'address-level4',
-        'address-line1',
-        'address-line2',
-        'address-line3',
-        'bday',
-        'bday-day',
-        'bday-month',
-        'bday-year',
-        'cc-additional-name',
-        'cc-csc',
-        'cc-exp',
-        'cc-exp-month',
-        'cc-exp-year',
-        'cc-family-name',
-        'cc-given-name',
-        'cc-name',
-        'cc-number',
-        'cc-type',
-        'country',
-        'country-name',
-        'current-password',
-        'email',
-        'family-name',
-        'given-name',
-        'honorific-prefix',
-        'honorific-suffix',
-        'impp',
-        'language',
-        'name',
-        'new-password',
-        'nickname',
-        'off',
-        'on',
-        'one-time-code',
-        'organization',
-        'organization-title',
-        'photo',
-        'postal-code',
-        'sex',
-        'street-address',
-        'tel',
-        'tel-area-code',
-        'tel-country-code',
-        'tel-extension',
-        'tel-local',
-        'tel-national',
-        'transaction-amount',
-        'transaction-currency',
-        'url',
-        'username',
-    );
-
     constructor(tagName, widgetStyle) {
         super(tagName);
         this.widgetStyle = widgetStyle;
@@ -98,59 +41,9 @@ register(class InputBaseWidget extends Widget {
         return this;
     }
 
-    clearAutoComplete() {
-        this.clearAttribute('autocomplete');
-        return this;
-    }
-
-    clearAutoFocus() {
-        this.clearAttribute('autofocus');
-        return this;
-    }
-
-    clearChecked() {
-        this.clearAttribute('checked');
-        return this;
-    }
-
-    clearEnabled() {
-        this.setAttribute('disabled');
-        this.setAttribute('widget-style', `${this.widgetStyle}disabled`);
-        return this;
-    }
-
-    clearMax() {
-        this.clearAttribute('max');
-        return this;
-    }
-
-    clearMaxLength() {
-        this.clearAttribute('maxlength');
-        return this;
-    }
-
-    clearMin() {
-        this.clearAttribute('min');
-        return this;
-    }
-
-    clearMinLength() {
-        this.clearAttribute('minlength');
-        return this;
-    }
-
-    clearPattern() {
-        this.clearAttribute('pattern');
-        return this;
-    }
-
-    clearPlaceholder() {
-        this.clearAttribute('placeholder');
-        return this;
-    }
-
-    clearRequired() {
-        this.clearAttribute('required');
+    clearDisabled() {
+        this.clearAttribute('disabled');
+        this.setAttribute('widget-style', this.widgetStyle);
         return this;
     }
 
@@ -159,120 +52,17 @@ register(class InputBaseWidget extends Widget {
         return this;
     }
 
-    getAutoComplete() {
-        return this.getAttribute('autocomplete');
-    }
-
-    getAutoFocus() {
-        return !this.hasAttribute('autofocus');
-    }
-
-    getChecked() {
-        return !this.hasAttribute('checked');
-    }
-
-    getEnabled() {
-        return !this.hasAttribute('disabled');
-    }
-
-    getMax() {
-        return !this.getAttribute('max');
-    }
-
-    getMaxLength() {
-        return !this.getAttribute('maxlength');
-    }
-
-    getMin() {
-        return !this.getAttribute('min');
-    }
-
-    getMinLength() {
-        return !this.getAttribute('minlength');
-    }
-
-    getPattern() {
-        return !this.getAttribute('pattern');
-    }
-
-    getPlaceholder() {
-        return !this.getAttribute('placeholder');
-    }
-
-    getRequired() {
-        return this.hasAttribute('required');
+    getDisabled() {
+        return this.hasAttribute('disabled');
     }
 
     getValue() {
         return null;
     }
 
-    setAutoComplete(value) {
-        if (InputBaseWidget.autoCompleteEnum.has(value)) {
-            this.setAttribute('autocomplete', value);
-        }
-
-        return this;
-    }
-
-    setAutoFocus() {
-        this.setAttribute('autofocus');
-        return this;
-    }
-
-    setChecked() {
-        this.setAttribute('checked');
-        return this;
-    }
-
-    setEnabled() {
-        this.clearAttribute('disabled');
-        this.setAttribute('widget-style', this.widgetStyle);
-        return this;
-    }
-
-    setMax(value) {
-        this.setAttribute('max', value);
-        return this;
-    }
-
-    setMaxLength(value) {
-        this.setAttribute('maxlength', value);
-        return this;
-    }
-
-    setMin(value) {
-        this.setAttribute('min', value);
-        return this;
-    }
-
-    setMinLength(value) {
-        this.setAttribute('minlength', value);
-        return this;
-    }
-
-    setPattern(value) {
-        if (typeof value == 'string') {
-            this.setAttribute('pattern', value);
-        }
-        else if (pattern instanceof RegExp) {
-            let regex = value.toString().substr(1);
-            let lastIndex = regex.lastIndexOf('/');
-            regex = regex.substr(0, lastIndex);
-            regex = regex.replace(/\\\\/mg, '\\');
-            this.setAttribute('pattern', regex);
-        }
-
-        return this;
-    }
-
-    setPlaceholder(value) {
-        this.setAttribute('placeholder', value);
-        return this;
-    }
-
-    setRequired(flag) {
-        this.setAttribute('required');
+    setDisabled() {
+        this.setAttribute('disabled');
+        this.setAttribute('widget-style', `${this.widgetStyle}disabled`);
         return this;
     }
 

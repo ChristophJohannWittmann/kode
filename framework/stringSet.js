@@ -44,11 +44,16 @@ register(class StringSet extends Jsonable {
             if (arg instanceof Set) {
                 array = array.concat(Object.keys(arg.values));
             }
-            else if (typeof arg == 'object') {
-                array = array.concat(Object.keys(arg));
+            else if (Array.isArray(arg)) {
+                array = array.concat(arg);
             }
-            else {
-                array.push(arg.toString());
+            else if (typeof arg == 'object') {
+                if (arg !== null) {
+                    array = array.concat(Object.keys(arg));
+                }
+            }
+            else if (typeof arg == 'string') {
+                array.push(arg);
             }
         }
   
@@ -97,6 +102,10 @@ register(class StringSet extends Jsonable {
     }
   
     hasAll(...args) {
+        if (!args.length) {
+            return false;
+        }
+        
         let array = StringSet.arrayify(...args);
   
         for (let i = 0; i < array.length; i++) {
@@ -109,6 +118,10 @@ register(class StringSet extends Jsonable {
     }
   
     hasAny(...args) {
+        if (!args.length) {
+            return false;
+        }
+
         let array = StringSet.arrayify(...args);
   
         for (let i = 0; i < array.length; i++) {

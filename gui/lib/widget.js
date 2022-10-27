@@ -103,6 +103,10 @@ register(class Widget extends Emitter {
         return null;
     }
 
+    children() {
+        return this.htmlElement.children();
+    }
+
     clear() {
         this.htmlElement.clear();
 
@@ -157,7 +161,7 @@ register(class Widget extends Emitter {
     }
 
     hasAttribute(name) {
-        return this.htmlElement.hasAttribute();
+        return this.htmlElement.hasAttribute(name);
     }
 
     hasClassName(className) {
@@ -193,6 +197,14 @@ register(class Widget extends Emitter {
         }
         else {
             super.once(messageName, handler, filter);
+        }
+    }
+
+    parent() {
+        let parent = this.htmlElement.parent();
+
+        if (parent) {
+            return parent.widget();    
         }
     }
 

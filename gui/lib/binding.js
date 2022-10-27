@@ -39,26 +39,26 @@ class Binding {
     constructor(widget, activeData, key) {
         this.id = Binding.nextId++;
         this.widget = widget;
-        this.activeData = activeData;
-        this.key = key;
-        this.activeDataId = ActiveData.id(this.activeData);
+
+        if (ActiveData.isActiveData(activeData[key])) {
+            this.activeData = activeData[key];
+            this.key = '';
+            this.activeDataId = ActiveData.id(this.activeData);
+        }
+        else {
+            this.activeData = activeData;
+            this.key = key;
+            this.activeDataId = ActiveData.id(this.activeData);
+        }
 
         if (!(this.widget.id in Binding.byWidget)) {
-            let handler = message => {
-                Binding.onWidgetChanged(message);
-            };
-
-            Binding.byWidget[this.widget.id] = { '#HANDLER': handler };
-            this.widget.on('Widget.Changed', handler);
+            Binding.byWidget[this.widget.id] = {};
+            this.widget.on('Widget.Changed', Binding.onWidgetChanged);
         }
 
         if (!(this.activeDataId in Binding.byActiveData)) {
-            let handler = message => {
-                Binding.onActiveDataChanged(message);
-            };
-
-            Binding.byActiveData[this.activeDataId] = { '#HANDLER': handler };
-            ActiveData.on(this.activeData, handler);
+            Binding.byActiveData[this.activeDataId] = {};
+            ActiveData.on(this.activeData, Binding.onActiveDataChanged);
         }
 
         if (!ActiveData.has(this.activeData, key)) {
@@ -75,7 +75,7 @@ class Binding {
 
             for (let binding of Object.values(Binding.byActiveData[adId])) {
                 if (binding instanceof Binding) {
-                    if (binding.key == message.key) {
+                    if (!binding.key || binding.key == message.key) {
                         if (!Binding.silentWidget || binding.widget.id != Binding.silentWidget.id) {
                             binding.onActiveDataChanged();
                         }
@@ -87,21 +87,19 @@ class Binding {
 
     static onWidgetChanged(message) {
         for (let binding of Object.values(Binding.byWidget[message.widget.id])) {
-            if (binding instanceof Binding) {
-                if (binding instanceof AttributeBinding) {
-                    if (message.type == 'attribute' && message.name == binding.attributeName) {
-                        binding.onWidgetChanged(message.value);
-                    }
+            if (binding instanceof AttributeBinding) {
+                if (message.type == 'attribute' && message.name == binding.attributeName) {
+                    binding.onWidgetChanged(message.value);
                 }
-                else if (binding instanceof InnerHtmlBinding) {
-                    if (message.type == 'innerHTML') {
-                        binding.onWidgetChanged(message.widget.get());
-                    }
+            }
+            else if (binding instanceof InnerHtmlBinding) {
+                if (message.type == 'innerHTML') {
+                    binding.onWidgetChanged(message.widget.get());
                 }
-                else if (binding instanceof ValueBinding) {
-                    if (message.type == 'value') {
-                        binding.onWidgetChanged(message.value);
-                    }
+            }
+            else if (binding instanceof ValueBinding) {
+                if (message.type == 'value') {
+                    binding.onWidgetChanged(message.value);
                 }
             }
         }
@@ -133,13 +131,13 @@ class Binding {
             }
         }
 
-        if (Object.keys(Binding.byActiveData[adId]).length == 1) {
-            ActiveData.off(activeData, Binding.byActiveData[adId]['#HANDLER']);
+        if (!Object.keys(Binding.byActiveData[adId])) {
+            ActiveData.off(activeData, Binding.onActiveDataChanged);
             delete Binding.byActiveData[adId];
         }
 
-        if (Object.keys(Binding.byWidget[widget.id]).length == 1) {
-            widget.off('Widget.Changed', Binding.byWidget[widget.id]['#HANDLER']);
+        if (!Object.keys(Binding.byWidget[widget.id])) {
+            widget.off('Widget.Changed', Binding.onWidgetChanged);
             delete Binding.byWidget[widget.id];
         }
     }
@@ -163,14 +161,14 @@ class Binding {
             }
         }
 
-        if (Object.keys(Binding.byActiveData[adId]).length == 1) {
-            ActiveData.off(activeData, Binding.byActiveData[adId]['#HANDLER']);
+        if (!Object.keys(Binding.byActiveData[adId]).length) {
+            ActiveData.off(activeData, Binding.onActiveDataChanged);
             delete Binding.byActiveData[adId];
         }
 
         for (let id of Object.keys(widgets)) {
-            if (Object.keys(Binding.byWidget[id]).length == 1) {
-                widgets[id].off('Widget.Changed', Binding.byWidget[id]['#HANDLER']);
+            if (!Object.keys(Binding.byWidget[id]).length) {
+                widgets[id].off('Widget.Changed', Binding.onWidgetChanged);
                 delete Binding.byWidget[id];
             }
         }
@@ -194,14 +192,14 @@ class Binding {
             }
         }
 
-        if (Object.keys(Binding.byWidget[widget.id]).length == 1) {
-            widget.off('Widget.Changed', Binding.byWidget[widget.id]['#HANDLER']);
+        if (!Object.keys(Binding.byWidget[widget.id]).length) {
+            widget.off('Widget.Changed', Binding.onActiveDataChanged);
             delete Binding.byWidget[widget.id];
         }
 
         for (let adId of Object.keys(activeDaten)) {
-            if (Object.keys(Binding.byActiveData[adId]).length == 1) {
-                ActiveData.off(activeDaten[adId], Binding.byActiveData[adId]['#HANDLER']);
+            if (!Object.keys(Binding.byActiveData[adId]).length) {
+                ActiveData.off(activeDaten[adId], Binding.onWidgetChanged);
                 delete Binding.byActiveData[adId];
             }
         }
@@ -280,13 +278,26 @@ register(class ValueBinding extends Binding {
     constructor(widget, activeData, key) {
         super(widget, activeData, key);
         this.widget.silence();
-        this.widget.setValue(this.activeData[key]);
+
+        if (this.key) {
+            this.widget.setValue(this.activeData[this.key]);
+        }
+        else {
+            this.widget.setValue(ActiveData.value(this.activeData));
+        }
+
         this.widget.resume();
     }
 
     onActiveDataChanged() {
         this.widget.silence();
-        this.widget.setValue(this.activeData[this.key]);
+        if (this.key) {
+            this.widget.setValue(this.activeData[this.key]);
+        }
+        else {
+            this.widget.setValue(ActiveData.value(this.activeData));
+        }
+
         this.widget.resume();
     }
 
