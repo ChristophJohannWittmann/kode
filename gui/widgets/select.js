@@ -33,7 +33,7 @@ register(class WSelect extends InputBaseWidget {
     constructor() {
         super('select', 'select');
 
-        this.on('html.change', message => {
+        this.on('html.input', message => {
             this.valueChanged(this.getValue());
         });
     }

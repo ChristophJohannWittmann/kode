@@ -22,12 +22,20 @@
 
 
 /*****
- * Wraps the standard HTML form element.  The main reason for creating this class
- * is to generate forms that utilize the extensive validation features that now
- * come built into web browsers.
 *****/
-register(class WForm extends Widget {
-    constructor(opts) {
-        super('form');
+singleton(class EssayEntryFilter extends EntryFilter {
+    constructor() {
+        super();
+
+        for (let filterPoint of [
+            [ true, '****', 'Tab' ],
+        ]) {
+            this.registerFilterPoint(filterPoint);
+        }
+    }
+
+    onTabDown() {
+        console.log(this.event);
+        this.event.preventDefault();
     }
 });

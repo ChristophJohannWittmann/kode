@@ -27,7 +27,6 @@ register(class SignInView extends Widget {
     constructor() {
         super('div');
         this.setAttribute('widget-style', 'view');
-        this.setClassName('colors-2');
 
         this.layout = mkGridLayout(this, {
             rows: ['auto', '350px', 'auto'],
@@ -41,21 +40,30 @@ register(class SignInView extends Widget {
             username: 'chris.wittmann@infosearch.online',
             password: 'a very unbreakable password',
             dropdown: 'no',
+            essay: 'hello essay',
         });
 
         this.createChallengeForm();
         this.createForgotEmailForm();
         this.createForgotPasswordForm();
 
-        this.layout.setAt(1, 1, this.challengeForm);
+        //this.layout.setAt(1, 1, this.challengeForm);
+
+        this.layout.setAt(1, 1,
+            mkWText(EssayEntryFilter)
+            .set('hello text area')
+            .setClassName('fill')
+            //.setClassName('font-size-4')
+            //.setClassName('border-radius-2')
+            //.disable()
+            .setAttribute('autofocus')
+            .bind(this.credentials, 'essay')
+        );
     }
 
     createChallengeForm() {
-        this.challengeForm = mkFormWidget()
-        .setClassName('flex-h-cc')
-        .setClassName('colors-1')
-        .setClassName('border-1')
-        .setClassName('border-radius-2');
+        this.challengeForm = mkWForm()
+        .setClasses('flex-h-cc colors-2 border-style-solid border-width-1 border-radius-2');
 
         this.challengeLayout = mkGridLayout(this.challengeForm, {
             rows: ['6fr', 'auto', '3px', 'auto', '8px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
@@ -73,16 +81,12 @@ register(class SignInView extends Widget {
         .bindValue(this.credentials, 'password'))
         .setAttribute('autocomplete', 'current-password');
 
-        /*
         this.challengeLayout.setAt(9, 0, mkWLink()
             .setHref('https://google.com')
             .set('Sign In')
             .setTarget('_blank')
             .setClassName('flex-h-sc')
         );
-        */
-
-        //this.challengeLayout.setAt(9, 0, mkWPlaceholder(this.credentials, 'dropdown'));
 
         /*
         this.challengeLayout.setAt(11, 0, mkWLink()
@@ -110,9 +114,6 @@ register(class SignInView extends Widget {
             .setAttribute('required')
             .bindValue(this.credentials, 'dropdown')
         );
-
-        //console.log(this.challengeLayout.getAt(11, 0).getGroupArray());
-        setTimeout(() => this.credentials.dropdown = 'veleicht', 2000);
     }
 
     createForgotEmailForm() {

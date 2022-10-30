@@ -133,6 +133,20 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    clearClasses() {
+        this.setAttribute('class', '');
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'attribute',
+            widget: this,
+            name: 'classes',
+            value: '',
+        });
+
+        return this;
+    }
+
     clearClassName(className) {
         this.htmlElement.clearClassName(className);
 
@@ -275,6 +289,20 @@ register(class Widget extends Emitter {
             widget: this,
             name: name,
             value: value,
+        });
+
+        return this;
+    }
+
+    setClasses(classes) {
+        this.setAttribute('class', classes);
+
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'attribute',
+            widget: this,
+            name: 'classes',
+            value: classes,
         });
 
         return this;

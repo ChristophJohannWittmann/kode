@@ -41,7 +41,13 @@ register(class InputBaseWidget extends Widget {
         return this;
     }
 
-    clearDisabled() {
+    disable() {
+        this.setAttribute('disabled');
+        this.setAttribute('widget-style', `${this.widgetStyle}disabled`);
+        return this;
+    }
+
+    enable() {
         this.clearAttribute('disabled');
         this.setAttribute('widget-style', this.widgetStyle);
         return this;
@@ -52,18 +58,12 @@ register(class InputBaseWidget extends Widget {
         return this;
     }
 
-    getDisabled() {
-        return this.hasAttribute('disabled');
-    }
-
     getValue() {
         return null;
     }
 
-    setDisabled() {
-        this.setAttribute('disabled');
-        this.setAttribute('widget-style', `${this.widgetStyle}disabled`);
-        return this;
+    isDisabled() {
+        return this.hasAttribute('disabled');
     }
 
     setValue(value) {

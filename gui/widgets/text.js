@@ -24,19 +24,81 @@
 /*****
 *****/
 register(class WText extends InputBaseWidget {
-    constructor() {
-        super('textarea', 'text');
+    constructor(entryFilter) {
+        super('textarea', 'textarea');
+        this.setEntryFilter(entryFilter);
 
-        this.on('html.change', message => {
-            //this.valueChanged(message.event.target.value);
+        this.on('html.input', message => {
+            this.valueChanged(message.event.target.value);
+        });
+
+        doc.on('keydown', message => {
+            if (this.entryFilter) {
+                this.entryFilter.handle(event, this);
+            }
+        });
+
+        doc.on('keyup', message => {
+            if (this.entryFilter) {
+                this.entryFilter.handle(event, this);
+            }
         });
     }
 
-    getValue() {
-        //return this.getAttribute('value');
+    clearEntryFilter() {
+        this.entryFilter = null;
+        return this;
     }
 
-    setValue(value) {
-        //this.setAttribute('value', value);
+    clearSelection() {
+        return this;
+    }
+
+    getCaretCol() {
+    }
+
+    getCaretIndex() {
+    }
+
+    getCaretRow() {
+    }
+
+    getCol(index) {
+    }
+
+    getRow(index) {
+    }
+
+    getEntryFilter() {
+        return this.entryFilter;
+    }
+
+    getSelection() {
+    }
+
+    hasEntryFilter() {
+        return this.entryFilter !== null;
+    }
+
+    hasSelection() {
+        return this.htmlElement.node.selectionStart != this.htmlElement.node.selectionEnd;
+    }
+
+    insertAt(index) {
+    }
+
+    insertAfterCaret() {
+    }
+
+    insertBeforeCaret() {
+    }
+
+    setEntryFilter(entryFilter) {
+        this.entryFilter = entryFilter ? entryFilter : null;
+        return this;
+    }
+
+    setSelection(selection) {
+        return this;
     }
 });
