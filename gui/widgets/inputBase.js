@@ -34,6 +34,7 @@ register(class InputBaseWidget extends Widget {
         super(tagName);
         this.widgetStyle = widgetStyle;
         this.setAttribute('widget-style', this.widgetStyle);
+        this.bindingType = 'value';
     }
 
     blur() {

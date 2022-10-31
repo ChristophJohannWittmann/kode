@@ -23,10 +23,10 @@
 
 /*****
 *****/
-register(class SignInView extends Widget {
+register(class SignIn extends Widget {
     constructor() {
         super('div');
-        this.setAttribute('widget-style', 'view');
+        this.setAttribute('widget-style', 'panel');
 
         this.layout = mkGridLayout(this, {
             rows: ['auto', '350px', 'auto'],
@@ -40,8 +40,16 @@ register(class SignInView extends Widget {
             username: 'chris.wittmann@infosearch.online',
             password: 'a very unbreakable password',
             dropdown: 'no',
-            essay: 'hello essay',
+            essay: 'hello essay.  tab here\nbefore this stuff here.',
         });
+
+        /*
+        ActiveData.on(this.credentials, message => {
+            if (message.action == 'change') {
+                console.log(message.newValue);
+            }
+        });
+        */
 
         this.createChallengeForm();
         this.createForgotEmailForm();
@@ -53,9 +61,6 @@ register(class SignInView extends Widget {
             mkWText(EssayEntryFilter)
             .set('hello text area')
             .setClassName('fill')
-            //.setClassName('font-size-4')
-            //.setClassName('border-radius-2')
-            //.disable()
             .setAttribute('autofocus')
             .bind(this.credentials, 'essay')
         );
@@ -72,13 +77,13 @@ register(class SignInView extends Widget {
 
         this.challengeLayout.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
         this.challengeLayout.setAt(3, 0, mkEmailInput()
-        .bindValue(this.credentials, 'username'))
+        .bind(this.credentials, 'username'))
         .setAttribute('autofocus')
         .setAttribute('autocomplete', 'email');
 
         this.challengeLayout.setAt(5, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
         this.challengeLayout.setAt(7, 0, mkPasswordInput()
-        .bindValue(this.credentials, 'password'))
+        .bind(this.credentials, 'password'))
         .setAttribute('autocomplete', 'current-password');
 
         this.challengeLayout.setAt(9, 0, mkWLink()
@@ -112,7 +117,7 @@ register(class SignInView extends Widget {
             ])
             .setAttribute('multiple')
             .setAttribute('required')
-            .bindValue(this.credentials, 'dropdown')
+            .bind(this.credentials, 'dropdown')
         );
     }
 

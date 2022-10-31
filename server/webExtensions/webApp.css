@@ -828,14 +828,3 @@ html {
     padding: 0px;
     margin: 0px;
 }
-
-
-/***********************************************
- * View
- ***********************************************/
-[widget-style=view] {
-    height: 100%;
-    width: 100%;
-    padding: 0px;
-    margin: 0px;
-}

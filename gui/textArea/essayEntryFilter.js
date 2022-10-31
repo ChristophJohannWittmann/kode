@@ -22,20 +22,31 @@
 
 
 /*****
+ * A very small and simple entry filter for text areas and editors that modify
+ * the text area's behavior and make it simpler to use.  One nice feature is
+ * the ability to use the widget's tabSize setting to insert spaces into the
+ * document that will automatically align to a fixed column number based on the
+ * tabSize.
 *****/
 singleton(class EssayEntryFilter extends EntryFilter {
     constructor() {
         super();
 
         for (let filterPoint of [
+            [ true, '****', 'Enter' ],
             [ true, '****', 'Tab' ],
         ]) {
             this.registerFilterPoint(filterPoint);
         }
     }
 
-    onTabDown() {
-        console.log(this.event);
-        this.event.preventDefault();
+    onEnterDown(action) {
+        action.widget.insertAfterCaret('\n');
+    }
+
+    onTabDown(action) {
+        let index = action.widget.getCaretIndex();
+        let spaces = action.widget.getTabOut(' ');
+        action.widget.insertAfterCaret(spaces);
     }
 });

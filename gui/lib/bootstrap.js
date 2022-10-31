@@ -36,6 +36,6 @@ register(async function bootstrap() {
     window.appStack = mkWStack();
     doc.body().append(appStack);
     // -- test code
-    appStack.push(mkSignInView());
+    appStack.push(mkSignIn());
     // --
 });

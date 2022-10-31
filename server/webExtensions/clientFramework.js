@@ -36,8 +36,8 @@ const clientFrameworkPaths = [
     'gui/textArea/entryFilter.js',
     'gui/textArea',
     'gui/widgets',
-    'gui/views',
-    'gui/Editors',
+    'gui/editors',
+    'gui/panels',
 ];
 
 

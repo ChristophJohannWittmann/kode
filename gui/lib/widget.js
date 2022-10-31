@@ -44,6 +44,7 @@ register(class Widget extends Emitter {
         this.widgetId = Widget.nextId++;
         this.selector = `widget${this.widgetId}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
+        this.bindingType = 'innerHtml';
 
         if (typeof tagName == 'string') {
             this.htmlElement = htmlElement(tagName);
@@ -68,18 +69,17 @@ register(class Widget extends Emitter {
         return this;
     }
 
-    bind(activeData, key) {
-        mkInnerHtmlBinding(this, activeData, key);
-        return this;
-    }
+    bind(activeData, key, attributeName) {
+        if (attributeName) {
+            mkAttributeBinding(this, activeData, key, attributeName);
+        }
+        else if (this.bindingType == 'innerHtml') {
+            mkAttributeBinding(this, activeData, key);
+        }
+        else if (this.bindingType == 'value') {
+            mkValueBinding(this, activeData, key);
+        }
 
-    bindAttribute(activeData, key, attributeName) {
-        mkAttributeBinding(this, activeData, key, attributeName);
-        return this;
-    }
-
-    bindValue(activeData, key) {
-        mkValueBinding(this, activeData, key);
         return this;
     }
 

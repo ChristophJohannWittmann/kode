@@ -36,27 +36,37 @@ register(class EntryFilter {
     }
 
     handle(event, widget) {
-        this.event = event;
-        this.widget = widget;
-
         let key = [
-            this.event.type == 'keydown' ? 'd' : 'u',
-            this.event.altKey ? 'S' : 'U',
-            this.event.ctrlKey ? 'S' : 'U',
-            this.event.metaKey ? 'S' : 'U',
-            this.event.shiftKey ? 'S' : 'U',
-            this.event.key
+            event.type == 'keydown' ? 'd' : 'u',
+            event.altKey ? 'S' : 'U',
+            event.ctrlKey ? 'S' : 'U',
+            event.metaKey ? 'S' : 'U',
+            event.shiftKey ? 'S' : 'U',
+            event.key
 
         ].join('');
 
         let handler = this.handlers[key];
 
         if (handler) {
-            Reflect.apply(handler, this, []);
-        }
+            Reflect.apply(handler, this, [{
+                    event: event,
+                    widget: widget,
+                }]
+            );
 
-        this.event = null;
-        this.widget = null;
+            switch (widget.bindingType) {
+                case 'innerHtml':
+                    widget.valueChanged(widget.get());
+                    break;
+
+                case 'value':
+                    widget.valueChanged(widget.getValue());
+                    break;
+            }
+
+            event.preventDefault();
+        }
     }
 
     registerFilterPoint(filterPoint) {
