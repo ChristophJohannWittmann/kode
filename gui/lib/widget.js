@@ -74,7 +74,7 @@ register(class Widget extends Emitter {
             mkAttributeBinding(this, activeData, key, attributeName);
         }
         else if (this.bindingType == 'innerHtml') {
-            mkAttributeBinding(this, activeData, key);
+            mkInnerHtmlBinding(this, activeData, key);
         }
         else if (this.bindingType == 'value') {
             mkValueBinding(this, activeData, key);
@@ -194,6 +194,8 @@ register(class Widget extends Emitter {
         else {
             super.off(messageName, handler);
         }
+
+        return this;
     }
 
     on(messageName, handler, filter) {
@@ -203,6 +205,8 @@ register(class Widget extends Emitter {
         else {
             super.on(messageName, handler, filter);
         }
+
+        return this;
     }
 
     once(messageName, handler, filter) {
@@ -212,6 +216,8 @@ register(class Widget extends Emitter {
         else {
             super.once(messageName, handler, filter);
         }
+
+        return this;
     }
 
     parent() {

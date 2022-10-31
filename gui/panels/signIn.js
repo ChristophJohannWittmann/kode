@@ -23,10 +23,9 @@
 
 /*****
 *****/
-register(class SignIn extends Widget {
+register(class SignIn extends PanelWidget {
     constructor() {
         super('div');
-        this.setAttribute('widget-style', 'panel');
 
         this.layout = mkGridLayout(this, {
             rows: ['auto', '350px', 'auto'],
@@ -41,6 +40,7 @@ register(class SignIn extends Widget {
             password: 'a very unbreakable password',
             dropdown: 'no',
             essay: 'hello essay.  tab here\nbefore this stuff here.',
+            buttonText: 'Hello Button',
         });
 
         /*
@@ -55,8 +55,8 @@ register(class SignIn extends Widget {
         this.createForgotEmailForm();
         this.createForgotPasswordForm();
 
-        //this.layout.setAt(1, 1, this.challengeForm);
-
+        this.layout.setAt(1, 1, this.challengeForm);
+        /*
         this.layout.setAt(1, 1,
             mkWText(EssayEntryFilter)
             .set('hello text area')
@@ -64,6 +64,7 @@ register(class SignIn extends Widget {
             .setAttribute('autofocus')
             .bind(this.credentials, 'essay')
         );
+        */
     }
 
     createChallengeForm() {
@@ -103,6 +104,7 @@ register(class SignIn extends Widget {
         this.challengeLayout.setAt(11, 0, mkWPlaceholder(this.credentials, 'username'));
         */
 
+        /*
         this.challengeLayout.setAt(11, 0,
             mkWSelect()
             .setOptions([
@@ -118,6 +120,13 @@ register(class SignIn extends Widget {
             .setAttribute('multiple')
             .setAttribute('required')
             .bind(this.credentials, 'dropdown')
+        );
+        */
+
+        this.challengeLayout.setAt(11, 0,
+            mkWTextButton('Some Odd Button')
+            //.on('html.click', message => console.log(message))
+            //.bind(this.credentials, 'buttonText')
         );
     }
 

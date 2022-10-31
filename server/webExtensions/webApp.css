@@ -11,19 +11,22 @@
 
         --color-1: #696969;
         --background-color-1: #FFFFFF;
+        --background-button-1: #F5F5F5;
         --border-color-1: #4682B4;
         --outline-color-1: #4682B4;
         --link-color-1: #6B8E23;
-        --hover-color-1: #F4C84C;
+        --hover-color-1: #C0C0C0;
 
         --color-2: #5C5D5E;
         --background-color-2: #EEF3F9;
+        --background-button-2: #F5F5F5;
         --border-color-2: #7EB9E4;
         --outline-color-2: #7EB9E4;
-        --hover-color-2: #F4C84C;
+        --hover-color-2: #C0C0C0;
 
         --color-3: #696969;
         --background-color-3: #FFFFFF;
+        --background-button-3: #F5F5F5;
         --border-color-3: #4682B4;
         --outline-color-3: #4682B4;
         --link-color-3: #6B8E23;
@@ -31,6 +34,7 @@
 
         --color-4: #696969;
         --background-color-4: #FFFFFF;
+        --background-button-4: #F5F5F5;
         --border-color-4: #4682B4;
         --outline-color-4: #4682B4;
         --link-color-4: #6B8E23;
@@ -171,15 +175,15 @@ html {
     --hover-color: var(--hover-color-1);
 }
 .color-hover-2 {
-    --hover-color: : var(--hover-color-1);
+    --hover-color: : var(--hover-color-2);
     --hover-color: var(--hover-color-2);
 }
 .color-hover-3 {
-    --hover-color: : var(--hover-color-1);
+    --hover-color: : var(--hover-color-3);
     --hover-color: var(--hover-color-3);
 }
 .color-hover-4 {
-    --hover-color: : var(--hover-color-1);
+    --hover-color: : var(--hover-color-4);
     --hover-color: var(--hover-color-4);
 }
 .colors-1 {
@@ -279,17 +283,27 @@ html {
 
 
 /***********************************************
- * Fill
+ * Height Width
  ***********************************************/
 .fill {
     height: 100%;
     width: 100%;
 }
 .fill-x {
-    width:  100%;
+    width: 100%;
 }
 .fill-y {
-    height:  100%;
+    height: 100%;
+}
+.auto {
+    height: auto;
+    width: auto;
+}
+.auto-x {
+    width: auto;
+}
+.auto-y {
+    height: auto;
 }
 
 
@@ -484,33 +498,43 @@ html {
  ***********************************************/
 .outline-style-none {
     outline-style: none;
+    --outline-style: none;
 }
 .outline-style-dotted {
     outline-style: dotted;
+    --outline-style: dotted;
 }
 .outline-style-dashed {
     outline-style: dashed;
+    --outline-style: dashed;
 }
 .outline-style-solid {
     outline-style: solid;
+    --outline-style: solid;
 }
 .outline-width-0 {
     outline-width: 0px;
+    --outline-width: 0px;
 }
 .outline-width-1 {
     outline-width: 1px;
+    --outline-width: 1px;
 }
 .outline-width-2 {
     outline-width: 2px;
+    --outline-width: 2px;
 }
 .outline-width-3 {
     outline-width: 3px;
+    --outline-width: 3px;
 }
 .outline-width-4 {
     outline-width: 4px;
+    --outline-width: 4px;
 }
 .outline-width-5 {
     outline-width: 5px;
+    --outline-width: 5px;
 }
 
 
@@ -704,7 +728,6 @@ html {
     border-style: solid;
     border-width: 1px;
     border-radius: var(--border-radius-1);
-    outline-style: hidden;
     outline-width: var(--outline-width-2);
     outline-color: inherit;
     background-color: var(--background-color-1);
@@ -744,7 +767,6 @@ html {
     border-style: solid;
     border-width: 1px;
     border-radius: var(--border-radius-1);
-    outline-style: hidden;
     outline-width: var(--outline-width-2);
     outline-color: inherit;
     background-color: var(--background-color-1);
@@ -776,6 +798,49 @@ html {
 
 
 /***********************************************
+ * Button Tag
+ ***********************************************/
+[widget-style=buttontag] {
+    display: inline-block;
+    font-family: inherit;
+    font-size: inherit;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: var(--border-radius-1);
+    outline-width: var(--outline-width-1);
+    outline-color: inherit;
+    background-color: var(--background-button-1);
+    text-decoration: none;
+    user-select: none;
+}
+[widget-style=buttontagdisabled] {
+    padding-top: var(--padding-2);
+    padding-bottom: var(--padding-2);
+    border-style: var(--border-style);
+    border-width: var(--border-width);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size);
+    font-family: var(--font-family);
+    opacity: .5;
+}
+[widget-style=buttontag]:hover {
+    color: var(--hover-color);
+    border-color: transparent;
+    outline-style: solid;
+    outline-color: var(--outline-color);
+    cursor: pointer;
+}
+[widget-style=buttontag]:focus {
+    border-color: transparent;
+    outline-color: inherit;
+}
+
+
+/***********************************************
  * Text Area
  ***********************************************/
 [widget-style=textarea] {
@@ -788,7 +853,6 @@ html {
     border-style: solid;
     border-width: 1px;
     border-radius: var(--border-radius-1);
-    outline-style: hidden;
     outline-width: var(--outline-width-2);
     outline-color: inherit;
     background-color: var(--background-color-1);
@@ -804,7 +868,6 @@ html {
     border-style: solid;
     border-width: 1px;
     border-radius: var(--border-radius-1);
-    outline-style: hidden;
     outline-width: var(--outline-width-2);
     outline-color: inherit;
 }
@@ -816,6 +879,17 @@ html {
     color: var(--error-color);
     border-color: var(--error-border-color);
     outline-color: var(--error-outline-color);
+}
+
+
+/***********************************************
+ * View Stack
+ ***********************************************/
+[widget-style=stack] {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
 }
 
 
