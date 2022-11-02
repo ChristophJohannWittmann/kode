@@ -31,7 +31,7 @@
  * The details of configuring and validating each specific type are performed
  * by each specific subclass.
 *****/
-register(class InputWidget extends InputBaseWidget {
+register(class WInput extends InputBaseWidget {
     constructor(type) {
         super('input', 'input');
         this.setAttribute('type', type);
@@ -56,134 +56,135 @@ register(class InputWidget extends InputBaseWidget {
  * can be constructed directly using the mkTypeInpud() notaiton, and will wrap
  * the underlying HTML element that's consktructed.
 *****/
-register(class ButtonInput extends InputWidget {
+register(class IButton extends WInput {
     constructor() {
         super('button');
+        this.setAttribute('widget-style', 'button');
     }
 });
 
-register(class CheckboxInput extends InputWidget {
+register(class ICheckbox extends WInput {
     constructor() {
         super('checkbox');
     }
 });
 
-register(class ColorInput extends InputWidget {
+register(class IColor extends WInput {
     constructor() {
         super('color');
     }
 });
 
-register(class DateInput extends InputWidget {
+register(class IDate extends WInput {
     constructor() {
         super('date');
     }
 });
 
-register(class DateTimeInput extends InputWidget {
+register(class IDateTime extends WInput {
     constructor() {
         super('datetime-local');
     }
 });
 
-register(class EmailInput extends InputWidget {
+register(class IEmail extends WInput {
     constructor() {
         super('email');
     }
 });
 
-register(class FileInput extends InputWidget {
+register(class IFile extends WInput {
     constructor() {
         super('file');
     }
 });
 
-register(class HiddenInput extends InputWidget {
+register(class IHidden extends WInput {
     constructor() {
         super('hidden');
     }
 });
 
-register(class ImageInput extends InputWidget {
+register(class IImage extends WInput {
     constructor() {
         super('image');
     }
 });
 
-register(class MonthInput extends InputWidget {
+register(class IMonth extends WInput {
     constructor() {
         super('month');
     }
 });
 
-register(class NumberInput extends InputWidget {
+register(class INumber extends WInput {
     constructor() {
         super('number');
     }
 });
 
-register(class PasswordInput extends InputWidget {
+register(class IPassword extends WInput {
     constructor() {
         super('password');
     }
 });
 
-register(class RadioInput extends InputWidget {
+register(class IRadio extends WInput {
     constructor() {
         super('radio');
     }
 });
 
-register(class RangeInput extends InputWidget {
+register(class IRange extends WInput {
     constructor() {
         super('range');
     }
 });
 
-register(class ResetInput extends InputWidget {
+register(class IReset extends WInput {
     constructor() {
         super('reset');
     }
 });
 
-register(class Search extends InputWidget {
+register(class ISearch extends WInput {
     constructor() {
         super('search');
     }
 });
 
-register(class SubmitInput extends InputWidget {
+register(class ISubmit extends WInput {
     constructor() {
         super('submit');
     }
 });
 
-register(class TelInput extends InputWidget {
+register(class ITel extends WInput {
     constructor() {
         super('tel');
     }
 });
 
-register(class TextInput extends InputWidget {
+register(class IText extends WInput {
     constructor() {
         super('text');
     }
 });
 
-register(class TimeInput extends InputWidget {
+register(class ITime extends WInput {
     constructor() {
         super('time');
     }
 });
 
-register(class UrlInput extends InputWidget {
+register(class IUrl extends WInput {
     constructor() {
         super('url');
         mkPlaceholderHelper(this);
     }
 });
 
-register(class WeekInput extends InputWidget {
+register(class IWeek extends WInput {
     constructor() {
         super('week');
     }

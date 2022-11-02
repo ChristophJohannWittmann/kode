@@ -29,23 +29,23 @@
  * Element.
 *****/
 register(class WButton extends InputBaseWidget {
-    constructor(widgetStyle) {
-        super('button', widgetStyle ? widgetStyle : 'buttontag');
-        this.bindingType = 'innerHtml';
-        this.setButton();
+    constructor() {
+        super('button', 'buttontag');
+        this[Widget.bindingKey] = 'innerHtml';
+        this.setButtonType();
     }
 
-    setButton() {
+    setButtonType() {
         this.setAttribute('type', 'button');
         return this;
     }
 
-    setReset() {
+    setResetType() {
         this.setAttribute('type', 'reset');
         return this;
     }
 
-    setSubmit() {
+    setSubmitType() {
         this.setAttribute('type', 'submit');
         return this;
     }

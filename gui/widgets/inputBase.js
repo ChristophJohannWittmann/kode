@@ -32,9 +32,8 @@
 register(class InputBaseWidget extends Widget {
     constructor(tagName, widgetStyle) {
         super(tagName);
-        this.widgetStyle = widgetStyle;
-        this.setAttribute('widget-style', this.widgetStyle);
-        this.bindingType = 'value';
+        this.setWidgetStyle(widgetStyle);
+        this[Widget.bindingKey] = 'value';
     }
 
     blur() {
@@ -44,13 +43,13 @@ register(class InputBaseWidget extends Widget {
 
     disable() {
         this.setAttribute('disabled');
-        this.setAttribute('widget-style', `${this.widgetStyle}disabled`);
+        this.setAttribute('widget-style', `${this.getAttribute('widget-style')}disabled`);
         return this;
     }
 
     enable() {
         this.clearAttribute('disabled');
-        this.setAttribute('widget-style', this.widgetStyle);
+        this.setAttribute('widget-style', this.getAttribute('widget-style'));
         return this;
     }
 

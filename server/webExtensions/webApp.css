@@ -77,6 +77,11 @@
     .screen-l  {}
 }
 
+h4 {
+    margin-block-start: 6px;
+    margin-block-end: 0px;
+}
+
 
 /***********************************************
  * HTML
@@ -171,19 +176,15 @@ html {
     --outline-color: var(--outline-color-4);
 }
 .color-hover-1 {
-    --hover-color: : var(--hover-color-1);
     --hover-color: var(--hover-color-1);
 }
 .color-hover-2 {
-    --hover-color: : var(--hover-color-2);
     --hover-color: var(--hover-color-2);
 }
 .color-hover-3 {
-    --hover-color: : var(--hover-color-3);
     --hover-color: var(--hover-color-3);
 }
 .color-hover-4 {
-    --hover-color: : var(--hover-color-4);
     --hover-color: var(--hover-color-4);
 }
 .colors-1 {
@@ -748,6 +749,52 @@ html {
     outline-color: inherit;
 }
 [widget-style=input]:invalid {
+    color: var(--error-color);
+    border-color: var(--error-border-color);
+    outline-color: var(--error-outline-color);
+}
+
+
+/***********************************************
+ * Input Button
+ ***********************************************/
+[widget-style=button] {
+    font-family: inherit;
+    font-size: inherit;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: var(--border-radius-1);
+    outline-width: var(--outline-width-2);
+    outline-color: inherit;
+    background-color: var(--background-button-1);
+    text-decoration: none;
+    cursor: pointer;
+}
+[widget-style=buttondisabled] {
+    padding-top: var(--padding-2);
+    padding-bottom: var(--padding-2);
+    border-style: var(--border-style);
+    border-width: var(--border-width);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size);
+    font-family: var(--font-family);
+    opacity: .5;
+}
+[widget-style=button]:hover {
+    color: var(--hover-color);
+    border-color: transparent;
+    outline-style: solid;
+    outline-color: var(--outline-color);
+}
+[widget-style=button]:focus {
+    border-color: transparent;
+    outline-color: inherit;
+}
+[widget-style=button]:invalid {
     color: var(--error-color);
     border-color: var(--error-border-color);
     outline-color: var(--error-outline-color);

@@ -23,9 +23,9 @@
 
 /*****
 *****/
-register(class SignIn extends PanelWidget {
+register(class SignIn extends Widget {
     constructor() {
-        super('div');
+        super();
 
         this.layout = mkGridLayout(this, {
             rows: ['auto', '350px', 'auto'],
@@ -37,102 +37,60 @@ register(class SignIn extends PanelWidget {
         this.credentials = mkActiveData({
             forgotPassword: false,
             username: 'chris.wittmann@infosearch.online',
-            password: 'a very unbreakable password',
-            dropdown: 'no',
-            essay: 'hello essay.  tab here\nbefore this stuff here.',
-            buttonText: 'Hello Button',
+            password: '',
         });
 
-        /*
-        ActiveData.on(this.credentials, message => {
-            if (message.action == 'change') {
-                console.log(message.newValue);
-            }
-        });
-        */
-
-        this.createChallengeForm();
-        this.createForgotEmailForm();
+        this.createAuthenticationForm();
         this.createForgotPasswordForm();
 
         this.layout.setAt(1, 1, this.challengeForm);
-        /*
-        this.layout.setAt(1, 1,
-            mkWText(EssayEntryFilter)
-            .set('hello text area')
-            .setClassName('fill')
-            .setAttribute('autofocus')
-            .bind(this.credentials, 'essay')
-        );
-        */
     }
 
-    createChallengeForm() {
-        this.challengeForm = mkWForm()
+    createAuthenticationForm() {
+        this.challengeForm = mkWidget('form')
         .setClasses('flex-h-cc colors-2 border-style-solid border-width-1 border-radius-2');
 
-        this.challengeLayout = mkGridLayout(this.challengeForm, {
-            rows: ['6fr', 'auto', '3px', 'auto', '8px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
+        const challengeLayout = mkGridLayout(this.challengeForm, {
+            rows: ['2fr', 'auto', '3px', 'auto', '8px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
             cols: ['350px'],
         });
 
-        this.challengeLayout.setAt(1, 0, mkWidget('div').set('Username').setClassName('flex-h-sc'));
-        this.challengeLayout.setAt(3, 0, mkEmailInput()
+        challengeLayout.setAt(1, 0, mkWidget('div').set('Username').setClasses('flex-h-sc font-weight-bold font-size-4'));
+        challengeLayout.setAt(3, 0, mkIEmail()
         .bind(this.credentials, 'username'))
         .setAttribute('autofocus')
         .setAttribute('autocomplete', 'email');
 
-        this.challengeLayout.setAt(5, 0, mkWidget('div').set('Password').setClassName('flex-h-sc'));
-        this.challengeLayout.setAt(7, 0, mkPasswordInput()
+        challengeLayout.setAt(5, 0, mkWidget('div').set('Password').setClasses('flex-h-sc font-weight-bold font-size-4'));
+        challengeLayout.setAt(7, 0, mkIPassword()
         .bind(this.credentials, 'password'))
         .setAttribute('autocomplete', 'current-password');
 
-        this.challengeLayout.setAt(9, 0, mkWLink()
-            .setHref('https://google.com')
-            .set('Sign In')
-            .setTarget('_blank')
-            .setClassName('flex-h-sc')
-        );
+        challengeLayout.setAt(9, 0,
+            mkIButton('button')
+            .setAttribute('value', 'Sign In')
+            .on('html.click', message => this.onSignIn())
+        )
 
-        /*
-        this.challengeLayout.setAt(11, 0, mkWLink()
-            .setHref('https://google.com')
-            .set('Forgot Password')
-            .setTarget('_blank')
-            .setClassName('flex-h-sc',)
-        );
-        this.challengeLayout.setAt(11, 0, mkWPlaceholder(this.credentials, 'username'));
-        */
-
-        /*
-        this.challengeLayout.setAt(11, 0,
-            mkWSelect()
-            .setOptions([
-                { value: 'yes',    text: 'Yes',   disabled: false },
-                { value: 'no',     text: 'No',    disabled: false },
-                { value: 'maybe',  text: 'Maybe', disabled: false },
-                { label: 'Alternative', options: [
-                    { value: 'ja',       text: 'Ja',       disabled: false },
-                    { value: 'nein',     text: 'Nein',     disabled: false },
-                    { value: 'veleicht', text: 'Veleicht', disabled: false },
-                ]}
-            ])
-            .setAttribute('multiple')
-            .setAttribute('required')
-            .bind(this.credentials, 'dropdown')
-        );
-        */
-
-        this.challengeLayout.setAt(11, 0,
-            mkWTextButton('Some Odd Button')
-            //.on('html.click', message => console.log(message))
-            //.bind(this.credentials, 'buttonText')
-        );
-    }
-
-    createForgotEmailForm() {
+        challengeLayout.setAt(11, 0,
+            mkIButton('button')
+            .setAttribute('value', 'Forgot Password')
+            .on('html.click', message => this.onForgotPassword())
+        )
     }
 
     createForgotPasswordForm() {
+    }
+
+    onAuthenticate() {
+        console.log('onAuthenticate()');
+    }
+
+    onForgotPassword() {
+        console.log('onForgotPassword()');
+    }
+
+    onSignIn() {
+        console.log('onSignIn()');
     }
 });

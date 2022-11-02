@@ -37,6 +37,7 @@ register(class Widget extends Emitter {
     static nextId = 1;
     static initialized = {};
     static widgetKey = Symbol('widget');
+    static bindingKey = Symbol('binding');
 
     constructor(tagName) {
         super();
@@ -44,10 +45,10 @@ register(class Widget extends Emitter {
         this.widgetId = Widget.nextId++;
         this.selector = `widget${this.widgetId}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
-        this.bindingType = 'innerHtml';
+        this[Widget.bindingKey] = 'innerHtml';
 
-        if (typeof tagName == 'string') {
-            this.htmlElement = htmlElement(tagName);
+        if (typeof tagName == 'string' || tagName === undefined) {
+            this.htmlElement = htmlElement(tagName === undefined ? 'div' : tagName);
             this.htmlElement.setAttribute('id', this.selector);
             this.brand(this.htmlElement);
             this.setAttribute('widgetclass', `${Reflect.getPrototypeOf(this).constructor.name}`);
@@ -73,10 +74,10 @@ register(class Widget extends Emitter {
         if (attributeName) {
             mkAttributeBinding(this, activeData, key, attributeName);
         }
-        else if (this.bindingType == 'innerHtml') {
+        else if (this[Widget.bindingKey] == 'innerHtml') {
             mkInnerHtmlBinding(this, activeData, key);
         }
-        else if (this.bindingType == 'value') {
+        else if (this[Widget.bindingKey] == 'value') {
             mkValueBinding(this, activeData, key);
         }
 
@@ -172,6 +173,10 @@ register(class Widget extends Emitter {
 
     getAttribute(name) {
         return this.htmlElement.getAttribute(name);
+    }
+
+    getWidgetStyle() {
+        return this.getAttribute('widget-style');
     }
 
     hasAttribute(name) {
@@ -325,6 +330,11 @@ register(class Widget extends Emitter {
             value: className,
         });
 
+        return this;
+    }
+
+    setWidgetStyle(widgetStyle) {
+        this.setAttribute('widget-style', widgetStyle);
         return this;
     }
 

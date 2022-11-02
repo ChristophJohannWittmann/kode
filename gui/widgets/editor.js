@@ -25,6 +25,6 @@
 *****/
 register(class Editor extends Widget {
     constructor() {
-        super('textarea');
+        super('div');
     }
 });
