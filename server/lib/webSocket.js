@@ -23,63 +23,7 @@
 
 /*****
 *****/
-/*
-$(class $WebSocketServer extends Cls$Server {
-    constructor(config) {
-        super(config);
-    }
-  
-    async startPrimary() {
-    }
-  
-    async startWorker() {
-        let crypto = this.crypto();
-  
-        if (crypto) {
-            this._nodeHttpServer = Https.createServer({
-                key: crypto.pemPrivate,
-                cert: crypto.pemCert,
-                ca: crypto.pemCA,
-            }, (req, rsp) => {
-                rsp.writeHead(426, {'Content-Type': 'text/plain'});
-                rsp.end('Upgrade Required');
-            });
-        }
-        else {
-            this._nodeHttpServer = Http.createServer((req, rsp) => {
-                rsp.writeHead(426, {'Content-Type': 'text/plain'});
-                rsp.end('Upgrade Required');
-            });
-        }
-  
-        this._nodeHttpServer.listen(this.port(), this.addr());
-  
-        this._nodeHttpServer.on('upgrade', async (req, socket, headPacket) => {
-            let secureKey = req.headers['sec-websocket-key'];
-            let hash = await Cls$Crypto.digest('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
-            let webSocket = $WebSocket(socket, req.headers['sec-websocket-extensions'], headPacket);
-            
-            let headers = [
-                'HTTP/1.1 101 Switching Protocols',
-                'Upgrade: websocket',
-                'Connection: upgrade',
-                `Sec-WebSocket-Accept: ${hash}`,
-                '\r\n'
-            ];
-  
-            if (webSocket.secWebSocketExtensions()) {
-                headers.append(`Sec-WebSocket-Extensions: ${webSocket.secWebSocketExtensions()}`);
-            }
-        
-            socket.write(headers.join('\r\n'));
-        });
-    }
-});
-
-
-/**
- *
-$(class $WebSocket {
+register(class WSocket {
     static _socketId = 1;
 
     constructor(socket, extensions, headData) {
@@ -101,7 +45,7 @@ $(class $WebSocket {
         }, 15000);
     }
   
-    _buildExtensionMap(extensions) {
+    buildExtensionMap(extensions) {
         let extensionMap = {};
   
         extensions.split(';').forEach(extension => {
@@ -250,9 +194,9 @@ $(class $WebSocket {
 });
 
 
-/**
- *
-$(class $FrameBuilder {
+/*****
+*****/
+class FrameBuilder {
     static _maxPayloadLength = 50000;
 
     build(payload, opcode) {
@@ -308,12 +252,12 @@ $(class $FrameBuilder {
 
         return frame;
     }
-});
+}
 
 
-/**
- *
-$(class $FrameParser {
+/*****
+*****/
+class $FrameParser {
     constructor(webSocket, headData) {
         this._webSocket = webSocket;
         this._socket = webSocket._socket;
@@ -446,5 +390,4 @@ $(class $FrameParser {
 
         return decoded;
     }
-});
-*/
+}

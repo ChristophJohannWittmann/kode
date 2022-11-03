@@ -57,6 +57,16 @@ exports = module.exports = register(class WebExtension extends Emitter {
     async init() {
     }
 
+    on(messageName, handler) {
+        delete this.handlers[messageName];
+        super.on(messageName, handler);
+    }
+
+    once(messageName, handler, filter) {
+        delete this.handlers[messageName];
+        super.once(messageName, handler);
+    }
+
     async upgrade(httpReq, socket, headPacket) {
         if (this.config.websocket) {
             if (Reflect.has(this, 'onWebSocket')) {

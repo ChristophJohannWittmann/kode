@@ -63,6 +63,8 @@ register(class Emitter extends NonJsonable {
                 }
             });
         }
+
+        return this;
     }
 
     on(messageName, func, filter) {
@@ -85,6 +87,8 @@ register(class Emitter extends NonJsonable {
                 handler.map[func['#HANDLER']] = thunk;
             }
         });
+
+        return this;
     }
 
     once(messageName, func, filter) {
@@ -107,6 +111,8 @@ register(class Emitter extends NonJsonable {
                 handler.map[func['#HANDLER']] = thunk;
             }
         });
+
+        return this;
     }
 
     query(message) {
@@ -116,12 +122,39 @@ register(class Emitter extends NonJsonable {
 
         let trap = mkTrap();
         message['#Trap'] = trap.id;
-        this.send(message);
+
+        if (message.messageName in this.handlers) {
+            let handler = this.handlers[message.messageName];
+
+            if (handler.thunks.length) {
+                let thunks = handler.thunks;
+                handler.thunks = [];
+                Trap.setExpected(message['#Trap'], thunks.length);
+
+                thunks.forEach(thunk => {
+                    if (!thunk.once) {
+                        handler.thunks.push(thunk);
+                    }
+
+                    if (typeof thunk.filter != 'function' || thunk.filter(message)) {
+                        thunk.func(message);
+                    }
+                });
+            }
+            else {
+                Trap.done(trap);
+            }
+        }
+        else {
+            Trap.done(trap);
+        }
+
         return trap.promise;
     }
 
     resume() {
         this.silent = false;
+        return this;
     }
 
     send(message) {
@@ -134,10 +167,6 @@ register(class Emitter extends NonJsonable {
                 let handler = this.handlers[message.messageName];
                 let thunks = handler.thunks;
                 handler.thunks = [];
-      
-                if ('#Trap' in message) {
-                    Trap.setExpected(message['#Trap'], thunks.length);
-                }
 
                 thunks.forEach(thunk => {
                     if (!thunk.once) {
@@ -154,6 +183,7 @@ register(class Emitter extends NonJsonable {
 
     silence() {
         this.silent = true;
+        return this;
     }
 });
 
@@ -174,6 +204,7 @@ register(class Trap {
         this.id = Trap.nextId++;
         this.replies = [];
         this.expected = 0;
+        this.pending = true;
         Trap.traps[this.id] = this;
         let self = this;
   
@@ -194,22 +225,71 @@ register(class Trap {
             self.done = () => done();
         });
     }
+
+    static cancel(arg) {
+        let trap;
+
+        if (typeof arg == 'number') {
+            trap = Trap.traps[arg];
+        }
+        else if (arg instanceof Trap && arg.id in Trap.traps) {
+            trap = arg;
+        }
+
+        if (trap) {
+            trap.pending = false;
+            delete Trap.traps[trap.id];
+        }
+    }
+
+    static done(arg) {
+        let trap;
+
+        if (typeof arg == 'number') {
+            trap = Trap.traps[arg];
+        }
+        else if (arg instanceof Trap && arg.id in Trap.traps) {
+            trap = arg;
+        }
+
+        if (trap) {
+            trap.done();
+            trap.pending = false;
+            delete Trap.traps[trap.id];
+        }
+    }
   
-    static pushReply(trapId, reply) {
-        if (trapId && trapId in Trap.traps) {
-            let trap = Trap.traps[trapId];
+    static pushReply(arg, reply) {
+        let trap;
+
+        if (typeof arg == 'number') {
+            trap = Trap.traps[arg];
+        }
+        else if (arg instanceof Trap && arg.id in Trap.traps) {
+            trap = arg;
+        }
+
+        if (trap && trap.pending) {
             trap.replies.push(reply);
   
             if (trap.replies.length == trap.expected) {
+                trap.pending = false;
                 trap.done();
             }
         }
     }
   
-    static setExpected(id, expected) {
-        let trap = Trap.traps[id];
-  
-        if (trap) {
+    static setExpected(arg, expected) {
+        let trap;
+
+        if (typeof arg == 'number') {
+            trap = Trap.traps[arg];
+        }
+        else if (arg instanceof Trap && arg.id in Trap.traps) {
+            trap = arg;
+        }
+
+        if (trap && trap.pending) {
             trap.expected = expected;
         }
     }

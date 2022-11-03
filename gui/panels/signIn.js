@@ -90,7 +90,17 @@ register(class SignIn extends Widget {
         console.log('onForgotPassword()');
     }
 
-    onSignIn() {
-        console.log('onSignIn()');
+    async onResetPassword() {
+        console.log('onResetPassword()');
+    }
+
+    async onSignIn() {
+        let rsp = await mkHttp().query({
+            messageName: 'SignIn',
+            username: this.credentials.username,
+            password: this.credentials.password,
+        });
+
+        console.log(rsp.getMessage());
     }
 });

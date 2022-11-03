@@ -9,8 +9,16 @@
         <style title="${cssTitle}">
             ${css}
         </style>
+        <script>
+            const webAppSettings = {
+                authenticate: () => ${authenticate},
+                session: () => null,
+                url: () => '${url}',
+                websocket: () => ${websocket},
+            }
+        </script>
         <script src="CLIENTFRAMEWORK.js"></script>
     </head>
-    <body class="fill margin-0 padding-0 ${fontFamily} ${fontSize} ${colorScheme}" onload="bootstrap()">
+    <body class="fill margin-0 padding-0 ${classes}" onload="bootstrap()">
     </body>
 </html>

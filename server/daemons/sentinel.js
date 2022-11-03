@@ -24,16 +24,10 @@
 /*****
 *****/
 class Session {
-    constructor(id) {
+    constructor(id, key) {
         this.id = id;
-        this.state = 'unauth';
-    }
-
-    async upgrade(user) {
-        this.state = 'anon'
-        this.org = null;
-        this.user = null;
-        this.grants = {};
+        this.key = key;
+        this.state = 'anonymous';
     }
 }
 
@@ -43,24 +37,23 @@ class Session {
 singleton(class Sentinel extends Daemon {
     constructor() {
         super();
+        this.sessionId = 1;
         this.sessions = {};
         this.expiring = [];
         
         this.permissions = mkStringSet(
-            'config',
             'sys',
             'user',
         );
     }
-    /*
+
     async onAddPermissions(message) {
-        for (let permission of message.permissions {
+        for (let permission of message.permissions) {
             this.permissions.set(permission);
         }
 
         Message.reply(message, 'ok');
     }
-    */
 
     async onAuthenticate(message) {
     }
@@ -72,14 +65,16 @@ singleton(class Sentinel extends Daemon {
     }
 
     async onCreateSession(message) {
-        let id = await Crypto.digestUnsalted('sha256', (new Date()).toString());
+        let id = Sentinel.sessionId++;
+        let seed = `${(new Date()).toString()}${id}`;
+        let key = await Crypto.digestUnsalted('sha256', `${seed}${Math.rand()}`);
 
-        while (id in this.sessions) {
-            id = await Crypto.digestUnsalted('sha256', (new Date()).toString());
+        while (key in this.sessions) {
+            key = await Crypto.digestUnsalted('sha256', `${seed}${Math.rand()}`);
         }
 
-        let session = new Session(id);
-        Message.reply(message, session.id);
+        let session = new Session(id, key);
+        Message.reply(message, session.key);
     }
 
     async onListPermissions(message) {

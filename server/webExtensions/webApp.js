@@ -60,7 +60,7 @@ exports = module.exports = register(class WebApp extends WebExtension {
         this.links = '';
 
         if ('favicons' in this.config) {
-            for (let favicon of this.config.favicons) {
+            for (let favicon of this.options.favicons) {
                 switch (favicon.type) {
                     case 'icon':
                         let parsed = PATH.parse(favicon.href);
@@ -92,6 +92,11 @@ exports = module.exports = register(class WebApp extends WebExtension {
         }
     }
 
+    async handleAuthentication(message) {
+        let result = { ok: false };
+        return result;
+    }
+
     async handleGET(req, rsp) {
         let doc = mkTextTemplate(Config.minify ? this.compactHtml : this.visualHtml).set({
             css: this.compactCss,
@@ -99,38 +104,67 @@ exports = module.exports = register(class WebApp extends WebExtension {
             title: this.config.title,
             description: this.config.description,
             links: this.links,
-            fontFamily: this.config.fontFamily,
-            fontSize: this.config.fontSize,
-            colorScheme: this.config.colorScheme,
+            classes: this.options.classes,
+            url: this.config.url,
+            authenticate: this.config.authenticate,
+            websocket: this.config.websocket,
         });
 
         rsp.end(200, 'text/html', await doc.toString());
     }
 
     async handlePOST(req, rsp) {
-        rsp.endStatus(204);
+        if (req.isMessage() && 'messageName' in req.message()) {
+            let requestMessage = req.message();
+            let response = await this.query(requestMessage);
+
+            if (response) {
+                var message = {
+                    messageName: 'PostResponse',
+                    '#Trap': requestMessage['#Trap'],
+                    response: response
+                };
+            }
+            else {
+                var message = {
+                    messageName: 'Ignored',
+                    '#Trap': requestMessage['#Trap'],                    
+                };
+            }
+
+            rsp.end(200, 'application/json', toJson(message));
+        }
+        else {
+            rsp.endStatus(401);
+        }
     }
 
     async init(cssPath, htmlPath) {
         await super.init();
+        this.setOptions();
         await this.buildLinks();
+        await this.buildHTML(PATH.join(env.kodePath, 'server/webExtensions/webApp.html'));
 
-        if (this.config.css) {
+        if (this.options.css) {
             await this.buildCSS(this.config.css);
         }
         else {
             await this.buildCSS(PATH.join(env.kodePath, 'server/webExtensions/webApp.css'));
         }
-
-        if (this.config.html) {
-            await this.buildHTML(this.config.html);
-        }
-        else {
-            await this.buildHTML(PATH.join(env.kodePath, 'server/webExtensions/webApp.html'));
-        }
     }
 
     async onWebSocket(req, webSocket) {
         //this.webSockets[webSocket.id] = webSocket;
+    }
+
+    setOptions() {
+        this.options = {
+            css: this.config.css,
+            favicons: this.config.favicons,
+            classes: 'font-family-sans font-size-4 colors-1',
+            websocket: this.config.websocket,
+            authenticate: this.config.authenticate,
+            homeView: this.config.homeView,
+        };
     }
 });

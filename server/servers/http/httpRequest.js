@@ -33,7 +33,7 @@ register(class HttpRequest {
         return new Promise(async (ok, fail) => {
             this.httpServer = httpServer;
             this.httpReq = httpReq;
-            await this.loadBody();
+            this.method() == 'POST' ? await this.loadBody() : false;
 
             this.params = {};
             this.parsedUrl = URL.parse(this.httpReq.url);
@@ -187,7 +187,12 @@ register(class HttpRequest {
                     }
                     
                     if (mimeCode == 'application/json') {
-                        this.requestMessage = fromJson(this.requestBody.value);
+                        try {
+                            this.requestMessage = fromJson(this.requestBody.value);
+                        }
+                        catch (e) {
+                            this.requestMessage = new Object({ messageName: '#DUMMY' });
+                        }
                     }
                 }
                 else {
@@ -196,7 +201,7 @@ register(class HttpRequest {
                         data: ''
                     };
                 }
-                
+
                 ok();
             });
         });
@@ -204,12 +209,7 @@ register(class HttpRequest {
 
     message() {
         if (this.requestBody.mime.code === 'application/json') {
-            try {
-                return fromJson(this.requestBody);
-            }
-            catch (e) {
-                return new Object();
-            }
+            return this.requestMessage;
         }
     }
 
@@ -223,10 +223,6 @@ register(class HttpRequest {
 
     parameters() {
         return this.params;
-    }
-
-    path() {
-        return this.httpReq.path !== null ? this.httpReq.path : '';
     }
 
     pathname() {

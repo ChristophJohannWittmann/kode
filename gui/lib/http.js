@@ -1,212 +1,209 @@
-/**
- */
-
-
-/**
+/*****
+ * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
  *
-$(class $Http {
-    static _converters = {
-        'application/json': rsp=>$fromJson(rsp),
-    };
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+*****/
 
-    constructor() {
-        this._session = `${SESSION}`;
+
+/*****
+ * Wrapper object for the client-side XMLHTTPRequest response-related feature
+ * subset.  Conceptually, the HTTP class executes the request and returns this
+ * object that encapsulates the API object as if it were an independent respoonse
+ * object.  An instance of HttpResponse is passed to the caller after awaiting
+ * the HTTP request result.
+*****/
+class HttpResponse {
+    constructor(xmlHttpRequest) {
+        this.req = xmlHttpRequest;
     }
-  
-    async get(path) {
-        let url = `${path}?SESSION=${this._session}`;
-        return await this.request('GET', url, undefined, 'application/json');
+
+    getHeader(headerName) {
+        return this.req.getResponseHeader(headerName);
     }
-  
-    async post(message) {
-        if (!(message instanceof Cls$Message)) {
-            message = $Message(message);
+
+    getHeaders() {
+        return this.req.getAllResponseHeaders();
+    }
+
+    getMessage() {
+        if (this.isMessage()) {
+            return fromJson(this.req.responseText);
+        }
+    }
+
+    getReadyState() {
+        switch (this.req.readyState) {
+            case 0:
+                return Http.Unsent;
+
+            case 1:
+                return Http.Opened;
+
+            case 2:
+                return Http.HeadersReceived;
+
+            case 3:
+                return Http.Loading;
+
+            case 4:
+                return Http.Done;
+        }
+    }
+
+    getStatus() {
+        return {
+            code: this.req.status,
+            text: this.req.statusText,
+        };
+    }
+
+    getResponseData() {
+        return this.req.response;
+    }
+
+    getResponseText() {
+        return this.req.responseText;
+    }
+
+    getResponseType() {
+        return this.req.responseType;
+    }
+
+    getUrl() {
+        return this.req.responseURL;
+    }
+
+    isDone() {
+        return this.req.readyState == Http.Done;
+    }
+
+    isMessage() {
+        return this.req.getResponseHeader('content-type').startsWith('application/json')
+    }
+
+    isOk() {
+        if (this.req.readyState == Http.Done) {
+            if (this.req.status >= 100 && this.req.status < 400) {
+                return true;
+            }
         }
 
-        let url = $Window().location().href;
-        message.$sessionId = this._session;
-        let json = $toJson(message);
-        return $Message((await this.request('POST', url, json, 'application/json')).data.reply);
+        return false;
     }
+}
+
+
+/*****
+ * The framework wrapper for the XMLHTTPRequest provides loads of functionality
+ * for simplifying the entire GET and POST cycles.  Firstly, all requests are
+ * wrapped in a promise/promise-trap layer to make the function calls operate in
+ * an asynchronous manner.  This results in simplified syntax and better code.
+ * Moreover, progress messages are emitted for larger downloads, which may also
+ * be easily cancelled.
+*****/
+register(class Http extends Emitter {
+    static Done            = XMLHttpRequest.DONE;
+    static HeadersReceived = XMLHttpRequest.HEADERS_RECEIVED;
+    static Loading         = XMLHttpRequest.LOADING;
+    static Opened          = XMLHttpRequest.OPENED;
+    static Unsent          = XMLHttpRequest.UNSENT;
+
+    constructor(timeoutMillis) {
+        super();
+        this.req = new XMLHttpRequest();
+        this.setTimeout(timeoutMillis);
+        this.trap = mkTrap();
+        Trap.setExpected(this.trap.id, 1);
+    }
+
+    cancel() {
+        if (this.req.readyState != Http.Done) {
+            Trap.cancel(this.trap.id);
+            this.req.abort();
+        }
+
+        return this;
+    }
+
+    get(url) {
+        this.request('GET', url);
+        return this.trap.promise;
+    }
+
+    getTimeout() {
+        return this.req.timeout;
+    }
+
+    post(url, mime, body) {
+        this.request('POST', url, mime.code, body);
+        return this.trap.promise;
+    }
+
+    query(message) {
+        message = message instanceof Message ? message : mkMessage(message);
+        message['#Session'] = webAppSettings.session();
+        message['#Trap'] = this.trap.id;
+        this.request('POST', webAppSettings.url(), 'application/json', toJson(message));
+        return this.trap.promise;
+    }
+
+    request(method, url, mime, body) {
+        this.req.onabort = event => {
+            Trap.pushReply(this.trap, new HttpResponse(this.req));
+        };
+
+        this.req.onerror = event => {
+            Trap.pushReply(this.trap, new HttpResponse(this.req));
+        };
+
+        this.req.onprogress = event => {
+            this.send({
+                messageName: 'Progress',
+                determinate: event.lengthComputable,
+                loaded: event.loaded,
+                total: event.total,
+            });
+        };
+
+        this.req.onreadystatechange = event => {
+            if (this.req.readyState == Http.Done) {
+                Trap.pushReply(this.trap.id, new HttpResponse(this.req));
+            }
+        };
+
+        this.req.ontimeout = event => {
+            Trap.pushReply(this.trap, new HttpResponse(this.req));
+        };
   
-    request(method, url, body, mime) {
-        return new Promise((ok, fail) => {
-            let req = new XMLHttpRequest();
-      
-            req.onreadystatechange = function() {
-                if (this.readyState == 4) {
-                    if (req.status >= 200 && req.status < 300) {
-                        let contentType = req.getResponseHeader('content-type');
-                        
-                        if (contentType in $Http._converters) {
-                            ok({mime: contentType, data: $Http._converters[contentType](req.response)});
-                        }
-                        else {
-                            ok({mime: contentType, data: req.response});
-                        }
-                    }
-                    else {
-                        ok(this);
-                    }
-                }
-            };
-      
-            req.open(method, url, true);
-            req.setRequestHeader('content-type', mime);
-            req.send(body);
-        });
+        this.req.open(method, url, true);
+
+        if (method == 'GET') {
+            this.req.send();
+        }
+        else if (method == 'POST') {
+            this.req.setRequestHeader('content-type', mime);
+            this.req.send(body);
+        }
+    }
+
+    setTimeout(timeoutMillis) {
+        this.req.timeout = timeoutMillis ? timeoutMillis : 15000;
+        return this;
     }
 });
-
-
-/**
- *
-$(class $WebSocket {
-    static _socket = null;
-    static _socketServerName = '';
-    static _emitter = $Emitter();
-    static _pendingMessages = [];
-
-    static _auto = (() => {
-        Cls$Message.on('$CloseApp', message => {
-            $WebSocket.close();
-        });
-    })();
-  
-    constructor(socketServerName) {
-        $WebSocket._socketServerName = socketServerName;
-        return $WebSocket;
-    }
-  
-    static close() {
-        if ($WebSocket._socket && $WebSocket._socket.readyState == 1) {
-            $WebSocket._socket.close();
-        }
-  
-        return $WebSocket;
-    }
-  
-    static connect() {
-        return new Promise((ok, fail) => {
-            if ($WebSocket._socketServerName in SOCKETS) {
-                $WebSocket._pendingMessages.unshift({
-                    messageName: '$SocketSession',
-                    sessionId: SESSION
-                });
-                
-                let socketInfo = SOCKETS[$WebSocket._socketServerName];
-                let location = $Window().location();
-                let url = `${location.protocol.replace('http', 'ws')}//${location.hostname}:${location.port}${location.pathname}`;
-                $WebSocket._socket = new WebSocket(url);
-                
-                $WebSocket._socket.onopen = event => {
-                    while ($WebSocket._pendingMessages.length) {
-                        $WebSocket.send($WebSocket._pendingMessages.shift());
-                    }
-                    
-                    ok($WebSocket);
-                };
-                
-                $WebSocket._socket.onerror = error => {
-                    console.log(error);
-                    $WebSocket.close();
-                    fail();
-                };
-                
-                $WebSocket._socket.onclose = () => {
-                    $WebSocket._socket.close();
-                    $WebSocket._socket = null;
-                };
-                
-                $WebSocket._socket.onmessage = event => $WebSocket.onMessage(event);
-            }
-            else {
-                ok(`$WebSocket, cannot connection to unknown server: ${$WebSocket._socketServerName}`);
-            }
-        });
-    }
-  
-    static off(messageName, handler, filter) {
-        $WebSocket._emitter.off(messageName, handler, filter);
-        return $WebSocket;
-    }
-  
-    static on(messageName, handler, filter) {
-        $WebSocket._emitter.on(messageName, handler, filter);
-        return $WebSocket;
-    }
-  
-    static once(messageName, handler, filter) {
-        $WebSocket._emitter.once(messageName, handler, filter);
-        return $WebSocket;
-    }
-  
-    static async onMessage(event) {
-        let message = $fromJson(event.data);
-  
-        if (message.messageName == '$Ping') {
-            $WebSocket.send({messageName: '$Pong'});
-        }
-        else if (message.messageName != '$Pong') {
-            if (message.messageName == '$wsReply') {
-                Cls$ReturnTrap.pushReply(message.$returnTrapId, message.reply);
-            }
-            else if (message.$wsQuery) {
-                let handlerCount = $WebSocket._emitter.lengthOf(message.messageName);
-
-                let trap = $ReturnTrap();
-                Cls$ReturnTrap.setExpected(trap.id(), handlerCount);
-                let originalReturnTrapId = message.$returnTrapId;
-                message.$returnTrapId = trap.id();
-
-                $WebSocket._emitter.send(message);
-                let reply = await trap.promise();
-
-                let replyMessage = $Message({
-                    messageName: '$wsReply',
-                    query: message,
-                    reply: reply
-                });
-
-                delete message.$webSocket;
-                replyMessage.$returnTrapId = originalReturnTrapId;
-                $WebSocket.send(replyMessage);
-            }
-            else {
-                $WebSocket._emitter.send(message);
-            }
-        }
-    }
-  
-    static async query(message) {
-        let trap = $ReturnTrap();
-        Cls$ReturnTrap.setExpected(trap.id(), 1);
-        message.$returnTrapId = trap.id();
-        message.$wsQuery = true;
-        $WebSocket.send(message);
-        return trap.promise();
-    }
-  
-    static send(message) {
-        if (!(message instanceof Cls$Message)) {
-            message = $Message(message);
-        }
-  
-        message.sessionId = SESSION;
-  
-        if (!('$wsQuery' in message)) {
-            message.$wsQuery = false;
-        }
-  
-        if ($WebSocket._socket && $WebSocket._socket.readyState == 1) {
-            $WebSocket._socket.send($toJson(message));
-        }
-        else {
-            $WebSocket._pendingMessages.push(message);
-            $WebSocket.connect();
-        }
-  
-        return $WebSocket;
-    }
-});
-*/
