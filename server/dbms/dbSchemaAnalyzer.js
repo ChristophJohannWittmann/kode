@@ -194,9 +194,10 @@ class DbIndexDiff {
  * executed to perform DBMS upgrades or downgrades.
 *****/
 register(class DbSchemaAnalyzer {
-    constructor(configName, tableMap) {
+    constructor(dbName, tableMap) {
         return new Promise(async (ok, fail) => {
-            this.settings = Config.databases[configName];
+            this.settings = mkDbSettings(dbName);
+            this.database = mkDbDatabase(dbName);
             this.diffs = [];
             this.design = { tableMap: tableMap };
             this.design.tableArray = Object.values(tableMap);
@@ -216,8 +217,8 @@ register(class DbSchemaAnalyzer {
         else {
             this.diffs.push(new DbDatabaseDiff(this.settings, true));
 
-            for (let tableDef of this.tableDefArray) {
-                this.diffs.push(new DbTableDiff(this.settings, true, tableDef));
+            for (let table of this.database) {
+                this.diffs.push(new DbTableDiff(this.settings, true, table));
             }
 
             return false;
@@ -259,6 +260,8 @@ register(class DbSchemaAnalyzer {
 
     async analyzeTables() {
         this.actual = await dbSchema(this.settings);
+        console.log(this.actual);
+        /*
         this.intersection = [];
 
         for (let table of this.design.tableArray) {
@@ -280,5 +283,6 @@ register(class DbSchemaAnalyzer {
             await this.analyzeColumns(pair);
             await this.analyzeIndexes(pair);
         }
+        */
     }
 });

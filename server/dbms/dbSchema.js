@@ -325,7 +325,6 @@ global.dbTimeArray = {
 *****/
 register(class DbSchema {
     static schemas = {};
-    static tables = {};
 
     constructor(name, defined, ...tableDefs) {
         if (!defined || name.startsWith('#')) {
@@ -335,7 +334,10 @@ register(class DbSchema {
             this.registered = false;
             this.defined = defined;
 
-            if (this.defined && this.name in DbSchema.schemas) {
+            if (this.defined && !this.name.startsWith('#')) {
+                throw new Error(`Schema name does not being with a hashtag: ${this.name}`);
+            }
+            else if (this.defined && this.name in DbSchema.schemas) {
                 throw new Error(`Duplicate DB schema name: ${this.name}`);
             }
             else {
@@ -372,6 +374,10 @@ register(class DbSchema {
         this.registered = true;
         return this;
     }
+
+    [Symbol.iterator]() {
+        return this.tableArray[Symbol.iterator]();
+    }
 });
 
 class DbSchemaTable {
@@ -384,11 +390,8 @@ class DbSchemaTable {
         this.indexArray = [];
 
         if (this.schema.defined) {
-            if (this.name in DbSchema.tables) {
-                throw new Error(`Duplicate DBMS table name: ${this.name}`);
-            }
-            else {
-                DbSchema.tables[this.name] = this;
+            if (this.name in this.schema.tableMap) {
+                throw new Error(`Duplicate DBMS table name: ${this.name} in schema: ${this.schema.name}`);
             }
         }
   
@@ -414,6 +417,10 @@ class DbSchemaTable {
                 this.indexMap[schemaIndex.name] = schemaIndex;
             }
         });
+    }
+
+    [Symbol.iterator]() {
+        return this.columnArray[Symbol.iterator]();
     }
 }
 

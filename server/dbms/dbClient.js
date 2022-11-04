@@ -22,6 +22,46 @@
 
 
 /*****
+ * An independent class that encapsulates the initialization of the database
+ * connection settings based on one of the provided arguments.  DbSettings
+ * object instances are required in order connect to and manage a database.
+*****/
+register(class DbSettings {
+    constructor(arg) {
+        if (!arg) {
+            this.config = Config.databases['@'];
+        }
+        else if (typeof arg == 'string') {
+            if (arg.startsWith('@') && arg in Config.databases) {
+                this.config = Config.databases[arg];
+            }
+            else {
+                throw new Error(`Couldn't find database: "${arg}"`);
+            }
+        }
+        else if (arg instanceof DbSettings) {
+            return arg;
+        }
+        else if (typeof arg == 'object') {
+            this.config = arg;
+        }
+        else {
+            throw new Error(`Invalid database settings parameter: "${arg}"`);
+        }
+
+        this.dbms = this.config.dbms;
+        this.host = this.config.host ? this.config.host : 'localhost';
+        this.port = this.config.port ? this.config.port : 0;
+        this.user = this.config.user ? this.config.user : '';
+        this.password = this.config.password ? this.config.password : '';
+        this.database = this.config.database ? this.config.database : '';
+        this.privateKey = this.config.privateKey ? this.config.privateKey : '';
+        this.privateKeyPath = this.config.privateKeyPath ? this.config.privateKeyPath : '';
+    }
+});
+
+
+/*****
  * A DbClient is a shell or wrapper for one of the DBMS-specific DBMS clients.
  * MSSQL and PostgreSQL are examples of specific clients.  Each specific client
  * has its own wrapper or API layer to ensure they all behave identially.  In
@@ -30,7 +70,7 @@
  * class also implements code for managing connects as a pool to ensure server
  * performance.  Note that there is a separate pool for each DBMS instance.
 *****/
-global.DbClient = class DbClient {
+register(class DbClient {
     static pools = {};
     static clients = {};
     static max = 50;
@@ -86,7 +126,7 @@ global.DbClient = class DbClient {
             await this.query('START TRANSACTION');
         }
     }
-}
+});
 
 
 /*****
@@ -96,40 +136,14 @@ global.DbClient = class DbClient {
  * that are generally DBMS specific.  Hence, they are encapsulated within the
  * code the DBMS-specific client.
 *****/
-register(async function dbConnect(config) {
-    if (typeof config == 'string') {
-        if (config.startsWith('#')) {
-            let configName = Config.schemas[config];
-            this.config = Config.databases[configName];
-        }
-        else {
-            this.config = Config.databases[config];
-        }
-    }
-    else if (typeof config == 'object') {
-        this.config = config;
-    }
-    else {
-        throw new Error(`Invalid DBMS configurtion: ${config}`);
-    }
-
-    let settings = {
-        dbms: this.config.dbms,
-        host: this.config.host ? this.config.host : 'localhost',
-        port: this.config.port ? this.config.port : 0,
-        user: this.config.user ? this.config.user : '',
-        password: this.config.password ? this.config.password : '',
-        database: this.config.database ? this.config.database : '',
-        privateKey: this.config.privateKey ? this.config.privateKey : '',
-        privateKeyPath: this.config.privateKeyPath ? this.config.privateKeyPath : '',
-    };
-
+register(async function dbConnect(arg) {
+    const settings = mkDbSettings(arg);
     const poolKey = `${settings.dbms}_${settings.host}_${settings.database}`;
     
     if (!(poolKey in DbClient.pools)) {
         let pool = mkPool(
             async () => {
-                let dbc = new DbClient(DbClient.clients[settings.dbms], settings);
+                let dbc = mkDbClient(DbClient.clients[settings.dbms], settings);
                 await dbc.connect();
                 return dbc;
             },
@@ -145,28 +159,34 @@ register(async function dbConnect(config) {
     return dbc;
 });
 
-register(async function dbCreate(settings, dbName) {
-    await DbClient.clients[settings.dbms].dbCreate(settings, dbName);
+register(async function dbCreate(arg) {
+    let settings = mkDbSettings(arg); 
+    await DbClient.clients[settings.dbms].dbCreate(settings, settings.database);
 });
 
-register(async function dbDrop(settings, dbName) {
-    await DbClient.clients[settings.dbms].dbDrop(settings, dbName);
+register(async function dbDrop(arg) {
+    let settings = mkDbSettings(arg); 
+    await DbClient.clients[settings.dbms].dbDrop(settings, settings.database);
 });
 
-register(async function dbList(settings) {
+register(async function dbList(arg) {
+    let settings = mkDbSettings(arg); 
     return DbClient.clients[settings.dbms].dbList(settings);
 });
 
-register(async function dbSchema(settings) {
+register(async function dbSchema(arg) {
+    let settings = mkDbSettings(arg);
     let tableDefs = await DbClient.clients[settings.dbms].dbSchema(settings);
     return mkDbSchema('', false, ...tableDefs);
 });
 
-register(function dbSized(settings) {
+register(function dbSized(arg) {
+    let settings = mkDbSettings(arg); 
     return DbClient.clients[settings.dbms].dbSized();
 });
 
-register(function dbTypes(settings) {
+register(function dbTypes(arg) {
+    let settings = mkDbSettings(arg); 
     return DbClient.clients[settings.dbms].dbTypes();
 });
 

@@ -1,7 +1,0 @@
-{
-    "active": true,
-    "ns": "config",
-    "references": [
-        { "url": "/config", "type": "app", "path": "./config.js" }
-    ]
-}

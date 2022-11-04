@@ -29,91 +29,216 @@
  * javascript code.
 *****/
 register(class Module {
-    constructor(path, builtin) {
+    constructor(path) {
         this.path = path;
         this.configPath = PATH.join(this.path, 'config.json');
+        this.modulePath = PATH.join(this.path, 'module.json');
         this.status = 'ok';
         this.prefix = '(ok      )';
-        this.error = '';
+        this.failure = false;
+        this.databases = {};
     }
 
-    info() {
+    async execute(methodName) {
+        if (this.status == 'ok') {
+            await this[methodName]();
+        }
+    }
+
+    getActive() {
+        return this.config.active;
+    }
+
+    getContainer() {
+        return this.module.container;
+    }
+
+    getDiagnostic() {
+        return `                [${this.failure}]`;
+    }
+
+    getFailure() {
+        return this.failure;
+    }
+
+    getInfo() {
         return `${this.prefix} Module ${this.path}`;
+    }
+
+    getStatus() {
+        return this.status;
     }
     
     async load() {
-        if (await pathExists(this.path)) {
-            let stats = await FILES.stat(this.path);
+        await this.execute('validatePath');
+        await this.execute('loadModule');
+        await this.execute('validateModule');
+        await this.execute('loadConfig');
+        await this.execute('validateConfig');
+        await this.execute('loadDatabases');
+    }
 
-            if (stats.isDirectory()) {
-                if (await pathExists(this.configPath)) {
-                    stats = await FILES.stat(this.configPath);
+    async loadConfig() {
+        if (this.settings.configuration) {
+            if (await pathExists(this.configPath)) {
+                let stats = await FILES.stat(this.configPath);
 
-                    if (stats.isFile()) {
-                        try {                    
-                            this.config = fromJson((await FILES.readFile(this.configPath)).toString());
-                            await this.validate();
-
-                            if (this.status == 'ok') {
-                                for (let reference of this.config.references) {
-                                    reference.modulePath = this.path;
-                                    await ResourceLibrary.register(reference, this);
-                                }
-                            }
-
-                            if (this.status == 'ok') {
-                                Config.moduleMap[this.container] = this;
-                                Config.moduleArray.push(this);
-                            }
-                        }
-                        catch (e) {
-                            this.error = e;
-                            this.status = 'error';
-                            this.prefix = '(error    )';
-                            log(`\n${this.error.stack.toString()}`);
-                        }
+                if (stats.isFile()) {
+                    try {
+                        this.config = fromJson((await FILES.readFile(this.configPath)).toString());
                     }
-                    else {
+                    catch (e) {
                         this.status = 'fail';
-                        this.prefix = '(config   )';
+                        this.prefix = '(json     )';
+                        this.failure = `Config file syntax failure: "${this.configPath}"`;
                     }
                 }
                 else {
                     this.status = 'fail';
-                    this.prefix = '(path     )';
+                    this.prefix = '(file     )';
+                    this.failure = `Config path is not a regular file: "${this.configPath}"`;
                 }
             }
             else {
                 this.status = 'fail';
+                this.prefix = '(config   )';
+                this.failure = `Config file not found: "${this.configPath}"`;
+            }
+        }
+        else {
+            this.config = null;
+        }
+    }
+
+    async loadDatabases() {
+        if (this.settings.schemas) {
+            for (let schemaPath of this.settings.schemas) {
+                let absPath = absolutePath(this.path, schemaPath);
+
+                if (await pathExists(absPath)) {
+                    let stats = await FILES.stat(absPath);
+
+                    if (stats.isFile()) {
+                        try {
+                            require(absPath);
+                        }
+                        catch (e) {
+                            throw new Error(`Error occured while loading schema file ${abspath} in module ${this.path}\n${e.stack}`);
+                        }
+                    }
+                    else {
+                        throw new Error(`Could not open schema file ${abspath} in module ${this.path}`);
+                    }
+                }
+                else {
+                    throw new Error(`Schema file not found ${schemaPath} in module ${this.path}`);
+                }
+            }
+        }
+
+        if (this.settings.databases) {
+            for (let dbName in this.settings.databases) {
+                let db = mkDbDatabase(dbName);
+
+                for (let schemaName of this.settings.databases[dbName]) {
+                    db.setSchema(schemaName);
+                }
+            }
+        }
+    }
+
+    async loadModule() {
+        if (await pathExists(this.modulePath)) {
+            let stats = await FILES.stat(this.modulePath);
+
+            if (stats.isFile()) {
+                try {
+                    this.settings = fromJson((await FILES.readFile(this.modulePath)).toString());
+                }
+                catch (e) {
+                    this.status = 'fail';
+                    this.prefix = '(json     )';
+                    this.failure = `Module file syntax failure: "${this.modulePath}"`;
+                }
+            }
+            else {
+                this.status = 'fail';
+                this.prefix = '(file     )';
+                this.failure = `Module path is not a regular file: "${this.modulePath}"`;
+            }
+        }
+        else {
+            this.status = 'fail';
+            this.prefix = '(config   )';
+            this.failure = `Module file not found: "${this.modulePath}"`;
+        }
+    }
+
+    async validateConfig() {
+        if (this.config) {
+            let validation = Layout.validateObject(this.settings.layout, this.config);
+
+            if (!validation.valid) {
+                this.status = 'fail';
+                this.prefix = '(validate )';
+                this.failure = `Module configuration validation: "${validation.failure}"`;
+            }
+        }
+    }
+
+    async validateModule() {
+        for (let entry of Object.entries({
+            title: prop => typeof prop == 'string',
+            description: prop => typeof prop == 'string',
+            container: prop => typeof prop == 'string',
+            client: prop => Array.isArray(prop) || prop === undefined,
+            server: prop => Array.isArray(prop) || prop === undefined,
+            schemas: prop => Array.isArray(prop) || prop === undefined,
+            databases: prop => typeof prop == 'object' || prop === undefined,
+            references: prop => Array.isArray(prop) || prop === undefined,
+            configuration: prop => typeof prop == 'object' || prop === undefined,
+        })) {
+            let [ key, validator ] = entry;
+
+            if (key in this.settings) {
+                if (!validator(this.settings[key])) {
+                    this.status = 'fail';
+                    this.prefix = '(type     )';
+                    this.failure = `Module setting doesn't match the expected value type: "${key}"`;
+                    return;                    
+                }
+            }
+            else {
+                this.status = 'fail';
+                this.prefix = '(required )';
+                this.failure = `Required module setting not found: "${key}"`;
+                return;
+            }
+        }
+
+        let validation = Layout.validate(this.settings.layout);
+
+        if (!validation.valid) {
+            this.status = 'fail';
+            this.prefix = '(validate )';
+            this.failure = `Module layout failed validation: "${validation.failure}"`;
+        }
+    }
+
+    async validatePath() {
+        if (await pathExists(this.path)) {
+            let stats = await FILES.stat(this.path);
+
+            if (!stats.isDirectory()) {
+                this.status = 'fail';
                 this.prefix = '(dir      )';
+                this.failure = `Module path is not a directory: "${this.path}"`;
             }
         }
         else {
             this.status = 'fail';
             this.prefix = '(notfound )';
-        }
-    }
-
-    async validate() {
-        if (this.status == 'ok' && 'container' in this.config) {
-            if (this.config.container in Config.moduleMap) {
-                this.status = 'duplicate';
-                this.prefix = '(duplicate)';
-            }
-            else {
-                this.container = this.config.container;
-            }
-        }
-        else {
-            this.status = 'container';
-            this.prefix = '(container )';
-        }
-
-        if (this.status == 'ok' && 'active' in this.config && typeof this.config.active == 'boolean') {
-            if (!this.config.active) {
-                this.status = 'inactive';
-                this.prefix = '(inactive )';
-            }
+            this.failure = `Invalid module path: "${this.path}"`;
         }
     }
 });

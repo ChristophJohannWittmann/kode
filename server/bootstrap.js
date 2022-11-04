@@ -97,57 +97,6 @@ global.env = {
 
 
 /*****
- * In order to properly analyze a DBMS schema, we need to wait until we have
- * all of the modules registered so we know what tables are associated with
- * what DBMS connections. (1) Iterate through the loaded modules and generate
- * the configMap.  The configMap shows all expected schemas (tables) on each
- * defined DBMS connection.  (2) Perform a deep DBMS analysis on each of the
- * defined DBMS connections to determine differences between the design and
- * the actual schemas.  The startup behavior is to executed upgrade diffs only.
- * Downgrads can be left waiting for manual DBMS maintenance.
-*****/
-async function prepareDbms() {
-    let configMap = {};
-
-    for (let schemaName in Config.schemas) {
-        let configName = Config.schemas[schemaName];
-
-        if (configName in configMap) {
-            configMap[configName].set(schemaName);
-        }
-        else {
-            configMap[configName] = mkStringSet(schemaName);
-        }
-    }
-
-    for (let configName in configMap) {
-        let settings = Config.databases[configName];
-        let tableMap = {};
-
-        for (let schemaName of configMap[configName]) {
-            let schema = DbSchema.schemas[schemaName];
-
-            for (let tableDef of schema.tableArray) {
-                if (tableDef.name in tableMap) {
-                    throw new Error(`Duplicate table name DBMS: "${configName}" TABLE: "${tableDef.name}"`);
-                }
-
-                tableMap[tableDef.name] = tableDef;
-            }
-        }
-
-        for (let diff of (await mkDbSchemaAnalyzer(configName, tableMap)).diffs) {
-            logPrimary(`    ${diff.toString()}`);
-
-            if (diff.isUpgrade) {
-                await diff.upgrade();
-            }
-        }
-    }
-}
-
-
-/*****
  * This is the code that bootstraps the server and this is the entry point into
  * the kode application server.  The kode framework is NOT an application.  It's
  * a framework that loads in modules.  A module represents a namespace and some
@@ -166,7 +115,10 @@ async function prepareDbms() {
  * instructed to stop with a system-wide #Stop message.
 *****/
 (async () => {
-    require('./config.js');
+    /********************************************
+     * Load Structural Code
+     *******************************************/
+    require('./lib/config.js');
     require('./lib/utility.js');
     require('./lib/logging.js');
     await Config.loadSystem(env.kodePath);
@@ -180,6 +132,7 @@ async function prepareDbms() {
     require('./lib/crypto.js');
     require('./lib/html.js');
     require('./lib/ipc.js');
+    require('./lib/layout.js');
     require('./lib/module.js');
     require('./lib/pool.js');
     require('./lib/server.js');
@@ -191,6 +144,7 @@ async function prepareDbms() {
     require('./dbms/dbClient.js');
     require('./dbms/pgClient.js');
     require('./dbms/dbSchema.js');
+    require('./dbms/dbDatabase.js');
     require('./dbms/dbSchemaAnalyzer.js');
     require('./dbms/dbObject.js');
 
@@ -204,10 +158,16 @@ async function prepareDbms() {
         require('./daemons/sentinel.js');
     }
 
+    /********************************************
+     * Load Servers
+     *******************************************/
     require('./servers/http.js');
- 
-    await onSingletons();
+
+    /********************************************
+     * Load Addons
+     *******************************************/
     logPrimary('[ Loading Addons ]');
+    await onSingletons();
     Config.addonMap = {};
     Config.addonArray = [];
 
@@ -220,10 +180,12 @@ async function prepareDbms() {
         }
     }
 
-    await onSingletons();
-    require('./dbms/dbSchemas.js');
- 
+    /********************************************
+     * Load Modules
+     *******************************************/
     logPrimary('[ Loading Modules ]');
+    await onSingletons();
+    require('./dbms/frameworkSchema.js');
     Config.moduleMap = {};
     Config.moduleArray = [];
  
@@ -232,7 +194,11 @@ async function prepareDbms() {
             let modulePath = PATH.join(env.modulePath, entry);
             let module = mkModule(modulePath);
             await module.load();
-            logPrimary(`    ${module.info()}`);
+            logPrimary(`    ${module.getInfo()}`);
+
+            if (module.status == 'fail') {
+                logPrimary(module.getDiagnostic());
+            }
         }
     }
 
@@ -241,17 +207,41 @@ async function prepareDbms() {
     for (let modulePath of Config.modules) {
         let module = mkModule(modulePath);
         await module.load();
-        logPrimary(`    ${module.info()}`);
+        logPrimary(`    ${module.getInfo()}`);
+
+        if (module.status == 'fail') {
+            logPrimary(module.getDiagnostic());
+        }
     }
 
+    /********************************************
+     * Analyze and Upgrade Databases
+     *******************************************/
+    logPrimary('[ Preparing Databases ]');
     await onSingletons();
     Config.sealOff();
 
     if (CLUSTER.isPrimary) {
-        logPrimary('[ Preparing DBMS API ]');
-        await prepareDbms();
-    }
+        for (let db of DbDatabase) {
+            let dups = db.checkDuplicates().duplicates;
 
+            if (dups.length() == 0) {
+                if (db.checkSettings()) {
+                    await db.upgrade();
+                }
+            }
+            else {
+                for (let dup of dups) {
+                    logPrimary(`    (duptable) Duplicate database table: "${dup}"" in database "${db.name}"`);
+                }
+            }
+        }
+    }
+    return;
+
+    /********************************************
+     * Start Servers
+     *******************************************/
     if (CLUSTER.isPrimary) {
         logPrimary('[ Starting Servers ]');
 
