@@ -95,7 +95,7 @@ const pgTypes = {
         type: () => 'json',
         fmwk: () => dbJson,
         encode: value => `'${escape(toJson(value))}'`,
-        decode: value => fromJson(value),
+        decode: value => value,
     },
 
     dbKey: {
@@ -171,8 +171,8 @@ const pgTypes = {
     dbJsonArray: {
         type: () => '_json',
         fmwk: () => global.dbJsonArray,
-        encode: array => `ARRAY['${array.map(el => escape(JSON.stringify(el))).join("','")}']::json[]`,
-        decode: array => array.map(el => fromJson(el)),
+        encode: array => `ARRAY['${array.map(el => escape(toJson(el))).join("','")}']::json[]`,
+        decode: array => array.map(el => el),
     },
   
     dbTextArray: {

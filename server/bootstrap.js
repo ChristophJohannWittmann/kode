@@ -28,6 +28,9 @@
  * general features that are both (a) utilities, and (b) functions and classes
  * that shape the way code is written and structured.
 *****/
+global.CLUSTER = require('cluster');
+if (CLUSTER.isPrimary) console.log(`\n[ Booting Server at ${(new Date()).toISOString()} ]`);
+if (CLUSTER.isPrimary) console.log(`[ Loading Framework ]`);
 require('../framework/core.js');
 require('../framework/activeData.js');
 require('../framework/language.js');
@@ -36,8 +39,8 @@ require('../framework/mime.js');
 require('../framework/stringSet.js');
 require('../framework/textTemplate.js');
 require('../framework/time.js');
-require('../framework/calendars/gregorian.js');
 require('../framework/utility.js');
+require('../framework/calendars/gregorian.js');
 
 
 /*****
@@ -46,9 +49,9 @@ require('../framework/utility.js');
  * required modules using all caps to signify that the required modules is a
  * NodeJS builtin module.
 *****/
+if (CLUSTER.isPrimary) console.log(`[ Loading nodeJS Modules ]`);
 global.BUFFER    = require('buffer').Buffer;
 global.CHILDPROC = require('child_process');
-global.CLUSTER   = require('cluster');
 global.CRYPTO    = require('crypto');
 global.FILES     = require('fs').promises;
 global.FS        = require('fs');
@@ -61,6 +64,7 @@ global.PROC      = require('process');
 global.URL       = require('url');
 
 
+if (CLUSTER.isPrimary) console.log(`[ Loading NPM Modules ]`);
 /*****
  * Imported NPM Modules, which are enumerated in the package.json directory
  * for the framework.
@@ -74,6 +78,7 @@ global.npmGZIP      = require('node-gzip');
  * items are mostly used by the server-side infrastructure code, but have other
  * uses throughout the loaded modules and applciations.
 *****/
+if (CLUSTER.isPrimary) console.log(`[ Building "global.env" ]`);
 global.env = {
     arch:           OS.arch(),
     cpus:           OS.cpus().length,
@@ -116,14 +121,42 @@ global.env = {
 *****/
 (async () => {
     /********************************************
-     * Load Structural Code
+     * Validating Configuration
      *******************************************/
+    let badconfig = false;
+
+    if (PATH.isAbsolute(PROC.argv[2])) {
+        env.configPath = PROC.argv[2];
+    }
+    else {
+        env.configPath = PATH.join(__dirname, '..', PROC.argv[2]);
+    }
+
+    if (FS.existsSync(env.configPath)) {
+        if (!(await FILES.stat(env.configPath)).isFile()) {
+            badconfig = true
+        }
+    }
+    else {
+        badconfig = true;
+    }
+
+    if (badconfig && CLUSTER.isPrimary) {
+        console.log(`\n[ CONFIGURATION PATH BAD OR NOT FOUND: "${env.configPath}" ]`);
+        console.log(`[ Usage: "node /path/to/Kode/server/bootstrap.js /path/to/config/directory" ]\n`);
+        PROC.exit(-1);
+    }
+
+    if (CLUSTER.isPrimary) console.log(`[ Setting Configuration Path "${env.configPath}" ]`);
     require('./lib/config.js');
     require('./lib/utility.js');
     require('./lib/logging.js');
-    await Config.loadSystem(env.kodePath);
-    logPrimary(`\n[ Booting Server at ${(new Date()).toISOString()} ]`);
+    await Config.loadSystem();
 
+    /********************************************
+     * Infrastructure Code
+     *******************************************/
+    logPrimary(`[ Loading Server Infrastructure ]`);
     require('./lib/addon.js');
     require('./lib/auth.js');
     require('./lib/binary.js');
@@ -132,7 +165,6 @@ global.env = {
     require('./lib/crypto.js');
     require('./lib/html.js');
     require('./lib/ipc.js');
-    require('./lib/layout.js');
     require('./lib/module.js');
     require('./lib/pool.js');
     require('./lib/server.js');
@@ -158,16 +190,14 @@ global.env = {
         require('./daemons/sentinel.js');
     }
 
-    /********************************************
-     * Load Servers
-     *******************************************/
     require('./servers/http.js');
+
+    await onSingletons();
 
     /********************************************
      * Load Addons
      *******************************************/
     logPrimary('[ Loading Addons ]');
-    await onSingletons();
     Config.addonMap = {};
     Config.addonArray = [];
 
@@ -180,11 +210,12 @@ global.env = {
         }
     }
 
+    await onSingletons();
+
     /********************************************
      * Load Modules
      *******************************************/
     logPrimary('[ Loading Modules ]');
-    await onSingletons();
     require('./dbms/frameworkSchema.js');
     Config.moduleMap = {};
     Config.moduleArray = [];
@@ -194,6 +225,8 @@ global.env = {
             let modulePath = PATH.join(env.modulePath, entry);
             let module = mkModule(modulePath);
             await module.load();
+            Config.moduleArray.push(module);
+            Config.moduleMap[module.getContainer()] = module;
             logPrimary(`    ${module.getInfo()}`);
 
             if (module.status == 'fail') {
@@ -205,8 +238,11 @@ global.env = {
     await onSingletons();
 
     for (let modulePath of Config.modules) {
-        let module = mkModule(modulePath);
+        let absPath = absolutePath(env.configPath, modulePath);
+        let module = mkModule(absPath);
         await module.load();
+        Config.moduleArray.push(module);
+        Config.moduleMap[module.getContainer()] = module;
         logPrimary(`    ${module.getInfo()}`);
 
         if (module.status == 'fail') {
@@ -214,12 +250,13 @@ global.env = {
         }
     }
 
+    await onSingletons();
+    Config.sealOff();
+
     /********************************************
      * Analyze and Upgrade Databases
      *******************************************/
     logPrimary('[ Preparing Databases ]');
-    await onSingletons();
-    Config.sealOff();
 
     if (CLUSTER.isPrimary) {
         for (let db of DbDatabase) {
@@ -237,7 +274,24 @@ global.env = {
             }
         }
     }
-    return;
+
+    /********************************************
+     * Load Configuration Settings
+     *******************************************/
+    logPrimary('[ Loaoding Configuration Settings ]');
+
+    for (let module of Config.moduleArray) {
+        await module.loadConfig();
+
+        if (module.status == 'ok') {
+            await module.loadReferences();
+        }
+        else {
+            module.erase();
+            logPrimary(`    Module at "${this.path}" failed to load.`);
+        }
+    }
+
 
     /********************************************
      * Start Servers
@@ -253,6 +307,8 @@ global.env = {
         }
 
         logPrimary('[ Kode Application Server Ready ]\n');
+        clearBootMode();
+        logPrimary('[ Kode Application Server Ready ]');
     }
     else {
         const serverName = PROC.env.KODE_SERVER_NAME;

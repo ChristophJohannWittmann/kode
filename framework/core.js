@@ -43,6 +43,7 @@
      * which to register classes and functions.
     *****/
     let chain = '';
+    let prefix = '';
     let container = global;
 
     global.getContainer = function(links) {
@@ -61,11 +62,15 @@
         return container;
     }
 
-    global.setContainer = function(links) {
-        chain = [];
-        container = global;
+    global.getContainerPrefix = function() {
+        return prefix;
+    }
 
+    global.setContainer = function(links) {
         if (links !== undefined) {
+            container = global;
+            chain = [];
+
             for (let link of links.split('.')) {
                 chain.push(link);
 
@@ -75,9 +80,10 @@
 
                 container = container[link];
             }
-        }
 
-        chain = chain.join('.');
+            chain = chain.join('.');
+            prefix = `${chain}.`;
+        }
     }
 
 

@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
 *****/
-'javascript-web-extension';
 
 
 /*****
@@ -38,7 +37,7 @@
  * the sub class is created.  Thereafter, that instance is used repeatedly for
  * handling HTTP and web socket requests.
 *****/
-exports = module.exports = register(class WebApp extends WebExtension {
+register(class WebApp extends WebExtension {
     constructor() {
         super();
         this.webSockets = {};
@@ -101,13 +100,13 @@ exports = module.exports = register(class WebApp extends WebExtension {
         let doc = mkTextTemplate(Config.minify ? this.compactHtml : this.visualHtml).set({
             css: this.compactCss,
             cssTitle: 'webapp',
-            title: this.config.title,
-            description: this.config.description,
+            title: this.options.title,
+            description: this.options.description,
             links: this.links,
             classes: this.options.classes,
-            url: this.config.url,
-            authenticate: this.config.authenticate,
-            websocket: this.config.websocket,
+            url: this.options.url,
+            authenticate: this.options.authenticate,
+            websocket: this.options.websocket,
         });
 
         rsp.end(200, 'text/html', await doc.toString());
@@ -141,7 +140,7 @@ exports = module.exports = register(class WebApp extends WebExtension {
 
     async init(cssPath, htmlPath) {
         await super.init();
-        this.setOptions();
+
         await this.buildLinks();
         await this.buildHTML(PATH.join(env.kodePath, 'server/webExtensions/webApp.html'));
 
@@ -154,17 +153,7 @@ exports = module.exports = register(class WebApp extends WebExtension {
     }
 
     async onWebSocket(req, webSocket) {
+        console.log(websocket);
         //this.webSockets[webSocket.id] = webSocket;
-    }
-
-    setOptions() {
-        this.options = {
-            css: this.config.css,
-            favicons: this.config.favicons,
-            classes: 'font-family-sans font-size-4 colors-1',
-            websocket: this.config.websocket,
-            authenticate: this.config.authenticate,
-            homeView: this.config.homeView,
-        };
     }
 });

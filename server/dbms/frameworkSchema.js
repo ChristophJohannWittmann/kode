@@ -147,6 +147,24 @@ mkDbSchema(
         ]
     },
     {
+        name: 'setting',
+        columns: [
+            { name: 'name',        type: dbText, size:   50 },
+            { name: 'value',       type: dbJson, size: 2000 },
+        ],
+        indexes: [
+            'name:asc',
+        ]
+    },
+    {
+        name: 'systemLog',
+        columns: [
+            { name: 'message',     type: dbText, size: 2000 },
+        ],
+        indexes: [
+        ]
+    },
+    {
         name: 'user',
         columns: [
             { name: 'orgOid',    type: dbInt64           },

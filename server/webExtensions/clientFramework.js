@@ -47,12 +47,13 @@ const clientFrameworkPaths = [
  * compiling the final product, which is cached in memory in the individual
  * process for performance purposes.
 *****/
-exports = module.exports = register(class ClientFramework extends WebExtension {
+register(class ClientFramework extends WebExtension {
     constructor() {
         super();
     }
 
     async init() {
+        console.log(this);
         this.framework = { '': await buildClientLibrary(clientFrameworkPaths) };
     }
 

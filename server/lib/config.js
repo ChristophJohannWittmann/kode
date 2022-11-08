@@ -29,63 +29,29 @@
  * Config singleton instance is whatever value is returned back by the singleton
  * constructor's promise resolution.
 *****/
-singleton(class Config {
-    async loadModule(path) {
-        if (await pathExists(path)) {
-            try {
-                let stats = await FILES.stat(path);
-
-                if (stats.isFile()) {
-                    let buffer = await FILES.readFile(path);
-                    let config = fromJson(buffer.toString());
-          
-                    if (config.active) {
-                        global.Config.moduleArray.push(config);
-                        global.Config.moduleMap[config.name] = config;
-                    }
-          
-                    return config;
-                }
-                else {
-                    return 'config.json-not-a-file';
-                }
-            }
-            catch(e) {
-                console.log(e);
-                return 'config.json-failed';
-            }
-        }
-        else {
-            return 'config.json-not-found';
-        }
-        
-        return 'ok';
-    }
-    
-    async loadSystem(path) {
-        if (!path || !await pathExists(path)) {
+singleton(class Config {    
+    async loadSystem() {
+        if (!env.configPath || !await pathExists(env.configPath)) {
             return false;
         }
         
-        let stats = await FILES.stat(path);
+        let stats = await FILES.stat(env.configPath);
 
-        if (!stats.isDirectory()) {
-            return false;
-        }
-        
-        let configurationFilePath = PATH.join(path, 'config.json');
-     
-        if (!await pathExists(configurationFilePath)) {
+        if (!stats.isFile()) {
             return false;
         }
      
-        stats = await FILES.stat(configurationFilePath);
+        if (!await pathExists(env.configPath)) {
+            return false;
+        }
+     
+        stats = await FILES.stat(env.configPath);
 
         if (!stats.isFile()) {
             return false;
         }
         
-        let buffer = await FILES.readFile(configurationFilePath);
+        let buffer = await FILES.readFile(env.configPath);
         let systemConfig = fromJson(buffer.toString());
         
         for (let key in systemConfig) {

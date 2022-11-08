@@ -31,12 +31,24 @@
 register(class Module {
     constructor(path) {
         this.path = path;
-        this.configPath = PATH.join(this.path, 'config.json');
-        this.modulePath = PATH.join(this.path, 'module.json');
         this.status = 'ok';
         this.prefix = '(ok      )';
         this.failure = false;
         this.databases = {};
+        this.config = {};
+    }
+
+    erase() {
+        global[this.settings.container];
+
+
+        if (this.settings.databases) {
+            for (let dbName in this.settings.databases) {
+                delete DbDatabase.databases[dbName];
+            }
+        }
+
+        return this;
     }
 
     async execute(methodName) {
@@ -45,16 +57,12 @@ register(class Module {
         }
     }
 
-    getActive() {
-        return this.config.active;
-    }
-
     getContainer() {
-        return this.module.container;
+        return this.settings.container;
     }
 
     getDiagnostic() {
-        return `                [${this.failure}]`;
+        return `    [${this.failure}]`;
     }
 
     getFailure() {
@@ -72,41 +80,27 @@ register(class Module {
     async load() {
         await this.execute('validatePath');
         await this.execute('loadModule');
-        await this.execute('validateModule');
-        await this.execute('loadConfig');
-        await this.execute('validateConfig');
+        setContainer(this.settings.container);
         await this.execute('loadDatabases');
     }
 
     async loadConfig() {
-        if (this.settings.configuration) {
-            if (await pathExists(this.configPath)) {
-                let stats = await FILES.stat(this.configPath);
+        let dbc = await dbConnect();
+        let config = await selectOneDboSetting(dbc, `_name='${this.settings.container}-module'`);
+        await dbc.rollback();
+        await dbc.free();
 
-                if (stats.isFile()) {
-                    try {
-                        this.config = fromJson((await FILES.readFile(this.configPath)).toString());
-                    }
-                    catch (e) {
-                        this.status = 'fail';
-                        this.prefix = '(json     )';
-                        this.failure = `Config file syntax failure: "${this.configPath}"`;
-                    }
-                }
-                else {
-                    this.status = 'fail';
-                    this.prefix = '(file     )';
-                    this.failure = `Config path is not a regular file: "${this.configPath}"`;
-                }
-            }
-            else {
+        if (config) {
+            this.config = new ModuleConfig(this, config.value);
+
+            if (await !this.config.validate()) {
                 this.status = 'fail';
-                this.prefix = '(config   )';
-                this.failure = `Config file not found: "${this.configPath}"`;
+                this.prefix = '(validate )';
+                this.failure = `Module configuration validation: "${validation.failure}"`;
             }
         }
         else {
-            this.config = null;
+            this.config = new ModuleConfig(this);
         }
     }
 
@@ -123,11 +117,11 @@ register(class Module {
                             require(absPath);
                         }
                         catch (e) {
-                            throw new Error(`Error occured while loading schema file ${abspath} in module ${this.path}\n${e.stack}`);
+                            throw new Error(`Error occured while loading schema file ${absPath} in module ${this.path}\n${e.stack}`);
                         }
                     }
                     else {
-                        throw new Error(`Could not open schema file ${abspath} in module ${this.path}`);
+                        throw new Error(`Could not open schema file ${absPath} in module ${this.path}`);
                     }
                 }
                 else {
@@ -148,6 +142,8 @@ register(class Module {
     }
 
     async loadModule() {
+        this.modulePath = PATH.join(this.path, 'module.json');
+
         if (await pathExists(this.modulePath)) {
             let stats = await FILES.stat(this.modulePath);
 
@@ -174,54 +170,19 @@ register(class Module {
         }
     }
 
-    async validateConfig() {
-        if (this.config) {
-            let validation = Layout.validateObject(this.settings.layout, this.config);
-
-            if (!validation.valid) {
-                this.status = 'fail';
-                this.prefix = '(validate )';
-                this.failure = `Module configuration validation: "${validation.failure}"`;
-            }
-        }
-    }
-
-    async validateModule() {
-        for (let entry of Object.entries({
-            title: prop => typeof prop == 'string',
-            description: prop => typeof prop == 'string',
-            container: prop => typeof prop == 'string',
-            client: prop => Array.isArray(prop) || prop === undefined,
-            server: prop => Array.isArray(prop) || prop === undefined,
-            schemas: prop => Array.isArray(prop) || prop === undefined,
-            databases: prop => typeof prop == 'object' || prop === undefined,
-            references: prop => Array.isArray(prop) || prop === undefined,
-            configuration: prop => typeof prop == 'object' || prop === undefined,
-        })) {
-            let [ key, validator ] = entry;
-
-            if (key in this.settings) {
-                if (!validator(this.settings[key])) {
-                    this.status = 'fail';
-                    this.prefix = '(type     )';
-                    this.failure = `Module setting doesn't match the expected value type: "${key}"`;
-                    return;                    
+    async loadReferences() {
+        if (this.status == 'ok') {
+            if (Array.isArray(this.settings.references)) {
+                for (let reference of this.settings.references) {
+                    ResourceLibrary.register(reference, this);
                 }
             }
-            else {
-                this.status = 'fail';
-                this.prefix = '(required )';
-                this.failure = `Required module setting not found: "${key}"`;
-                return;
+
+            if (Array.isArray(this.config.references)) {
+                for (let reference of this.config.references) {
+                    ResourceLibrary.register(reference, this);
+                }
             }
-        }
-
-        let validation = Layout.validate(this.settings.layout);
-
-        if (!validation.valid) {
-            this.status = 'fail';
-            this.prefix = '(validate )';
-            this.failure = `Module layout failed validation: "${validation.failure}"`;
         }
     }
 
@@ -242,3 +203,44 @@ register(class Module {
         }
     }
 });
+
+
+/*****
+*****/
+class ModuleConfig {
+    constructor(module, config) {
+        this['#VALID'] = true;
+
+        if (config) {
+            Object.assign(this, config);
+        }
+        else {
+            this.createDefaults(module.settings);
+        }
+    }
+
+    async createDefaults(settings) {
+        console.log('TODO -- ModuleConfig.createDefaults()');
+
+        for (let setting in Object.values(settings)) {
+            let [ key, value ] = setting;
+
+            switch (typeof value) {
+                case 'string':
+                    break;
+            }
+        }
+    }
+
+    isValid() {
+        return this['#VALID'];
+    }
+
+    async validate() {
+        console.log('TODO -- ModuleConfig.validate()');
+        if (this['#VALID']) {
+        }
+
+        return this['#VALID'];
+    }
+}

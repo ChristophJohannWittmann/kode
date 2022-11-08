@@ -331,8 +331,8 @@ register(class DbSchema {
             this.name = name;
             this.tableMap = {};
             this.tableArray = [];
-            this.registered = false;
             this.defined = defined;
+            this.container = getContainer();
 
             if (this.defined && !this.name.startsWith('#')) {
                 throw new Error(`Schema name does not being with a hashtag: ${this.name}`);
@@ -358,6 +358,10 @@ register(class DbSchema {
                     let schemaTable = new DbSchemaTable(this, tableDef);
                     this.tableArray.push(schemaTable);
                     this.tableMap[schemaTable.name] = schemaTable;
+
+                    if (this.defined) {
+                        defineDboType(schemaTable);
+                    }
                 }
             }
         }
@@ -366,17 +370,12 @@ register(class DbSchema {
         }
     }
 
-    registerClass() {
-        for (let table of this.tableArray) {
-            defineDboType(table, this.name);
-        }
-
-        this.registered = true;
-        return this;
-    }
-
     [Symbol.iterator]() {
         return this.tableArray[Symbol.iterator]();
+    }
+
+    static [Symbol.iterator]() {
+        return Object.values(DbSchema.schemas)[Symbol.iterator]();
     }
 });
 

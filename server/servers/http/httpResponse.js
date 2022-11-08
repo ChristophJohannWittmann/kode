@@ -151,7 +151,7 @@ register(class HttpResponse {
     }
 
     endStatus(status) {
-        this.end(status, 'text/plain', HttpResponse.statusCodes[this.status].text);
+        this.end(status, 'text/plain', HttpResponse.statusCodes[status].text);
     }
 
     setEncoding() {

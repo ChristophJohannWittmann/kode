@@ -39,19 +39,22 @@ class Resource {
             this.expires = null;
             this.oneTime = false;
             this.url = reference.expandedUrl;
-            this.path = reference.expandedPath;
-            this.mime = mkMime(PATH.extname(this.path));
             this.value = null;
 
-            if (this.mime.code == 'text/javascript') {
-                const code = (await FILES.readFile(this.path)).toString();
-
-                if (code.match(/'javascript-web-extension';/m)) {
-                    this.webExtension = true;
-                    this.value = new require(this.path)();
-                    this.value.module = module;
-                    this.value.config = reference;
-                }
+            if ('path' in reference) {
+                this.category = 'content';
+                this.path = reference.expandedPath;
+                this.mime = mkMime(PATH.extname(this.path));
+            }
+            else if ('webex' in reference) {
+                this.category = 'webex';
+                eval('this.value = ' + (reference.container ? `mk${reference.container}.${reference.webex}()` : `mk${reference.webex}()`));
+                this.value.config = reference;
+                this.value.module = this.module;
+                await this.value.init();
+            }
+            else {
+                logPrimary(`    WARNING: "Unable to process reference:\n.   reference: "${toJson(reference, true)}"`);
             }
 
             ok(this);
@@ -103,8 +106,7 @@ class Resource {
 singleton(class ResourceLibrary {
     constructor() {
         this.urls = {};
-        this.webExtensionMap = {};
-        this.webExtensionArray = [];
+        this.builtin = false;
     }
 
     deregister(url) {
@@ -114,8 +116,10 @@ singleton(class ResourceLibrary {
     }
 
     async expandReference(reference) {
+        let expanded = [];
+
         if ('path' in reference) {
-            let absPath = PATH.isAbsolute(reference.path) ? reference.path : PATH.join(env.kodePath, 'server', reference.path);
+            let absPath = absolutePath(env.kodePath, reference.path);
 
             if (await pathExists(absPath)) {
                 let stats = await FILES.stat(absPath);
@@ -126,8 +130,6 @@ singleton(class ResourceLibrary {
                     return [reference];
                 }
                 else if (stats.isDirectory()) {
-                    let expanded = [];
-
                     for (let filePath of await recurseFiles(absPath)) {
                         let baseName = PATH.basename(filePath);
                         let relative = filePath.substr(reference.path.length);
@@ -155,16 +157,18 @@ singleton(class ResourceLibrary {
                             }
                         }
                     }
-
-                    return expanded;
                 }
             }
             else {
-                logPrimary(`    ERROR: "File Not Found"  PATH: "${reference.path}"`);
+                logPrimary(`    WARNING: "File Not Found"  PATH: "${reference.path}"`);
             }
         }
+        else {
+            reference.expandedUrl = reference.url;
+            expanded.push(reference);
+        }
 
-        return [];
+        return expanded;
     }
     
     async get(url) {
@@ -176,17 +180,11 @@ singleton(class ResourceLibrary {
     async register(reference, module) {
         for (let ref of await this.expandReference(reference)) {
             if (ref.expandedUrl in this.urls) {
-                logPrimary(`    ERROR: "Duplicate URL ignored"  URL: "${ref.expandedUrl}"`);
+                logPrimary(`    WARNING: "Duplicate URL ignored"  URL: "${ref.expandedUrl}"`);
             }
             else {
                 let resource = await (new Resource(ref, module));
                 this.urls[resource.url] = resource;
-
-                if (resource.webExtension) {
-                    this.webExtensionArray.push(resource);
-                    this.webExtensionMap[resource.url] = resource;
-                    await resource.value.init();
-                }
             }
         }
     }

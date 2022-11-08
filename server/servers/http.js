@@ -73,7 +73,7 @@ if (CLUSTER.isWorker) {
             this.nodeHttpServer.on('upgrade', async (httpReq, socket, headPacket) => {
                 let resource = ResourceLibrary.get(httpReq.pathname());
 
-                if (resource && resource.webExtension) {
+                if (resource && resource.category == 'webex') {
                     try {
                         await resource.value.upgrade(httpReq, socket, headPacket);
                     }
@@ -90,37 +90,45 @@ if (CLUSTER.isWorker) {
             let req = await mkHttpRequest(this, httpReq);
             let rsp = await mkHttpResponse(this, httpRsp, req);
 
-            if (req.method() in { GET:0, POST:0 }) {
-                let resource = await ResourceLibrary.get(req.pathname());
+            try {
+                if (req.method() in { GET:0, POST:0 }) {
+                    let resource = await ResourceLibrary.get(req.pathname());
 
-                if (resource) {
-                    if (resource.webExtension) {
-                        await resource.value.handleRequest(req, rsp);
-                    }
-                    else if (req.method() == 'GET') {
-                        let content = await resource.get(rsp.encoding);
+                    if (resource) {
+                        if (resource.category == 'webex') {
+                            await resource.value.handleRequest(req, rsp);
+                        }
+                        else if (req.method() == 'GET') {
+                            let content = await resource.get(rsp.encoding);
 
-                        if (content.error) {
-                            rsp.mime = mkMime('text/plain');
-                            rsp.end(`Error while fetching ${req.url()}`);
+                            if (content.error) {
+                                rsp.mime = mkMime('text/plain');
+                                rsp.end(`Error while fetching ${req.url()}`);
+                            }
+                            else {
+                                rsp.preEncoded = true;
+                                rsp.mime = content.mime;
+                                rsp.end(content.value);
+                            }
                         }
                         else {
-                            rsp.preEncoded = true;
-                            rsp.mime = content.mime;
-                            rsp.end(content.value);
+                            rsp.endStatus(405);
                         }
                     }
                     else {
-                        rsp.endError(405);
+                        rsp.endStatus(404);
                     }
                 }
                 else {
-                    rsp.endError(404);
+                    rsp.endStatus(405);
                 }
             }
-            else {
-                rsp.endError(405);
+            catch (e) {
+                log(e);
+                rsp.endStatus(500);
             }
+
+            let dbc = await dbConnect();
 
             await mkDboHttpLog({
                 ipAddr: req.host(),
@@ -129,7 +137,10 @@ if (CLUSTER.isWorker) {
                 url: req.url(),
                 headers: req.headers(),
                 status: rsp.status,
-            }).save();
+            }).save(dbc);
+
+            await dbc.commit();
+            await dbc.free();
         }
 
         port() {

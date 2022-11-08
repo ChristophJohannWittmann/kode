@@ -260,8 +260,6 @@ register(class DbSchemaAnalyzer {
 
     async analyzeTables() {
         this.actual = await dbSchema(this.settings);
-        console.log(this.actual);
-        /*
         this.intersection = [];
 
         for (let table of this.design.tableArray) {
@@ -283,6 +281,5 @@ register(class DbSchemaAnalyzer {
             await this.analyzeColumns(pair);
             await this.analyzeIndexes(pair);
         }
-        */
     }
 });
