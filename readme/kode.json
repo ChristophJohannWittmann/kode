@@ -1,0 +1,47 @@
+{
+    "cache": false,
+    "cacheMB": 10,
+    "minify": false,
+    "logging": "console",
+    "network": {
+        "public": {
+            "active": true,
+            "address": "0.0.0.0",
+            "domain": "somedomain.com",
+            "host": "host.somedomain.com",
+            "tls": {
+                "caName": "letsEncrypt",
+                "caUrl": "https//letsencrypt.com/apiv2:",
+                "caAccount": "",
+                "publicKey": { "#NULL": 0 },
+                "privateKey": { "#NULL": 0 },
+                "cert": { "#NULL": 0 },
+                "caCert": { "#NULL": 0 },
+                "expiration": { "#NULL": 0 }
+            }
+        }
+    },
+    "databases": {
+        "@": {
+            "dbms": "postgres",
+            "host": "localhost",
+            "user": "postgres",
+            "password": "postgres",
+            "database": "dbname"
+        }
+    },
+    "servers": {
+        "http": {
+            "type": "HttpServer",
+            "network": "public",
+            "active": true,
+            "options": {
+                "keepAlive": true
+            },
+            "workers": 1
+        }
+    },
+    "modules": [
+        "../path/to/module/directory"
+    ]
+}

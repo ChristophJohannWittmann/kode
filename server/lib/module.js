@@ -22,6 +22,53 @@
 
 
 /*****
+ * This is an object containing settings that need to be made available for all
+ * module configurations, which mean they do NOT need to be added manually to the
+ * module.json "configuration" property.  Instead, they are automatically addd
+ * to the "configuration" property when that property is part of the module.json
+ * settings.
+*****/
+const alwaysConfigurable = {
+    "references" : {
+        "required": false,
+        "type": "array",
+        "of": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "required": true,
+                    "type": "string"
+                },
+                "class": {
+                    "required": false,
+                    "type": "string"
+                },
+                "path": {
+                    "required": false,
+                    "type": "string"
+                },
+                "css": {
+                    "required": false,
+                    "type": "string"
+                },
+                "panel": {
+                    "required": false,
+                    "type": "string"
+                },
+                "favicons": {
+                    "required": false,
+                    "type": "array",
+                    "of": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+};
+
+
+/*****
  * A module is an encapsulation of the data and functions that are required for
  * loading and executing the module content and programming code.  A module is
  * NOT coded as a nodeJS module.  The module is a directory with one config.js
@@ -39,8 +86,9 @@ register(class Module {
     }
 
     erase() {
-        global[this.settings.container];
-
+        if (this.settings.container in global) {
+            delete global[this.settings.container];
+        }
 
         if (this.settings.databases) {
             for (let dbName in this.settings.databases) {
@@ -76,6 +124,10 @@ register(class Module {
     getStatus() {
         return this.status;
     }
+
+    hasConfig() {
+        return 'configuration' in this.settings && typeof this.settings.configuration == 'object';
+    }
     
     async load() {
         await this.execute('validatePath');
@@ -85,22 +137,25 @@ register(class Module {
     }
 
     async loadConfig() {
-        let dbc = await dbConnect();
-        let config = await selectOneDboSetting(dbc, `_name='${this.settings.container}-module'`);
-        await dbc.rollback();
-        await dbc.free();
+        this.config = mkModuleConfig(this);
 
-        if (config) {
-            this.config = new ModuleConfig(this, config.value);
+        if (this.hasConfig()) {
+            Object.assign(this.settings.configuration, alwaysConfigurable);
 
-            if (await !this.config.validate()) {
+            if (this.config.validateSettings()) {
+                let result = await this.config.load();
+
+                if (result !== true) {
+                    this.status = 'fail';
+                    this.prefix = '(validate )';
+                    this.failure = `Unable to load configuration file at: "${this.config.getPath()}".  "${result}"`;
+                }
+            }
+            else {
                 this.status = 'fail';
                 this.prefix = '(validate )';
-                this.failure = `Module configuration validation: "${validation.failure}"`;
+                this.failure = `Module configuration settings failed validation: "${result}"`;
             }
-        }
-        else {
-            this.config = new ModuleConfig(this);
         }
     }
 
@@ -203,44 +258,3 @@ register(class Module {
         }
     }
 });
-
-
-/*****
-*****/
-class ModuleConfig {
-    constructor(module, config) {
-        this['#VALID'] = true;
-
-        if (config) {
-            Object.assign(this, config);
-        }
-        else {
-            this.createDefaults(module.settings);
-        }
-    }
-
-    async createDefaults(settings) {
-        console.log('TODO -- ModuleConfig.createDefaults()');
-
-        for (let setting in Object.values(settings)) {
-            let [ key, value ] = setting;
-
-            switch (typeof value) {
-                case 'string':
-                    break;
-            }
-        }
-    }
-
-    isValid() {
-        return this['#VALID'];
-    }
-
-    async validate() {
-        console.log('TODO -- ModuleConfig.validate()');
-        if (this['#VALID']) {
-        }
-
-        return this['#VALID'];
-    }
-}

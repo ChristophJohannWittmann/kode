@@ -257,7 +257,7 @@ class FrameBuilder {
 
 /*****
 *****/
-class $FrameParser {
+class FrameParser {
     constructor(webSocket, headData) {
         this._webSocket = webSocket;
         this._socket = webSocket._socket;

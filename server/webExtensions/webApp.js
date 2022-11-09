@@ -140,7 +140,6 @@ register(class WebApp extends WebExtension {
 
     async init(cssPath, htmlPath) {
         await super.init();
-
         await this.buildLinks();
         await this.buildHTML(PATH.join(env.kodePath, 'server/webExtensions/webApp.html'));
 

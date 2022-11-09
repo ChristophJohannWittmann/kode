@@ -41,6 +41,7 @@ require('../framework/textTemplate.js');
 require('../framework/time.js');
 require('../framework/utility.js');
 require('../framework/calendars/gregorian.js');
+require('./lib/binary.js');
 
 
 /*****
@@ -123,8 +124,6 @@ global.env = {
     /********************************************
      * Validating Configuration
      *******************************************/
-    let badconfig = false;
-
     if (PATH.isAbsolute(PROC.argv[2])) {
         env.configPath = PROC.argv[2];
     }
@@ -132,40 +131,34 @@ global.env = {
         env.configPath = PATH.join(__dirname, '..', PROC.argv[2]);
     }
 
-    if (FS.existsSync(env.configPath)) {
-        if (!(await FILES.stat(env.configPath)).isFile()) {
-            badconfig = true
-        }
+    if (CLUSTER.isPrimary) console.log(`[ Searching Configuration Path "${env.configPath}" ]`);
+
+    require('./lib/utility.js');
+    require('./lib/config.js');
+    const searchResult = await Config.loadSystem();
+
+    if (searchResult === true) {
+        if (CLUSTER.isPrimary) console.log(`    (ok      ) Server configuration successfully loaded.`);
     }
     else {
-        badconfig = true;
-    }
-
-    if (badconfig && CLUSTER.isPrimary) {
-        console.log(`\n[ CONFIGURATION PATH BAD OR NOT FOUND: "${env.configPath}" ]`);
-        console.log(`[ Usage: "node /path/to/Kode/server/bootstrap.js /path/to/config/directory" ]\n`);
+        if (CLUSTER.isPrimary) console.log(`    (config  ) ${searchResult}`);
         PROC.exit(-1);
     }
-
-    if (CLUSTER.isPrimary) console.log(`[ Setting Configuration Path "${env.configPath}" ]`);
-    require('./lib/config.js');
-    require('./lib/utility.js');
-    require('./lib/logging.js');
-    await Config.loadSystem();
 
     /********************************************
      * Infrastructure Code
      *******************************************/
-    logPrimary(`[ Loading Server Infrastructure ]`);
+    if (CLUSTER.isPrimary) (`[ Loading Server Infrastructure ]`);
     require('./lib/addon.js');
     require('./lib/auth.js');
-    require('./lib/binary.js');
     require('./lib/cluster.js');
     require('./lib/compression.js');
     require('./lib/crypto.js');
     require('./lib/html.js');
     require('./lib/ipc.js');
+    require('./lib/logging.js');
     require('./lib/module.js');
+    require('./lib/moduleConfig.js');
     require('./lib/pool.js');
     require('./lib/server.js');
     require('./lib/utility.js');
@@ -217,37 +210,43 @@ global.env = {
      *******************************************/
     logPrimary('[ Loading Modules ]');
     require('./dbms/frameworkSchema.js');
+
     Config.moduleMap = {};
     Config.moduleArray = [];
+
+    async function loadModule(modulePath) {
+        let module = mkModule(modulePath);
+        logPrimary(`    ${module.getInfo()}`);
+        await module.load();
+
+        if (module.getStatus() == 'ok') {
+            await module.loadConfig();
+
+            if (module.status == 'ok') {
+                await module.loadReferences();
+                Config.moduleArray.push(module);
+                Config.moduleMap[module.getContainer()] = module;
+            }
+        }
+
+        if (module.getStatus() == 'fail') {
+            logPrimary(module.getDiagnostic());
+            module.erase();
+        }
+
+        return module;
+    }
  
     for (let entry of await FILES.readdir(env.modulePath)) {
         if (!entry.startsWith('.')) {
-            let modulePath = PATH.join(env.modulePath, entry);
-            let module = mkModule(modulePath);
-            await module.load();
-            Config.moduleArray.push(module);
-            Config.moduleMap[module.getContainer()] = module;
-            logPrimary(`    ${module.getInfo()}`);
-
-            if (module.status == 'fail') {
-                logPrimary(module.getDiagnostic());
-            }
+            await loadModule(PATH.join(env.modulePath, entry));
         }
     }
 
     await onSingletons();
 
     for (let modulePath of Config.modules) {
-        let absPath = absolutePath(env.configPath, modulePath);
-        let module = mkModule(absPath);
-        await module.load();
-        Config.moduleArray.push(module);
-        Config.moduleMap[module.getContainer()] = module;
-        logPrimary(`    ${module.getInfo()}`);
-
-        if (module.status == 'fail') {
-            logPrimary(module.getDiagnostic());
-        }
+        await loadModule(absolutePath(env.configPath, modulePath));
     }
 
     await onSingletons();
@@ -276,37 +275,21 @@ global.env = {
     }
 
     /********************************************
-     * Load Configuration Settings
-     *******************************************/
-    logPrimary('[ Loaoding Configuration Settings ]');
-
-    for (let module of Config.moduleArray) {
-        await module.loadConfig();
-
-        if (module.status == 'ok') {
-            await module.loadReferences();
-        }
-        else {
-            module.erase();
-            logPrimary(`    Module at "${this.path}" failed to load.`);
-        }
-    }
-
-
-    /********************************************
      * Start Servers
      *******************************************/
     if (CLUSTER.isPrimary) {
         logPrimary('[ Starting Servers ]');
 
         for (let serverName in Config.servers) {
-            let server;
             let config = Config.servers[serverName];
-            eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
-            await server.start();
+
+            if (config.active) {
+                let server;
+                eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
+                await server.start();
+            }
         }
 
-        logPrimary('[ Kode Application Server Ready ]\n');
         clearBootMode();
         logPrimary('[ Kode Application Server Ready ]');
     }
@@ -314,9 +297,12 @@ global.env = {
         const serverName = PROC.env.KODE_SERVER_NAME;
 
         if (serverName) {
-            let server;
             let config = Config.servers[serverName];
-            eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
+
+            if (config.active) {
+                let server;
+                eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
+            }
         }
     }
 

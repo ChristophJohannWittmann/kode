@@ -32,31 +32,35 @@
 singleton(class Config {    
     async loadSystem() {
         if (!env.configPath || !await pathExists(env.configPath)) {
-            return false;
+            return `Configuration directory not found: "${env.configPath}"`;
         }
         
         let stats = await FILES.stat(env.configPath);
 
-        if (!stats.isFile()) {
-            return false;
+        if (!stats.isDirectory()) {
+            return `Configuration directory is not a standard directory" "${env.configPath}"`;
         }
-     
-        if (!await pathExists(env.configPath)) {
-            return false;
+
+        let serverConfigPath = PATH.join(env.configPath, 'builtin.json');
+
+        if (!await pathExists(serverConfigPath)) {
+            return `Server configuration path not found: "${serverConfigPath}"`;
         }
-     
-        stats = await FILES.stat(env.configPath);
+
+        stats = await FILES.stat(serverConfigPath);
 
         if (!stats.isFile()) {
-            return false;
+            return `Server configuration path is not a regular file: "${serverConfigPath}"`;
         }
         
-        let buffer = await FILES.readFile(env.configPath);
+        let buffer = await FILES.readFile(serverConfigPath);
         let systemConfig = fromJson(buffer.toString());
         
         for (let key in systemConfig) {
             this[key] = systemConfig[key];
         }
+
+        return true;
     }
     
     sealOff() {

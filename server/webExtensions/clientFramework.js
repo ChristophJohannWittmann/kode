@@ -53,7 +53,6 @@ register(class ClientFramework extends WebExtension {
     }
 
     async init() {
-        console.log(this);
         this.framework = { '': await buildClientLibrary(clientFrameworkPaths) };
     }
 
