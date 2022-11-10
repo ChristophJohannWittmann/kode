@@ -724,7 +724,7 @@ html {
     border-style: solid;
     border-width: 1px;
     border-radius: var(--border-radius-1);
-    outline-width: var(--outline-width-2);
+    outline-width: var(--outline-width-4);
     outline-color: inherit;
     background-color: var(--background-color-1);
     text-decoration: none;
@@ -741,7 +741,8 @@ html {
 }
 [widget-style=input]:focus {
     border-color: transparent;
-    outline-color: inherit;
+    outline-style: solid;
+    outline-color: var(--outline-color);
 }
 [widget-style=input]:invalid {
     color: var(--error-color);
@@ -763,7 +764,8 @@ html {
     border-style: solid;
     border-width: 1px;
     border-radius: var(--border-radius-1);
-    outline-width: var(--outline-width-2);
+    outline-width: var(--outline-width-1);
+    outline-color: var(--outline-color-1);
     outline-color: inherit;
     background-color: var(--background-button-1);
     text-decoration: none;
@@ -787,7 +789,8 @@ html {
 }
 [widget-style=button]:focus {
     border-color: transparent;
-    outline-color: inherit;
+    outline-style: solid;
+    outline-color: var(--outline-color);
 }
 [widget-style=button]:invalid {
     color: var(--error-color);

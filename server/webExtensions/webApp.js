@@ -103,7 +103,7 @@ register(class WebApp extends WebExtension {
             title: this.options.title,
             description: this.options.description,
             links: this.links,
-            classes: this.options.classes,
+            bodyClasses: this.options.bodyClasses,
             url: this.options.url,
             authenticate: this.options.authenticate,
             websocket: this.options.websocket,
@@ -143,7 +143,7 @@ register(class WebApp extends WebExtension {
         await this.buildLinks();
         await this.buildHTML(PATH.join(env.kodePath, 'server/webExtensions/webApp.html'));
 
-        if (this.options.css) {
+        if (this.options.colorsCss) {
             await this.buildCSS(this.config.css);
         }
         else {

@@ -94,6 +94,7 @@ register(class WebExtension extends Emitter {
         this.getModuleSetting('description', true, 'string');
         this.getModuleSetting('container', true, 'string');
         this.getModuleSetting('panel', true, 'string');
+        this.getModuleSetting('bodyClasses', true, 'string');
         this.getModuleSetting('websocket', true, 'boolean');
         this.getModuleSetting('authenticate', true, 'boolean');
         this.getModuleSetting('server', false, 'array');
