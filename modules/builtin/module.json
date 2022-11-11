@@ -2,10 +2,13 @@
     "title": "Builtin Features",
     "description": "Built-in features that are commonly helpful.",
     "container": "builtin",
+    "webx": {
+        "ClientFramework": "ClientFramework"
+    },
     "references": [
         {
             "url": "/CLIENTFRAMEWORK.js",
-            "webex": "ClientFramework"
+            "webx": "ClientFramework"
         }
     ]
 }

@@ -176,6 +176,7 @@ global.env = {
     require('./webExtensions/clientFramework.js');
     require('./webExtensions/clientLibraryBuilder.js');
     require('./webExtensions/webApp.js');
+    require('./webExtensions/webAppEndpoints.js');
 
     if (CLUSTER.isPrimary) {
         require('./lib/daemon.js');

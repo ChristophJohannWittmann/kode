@@ -332,7 +332,6 @@ register(class DbSchema {
             this.tableMap = {};
             this.tableArray = [];
             this.defined = defined;
-            this.container = getContainer();
 
             if (this.defined && !this.name.startsWith('#')) {
                 throw new Error(`Schema name does not being with a hashtag: ${this.name}`);

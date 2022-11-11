@@ -46,12 +46,9 @@ class Resource {
                 this.path = reference.expandedPath;
                 this.mime = mkMime(PATH.extname(this.path));
             }
-            else if ('webex' in reference) {
-                this.category = 'webex';
-                eval('this.value = ' + (reference.container ? `mk${reference.container}.${reference.webex}()` : `mk${reference.webex}()`));
-                this.value.config = reference;
-                this.value.module = this.module;
-                await this.value.init();
+            else if ('webx' in reference) {
+                this.category = 'webx';
+                this.value = await module.mkWebx(reference);
             }
             else {
                 logPrimary(`    WARNING: "Unable to process reference:\n.   reference: "${toJson(reference, true)}"`);

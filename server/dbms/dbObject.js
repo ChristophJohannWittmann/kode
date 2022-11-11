@@ -32,7 +32,8 @@
 register(function defineDboType(schemaTable) {
     const tableName = `_${toSnakeCase(schemaTable.name)}`;
     const className = `Dbo${schemaTable.name[0].toUpperCase()}${schemaTable.name.substr(1)}`;
-    const prefix = getContainerPrefix();
+    const chain = getContainer()['#CHAIN'];
+    const prefix = chain ? `${chain}.` : '';
 
     const fwdMap = {};
     const revMap = {};

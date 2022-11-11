@@ -39,7 +39,7 @@ const alwaysConfigurable = {
                     "required": true,
                     "type": "string"
                 },
-                "class": {
+                "webx": {
                     "required": false,
                     "type": "string"
                 },
@@ -132,7 +132,6 @@ register(class Module {
     async load() {
         await this.execute('validatePath');
         await this.execute('loadModule');
-        setContainer(this.settings.container);
         await this.execute('loadDatabases');
     }
 
@@ -205,6 +204,7 @@ register(class Module {
             if (stats.isFile()) {
                 try {
                     this.settings = fromJson((await FILES.readFile(this.modulePath)).toString());
+                    this.container = setContainer(this.settings.container);
                 }
                 catch (e) {
                     this.status = 'fail';
@@ -238,6 +238,36 @@ register(class Module {
                     ResourceLibrary.register(reference, this);
                 }
             }
+        }
+    }
+
+    async mkWebx(reference) {
+        if ('webx' in this.settings) {
+            if (reference.webx in this.settings.webx) {
+                let webx;
+                let className = this.settings.webx[reference.webx];
+                let lastDot = className.lastIndexOf('.');
+
+                if (lastDot > 0) {
+                    eval(`webx = ${className.substring(0, lastDot)}mk${className.substr(lastDot+1)}()`);
+                }
+                else {
+                    eval(`webx = mk${className}()`);
+                }
+
+                webx.module = this;
+                webx.container = this.container;
+                this.container[reference.webx] = webx;
+                webx.config = reference;
+                await webx.init();
+                return webx;
+            }
+            else {
+                throw new Error(`"${reference.webx}" not found in module settings.webx, module at "${this.path}"`);
+            }
+        }
+        else {
+            throw new Error(`Module settings do not include any webx definitions, module at "${this.path}"`);
         }
     }
 

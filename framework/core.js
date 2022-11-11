@@ -43,13 +43,16 @@
      * which to register classes and functions.
     *****/
     let chain = '';
-    let prefix = '';
     let container = global;
+    global['#CHAIN'] = '';
 
     global.getContainer = function(links) {
-        let container = global;
+        if (links === undefined) {
+            return container;
+        }
+        else {
+            let container = global;
 
-        if (links !== undefined) {
             for (let link of links.split('.')) {
                 if (!(link in container)) {
                     container[link] = new Object();
@@ -57,14 +60,10 @@
 
                 container = container[link];
             }
+
+            return container;
         }
-
-        return container;
-    }
-
-    global.getContainerPrefix = function() {
-        return prefix;
-    }
+    };
 
     global.setContainer = function(links) {
         if (links !== undefined) {
@@ -75,16 +74,17 @@
                 chain.push(link);
 
                 if (!(link in container)) {
-                    container[link] = new Object();
+                    container[link] = new Object({ '#CHAIN': chain.join('.') });
                 }
 
                 container = container[link];
             }
 
             chain = chain.join('.');
-            prefix = `${chain}.`;
         }
-    }
+
+        return container;
+    };
 
 
     /*****
@@ -94,6 +94,21 @@
     const SymbolCtor = Symbol('ctor');
     const SymbolJsonable = Symbol('jsonable');
     const SymbolSingleton = Symbol('singleton');
+ 
+ 
+    /*****
+     * Register a function or a class in the current namespace.  Classes must
+     * have upper case (PascalCase), while functions must use camelCase naming.
+     * For classes, a mkFunction() is created in the specified namespace.  For
+     * functions, they are just added to the namespace for use later on.
+    *****/
+    global.define = (name, value) => {
+        if (name in container) {
+            throw new Error(`Symbol "${name}" already defined in container "${chain}".`);
+        }
+
+        container[name] = value;
+    };
  
  
     /*****

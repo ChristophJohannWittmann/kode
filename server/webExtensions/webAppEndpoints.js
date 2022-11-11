@@ -22,21 +22,24 @@
 
 
 /*****
- * This is the startup or bootstrap function for the client framework code.
- * This is called when the body has been loaded with the onload="bootstrop()"
- * HTML attribute.  This ensures a standard environment initialization accross
- * web applications and a standard initiialization sequence.
 *****/
-register(async function bootstrap() {
-    window.win = mkWin(window);
-    window.doc = win.doc();
-    window.styleSheet = doc.getStyleSheet('WebApp');
-    await onSingletons();
+register(class WebAppEndpoints {
+    constructor(webapp) {
+        this.webapp = webapp;
 
-    window.appStack = mkWStack();
-    doc.body().append(appStack);
+        for (let propertyName of Object.getOwnPropertyNames(Reflect.getPrototypeOf(this))) {
+            if (propertyName.startsWith('on') && typeof this[propertyName] == 'function') {
+                console.log(propertyName);
+            }
+        }
+    }
 
-    // -- test code
-    appStack.push(mkSignIn());
-    // --
+    onResetPassword(message) {
+    }
+
+    onSignIn(message) {
+    }
+
+    onSignOut(message) {
+    }
 });

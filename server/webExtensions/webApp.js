@@ -28,13 +28,10 @@
  * (2) a GET with query parameters will be sent off to the handleGET() method
  * to handle, and (3) all POST querys will be passed on to the handlePOST()
  * method to be resolved.  To make a functioning webapp, an instance of a sub-
- * class needs to be made.  To make this happend, the subclass js module needs
- * to have a single export, and must look something like this:
+ * class needs to be made.
  * 
- * exports = module.exports = new (class SubClass extends WebApp { ... } )();
- * 
- * During server bootstrapping, the module is loaded and a single instance of
- * the sub class is created.  Thereafter, that instance is used repeatedly for
+ * During server bootstrapping, the module is loaded and a instances of
+ * the sub class are created.  Thereafter, that instance is used repeatedly for
  * handling HTTP and web socket requests.
 *****/
 register(class WebApp extends WebExtension {
@@ -99,7 +96,6 @@ register(class WebApp extends WebExtension {
     async handleGET(req, rsp) {
         let doc = mkTextTemplate(Config.minify ? this.compactHtml : this.visualHtml).set({
             css: this.compactCss,
-            cssTitle: 'webapp',
             title: this.options.title,
             description: this.options.description,
             links: this.links,
@@ -149,6 +145,8 @@ register(class WebApp extends WebExtension {
         else {
             await this.buildCSS(PATH.join(env.kodePath, 'server/webExtensions/webApp.css'));
         }
+
+        await mkWebAppEndpoints(this);
     }
 
     async onWebSocket(req, webSocket) {

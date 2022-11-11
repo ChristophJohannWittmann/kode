@@ -73,7 +73,7 @@ if (CLUSTER.isWorker) {
             this.nodeHttpServer.on('upgrade', async (httpReq, socket, headPacket) => {
                 let resource = ResourceLibrary.get(httpReq.pathname());
 
-                if (resource && resource.category == 'webex') {
+                if (resource && resource.category == 'webx') {
                     try {
                         await resource.value.upgrade(httpReq, socket, headPacket);
                     }
@@ -95,7 +95,7 @@ if (CLUSTER.isWorker) {
                     let resource = await ResourceLibrary.get(req.pathname());
 
                     if (resource) {
-                        if (resource.category == 'webex') {
+                        if (resource.category == 'webx') {
                             await resource.value.handleRequest(req, rsp);
                         }
                         else if (req.method() == 'GET') {
