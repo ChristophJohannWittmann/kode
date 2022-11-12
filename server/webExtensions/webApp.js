@@ -111,23 +111,33 @@ register(class WebApp extends WebExtension {
     async handlePOST(req, rsp) {
         if (req.isMessage() && 'messageName' in req.message()) {
             let requestMessage = req.message();
-            let response = await this.query(requestMessage);
+            let transaction = mkWebAppTransaction(requestMessage);
 
-            if (response) {
-                var message = {
-                    messageName: 'PostResponse',
-                    '#Trap': requestMessage['#Trap'],
-                    response: response
-                };
-            }
-            else {
-                var message = {
-                    messageName: 'Ignored',
-                    '#Trap': requestMessage['#Trap'],                    
-                };
-            }
+            try {
+                let responseMessage;
+                let response = await this.query(transaction);
+                transaction.commit();
 
-            rsp.end(200, 'application/json', toJson(message));
+                if (response) {
+                    responseMessage = {
+                        messageName: 'PostResponse',
+                        '#Trap': requestMessage['#Trap'],
+                        response: response
+                    };
+                }
+                else {
+                    responseMessage = {
+                        messageName: 'Ignored',
+                        '#Trap': requestMessage['#Trap'],                    
+                    };
+                }
+
+                rsp.end(200, 'application/json', toJson(responseMessage));
+            }
+            catch (e) {
+                transaction.rollback();
+                rsp.endStatus(500);
+            }
         }
         else {
             rsp.endStatus(401);

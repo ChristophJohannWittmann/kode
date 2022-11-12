@@ -177,15 +177,16 @@ global.env = {
     require('./webExtensions/clientLibraryBuilder.js');
     require('./webExtensions/webApp.js');
     require('./webExtensions/webAppEndpoints.js');
+    require('./webExtensions/webAppTransaction.js');
 
     if (CLUSTER.isPrimary) {
         require('./lib/daemon.js');
+        require('./lib/session.js');
         require('./daemons/events.js');
-        require('./daemons/sentinel.js');
+        require('./daemons/session.js');
     }
 
     require('./servers/http.js');
-
     await onSingletons();
 
     /********************************************
@@ -207,10 +208,21 @@ global.env = {
     await onSingletons();
 
     /********************************************
+     * Load Objects
+     *******************************************/
+    logPrimary('[ Loading Framework Object API ]');
+    require('./dbms/frameworkSchema.js');
+
+    for (let filePath of await recurseFiles(PATH.join(env.kodePath, 'server/objects'))) {
+        require(filePath);
+    }
+
+    await onSingletons();
+
+    /********************************************
      * Load Modules
      *******************************************/
     logPrimary('[ Loading Modules ]');
-    require('./dbms/frameworkSchema.js');
 
     Config.moduleMap = {};
     Config.moduleArray = [];

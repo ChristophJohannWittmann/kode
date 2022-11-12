@@ -23,62 +23,35 @@
 
 /*****
 *****/
-class Session {
-    constructor(id, key) {
-        this.id = id;
-        this.key = key;
-        this.state = 'anonymous';
-    }
-}
-
-
-/*****
-*****/
-singleton(class Sentinel extends Daemon {
+singleton(class Sessions extends Daemon {
     constructor() {
         super();
-        this.sessionId = 1;
-        this.sessions = {};
-        this.expiring = [];
-        
-        this.permissions = mkStringSet(
-            'sys',
-            'user',
-        );
-    }
-
-    async onAddPermissions(message) {
-        for (let permission of message.permissions) {
-            this.permissions.set(permission);
-        }
-
-        Message.reply(message, 'ok');
+        this.sessionsByKey = {};
+        this.sessionsByOrg = {};
+        this.sessionsByUser = {};
+        this.permissions = mkStringSet('unit', 'system', 'user');
     }
 
     async onAuthenticate(message) {
     }
 
-    async onAuthorize(message) {
+    async onClearPermission(message) {
     }
 
     async onCloseSession(message) {
     }
 
-    async onCreateSession(message) {
-        let id = Sentinel.sessionId++;
-        let seed = `${(new Date()).toString()}${id}`;
-        let key = await Crypto.digestUnsalted('sha256', `${seed}${Math.rand()}`);
-
-        while (key in this.sessions) {
-            key = await Crypto.digestUnsalted('sha256', `${seed}${Math.rand()}`);
-        }
-
-        let session = new Session(id, key);
-        Message.reply(message, session.key);
+    async onGetSession(message) {
     }
 
     async onListPermissions(message) {
         Message.reply(message, this.permissions);
+    }
+
+    async onSearchSessions(message) {
+    }
+
+    async onSetPermission(message) {
     }
 
     async onTouchSession(message) {

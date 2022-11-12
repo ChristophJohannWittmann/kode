@@ -66,13 +66,6 @@ class HttpResponse {
         }
     }
 
-    getStatus() {
-        return {
-            code: this.req.status,
-            text: this.req.statusText,
-        };
-    }
-
     getResponseData() {
         return this.req.response;
     }
@@ -85,6 +78,23 @@ class HttpResponse {
         return this.req.responseType;
     }
 
+    getResult() {
+        if (this.isMessage()) {
+            let message = this.getMessage();
+
+            if (message.messageName == 'PostResponse') {
+                return message.response;
+            }
+        }
+    }
+
+    getStatus() {
+        return {
+            code: this.req.status,
+            text: this.req.statusText,
+        };
+    }
+
     getUrl() {
         return this.req.responseURL;
     }
@@ -94,7 +104,13 @@ class HttpResponse {
     }
 
     isMessage() {
-        return this.req.getResponseHeader('content-type').startsWith('application/json')
+        let contentType = this.req.getResponseHeader('content-type');
+
+        if (typeof contentType == 'string') {
+            return contentType.startsWith('application/json');
+        }
+
+        return false;
     }
 
     isOk() {
@@ -183,7 +199,32 @@ register(class Http extends Emitter {
 
         this.req.onreadystatechange = event => {
             if (this.req.readyState == Http.Done) {
-                Trap.pushReply(this.trap.id, new HttpResponse(this.req));
+                let rsp = new HttpResponse(this.req);
+                let status = rsp.getStatus();
+
+                if (status.code >= 100 && status.code < 500) {
+                    if (rsp.isMessage()) {
+                        let message = rsp.getMessage();
+
+                        if (status.code >= 500) {
+                            Trap.cancel(this.trap.id);
+                            console.log(fromJson(body));
+                        }
+                        else {
+                            Trap.pushReply(this.trap.id, rsp.getResult());
+                        }
+                    }
+                    else {
+                        Trap.pushReply(this.trap.id, rsp);
+                    }
+                }
+                else if (status.code >= 500) {
+                    Trap.cancel(this.trap.id);
+                    console.log(fromJson(body));
+                }
+                else {
+                    Trap.cancel(this.trap.id);
+                }
             }
         };
 

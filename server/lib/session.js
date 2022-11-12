@@ -23,43 +23,62 @@
 
 /*****
 *****/
-register(function webPoint(obj) {
-    return `#ENDPOINT#${toJson(obj)}`
-});
+register(class Session {
+    constructor(data) {
+        return new Promise(async (ok, fail) => {
+            this.org = null;
+            this.user = null;
+            this.expires = null;
+            this.permissions = {};
+            this.ipAddress = null;
+            this.webSocket = null;
+            this.queue = [];
 
+            let seed = `${(new Date()).toString()}${this.user.email}`;
+            this.key = await Crypto.digestUnsalted('sha256', `${seed}${Math.rand()}`);
 
-/*****
-*****/
-register(class WebAppEndpoints {
-    constructor(webapp) {
-        this.webapp = webapp;
-
-        for (let propertyName of Object.getOwnPropertyNames(Reflect.getPrototypeOf(this))) {
-            if (propertyName.startsWith('#ENDPOINT#')) {
-                let endpoint = fromJson(propertyName.substr(10));
-                this[`on${endpoint.name}`] = this[propertyName];
-
-                this.webapp.on(endpoint.name, async req => {
-                    await this.authorize();
-                    await this[`on${endpoint.name}`](req);
-                });
+            while (this.key in this.sessions) {
+                this.key = await Crypto.digestUnsalted('sha256', `${seed}${Math.rand()}`);
             }
-        }
-    }
 
-    async authorize() {
-        return true;
-    }
-
-    async [webPoint({ name:'SignIn', perms: [ 'user' ] })](req) {
-        console.log('here');
-
-        req.reply({
-            greeting: 'hello signin please',
-            status: 'successful',
+            ok(this);
         });
     }
 
-    async [webPoint({ name:'SignOut', perms: [ 'user' ] })](req) {
+    async authorize(permission, org) {
+    }
+
+    clearQueue() {
+    }
+
+    async close() {
+    }
+
+    getExpires() {
+    }
+
+    getIpAddress() {
+        return this.ipAddress;
+    }
+
+    getOrg() {
+        return this.org;
+    }
+
+    getPermission() {
+    }
+
+    getUser() {
+        return this.user;
+    }
+
+    getWebSocket() {
+        return this.webSocket;
+    }
+
+    send(message) {
+    }
+
+    touch() {
     }
 });

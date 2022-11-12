@@ -134,6 +134,7 @@ mkDbSchema(
         columns: [
             { name: 'ownerType',   type: dbText, size:   20 },
             { name: 'ownerOid',    type: dbInt64            },
+            { name: 'status',      type: dbText             },
             { name: 'country',     type: dbText, size:   10 },
             { name: 'region',      type: dbText, size:   20 },
             { name: 'number',      type: dbText, size:  200 },
@@ -168,6 +169,7 @@ mkDbSchema(
         name: 'user',
         columns: [
             { name: 'orgOid',    type: dbInt64           },
+            { name: 'status',    type: dbText            },
             { name: 'userName',  type: dbText, size: 100 },
             { name: 'firstName', type: dbText, size: 100 },
             { name: 'lastName',  type: dbText, size: 100 },

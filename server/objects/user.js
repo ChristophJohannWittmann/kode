@@ -23,43 +23,50 @@
 
 /*****
 *****/
-register(function webPoint(obj) {
-    return `#ENDPOINT#${toJson(obj)}`
-});
+register(function mkDboUserObj(arg) {
+    let dbc = arg;
 
+    return new (class DboUserObj extends DboUser {
+        constructor() {
+            super();
 
-/*****
-*****/
-register(class WebAppEndpoints {
-    constructor(webapp) {
-        this.webapp = webapp;
+            return new Promise(async (ok, fail) => {
 
-        for (let propertyName of Object.getOwnPropertyNames(Reflect.getPrototypeOf(this))) {
-            if (propertyName.startsWith('#ENDPOINT#')) {
-                let endpoint = fromJson(propertyName.substr(10));
-                this[`on${endpoint.name}`] = this[propertyName];
-
-                this.webapp.on(endpoint.name, async req => {
-                    await this.authorize();
-                    await this[`on${endpoint.name}`](req);
-                });
-            }
+                ok(this);
+            });
         }
+
+    async activate() {
     }
 
-    async authorize() {
-        return true;
+    async authenticate(password) {
     }
 
-    async [webPoint({ name:'SignIn', perms: [ 'user' ] })](req) {
-        console.log('here');
-
-        req.reply({
-            greeting: 'hello signin please',
-            status: 'successful',
-        });
+    async deactivate() {
     }
 
-    async [webPoint({ name:'SignOut', perms: [ 'user' ] })](req) {
+    async search(username) {
     }
+
+    async sendMMS() {
+    }
+
+    async sendEmail(template) {
+    }
+
+    async sendMMS(template) {
+    }
+
+    async setDbc(dbc) {
+    }
+
+    async setPassword(password) {
+    }
+
+    async validate() {
+    }
+
+    async zombify() {
+    }
+    })();
 });
