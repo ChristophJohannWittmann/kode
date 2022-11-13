@@ -23,37 +23,29 @@
 
 /*****
 *****/
-singleton(class Sessions extends Daemon {
-    constructor() {
-        super();
-        this.sessionsByKey = {};
-        this.sessionsByOrg = {};
-        this.sessionsByUser = {};
-        this.permissions = mkStringSet('org', 'system', 'user');
+register(class SmtpEndpoints extends WebAppEndpointContainer {
+    constructor(webapp) {
+        super(webapp);
     }
 
-    async onAuthenticate(message) {
+    async [ mkWebAppEndpoint('GetSmtpAddressStats', 'system') ](req) {
     }
 
-    async onClearPermission(message) {
+    async [ mkWebAppEndpoint('GetSmtpDomainStats', 'system') ](req) {
     }
 
-    async onCloseSession(message) {
+    async [ mkWebAppEndpoint('GetSmtpSettings', 'system') ](req) {
     }
 
-    async onGetSession(message) {
+    async [ mkWebAppEndpoint('SetSmtpSettings', 'system') ](req) {
     }
 
-    async onListPermissions(message) {
-        Message.reply(message, this.permissions);
+    async [ mkWebAppEndpoint('ViewSmtpIncomingActivity', 'system') ](req) {
     }
 
-    async onSearchSessions(message) {
+    async [ mkWebAppEndpoint('ViewSmtpOutgoingActivity', 'system') ](req) {
     }
 
-    async onSetPermission(message) {
-    }
-
-    async onTouchSession(message) {
+    async [ mkWebAppEndpoint('ViewSmtpStats', 'system') ](req) {
     }
 });

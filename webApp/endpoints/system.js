@@ -23,37 +23,44 @@
 
 /*****
 *****/
-singleton(class Sessions extends Daemon {
-    constructor() {
-        super();
-        this.sessionsByKey = {};
-        this.sessionsByOrg = {};
-        this.sessionsByUser = {};
-        this.permissions = mkStringSet('org', 'system', 'user');
+register(class SystemEndpoints extends WebAppEndpointContainer {
+    constructor(webapp) {
+        super(webapp);
     }
 
-    async onAuthenticate(message) {
+    async [ mkWebAppEndpoint('DiscardTlsCertificate', 'system') ](req) {
     }
 
-    async onClearPermission(message) {
+    async [ mkWebAppEndpoint('GetAcmeCertificate', 'system') ](req) {
     }
 
-    async onCloseSession(message) {
+    async [ mkWebAppEndpoint('GetServerConfig', 'system') ](req) {
     }
 
-    async onGetSession(message) {
+    async [ mkWebAppEndpoint('GetSystemInformation', 'system') ](req) {
     }
 
-    async onListPermissions(message) {
-        Message.reply(message, this.permissions);
+    async [ mkWebAppEndpoint('GetTlsSettings', 'system') ](req) {
     }
 
-    async onSearchSessions(message) {
+    async [ mkWebAppEndpoint('ResolveDnsName', 'system') ](req) {
     }
 
-    async onSetPermission(message) {
+    async [ mkWebAppEndpoint('RestartServer', 'system') ](req) {
     }
 
-    async onTouchSession(message) {
+    async [ mkWebAppEndpoint('SetServerConfig', 'system') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('SetTlsSettings', 'system') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('StartNetwowrkInterface', 'system') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('StoptNetwowrkInterface', 'system') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('ShutdownServer', 'system') ](req) {
     }
 });

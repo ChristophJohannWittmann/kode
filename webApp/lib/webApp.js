@@ -174,7 +174,7 @@ register(class WebApp extends Webx {
                 'gui/widgets',
                 'gui/editors',
                 'gui/panels',
-                'webApp/gui/panels',
+                'webApp/gui',
             ])
         };
 

@@ -23,7 +23,7 @@
 
 /*****
 *****/
-register(function mkDboUserObj(arg) {
+register(function mkUserObj(arg) {
     let dbc = arg;
 
     return new (class DboUserObj extends DboUser {

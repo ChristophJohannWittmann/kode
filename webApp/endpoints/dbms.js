@@ -23,37 +23,26 @@
 
 /*****
 *****/
-singleton(class Sessions extends Daemon {
-    constructor() {
-        super();
-        this.sessionsByKey = {};
-        this.sessionsByOrg = {};
-        this.sessionsByUser = {};
-        this.permissions = mkStringSet('org', 'system', 'user');
+register(class DbmsEndpoints extends WebAppEndpointContainer {
+    constructor(webapp) {
+        super(webapp);
     }
 
-    async onAuthenticate(message) {
+    async [ mkWebAppEndpoint('AnalyzeDbmsDatabase', 'system') ](req) {
     }
 
-    async onClearPermission(message) {
+    async [ mkWebAppEndpoint('EraseDbmsDatabase', 'system') ](req) {
     }
 
-    async onCloseSession(message) {
+    async [ mkWebAppEndpoint('GetDbmsSchema', 'system') ](req) {
     }
 
-    async onGetSession(message) {
+    async [ mkWebAppEndpoint('ListDbmsDatabases', 'system') ](req) {
     }
 
-    async onListPermissions(message) {
-        Message.reply(message, this.permissions);
+    async [ mkWebAppEndpoint('ListDbmsSchemas', 'system') ](req) {
     }
 
-    async onSearchSessions(message) {
-    }
-
-    async onSetPermission(message) {
-    }
-
-    async onTouchSession(message) {
+    async [ mkWebAppEndpoint('UpgradeDbmsDatabase', 'system') ](req) {
     }
 });

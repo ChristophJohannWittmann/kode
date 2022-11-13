@@ -50,15 +50,17 @@ register(async function buildClientCode(paths) {
     for (let path of fileArray) {
         let stats = await FILES.stat(path);
 
-        if (path.endsWith('.js') && stats.isFile()) {
+        if (stats.isFile() && path.endsWith('.js')) {
             let code = Config.minify ? await minify(path) : (await FILES.readFile(path)).toString();
+            fileSet.set(path);
             raw.push(code);
         }
         else if (stats.isDirectory()) {
             for (let filePath of await recurseFiles(path)) {
                 stats = await FILES.stat(filePath);
 
-                if (filePath.endsWith('.js') && stats.isFile() && !fileSet.has(filePath)) {
+                if (stats.isFile() && filePath.endsWith('.js') && !fileSet.has(filePath) && !filePath.endsWith('Server.js')) {
+                    fileSet.set(filePath);
                     let code = Config.minify ? await minify(filePath) : (await FILES.readFile(filePath)).toString();
                     raw.push(code);
                 }

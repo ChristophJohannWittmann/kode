@@ -31,17 +31,17 @@
 global.CLUSTER = require('cluster');
 if (CLUSTER.isPrimary) console.log(`\n[ Booting Server at ${(new Date()).toISOString()} ]`);
 if (CLUSTER.isPrimary) console.log(`[ Loading Framework ]`);
-require('../framework/core.js');
-require('../framework/activeData.js');
-require('../framework/language.js');
-require('../framework/message.js');
-require('../framework/mime.js');
-require('../framework/stringSet.js');
-require('../framework/textTemplate.js');
-require('../framework/time.js');
-require('../framework/utility.js');
-require('../framework/calendars/gregorian.js');
-require('./lib/binary.js');
+require('./framework/core.js');
+require('./framework/activeData.js');
+require('./framework/binaryServer.js');
+require('./framework/language.js');
+require('./framework/message.js');
+require('./framework/mime.js');
+require('./framework/stringSet.js');
+require('./framework/textTemplate.js');
+require('./framework/time.js');
+require('./framework/utility.js');
+require('./framework/calendars/gregorian.js');
 
 
 /*****
@@ -93,12 +93,12 @@ global.env = {
     network:        OS.networkInterfaces(),
     memory:         ({ free: OS.freemem(), total: OS.totalmem() }),
     pid:            PROC.pid,
-    kodePath:       PATH.join(__dirname, '..'),
-    addonPath:      PATH.join(__dirname, './addons'),
-    nodeModulePath: PATH.join(__dirname, '../node_modules'),
-    modulePath:     PATH.join(__dirname, '../modules'),
-    daemonPath:     PATH.join(__dirname, './daemons'),
-    serverPath:     PATH.join(__dirname, './servers'),
+    kodePath:       PATH.join(__dirname, '.'),
+    addonPath:      PATH.join(__dirname, './server/addons'),
+    nodeModulePath: PATH.join(__dirname, './node_modules'),
+    modulePath:     PATH.join(__dirname, './modules'),
+    daemonPath:     PATH.join(__dirname, './server/daemons'),
+    serverPath:     PATH.join(__dirname, './server/servers'),
 };
 
 
@@ -133,8 +133,8 @@ global.env = {
 
     if (CLUSTER.isPrimary) console.log(`[ Searching Configuration Path "${env.configPath}" ]`);
 
-    require('./lib/utility.js');
-    require('./lib/config.js');
+    require('./server/lib/utility.js');
+    require('./server/lib/config.js');
     const searchResult = await Config.loadSystem();
 
     if (searchResult === true) {
@@ -149,46 +149,46 @@ global.env = {
      * Infrastructure Code
      *******************************************/
     if (CLUSTER.isPrimary) (`[ Loading Server Infrastructure ]`);
-    require('./lib/addon.js');
-    require('./lib/auth.js');
-    require('./lib/clientBuilder.js');
-    require('./lib/cluster.js');
-    require('./lib/compression.js');
-    require('./lib/crypto.js');
-    require('./lib/html.js');
-    require('./lib/ipc.js');
-    require('./lib/logging.js');
-    require('./lib/module.js');
-    require('./lib/moduleConfig.js');
-    require('./lib/pool.js');
-    require('./lib/server.js');
-    require('./lib/utility.js');
-    require('./lib/resource.js');
-    require('./lib/webSocket.js');
-    require('./lib/webx.js');
+    require('./server/lib/addon.js');
+    require('./server/lib/auth.js');
+    require('./server/lib/clientBuilder.js');
+    require('./server/lib/cluster.js');
+    require('./server/lib/compression.js');
+    require('./server/lib/crypto.js');
+    require('./server/lib/html.js');
+    require('./server/lib/ipc.js');
+    require('./server/lib/logging.js');
+    require('./server/lib/module.js');
+    require('./server/lib/moduleConfig.js');
+    require('./server/lib/pool.js');
+    require('./server/lib/server.js');
+    require('./server/lib/utility.js');
+    require('./server/lib/resource.js');
+    require('./server/lib/webSocket.js');
+    require('./server/lib/webx.js');
 
-    require('./dbms/dbClient.js');
-    require('./dbms/pgClient.js');
-    require('./dbms/dbSchema.js');
-    require('./dbms/dbDatabase.js');
-    require('./dbms/dbSchemaAnalyzer.js');
-    require('./dbms/dbObject.js');
+    require('./server/dbms/dbClient.js');
+    require('./server/dbms/pgClient.js');
+    require('./server/dbms/dbSchema.js');
+    require('./server/dbms/dbDatabase.js');
+    require('./server/dbms/dbSchemaAnalyzer.js');
+    require('./server/dbms/dbObject.js');
 
-    require('../webApp/lib/webApp.js');
-    require('../webApp/lib/endpoints.js');
-    require('../webApp/lib/transaction.js');
-    require('../webApp/endpoints/org.js');
-    require('../webApp/endpoints/self.js');
-    require('../webApp/endpoints/user.js');
+    require('./webApp/lib/webApp.js');
+    require('./webApp/lib/endpoints.js');
+    require('./webApp/lib/transaction.js');
+    require('./webApp/endpoints/org.js');
+    require('./webApp/endpoints/self.js');
+    require('./webApp/endpoints/user.js');
 
     if (CLUSTER.isPrimary) {
-        require('./lib/daemon.js');
-        require('./lib/session.js');
-        require('./daemons/events.js');
-        require('./daemons/session.js');
+        require('./server/lib/daemon.js');
+        require('./server/lib/session.js');
+        require('./server/daemons/events.js');
+        require('./server/daemons/session.js');
     }
 
-    require('./servers/http.js');
+    require('./server/servers/http.js');
     await onSingletons();
 
     /********************************************
@@ -213,7 +213,7 @@ global.env = {
      * Load Objects
      *******************************************/
     logPrimary('[ Loading Framework Object API ]');
-    require('./dbms/frameworkSchema.js');
+    require('./server/dbms/frameworkSchema.js');
 
     for (let filePath of await recurseFiles(PATH.join(env.kodePath, 'server/objects'))) {
         require(filePath);
