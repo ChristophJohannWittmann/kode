@@ -34,7 +34,7 @@
  * the sub class are created.  Thereafter, that instance is used repeatedly for
  * handling HTTP and web socket requests.
 *****/
-register(class WebApp extends WebExtension {
+register(class WebApp extends Webx {
     constructor() {
         super();
         this.webSockets = {};
@@ -88,24 +88,35 @@ register(class WebApp extends WebExtension {
         }
     }
 
-    async handleAuthentication(message) {
-        let result = { ok: false };
-        return result;
+    async handleGET(req, rsp) {
+        let handlerName = `handleGet${req.query()}`;
+
+        if (handlerName in this) {
+            await this[handlerName](req, rsp);
+        }
+        else {
+            let doc = mkTextTemplate(Config.minify ? this.compactHtml : this.visualHtml).set({
+                css: this.compactCss,
+                title: this.options.title,
+                description: this.options.description,
+                links: this.links,
+                bodyClasses: this.options.bodyClasses,
+                url: this.options.url,
+                authenticate: this.options.authenticate,
+                websocket: this.options.websocket,
+            });
+
+            rsp.end(200, 'text/html', await doc.toString());
+        }
     }
 
-    async handleGET(req, rsp) {
-        let doc = mkTextTemplate(Config.minify ? this.compactHtml : this.visualHtml).set({
-            css: this.compactCss,
-            title: this.options.title,
-            description: this.options.description,
-            links: this.links,
-            bodyClasses: this.options.bodyClasses,
-            url: this.options.url,
-            authenticate: this.options.authenticate,
-            websocket: this.options.websocket,
-        });
+    async handleGetCLIENTFRAMEWORK(req, rsp) {
+        if (!(rsp.encoding in this.framework)) {
+            this.framework[rsp.encoding] = await compress(rsp.encoding, this.framework['']);
+        }
 
-        rsp.end(200, 'text/html', await doc.toString());
+        rsp.preEncoded = true;
+        rsp.end(this.framework[rsp.encoding]);
     }
 
     async handlePOST(req, rsp) {
@@ -146,17 +157,39 @@ register(class WebApp extends WebExtension {
 
     async init(cssPath, htmlPath) {
         await super.init();
+
+        this.getModuleSetting('panel', true, 'string');
+        this.getModuleSetting('bodyClasses', true, 'string');
+        this.getModuleSetting('websocket', true, 'boolean');
+        this.getModuleSetting('authenticate', true, 'boolean');
+        this.getModuleSetting('server', false, 'array');
+        this.getModuleSetting('client', false, 'array');
+
+        this.framework = { '': await buildClientCode([
+                'framework/core.js',
+                'framework',
+                'gui/lib',
+                'gui/widgets/inputBase.js',
+                'gui/widgets/textArea/entryFilter.js',
+                'gui/widgets',
+                'gui/editors',
+                'gui/panels',
+            ])
+        };
+
         await this.buildLinks();
-        await this.buildHTML(PATH.join(env.kodePath, 'server/webExtensions/webApp.html'));
+        await this.buildHTML(PATH.join(env.kodePath, 'webApp/lib/webApp.html'));
 
         if (this.options.colorsCss) {
             await this.buildCSS(this.config.css);
         }
         else {
-            await this.buildCSS(PATH.join(env.kodePath, 'server/webExtensions/webApp.css'));
+            await this.buildCSS(PATH.join(env.kodePath, 'webApp/lib/webApp.css'));
         }
 
-        await mkWebAppEndpoints(this);
+        await mkOrgEndpoints(this);
+        await mkSelfEndpoints(this);
+        await mkUserEndpoints(this);
     }
 
     async onWebSocket(req, webSocket) {

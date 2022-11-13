@@ -45,23 +45,28 @@ register(class Emitter extends NonJsonable {
     }
 
     off(messageName, func) {
-        if ('#HANDLER' in func) {
-            (Array.isArray(messageName) ? messageName : [messageName]).forEach(messageName => {
-                let handler = this.handlers[messageName];
-                
-                if (handler && (func['#HANDLER'] in handler.map)) {
-                    for (let i = 0; i < handler.thunks.length; i++) {
-                        let thunk = handler.thunks[i];
-                        
-                        if (func['#HANDLER'] === thunk.func['#HANDLER']) {
-                            handler.thunks.splice(i, 1);
-                            break;
+        if (func === undefined) {
+            delete this.handlers[messageName];
+        }
+        else {
+            if ('#HANDLER' in func) {
+                (Array.isArray(messageName) ? messageName : [messageName]).forEach(messageName => {
+                    let handler = this.handlers[messageName];
+
+                    if (handler && (func['#HANDLER'] in handler.map)) {
+                        for (let i = 0; i < handler.thunks.length; i++) {
+                            let thunk = handler.thunks[i];
+                            
+                            if (func['#HANDLER'] === thunk.func['#HANDLER']) {
+                                handler.thunks.splice(i, 1);
+                                break;
+                            }
                         }
+                        
+                        delete handler.map[func['#HANDLER']];
                     }
-                    
-                    delete handler.map[func['#HANDLER']];
-                }
-            });
+                });
+            }
         }
 
         return this;

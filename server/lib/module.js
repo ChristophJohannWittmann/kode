@@ -242,32 +242,20 @@ register(class Module {
     }
 
     async mkWebx(reference) {
-        if ('webx' in this.settings) {
-            if (reference.webx in this.settings.webx) {
-                let webx;
-                let className = this.settings.webx[reference.webx];
-                let lastDot = className.lastIndexOf('.');
-
-                if (lastDot > 0) {
-                    eval(`webx = ${className.substring(0, lastDot)}mk${className.substr(lastDot+1)}()`);
-                }
-                else {
-                    eval(`webx = mk${className}()`);
-                }
-
-                webx.module = this;
-                webx.container = this.container;
-                this.container[reference.webx] = webx;
-                webx.config = reference;
-                await webx.init();
-                return webx;
-            }
-            else {
-                throw new Error(`"${reference.webx}" not found in module settings.webx, module at "${this.path}"`);
-            }
+        try {
+            let webx;
+            eval(`webx = mk${reference.webx}();`);
+            webx.module = this;
+            webx.container = this.container;
+            this.container[reference.webx] = webx;
+            webx.config = reference;
+            await webx.init();
+            return webx;
         }
-        else {
-            throw new Error(`Module settings do not include any webx definitions, module at "${this.path}"`);
+        catch (e) {
+            console.log(`Unable to build Web Extension "${reference.webx}" in module at "${this.path}"`);
+            console.log(e);
+            PROC.exit(-1);
         }
     }
 

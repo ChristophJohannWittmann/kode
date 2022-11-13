@@ -23,35 +23,21 @@
 
 /*****
 *****/
-register(function webPoint(obj) {
-    return `#ENDPOINT#${toJson(obj)}`
-});
-
-
-/*****
-*****/
-register(class WebAppEndpoints {
+register(class SelfEndpoints extends WebAppEndpointContainer {
     constructor(webapp) {
-        this.webapp = webapp;
-
-        for (let propertyName of Object.getOwnPropertyNames(Reflect.getPrototypeOf(this))) {
-            if (propertyName.startsWith('#ENDPOINT#')) {
-                let endpoint = fromJson(propertyName.substr(10));
-                this[`on${endpoint.name}`] = this[propertyName];
-
-                this.webapp.on(endpoint.name, async req => {
-                    await this.authorize();
-                    await this[`on${endpoint.name}`](req);
-                });
-            }
-        }
+        super(webapp);
     }
 
-    async authorize() {
-        return true;
+    async [ mkWebAppEndpoint('ModifySelf') ](req) {
     }
 
-    async [webPoint({ name:'SignIn', perms: [ 'user' ] })](req) {
+    async [ mkWebAppEndpoint('ResetSelfPassword') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('SetSelfPassword') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('SignSelfIn') ](req) {
         console.log('here');
 
         req.reply({
@@ -60,6 +46,6 @@ register(class WebAppEndpoints {
         });
     }
 
-    async [webPoint({ name:'SignOut', perms: [ 'user' ] })](req) {
+    async [ mkWebAppEndpoint('SignSelfOut') ](req) {
     }
 });

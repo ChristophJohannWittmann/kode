@@ -30,7 +30,7 @@
  * resource.  This base class provides both the overall web-extension framwork
  * and some basic common features that are required for all web extensions.
 *****/
-register(class WebExtension extends Emitter {
+register(class Webx extends Emitter {
     constructor() {
         super();
         this.valid = true;
@@ -93,33 +93,24 @@ register(class WebExtension extends Emitter {
         this.getModuleSetting('title', true, 'string');
         this.getModuleSetting('description', true, 'string');
         this.getModuleSetting('container', true, 'string');
-        this.getModuleSetting('panel', true, 'string');
-        this.getModuleSetting('bodyClasses', true, 'string');
-        this.getModuleSetting('websocket', true, 'boolean');
-        this.getModuleSetting('authenticate', true, 'boolean');
-        this.getModuleSetting('server', false, 'array');
-        this.getModuleSetting('client', false, 'array');
-
-        if (this.options.server) this.loadServer();
-        if (this.options.client) this.loadClient();
-
         Object.assign(this.options, this.config);
     }
 
-    async loadClient() {
-    }
-
-    async loadServer() {
+    off(messageName) {
+        super.off(messageName);
+        return this;
     }
 
     on(messageName, handler) {
-        delete this.handlers[messageName];
+        super.off(messageName);
         super.on(messageName, handler);
+        return this;
     }
 
     once(messageName, handler, filter) {
-        delete this.handlers[messageName];
+        super.off(messageName);
         super.once(messageName, handler);
+        return this;
     }
 
     async upgrade(httpReq, socket, headPacket) {

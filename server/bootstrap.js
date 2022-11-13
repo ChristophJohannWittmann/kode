@@ -151,6 +151,7 @@ global.env = {
     if (CLUSTER.isPrimary) (`[ Loading Server Infrastructure ]`);
     require('./lib/addon.js');
     require('./lib/auth.js');
+    require('./lib/clientBuilder.js');
     require('./lib/cluster.js');
     require('./lib/compression.js');
     require('./lib/crypto.js');
@@ -163,8 +164,8 @@ global.env = {
     require('./lib/server.js');
     require('./lib/utility.js');
     require('./lib/resource.js');
-    require('./lib/webExtension.js');
     require('./lib/webSocket.js');
+    require('./lib/webx.js');
 
     require('./dbms/dbClient.js');
     require('./dbms/pgClient.js');
@@ -173,11 +174,12 @@ global.env = {
     require('./dbms/dbSchemaAnalyzer.js');
     require('./dbms/dbObject.js');
 
-    require('./webExtensions/clientFramework.js');
-    require('./webExtensions/clientLibraryBuilder.js');
-    require('./webExtensions/webApp.js');
-    require('./webExtensions/webAppEndpoints.js');
-    require('./webExtensions/webAppTransaction.js');
+    require('../webApp/lib/webApp.js');
+    require('../webApp/lib/endpoints.js');
+    require('../webApp/lib/transaction.js');
+    require('../webApp/endpoints/org.js');
+    require('../webApp/endpoints/self.js');
+    require('../webApp/endpoints/user.js');
 
     if (CLUSTER.isPrimary) {
         require('./lib/daemon.js');

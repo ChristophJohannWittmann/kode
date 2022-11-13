@@ -96,7 +96,7 @@ register(class SignIn extends Widget {
 
     async onSignIn() {
         let rsp = await mkHttp().query({
-            messageName: 'SignIn',
+            messageName: 'SignSelfIn',
             username: this.credentials.username,
             password: this.credentials.password,
         });

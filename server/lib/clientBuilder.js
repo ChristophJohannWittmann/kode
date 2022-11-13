@@ -33,7 +33,7 @@
  * itself.  Don't worry about it.  This code will dedupe file names.  The result
  * is that the individually specified file will appear before the others.
 *****/
-register(async function buildClientLibrary(paths) {
+register(async function buildClientCode(paths) {
     let raw = [];
     let fileArray = [];
     let fileSet = mkStringSet();
