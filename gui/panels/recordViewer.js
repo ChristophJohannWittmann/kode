@@ -23,35 +23,8 @@
 
 /*****
 *****/
-register(class UserEndpoints extends WebAppEndpointContainer {
-    constructor(webapp) {
-        super(webapp);
-    }
-
-    async [ mkWebAppEndpoint('ActivateUser', 'user') ](req) {
-    }
-
-    async [ mkWebAppEndpoint('DeactivateUser', 'user') ](req) {
-    }
-
-    async [ mkWebAppEndpoint('GetUsers', 'user') ](req) {
-    }
-
-    async [ mkWebAppEndpoint('ModifyUser', 'user') ](req) {
-    }
-
-    async [ mkWebAppEndpoint('RemoveUser', 'user') ](req) {
-    }
-
-    async [ mkWebAppEndpoint('ResetUserPassword', 'user') ](req) {
-    }
-
-    async [ mkWebAppEndpoint('SetUserPassword', 'user') ](req) {
-    }
-
-    async [ mkWebAppEndpoint('SignUserOut', 'user') ](req) {
-    }
-
-    async [ mkWebAppEndpoint('VerifyUser', 'user') ](req) {
+register(class RecordViewer extends Widget {
+    constructor() {
+        super();
     }
 });

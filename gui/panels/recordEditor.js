@@ -23,29 +23,8 @@
 
 /*****
 *****/
-register(class SelfEndpoints extends WebAppEndpointContainer {
-    constructor(webapp) {
-        super(webapp);
-    }
-
-    async [ mkWebAppEndpoint('ModifySelf') ](req) {
-    }
-
-    async [ mkWebAppEndpoint('ResetSelfPassword') ](req) {
-    }
-
-    async [ mkWebAppEndpoint('SetSelfPassword') ](req) {
-    }
-
-    async [ mkWebAppEndpoint('SignSelfIn') ](req) {
-        console.log('here');
-
-        req.reply({
-            greeting: 'hello signin please',
-            status: 'successful',
-        });
-    }
-
-    async [ mkWebAppEndpoint('SignSelfOut') ](req) {
+register(class RecordEditor extends Widget {
+    constructor() {
+        super();
     }
 });
