@@ -163,7 +163,6 @@ global.env = {
     require('./server/lib/pool.js');
     require('./server/lib/server.js');
     require('./server/lib/utility.js');
-    require('./server/lib/resource.js');
     require('./server/lib/webSocket.js');
     require('./server/lib/webx.js');
 
@@ -177,8 +176,12 @@ global.env = {
     require('./webApp/lib/webApp.js');
     require('./webApp/lib/endpoints.js');
     require('./webApp/lib/transaction.js');
+    require('./webApp/endpoints/dbms.js');
     require('./webApp/endpoints/org.js');
     require('./webApp/endpoints/self.js');
+    require('./webApp/endpoints/smtp.js');
+    require('./webApp/endpoints/system.js');
+    require('./webApp/endpoints/template.js');
     require('./webApp/endpoints/user.js');
 
     if (CLUSTER.isPrimary) {
@@ -186,6 +189,9 @@ global.env = {
         require('./server/lib/session.js');
         require('./server/daemons/events.js');
         require('./server/daemons/session.js');
+    }
+    else {
+        require('./server/lib/resource.js');
     }
 
     require('./server/servers/http.js');
@@ -231,7 +237,6 @@ global.env = {
 
     async function loadModule(modulePath) {
         let module = mkModule(modulePath);
-        logPrimary(`    ${module.getInfo()}`);
         await module.load();
 
         if (module.getStatus() == 'ok') {
@@ -241,10 +246,12 @@ global.env = {
                 await module.loadReferences();
                 Config.moduleArray.push(module);
                 Config.moduleMap[module.getContainer()] = module;
+                logPrimary(`    ${module.getInfo()}`);
             }
         }
 
         if (module.getStatus() == 'fail') {
+            logPrimary(`    ${module.getInfo()}`);
             logPrimary(module.getDiagnostic());
             module.erase();
         }

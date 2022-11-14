@@ -31,39 +31,14 @@
  * and some basic common features that are required for all web extensions.
 *****/
 register(class Webx extends Emitter {
-    constructor() {
+    constructor(module, reference) {
         super();
         this.valid = true;
-        this.options = {};
-    }
-
-    async getModuleSetting(name, required, type) {
-        if (name in this.module.settings) {
-            let ok = true;
-            let value = this.module.settings[name];
-
-            if (type == 'array') {
-                ok = Array.isArray(value);
-            }
-            else {
-                ok = typeof value == type;
-            }
-
-            if (ok) {
-                this.options[name] = value;
-            }
-            else {
-                this.valid = false;
-                logPrimary(`    (ERROR) Webex Invalid Module Setting.  Module "${this.module.path}", Setting "${name}"`);
-            }
-        }
-        else if (required) {
-            this.valid = false;
-            logPrimary(`    (ERROR) Webex Module Setting Not Found.  Module "${this.module.path}", Setting "${name}" `);
-        }
-        else {
-            this.options[name] = null;
-        }
+        this.module = module;
+        this.reference = reference;
+        this.webxName = this.reference.webx;
+        this.settings = this.module.settings.webx[this.webxName];
+        this.module.container[this.webxName] = this;
     }
 
     async handleRequest(req, rsp) {
@@ -85,15 +60,13 @@ register(class Webx extends Emitter {
             }
         }
         else {
+            console.log('GOT HERE  501');
             rsp.endStatus(501);
         }
     }
 
     async init() {
-        this.getModuleSetting('title', true, 'string');
-        this.getModuleSetting('description', true, 'string');
-        this.getModuleSetting('container', true, 'string');
-        Object.assign(this.options, this.config);
+        getContainer()[this.webxName] = this;
     }
 
     off(messageName) {
@@ -114,7 +87,7 @@ register(class Webx extends Emitter {
     }
 
     async upgrade(httpReq, socket, headPacket) {
-        if (this.options.websocket) {
+        if (this.settings.websocket) {
             if (Reflect.has(this, 'onWebSocket')) {
                 let secureKey = httpReq.headers['sec-websocket-key'];
                 let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);

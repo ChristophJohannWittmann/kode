@@ -35,10 +35,8 @@
  * handling HTTP and web socket requests.
 *****/
 register(class WebApp extends Webx {
-    constructor() {
-        super();
-        this.webSockets = {};
-        this.permissions = [];
+    constructor(module, reference) {
+        super(module, reference);
     }
 
     async buildCSS(path) {
@@ -55,8 +53,8 @@ register(class WebApp extends Webx {
         let links = [];
         this.links = '';
 
-        if ('favicons' in this.config) {
-            for (let favicon of this.options.favicons) {
+        if (Array.isArray(this.reference.favicons)) {
+            for (let favicon of this.reference.favicons) {
                 switch (favicon.type) {
                     case 'icon':
                         let parsed = PATH.parse(favicon.href);
@@ -97,17 +95,26 @@ register(class WebApp extends Webx {
         else {
             let doc = mkTextTemplate(Config.minify ? this.compactHtml : this.visualHtml).set({
                 css: this.compactCss,
-                title: this.options.title,
-                description: this.options.description,
+                title: this.module.settings.title,
+                description: this.module.settings.description,
                 links: this.links,
-                bodyClasses: this.options.bodyClasses,
-                url: this.options.url,
-                authenticate: this.options.authenticate,
-                websocket: this.options.websocket,
+                bodyClasses: this.settings.bodyClasses,
+                url: this.reference.url,
+                authenticate: this.settings.authenticate,
+                websocket: this.settings.websocket,
             });
 
             rsp.end(200, 'text/html', await doc.toString());
         }
+    }
+
+    async handleGetCLIENTAPPLICATION(req, rsp) {
+        if (!(rsp.encoding in this.framework)) {
+            this.clientApplication[rsp.encoding] = await compress(rsp.encoding, this.clientApplication['']);
+        }
+
+        rsp.preEncoded = true;
+        rsp.end(this.clientApplication[rsp.encoding]);
     }
 
     async handleGetCLIENTFRAMEWORK(req, rsp) {
@@ -158,13 +165,6 @@ register(class WebApp extends Webx {
     async init(cssPath, htmlPath) {
         await super.init();
 
-        this.getModuleSetting('panel', true, 'string');
-        this.getModuleSetting('bodyClasses', true, 'string');
-        this.getModuleSetting('websocket', true, 'boolean');
-        this.getModuleSetting('authenticate', true, 'boolean');
-        this.getModuleSetting('server', false, 'array');
-        this.getModuleSetting('client', false, 'array');
-
         this.framework = { '': await buildClientCode([
                 'framework/core.js',
                 'framework',
@@ -178,18 +178,38 @@ register(class WebApp extends Webx {
             ])
         };
 
+        if (this.settings.server) {
+            for (let path of this.settings.server.map(path => absolutePath(this.module.path, path))) {
+                for (let codePath of await recurseFiles(path)) {
+                    if (codePath.endsWith('.js')) {
+                        require(codePath);
+                    }
+                }
+            }
+        }
+
+        if (this.settings.client) {
+            this.clientApplication = {
+                '': await buildClientCode(this.settings.client.map(path => absolutePath(this.module.path, path)))
+            };
+        }
+
         await this.buildLinks();
         await this.buildHTML(PATH.join(env.kodePath, 'webApp/lib/webApp.html'));
 
-        if (this.options.colorsCss) {
-            await this.buildCSS(this.config.css);
+        if (this.settings.colorsCss) {
+            await this.buildCSS(this.reference.css);
         }
         else {
             await this.buildCSS(PATH.join(env.kodePath, 'webApp/lib/webApp.css'));
         }
 
+        await mkDbmsEndpoints(this);
         await mkOrgEndpoints(this);
         await mkSelfEndpoints(this);
+        await mkSmtpEndpoints(this);
+        await mkSystemEndpoints(this);
+        await mkTemplateEndpoints(this);
         await mkUserEndpoints(this);
     }
 

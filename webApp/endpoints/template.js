@@ -23,37 +23,20 @@
 
 /*****
 *****/
-singleton(class Sessions extends Daemon {
-    constructor() {
-        super();
-        this.sessionsByKey = {};
-        this.sessionsByOrg = {};
-        this.sessionsByUser = {};
-        this.permissions = mkStringSet('org', 'system', 'template', 'user');
+register(class TemplateEndpoints extends WebAppEndpointContainer {
+    constructor(webapp) {
+        super(webapp);
     }
 
-    async onAuthenticate(message) {
+    async [ mkWebAppEndpoint('CreateTemplate', 'template') ](req) {
     }
 
-    async onClearPermission(message) {
+    async [ mkWebAppEndpoint('EraseTemplate', 'template') ](req) {
     }
 
-    async onCloseSession(message) {
+    async [ mkWebAppEndpoint('GetTemplate', 'template') ](req) {
     }
 
-    async onGetSession(message) {
-    }
-
-    async onListPermissions(message) {
-        Message.reply(message, this.permissions);
-    }
-
-    async onSearchSessions(message) {
-    }
-
-    async onSetPermission(message) {
-    }
-
-    async onTouchSession(message) {
+    async [ mkWebAppEndpoint('SaveTemplate', 'template') ](req) {
     }
 });

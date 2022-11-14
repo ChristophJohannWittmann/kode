@@ -86,13 +86,15 @@ register(class Module {
     }
 
     erase() {
-        if (this.settings.container in global) {
-            delete global[this.settings.container];
-        }
+        if (this.settings) {
+            if (this.settings.container in global) {
+                delete global[this.settings.container];
+            }
 
-        if (this.settings.databases) {
-            for (let dbName in this.settings.databases) {
-                delete DbDatabase.databases[dbName];
+            if (this.settings.databases) {
+                for (let dbName in this.settings.databases) {
+                    delete DbDatabase.databases[dbName];
+                }
             }
         }
 
@@ -132,6 +134,7 @@ register(class Module {
     async load() {
         await this.execute('validatePath');
         await this.execute('loadModule');
+        await this.execute('loadPrograms');
         await this.execute('loadDatabases');
     }
 
@@ -146,13 +149,13 @@ register(class Module {
 
                 if (result !== true) {
                     this.status = 'fail';
-                    this.prefix = '(validate )';
+                    this.prefix = '(validate)';
                     this.failure = `Unable to load configuration file at: "${this.config.getPath()}".  "${result}"`;
                 }
             }
             else {
                 this.status = 'fail';
-                this.prefix = '(validate )';
+                this.prefix = '(validate)';
                 this.failure = `Module configuration settings failed validation: "${result}"`;
             }
         }
@@ -208,34 +211,48 @@ register(class Module {
                 }
                 catch (e) {
                     this.status = 'fail';
-                    this.prefix = '(json     )';
+                    this.prefix = '(json    )';
                     this.failure = `Module file syntax failure: "${this.modulePath}"`;
                 }
             }
             else {
                 this.status = 'fail';
-                this.prefix = '(file     )';
+                this.prefix = '(file    )';
                 this.failure = `Module path is not a regular file: "${this.modulePath}"`;
             }
         }
         else {
             this.status = 'fail';
-            this.prefix = '(config   )';
+            this.prefix = '(config  )';
             this.failure = `Module file not found: "${this.modulePath}"`;
         }
     }
 
-    async loadReferences() {
-        if (this.status == 'ok') {
-            if (Array.isArray(this.settings.references)) {
-                for (let reference of this.settings.references) {
-                    ResourceLibrary.register(reference, this);
+    async loadPrograms() {
+        if (Array.isArray(this.settings.programs)) {
+            for (let path of this.settings.programs.map(path => absolutePath(this.path, path))) {
+                for (let codePath of await recurseFiles(path)) {
+                    if (codePath.endsWith('.js')) {
+                        require(codePath);
+                    }
                 }
             }
+        }
+    }
 
-            if (Array.isArray(this.config.references)) {
-                for (let reference of this.config.references) {
-                    ResourceLibrary.register(reference, this);
+    async loadReferences() {
+        if(CLUSTER.isWorker) {
+            if (this.status == 'ok') {
+                if (Array.isArray(this.settings.references)) {
+                    for (let reference of this.settings.references) {
+                        ResourceLibrary.register(reference, this);
+                    }
+                }
+
+                if (Array.isArray(this.config.references)) {
+                    for (let reference of this.config.references) {
+                        ResourceLibrary.register(reference, this);
+                    }
                 }
             }
         }
@@ -244,11 +261,8 @@ register(class Module {
     async mkWebx(reference) {
         try {
             let webx;
-            eval(`webx = mk${reference.webx}();`);
-            webx.module = this;
-            webx.container = this.container;
-            this.container[reference.webx] = webx;
-            webx.config = reference;
+            let webxSettings = this.settings.webx[reference.webx];
+            eval(`webx = mk${webxSettings.className}(this, reference);`);
             await webx.init();
             return webx;
         }
@@ -265,13 +279,13 @@ register(class Module {
 
             if (!stats.isDirectory()) {
                 this.status = 'fail';
-                this.prefix = '(dir      )';
+                this.prefix = '(dir     )';
                 this.failure = `Module path is not a directory: "${this.path}"`;
             }
         }
         else {
             this.status = 'fail';
-            this.prefix = '(notfound )';
+            this.prefix = '(notfound)';
             this.failure = `Invalid module path: "${this.path}"`;
         }
     }
