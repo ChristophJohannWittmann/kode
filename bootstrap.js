@@ -219,9 +219,9 @@ global.env = {
      * Load Objects
      *******************************************/
     logPrimary('[ Loading Framework Object API ]');
-    require('./server/dbms/frameworkSchema.js');
+    require('./webApp/lib/schema.js');
 
-    for (let filePath of await recurseFiles(PATH.join(env.kodePath, 'server/objects'))) {
+    for (let filePath of await recurseFiles(PATH.join(env.kodePath, 'webApp/obj'))) {
         require(filePath);
     }
 
