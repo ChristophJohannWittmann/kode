@@ -23,37 +23,14 @@
 
 /*****
 *****/
-singleton(class Sessions extends Daemon {
-    constructor() {
+register(class OrgObj extends DboOrg {
+    constructor(dbc) {
         super();
-        this.sessionsByKey = {};
-        this.sessionsByOrg = {};
-        this.sessionsByUser = {};
-        this.permissions = mkStringSet('org', 'system', 'template', 'user');
+        this.dbc = dbc;
     }
 
-    async onAuthenticate(message) {
-    }
-
-    async onClearPermission(message) {
-    }
-
-    async onCloseSession(message) {
-    }
-
-    async onGetSession(message) {
-    }
-
-    async onListPermissions(message) {
-        Message.reply(message, this.permissions);
-    }
-
-    async onSearchSessions(message) {
-    }
-
-    async onSetPermission(message) {
-    }
-
-    async onTouchSession(message) {
+    static async get(dbc, oid) {
+        let dbo = getDboOrg(dbc, oid);
+        return dbo ? mkOrgObj(dbo) : null;
     }
 });

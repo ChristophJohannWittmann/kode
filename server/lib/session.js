@@ -24,61 +24,63 @@
 /*****
 *****/
 register(class Session {
-    constructor(data) {
+    constructor(org, user) {
         return new Promise(async (ok, fail) => {
-            this.org = null;
-            this.user = null;
-            this.expires = null;
-            this.permissions = {};
-            this.ipAddress = null;
+            const dbc = await dbConnect();
+            this.org = org;
+            this.user = user;
+            this.timeout = null;
             this.webSocket = null;
-            this.queue = [];
+            this.messageQueue = [];
 
             let seed = `${(new Date()).toString()}${this.user.email}`;
-            this.key = await Crypto.digestUnsalted('sha256', `${seed}${Math.rand()}`);
+            this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
 
-            while (this.key in this.sessions) {
-                this.key = await Crypto.digestUnsalted('sha256', `${seed}${Math.rand()}`);
+            while (this.key in Sessions.byKey) {
+                this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
             }
 
+            await dbc.rollback();
+            await dbc.free();
+            this.setPermissions();
+            this.touch();
+            Sessions.addSession(this);
             ok(this);
         });
     }
 
-    async authorize(permission, org) {
-    }
-
-    clearQueue() {
+    authorize(req) {
     }
 
     async close() {
-    }
+        if (this.webSocket) {
+            this.webSocket.sendClient({
+                messageName: '#CloseSession'
+            });
 
-    getExpires() {
-    }
-
-    getIpAddress() {
-        return this.ipAddress;
-    }
-
-    getOrg() {
-        return this.org;
-    }
-
-    getPermission() {
-    }
-
-    getUser() {
-        return this.user;
-    }
-
-    getWebSocket() {
-        return this.webSocket;
+            await this.webSocket.close();
+            Sessions.removeSession(this);
+        }
     }
 
     send(message) {
+        if (this.webSocket) {
+            this.webSocket.sendClient(message);
+        }
+        else {
+            this.messageQueue.push(message);
+        }
+    }
+
+    setPermissions() {
+        this.permissions = {};
     }
 
     touch() {
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+        }
+
+        this.timeout = setTimeout(() => this.close(), Config.sessionIdle*60*1000);
     }
 });

@@ -174,7 +174,7 @@ register(class WebApp extends Webx {
                 'gui/widgets',
                 'gui/editors',
                 'gui/panels',
-                'webApp/gui',
+                'server/webApp/gui',
             ])
         };
 
@@ -195,13 +195,13 @@ register(class WebApp extends Webx {
         }
 
         await this.buildLinks();
-        await this.buildHTML(PATH.join(env.kodePath, 'webApp/lib/webApp.html'));
+        await this.buildHTML(PATH.join(env.kodePath, 'server/webApp/webApp.html'));
 
         if (this.settings.colorsCss) {
             await this.buildCSS(this.reference.css);
         }
         else {
-            await this.buildCSS(PATH.join(env.kodePath, 'webApp/lib/webApp.css'));
+            await this.buildCSS(PATH.join(env.kodePath, 'server/webApp/webApp.css'));
         }
 
         await mkDbmsEndpoints(this);

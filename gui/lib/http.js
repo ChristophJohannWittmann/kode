@@ -157,6 +157,17 @@ register(class Http extends Emitter {
         return this;
     }
 
+    handleIntercept(result) {
+        if (typeof result == 'object') {
+            if ('sessionKey' in result) {
+                webAppSettings.session = () => result.sessionKey;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     get(url) {
         this.request('GET', url);
         return this.trap.promise;
@@ -211,7 +222,14 @@ register(class Http extends Emitter {
                             console.log(fromJson(body));
                         }
                         else {
-                            Trap.pushReply(this.trap.id, rsp.getResult());
+                            let result = rsp.getResult();
+
+                            if (this.handleIntercept(result)) {
+                                Trap.pushReply(this.trap.id, 'ok');
+                            }
+                            else {
+                                Trap.pushReply(this.trap.id, result);
+                            }
                         }
                     }
                     else {

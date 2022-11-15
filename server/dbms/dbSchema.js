@@ -118,7 +118,7 @@ global.dbInt32 = {
 
 global.dbInt64 = {
     name: () => 'dbInt64',
-    init: () => 0,
+    init: () => 0n,
     check: value => {
         if (typeof value == 'bigint') {
             return value;
@@ -144,7 +144,7 @@ global.dbJson = {
 
 global.dbKey = {
     name: () => 'dbKey',
-    init: () => 0,
+    init: () => 0n,
     check: value => {
         if (typeof value == 'bigint') {
             return value;

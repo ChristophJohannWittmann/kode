@@ -173,22 +173,22 @@ global.env = {
     require('./server/dbms/dbSchemaAnalyzer.js');
     require('./server/dbms/dbObject.js');
 
-    require('./webApp/lib/webApp.js');
-    require('./webApp/lib/endpoints.js');
-    require('./webApp/lib/transaction.js');
-    require('./webApp/endpoints/dbms.js');
-    require('./webApp/endpoints/org.js');
-    require('./webApp/endpoints/self.js');
-    require('./webApp/endpoints/smtp.js');
-    require('./webApp/endpoints/system.js');
-    require('./webApp/endpoints/template.js');
-    require('./webApp/endpoints/user.js');
+    require('./server/webApp/webApp.js');
+    require('./server/webApp/lib/endpoints.js');
+    require('./server/webApp/lib/transaction.js');
+    require('./server/webApp/lib/dbmsEndpoints.js');
+    require('./server/webApp/lib/orgEndpoints.js');
+    require('./server/webApp/lib/selfEndpoints.js');
+    require('./server/webApp/lib/smtpEndpoints.js');
+    require('./server/webApp/lib/systemEndpoints.js');
+    require('./server/webApp/lib/templateEndpoints.js');
+    require('./server/webApp/lib/userEndpoints.js');
 
     if (CLUSTER.isPrimary) {
         require('./server/lib/daemon.js');
         require('./server/lib/session.js');
         require('./server/daemons/events.js');
-        require('./server/daemons/session.js');
+        require('./server/daemons/sessions.js');
     }
     else {
         require('./server/lib/resource.js');
@@ -219,9 +219,9 @@ global.env = {
      * Load Objects
      *******************************************/
     logPrimary('[ Loading Framework Object API ]');
-    require('./webApp/lib/schema.js');
+    require('./server/lib/schema.js');
 
-    for (let filePath of await recurseFiles(PATH.join(env.kodePath, 'webApp/obj'))) {
+    for (let filePath of await recurseFiles(PATH.join(env.kodePath, 'server/obj'))) {
         require(filePath);
     }
 

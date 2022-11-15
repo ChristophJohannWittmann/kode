@@ -101,6 +101,9 @@ register(class SignIn extends Widget {
             password: this.credentials.password,
         });
 
-        console.log(rsp);
+        if (rsp == 'ok') {
+        }
+        else {
+        }
     }
 });

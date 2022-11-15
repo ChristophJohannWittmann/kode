@@ -50,8 +50,9 @@ register(function defineDboType(schemaTable) {
     }));
     
     eval(`
-    register(class ${className} {
+    register(class ${className} extends Jsonable {
         constructor(values) {
+            super();
             this.init();
             this.set(values);
         }
@@ -63,7 +64,7 @@ register(function defineDboType(schemaTable) {
                 copy[propertyName] = this[propertyName];
             }
 
-            copy.oid = 0;
+            copy.oid = 0n;
             copy.created = mkTime();
             copy.updated = mkTime();
 
@@ -71,9 +72,9 @@ register(function defineDboType(schemaTable) {
         }
 
         async erase(dbc) {
-            if (this.oid > 0) {
+            if (this.oid > 0n) {
                 await dbc.query("DELETE FROM ${tableName} WHERE _oid=" + this.oid);
-                this.oid = 0;
+                this.oid = 0n;
                 return this;
             };
         }
@@ -108,7 +109,7 @@ register(function defineDboType(schemaTable) {
         }
 
         async save(dbc) {
-            if (this.oid == 0) {
+            if (this.oid == 0n) {
                 await this.insert(dbc);
             }
             else {

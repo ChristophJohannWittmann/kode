@@ -23,29 +23,59 @@
 
 /*****
 *****/
-register(class SelfEndpoints extends WebAppEndpointContainer {
-    constructor(webapp) {
-        super(webapp);
+register(class UserObj extends DboUser {
+    constructor(dbc) {
+        super();
+        this.dbc = dbc;
     }
 
-    async [ mkWebAppEndpoint('ModifySelf') ](req) {
+    async activate() {
     }
 
-    async [ mkWebAppEndpoint('ResetSelfPassword') ](req) {
+    static async authenticate(dbc, email, password) {
+        let result = await selectOneDboUser(dbc, `_email='email' AND _status='active'`);
+
+        if (result) {
+        }
+        else {
+            return false;
+        }
     }
 
-    async [ mkWebAppEndpoint('SetSelfPassword') ](req) {
+    async deactivate() {
     }
 
-    async [ mkWebAppEndpoint('SignSelfIn') ](req) {
-        console.log('here');
-
-        req.reply({
-            greeting: 'hello signin please',
-            status: 'successful',
-        });
+    static async empty(dbc) {
+        let result = await dbc.query(`SELECT COUNT(*) FROM _user`);
+        return result.data[0].count == 0;
     }
 
-    async [ mkWebAppEndpoint('SignSelfOut') ](req) {
+    static async get(dbc, oid) {
+        let dbo = getDboUser(dbc, oid);
+        return dbo ? mkUserObj(dbo) : null;
+    }
+
+    static async selectByEmail(dbc, email) {
+    }
+
+    static async selectByName(dbc, firstname, lastname) {
+    }
+
+    static async selectByUserName(dbc, username, status) {
+    }
+
+    async sendEmail(email) {
+    }
+
+    async sendMMS(mms) {
+    }
+
+    async setPassword(password) {
+    }
+
+    async validatePassword(password) {
+    }
+
+    async zombify() {
     }
 });

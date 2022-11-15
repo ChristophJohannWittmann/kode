@@ -66,7 +66,9 @@ mkDbSchema(
         name: 'credentials',
         columns: [
             { name: 'userOid',    type: dbInt64            },
-            { name: 'crypto',     type: dbText, size: 1000 },
+            { name: 'type',       type: dbText, size:   20 },
+            { name: 'status',     type: dbText, size:   20 },
+            { name: 'crypto',     type: dbText, size: 4000 },
             { name: 'expires',    type: dbTime             },
         ],
         indexes: [
@@ -121,9 +123,10 @@ mkDbSchema(
     {
         name: 'org',
         columns: [
-            { name: 'name',        type: dbText, size: 50 },
-            { name: 'category',    type: dbText, size: 50 },
-            { name: 'description', type: dbText, size:100 },
+            { name: 'name',         type: dbText, size: 50 },
+            { name: 'category',     type: dbText, size: 50 },
+            { name: 'description',  type: dbText, size:100 },
+            { name: 'authType',     type: dbText, size: 20 },
         ],
         indexes: [
             'name:asc',
@@ -168,20 +171,24 @@ mkDbSchema(
     {
         name: 'user',
         columns: [
-            { name: 'orgOid',    type: dbInt64           },
-            { name: 'status',    type: dbText            },
-            { name: 'userName',  type: dbText, size: 100 },
-            { name: 'firstName', type: dbText, size: 100 },
-            { name: 'lastName',  type: dbText, size: 100 },
-            { name: 'title',     type: dbText, size:  20 },
-            { name: 'suffix',    type: dbText, size:  20 },
+            { name: 'orgOid',       type: dbInt64           },
+            { name: 'email',        type: dbText, size: 100 },
+            { name: 'firstName',    type: dbText, size: 100 },
+            { name: 'lastName',     type: dbText, size: 100 },
+            { name: 'title',        type: dbText, size:  20 },
+            { name: 'suffix',       type: dbText, size:  20 },
+            { name: 'status',       type: dbText            },
+            { name: 'authType',     type: dbText, size:  20 },
+            { name: 'verified',     type: dbBool            },
+            { name: 'password',     type: dbBool            },
         ],
         indexes: [
             'orgOid:asc',
-            'userName:asc',
+            'email:asc',
             'lastName:asc',
             'firstName:asc',
             'lastName:asc, firstName:asc',
+            'authType:asc',
         ]
     },
 );
