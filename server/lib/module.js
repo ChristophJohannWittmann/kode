@@ -134,7 +134,7 @@ register(class Module {
     async load() {
         await this.execute('validatePath');
         await this.execute('loadModule');
-        await this.execute('loadPrograms');
+        await this.execute('loadFeatures');
         await this.execute('loadDatabases');
     }
 
@@ -228,11 +228,12 @@ register(class Module {
         }
     }
 
-    async loadPrograms() {
-        if (Array.isArray(this.settings.programs)) {
-            for (let path of this.settings.programs.map(path => absolutePath(this.path, path))) {
+    async loadFeatures() {
+        if (Array.isArray(this.settings.features)) {
+            for (let path of this.settings.features.map(path => absolutePath(this.path, path))) {
                 for (let codePath of await recurseFiles(path)) {
                     if (codePath.endsWith('.js')) {
+                        console.log(codePath);
                         require(codePath);
                     }
                 }

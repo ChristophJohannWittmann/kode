@@ -23,13 +23,15 @@
 
 /*****
 *****/
-singleton(class Sessions extends Daemon {
+singleton(class SessionManager extends Daemon {
     constructor() {
-        super();
-        this.byKey = {};
-        this.byOrg = {};
-        this.byUser = {};
-        this.permissions = mkStringSet('org', 'system', 'template', 'user');
+        return new Promise(async (ok, fail) => {
+            super();
+            this.byKey = {};
+            this.byOrg = {};
+            this.byUser = {};
+            ok(this);
+        });
     }
 
     addSession(session) {
@@ -55,34 +57,62 @@ singleton(class Sessions extends Daemon {
     async onCloseAllSession(message) {
     }
 
-    async onCloseSession(message) {
-    }
-
     async onCloseOrgSessions(message) {
     }
 
     async onCloseUserSessions(message) {
     }
 
+    async onCloseSession(message) {
+    }
+
+    async onCreateBootstrapSession(message) {
+
+        let session = await mkSession(false);
+        /*
+        let dbc = await dbConnect();
+
+        if (UserObj.empty(dbc)) {
+            let session = mkSession();
+            await session.initBootstrap();
+            this.addSession(session);
+            Message.reply(message, session.key);
+        }
+        else {
+            Message.reply(message, false);
+        }
+
+        await dbc.rollback();
+        await dbc.free();
+        */
+    }
+
     async onCreateSession(message) {
-        let session = await mkSession(message.org, message.user);
+        /*
+        let session = mkSession();
+        await session.init(message.user);
+        this.addSession(session);
         Message.reply(message, session.key);
+        */
+    }
+
+    async onGetOrgSessions(message) {
+    }
+
+    async onGetUserSessions(message) {
     }
 
     async onGetSession(message) {
+        if ('session' in message) {
+            if (message['session'] in this.byKey) {
+                return Message.reply(message, this.byKey[message['session']]);
+            }
+        }
+
+        Message.reply(message, false);
     }
 
-    async onListPermissions(message) {
-        Message.reply(message, this.permissions);
-    }
-
-    async onSearchOrgSessions(message) {
-    }
-
-    async onSearchUserSessions(message) {
-    }
-
-    async onSetPermission(message) {
+    async onNotifySessions(message) {
     }
 
     async onTouchSession(message) {

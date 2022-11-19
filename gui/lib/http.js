@@ -159,8 +159,8 @@ register(class Http extends Emitter {
 
     handleIntercept(result) {
         if (typeof result == 'object') {
-            if ('sessionKey' in result) {
-                webAppSettings.session = () => result.sessionKey;
+            if ('newlyEstablishedSessionKey' in result) {
+                webAppSettings.session = () => result.newlyEstablishedSessionKey;
                 return true;
             }
         }
@@ -225,7 +225,7 @@ register(class Http extends Emitter {
                             let result = rsp.getResult();
 
                             if (this.handleIntercept(result)) {
-                                Trap.pushReply(this.trap.id, 'ok');
+                                Trap.pushReply(this.trap.id, true);
                             }
                             else {
                                 Trap.pushReply(this.trap.id, result);

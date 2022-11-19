@@ -52,14 +52,13 @@ mkDbSchema(
         ]
     },
     {
-        name: 'auth',
+        name: 'conf',
         columns: [
-            { name: 'userOid',    type: dbInt64 },
-            { name: 'grants',     type: dbJson  },
-            { name: 'denies',     type: dbJson  },
+            { name: 'name',         type: dbText, size:   50 },
+            { name: 'value',        type: dbJson, size: 2000 },
         ],
         indexes: [
-            'userOid:asc',
+            'name:asc',
         ]
     },
     {
@@ -68,7 +67,7 @@ mkDbSchema(
             { name: 'userOid',    type: dbInt64            },
             { name: 'type',       type: dbText, size:   20 },
             { name: 'status',     type: dbText, size:   20 },
-            { name: 'crypto',     type: dbText, size: 4000 },
+            { name: 'crypto',     type: dbText, size: 2000 },
             { name: 'expires',    type: dbTime             },
         ],
         indexes: [
@@ -78,29 +77,47 @@ mkDbSchema(
     {
         name: 'domain',
         columns: [
-            { name: 'name',         type: dbText, size: 200 },
-            { name: 'tld',          type: dbText, size:  20 },
-            { name: 'isVerified',   type: dbBool            },
-            { name: 'lastVerified', type: dbTime            },
+            { name: 'name',         type: dbText, size:  200 },
+            { name: 'tld',          type: dbText, size:   20 },
+            { name: 'verified',     type: dbBool             },
+            { name: 'lastVerified', type: dbTime             },
+            { name: 'error',        type: dbText, size: 1000 },
         ],
         indexes: [
             'name:asc',
             'tld:asc',
+            'error:asc',
         ]
     },
     {
-        name: 'emailAddr',
+        name: 'email',
         columns: [
-            { name: 'domainOid',    type: dbInt64           },
-            { name: 'user',         type: dbText, size: 200 },
-            { name: 'addr',         type: dbText, size: 200 },
-            { name: 'verified',     type: dbBool            },
-            { name: 'lastVerified', type: dbTime            },
+            { name: 'ownerType',    type: dbText, size:   20 },
+            { name: 'ownerOid',     type: dbInt64            },
+            { name: 'domainOid',    type: dbInt64            },
+            { name: 'user',         type: dbText, size:  200 },
+            { name: 'addr',         type: dbText, size:  200 },
+            { name: 'verified',     type: dbBool             },
+            { name: 'lastVerified', type: dbTime             },
+            { name: 'error',        type: dbText, size: 1000 },
         ],
         indexes: [
+            'ownerType:asc, ownerOid:asc',
             'domainOid:asc',
             'user:asc',
             'addr:asc',
+            'error:asc',
+        ]
+    },
+    {
+        name: 'grant',
+        columns: [
+            { name: 'userOid',      type: dbInt64             },
+            { name: 'context',      type: dbText,  size: 4000 },
+        ],
+        indexes: [
+            'userOid:asc',
+            'context:asc',
         ]
     },
     {
@@ -110,7 +127,7 @@ mkDbSchema(
             { name: 'cipher',       type: dbText, size:  50 },
             { name: 'method',       type: dbText, size:  20 },
             { name: 'url',          type: dbText, size: 400 },
-            { name: 'headers',      type: dbJson, size: 900 },
+            { name: 'headers',      type: dbJson            },
             { name: 'status',       type: dbInt32           },
         ],
         indexes: [
@@ -124,26 +141,28 @@ mkDbSchema(
         name: 'org',
         columns: [
             { name: 'name',         type: dbText, size: 50 },
-            { name: 'category',     type: dbText, size: 50 },
+            { name: 'status',       type: dbText, size: 50 },
             { name: 'description',  type: dbText, size:100 },
             { name: 'authType',     type: dbText, size: 20 },
         ],
         indexes: [
             'name:asc',
+            'status:asc',
+            'status:asc, name:asc',
         ]
     },
     {
         name: 'phone',
         columns: [
-            { name: 'ownerType',   type: dbText, size:   20 },
-            { name: 'ownerOid',    type: dbInt64            },
-            { name: 'status',      type: dbText             },
-            { name: 'country',     type: dbText, size:   10 },
-            { name: 'region',      type: dbText, size:   20 },
-            { name: 'number',      type: dbText, size:  200 },
-            { name: 'unformatted', type: dbText, size:  200 },
-            { name: 'formatted',   type: dbText, size:  200 },
-            { name: 'allowMms',    type: dbBool             }
+            { name: 'ownerType',    type: dbText, size:    20 },
+            { name: 'ownerOid',     type: dbInt64             },
+            { name: 'country',      type: dbText, size:    10 },
+            { name: 'number',       type: dbText, size:    30 },
+            { name: 'unformatted',  type: dbText, size:   200 },
+            { name: 'mms',          type: dbBool              },
+            { name: 'verified',     type: dbBool              },
+            { name: 'lastVerified', type: dbTime              },
+            { name: 'error',        type: dbText, size: 1000  },
         ],
         indexes: [
             'ownerType:asc, ownerOid:asc',
@@ -153,10 +172,13 @@ mkDbSchema(
     {
         name: 'setting',
         columns: [
+            { name: 'ownerType',   type: dbText, size:   20 },
+            { name: 'ownerOid',    type: dbInt64            },
             { name: 'name',        type: dbText, size:   50 },
             { name: 'value',       type: dbJson, size: 2000 },
         ],
         indexes: [
+            'ownerType:asc, ownerOid:asc',
             'name:asc',
         ]
     },
@@ -169,10 +191,24 @@ mkDbSchema(
         ]
     },
     {
+        name: 'template',
+        columns: [
+            { name: 'orgOid',      type: dbInt64           },
+            { name: 'ownerType',   type: dbText, size:  20 },
+            { name: 'ownerOid',    type: dbInt64           },
+            { name: 'name',        type: dbText, size: 100 },
+            { name: 'content',     type: dbText, size:   0 },
+        ],
+        indexes: [
+            'orgOid:asc',
+            'ownerType:asc, ownerOid:asc',
+        ]
+    },
+    {
         name: 'user',
         columns: [
-            { name: 'orgOid',       type: dbInt64           },
-            { name: 'email',        type: dbText, size: 100 },
+            { name: 'userName',     type: dbText, size: 100 },
+            { name: 'emailOid',     type: dbInt64           },
             { name: 'firstName',    type: dbText, size: 100 },
             { name: 'lastName',     type: dbText, size: 100 },
             { name: 'title',        type: dbText, size:  20 },
@@ -183,12 +219,23 @@ mkDbSchema(
             { name: 'password',     type: dbBool            },
         ],
         indexes: [
-            'orgOid:asc',
-            'email:asc',
+            'userName:asc',
             'lastName:asc',
             'firstName:asc',
             'lastName:asc, firstName:asc',
             'authType:asc',
+        ]
+    },
+    {
+        name: 'userLog',
+        columns: [
+            { name: 'userOid',      type: dbInt64           },
+            { name: 'endpoint',     type: dbText,  size: 40 },
+            { name: 'details',      type: dbJson            },
+        ],
+        indexes: [
+            'userOid:asc',
+            'endpoint:asc',
         ]
     },
 );

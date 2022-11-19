@@ -101,7 +101,8 @@ register(class SignIn extends Widget {
             password: this.credentials.password,
         });
 
-        if (rsp == 'ok') {
+        console.log(webAppSettings.session());
+        if (rsp) {
         }
         else {
         }

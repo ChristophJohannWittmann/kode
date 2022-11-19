@@ -23,9 +23,8 @@
 
 /*****
 *****/
-register(class OrgObj extends DboOrg {
+register(class OrgObj {
     constructor(dbc) {
-        super();
         this.dbc = dbc;
     }
 

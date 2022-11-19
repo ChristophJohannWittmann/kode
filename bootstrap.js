@@ -34,6 +34,7 @@ if (CLUSTER.isPrimary) console.log(`[ Loading Framework ]`);
 require('./framework/core.js');
 require('./framework/activeData.js');
 require('./framework/binaryServer.js');
+require('./framework/context.js');
 require('./framework/language.js');
 require('./framework/message.js');
 require('./framework/mime.js');
@@ -103,6 +104,30 @@ global.env = {
 
 
 /*****
+ * This function is called only when first bootstrapping a new server with an
+ * empty user database.  Create a new user named Charlie Root, which will be used
+ * for signing in to get things going.
+*****/
+async function seedUser(dbc) {
+    logPrimary('[ Seeding Initial User: Charlie Root ]');
+
+    let user = await mkUserObject({
+        userName: 'username',
+        firstName: 'Charlie',
+        lastName: 'Root',
+        status: 'active',
+        authType: 'simple',
+        verified: true,
+        password: true,
+    }).save(dbc);
+
+    await user.setPassword(dbc, 'password');
+    await user.setGrant(dbc, { x: 'user' });
+    await user.setGrant(dbc, { x: 'system' });
+}
+
+
+/*****
  * This is the code that bootstraps the server and this is the entry point into
  * the kode application server.  The kode framework is NOT an application.  It's
  * a framework that loads in modules.  A module represents a namespace and some
@@ -150,7 +175,6 @@ global.env = {
      *******************************************/
     if (CLUSTER.isPrimary) (`[ Loading Server Infrastructure ]`);
     require('./server/lib/addon.js');
-    require('./server/lib/auth.js');
     require('./server/lib/clientBuilder.js');
     require('./server/lib/cluster.js');
     require('./server/lib/compression.js');
@@ -188,7 +212,7 @@ global.env = {
         require('./server/lib/daemon.js');
         require('./server/lib/session.js');
         require('./server/daemons/events.js');
-        require('./server/daemons/sessions.js');
+        require('./server/daemons/session.js');
     }
     else {
         require('./server/lib/resource.js');
@@ -294,6 +318,15 @@ global.env = {
                 }
             }
         }
+
+        let dbc = await dbConnect();
+
+        if ((await dbc.query(`SELECT COUNT(*) FROM _user`)).data[0].count == 0) {
+            await seedUser(dbc);
+        }
+
+        await dbc.commit();
+        await dbc.free();
     }
 
     /********************************************

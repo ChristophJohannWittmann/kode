@@ -28,21 +28,21 @@ register(class DbmsEndpoints extends WebAppEndpointContainer {
         super(webapp);
     }
 
-    async [ mkWebAppEndpoint('AnalyzeDbmsDatabase', 'system') ](req) {
+    async [ mkWebAppEndpoint('AnalyzeDbmsDatabase', 'global:system') ](req) {
     }
 
-    async [ mkWebAppEndpoint('EraseDbmsDatabase', 'system') ](req) {
+    async [ mkWebAppEndpoint('EraseDbmsDatabase', 'global:system') ](req) {
     }
 
-    async [ mkWebAppEndpoint('GetDbmsSchema', 'system') ](req) {
+    async [ mkWebAppEndpoint('GetDbmsSchema', 'global:system') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ListDbmsDatabases', 'system') ](req) {
+    async [ mkWebAppEndpoint('ListDbmsDatabases', 'global:system') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ListDbmsSchemas', 'system') ](req) {
+    async [ mkWebAppEndpoint('ListDbmsSchemas', 'global:system') ](req) {
     }
 
-    async [ mkWebAppEndpoint('UpgradeDbmsDatabase', 'system') ](req) {
+    async [ mkWebAppEndpoint('UpgradeDbmsDatabase', 'global:system') ](req) {
     }
 });

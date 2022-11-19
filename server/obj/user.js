@@ -23,59 +23,134 @@
 
 /*****
 *****/
-register(class UserObj extends DboUser {
-    constructor(dbc) {
-        super();
-        this.dbc = dbc;
+register(class UserObject extends DboUser {
+    constructor(properties) {
+        super(properties);
     }
 
     async activate() {
+        this.status = 'active';
+        return this;
     }
 
-    static async authenticate(dbc, email, password) {
-        let result = await selectOneDboUser(dbc, `_email='email' AND _status='active'`);
+    async checkPasswordHistory() {
+        return true;
+    }
 
-        if (result) {
-        }
-        else {
-            return false;
-        }
+    async clearGrant(dbc, grant) {
+    }
+
+    async credentials(dbc) {
+        return (await selectOneDboCredentials(dbc, `_user_oid=${this.oid} AND _status='current'`));
     }
 
     async deactivate() {
+        this.status = 'inactive';
+        return this;
     }
 
-    static async empty(dbc) {
-        let result = await dbc.query(`SELECT COUNT(*) FROM _user`);
-        return result.data[0].count == 0;
+    async getEmails(dbc) {
+        return (await selectDboEmail(dbc, `_owner_type='user' AND _owner_oid=${this.oid}`)).data;
     }
 
-    static async get(dbc, oid) {
+    async getGrants(dbc) {
+        return (await selectDboGrant(dbc, `_user_oid=${this.oid}`)).data;
+    }
+
+    async getHistory(dbc, data0, date1) {
+        if (date0) {
+            return (await selectDboUserLog(dbc, `_user_oid=${this.oid} AND _created BETWEEN '${date0.isoStr()}' AND '${date1.isoStr()}'`), `_created DESC`).data;
+        }
+        else {
+            return (await selectDboUserLog(dbc, `_user_oid=${this.oid}`), `_created DESC`).data;
+        }
+    }
+
+    async getPhones(dbc) {
+        return (await selectDboPhone(dbc, `_owner_type='user' AND _owner_oid=${this.oid}`)).data;
+    }
+
+    async getPrimaryEmail() {
+    }
+
+    async sendEmail(dbc, email) {
+        return this;
+    }
+
+    async sendMMS(dbc, mms) {
+        return this;
+    }
+
+    async setGrant(dbc, grant) {
+        let context = mkContext(grant);
+
+        if (!(await selectOneDboGrant(dbc, `_context='${context.toBase64()}'`))) {
+            await mkDboGrant({
+                userOid: this.oid,
+                context: context.toBase64(),
+            }).save(dbc);
+        }
+    }
+
+    async setPassword(dbc, password) {
+        let current = await selectOneDboCredentials(
+            dbc,
+            `_user_oid=${this.oid} AND _type='password' AND _status='current'`
+        );
+
+        if (current) {
+            current.status = 'halted';
+            await current.save(dbc);
+        }
+
+        let creds = await mkDboCredentials({
+            userOid: this.oid,
+            type: 'password',
+            status: 'current',
+            crypto: await Crypto.digestUnsalted('sha512', `${this.oid}${password}${this.oid}`),
+            expires: mkTime(),
+        }).save(dbc);
+
+        return this;
+    }
+
+    async zombify() {
+        this.status = 'zombie';
+        return this;
+    }
+});
+
+
+/*****
+*****/
+register(class Users {
+    constructor() {
+    }
+
+    async authenticate(dbc, userName, password) {
+        let user = await selectOneDboUser(dbc, `_user_name='${userName}' AND _status='active'`);
+
+        if (user) {
+            return user;
+        }
+
+        return false;
+    }
+
+    async get(dbc, oid) {
         let dbo = getDboUser(dbc, oid);
         return dbo ? mkUserObj(dbo) : null;
     }
 
-    static async selectByEmail(dbc, email) {
+    async selectByEmail(dbc, email) {
     }
 
-    static async selectByName(dbc, firstname, lastname) {
+    async selectByName(dbc, firstName, lastName) {
     }
 
-    static async selectByUserName(dbc, username, status) {
+    async selectByPhone(dbc, unformatted) {
     }
 
-    async sendEmail(email) {
-    }
-
-    async sendMMS(mms) {
-    }
-
-    async setPassword(password) {
-    }
-
-    async validatePassword(password) {
-    }
-
-    async zombify() {
+    async selectByUserName(dbc, userName, status) {
     }
 });

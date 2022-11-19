@@ -24,35 +24,31 @@
 /*****
 *****/
 register(class Session {
-    constructor(org, user) {
+    constructor(userObj) {
         return new Promise(async (ok, fail) => {
-            const dbc = await dbConnect();
-            this.org = org;
-            this.user = user;
-            this.timeout = null;
+            /*
+            this.contexts = {};
             this.webSocket = null;
-            this.messageQueue = [];
 
-            let seed = `${(new Date()).toString()}${this.user.email}`;
-            this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
-
-            while (this.key in Sessions.byKey) {
-                this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
+            for (let context of await Ipc.queryPrimary({ 'messageName': '#SecurityManagerListContexts' })) {
+                this.contexts[context.contextName] = unset();
             }
 
-            await dbc.rollback();
-            await dbc.free();
-            this.setPermissions();
-            this.touch();
-            Sessions.addSession(this);
+            user === false ? await this.loadBootstrapUser() : await this.loadUser(user);
+            let seed = `${(new Date()).toString()}${this.user.userName}`;
+            this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
+
+            while (this.key in SessionManager.byKey) {
+                this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
+            }
+            */
+
             ok(this);
         });
     }
 
-    authorize(req) {
-    }
-
     async close() {
+        /*
         if (this.webSocket) {
             this.webSocket.sendClient({
                 messageName: '#CloseSession'
@@ -61,19 +57,12 @@ register(class Session {
             await this.webSocket.close();
             Sessions.removeSession(this);
         }
+        */
     }
 
-    send(message) {
-        if (this.webSocket) {
-            this.webSocket.sendClient(message);
-        }
-        else {
-            this.messageQueue.push(message);
-        }
-    }
-
-    setPermissions() {
-        this.permissions = {};
+    setSecurityContext(contextName, value) {
+        this.contexts[contextName] = value;
+        return this;
     }
 
     touch() {

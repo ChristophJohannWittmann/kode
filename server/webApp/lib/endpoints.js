@@ -22,10 +22,20 @@
 
 
 /*****
+ * This is kind of a conveninece constructor for creating a new endpoint for
+ * an endpoint container.  In effect, the endpoint method name contains both
+ * the endpoint name and it's required permissions.
 *****/
 register(function mkWebAppEndpoint(name, ...permissions) {
     return `#ENDPOINT#${toJson({ name: name, permissions: permissions })}`
 });
+
+
+/*****
+ * Symbols are useful for this class since we don't want to muck up the object's
+ * namespace names that are NOT one of the defined endpoints.
+*****/
+//const authorize = Symbol('authorize');
 
 
 /*****
@@ -35,23 +45,73 @@ register(function mkWebAppEndpoint(name, ...permissions) {
  * WebApp instance.
 *****/
 register(class WebAppEndpointContainer {
-    constructor(webapp) {
-        this.webapp = webapp;
+    static unauthorized = Symbol('unauthorized');
+    static internalError = Symbol('internalError');
+    static ignored = Symbol('ignored');
+    static nonOrgPermissions = mkStringSet('system');
 
+    constructor(webapp) {
         for (let propertyName of Object.getOwnPropertyNames(Reflect.getPrototypeOf(this))) {
             if (propertyName.startsWith('#ENDPOINT#')) {
                 let endpoint = fromJson(propertyName.substr(10));
                 this[`on${endpoint.name}`] = this[propertyName];
 
-                this.webapp.on(endpoint.name, async req => {
-                    await this.authorize();
-                    await this[`on${endpoint.name}`](req);
+                webapp.on(endpoint.name, async req => {
+                    try {
+                        if (true) {
+                        //if (await this[authorize](endpoint, req)) {
+                            await this[propertyName](req);
+                        }
+                        else {
+                            return WebAppEndpointContainer.unauthorized;
+                        }
+                    }
+                    catch (e) {
+                        return WebAppEndpointContainer.internalError;
+                    }
                 });
             }
         }
     }
 
-    async authorize() {
-        return true;
+    /*
+    async [authorize](endpoint, req) {
+        const permissions = mkStringSet(endpoint.permissions);
+
+        if (permissions.has('nosession')) {
+            return true;
+        }
+        else {
+            req.session = await Ipc.queryPrimary({
+                messageName: '#SessionsGetSession',
+                session: req['#Session'],
+            });
+            
+            if (req.session) {
+                for (let permission of permissions) {
+                    if (!(permission in req.session.grants)) {
+                        return false;
+                    }
+
+                    if (!WebAppEndpointContainer.nonOrgPermissions.has(permission)) {
+                        if (!('permissionOrgOid' in req)) {
+                            return false;
+                        }
+
+                        if (req.user.orgOid > 0) {
+                            if (!req.session.orgs.has(req.permissionOrgOid)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
     }
+    */
 });

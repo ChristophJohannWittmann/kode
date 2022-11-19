@@ -31,6 +31,15 @@ register(class UserEndpoints extends WebAppEndpointContainer {
     async [ mkWebAppEndpoint('ActivateUser', 'user') ](req) {
     }
 
+    async [ mkWebAppEndpoint('AddUserAddress') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('AddUserEmail') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('AddUserPhone') ](req) {
+    }
+
     async [ mkWebAppEndpoint('DeactivateUser', 'user') ](req) {
     }
 
@@ -40,13 +49,28 @@ register(class UserEndpoints extends WebAppEndpointContainer {
     async [ mkWebAppEndpoint('ModifyUser', 'user') ](req) {
     }
 
+    async [ mkWebAppEndpoint('ModifyUserAddress') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('ModifyUserEmail') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('ModifyUserPhone') ](req) {
+    }
+
     async [ mkWebAppEndpoint('RemoveUser', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ResetUserPassword', 'user') ](req) {
+    async [ mkWebAppEndpoint('RemoveUserAddress') ](req) {
     }
 
-    async [ mkWebAppEndpoint('SetUserPassword', 'user') ](req) {
+    async [ mkWebAppEndpoint('RemoveUserEmail') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('RemoveUserPhone') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('ResetUserPassword', 'user') ](req) {
     }
 
     async [ mkWebAppEndpoint('SignUserOut', 'user') ](req) {

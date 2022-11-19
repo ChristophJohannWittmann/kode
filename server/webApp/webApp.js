@@ -128,37 +128,40 @@ register(class WebApp extends Webx {
 
     async handlePOST(req, rsp) {
         if (req.isMessage() && 'messageName' in req.message()) {
-            let requestMessage = req.message();
-            let transaction = mkWebAppTransaction(requestMessage);
+            let response;
+            let message = req.message();
 
-            try {
-                let responseMessage;
-                let response = await this.query(transaction);
-                transaction.commit();
-
-                if (response) {
-                    responseMessage = {
-                        messageName: 'PostResponse',
-                        '#Trap': requestMessage['#Trap'],
-                        response: response
-                    };
-                }
-                else {
-                    responseMessage = {
-                        messageName: 'Ignored',
-                        '#Trap': requestMessage['#Trap'],                    
-                    };
-                }
-
-                rsp.end(200, 'application/json', toJson(responseMessage));
+            if (message.messageName in this.handlers) {
+                let req = mkWebAppTransaction(message);
+                response = await this.query(req);
+                await req.commit();
             }
-            catch (e) {
-                transaction.rollback();
+            else {
+                response = WebAppEndpointContainer.ignored;
+            }
+
+            if (response === WebAppEndpointContainer.internalError) {
                 rsp.endStatus(500);
+            }
+            else if (response === WebAppEndpointContainer.unauthorized) {
+                rsp.endStatus(401);
+            }
+            else if (response === WebAppEndpointContainer.ignored) {
+                rsp.end(200, 'application/json', toJson({
+                    messageName: 'Ignored',
+                    '#Trap': message['#Trap'],
+                }));
+            }
+            else {
+                rsp.end(200, 'application/json', toJson({
+                    messageName: 'PostResponse',
+                    response: response,
+                    '#Trap': message['#Trap'],
+                }));
             }
         }
         else {
-            rsp.endStatus(401);
+            rsp.endStatus(400);
         }
     }
 
@@ -204,13 +207,13 @@ register(class WebApp extends Webx {
             await this.buildCSS(PATH.join(env.kodePath, 'server/webApp/webApp.css'));
         }
 
-        await mkDbmsEndpoints(this);
-        await mkOrgEndpoints(this);
+        //await mkDbmsEndpoints(this);
+        //await mkOrgEndpoints(this);
         await mkSelfEndpoints(this);
-        await mkSmtpEndpoints(this);
-        await mkSystemEndpoints(this);
-        await mkTemplateEndpoints(this);
-        await mkUserEndpoints(this);
+        //await mkSmtpEndpoints(this);
+        //await mkSystemEndpoints(this);
+        //await mkTemplateEndpoints(this);
+        //await mkUserEndpoints(this);
     }
 
     async onWebSocket(req, webSocket) {

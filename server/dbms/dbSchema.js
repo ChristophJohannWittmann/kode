@@ -174,8 +174,8 @@ global.dbTime = {
             else if (value instanceof Date) {
                 return mkTime(value);
             }
-            else if (value instanceof bigint) {
-                return mkTime(Number(bigint));
+            else if (typeof value == 'bigint') {
+                return mkTime(Number(value));
             }
         }
         else {

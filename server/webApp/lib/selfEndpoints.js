@@ -28,53 +28,67 @@ register(class SelfEndpoints extends WebAppEndpointContainer {
         super(webapp);
     }
 
+    async [ mkWebAppEndpoint('AddSelfAddress') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('AddSelfEmail') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('AddSelfPhone') ](req) {
+    }
+
     async [ mkWebAppEndpoint('ModifySelf') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ResetSelfPassword', 'nosession') ](req) {
+    async [ mkWebAppEndpoint('ModifySelfAddress') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('ModifySelfEmail') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('ModifySelfPhone') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('RemoveSelfAddress') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('RemoveSelfEmail') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('RemoveSelfPhone') ](req) {
+    }
+
+    async [ mkWebAppEndpoint('ResetSelfPassword') ](req) {
     }
 
     async [ mkWebAppEndpoint('SetSelfPassword') ](req) {
     }
 
-    async [ mkWebAppEndpoint('SignSelfIn', 'nosession') ](req) {
-        let org;
+    async [ mkWebAppEndpoint('SignSelfIn') ](req) {
         let dbc = await req.connect();
-        let user = await UserObj.authenticate(await req.connect(), req.username, req.password);
+        let user = await UserObj.authenticate(dbc, req.username, req.password);
 
         if (user) {
-            org = await OrgObj.get(dbc, user.orgOid);
-        }
-        else if (await UserObj.empty(dbc)) {
-            user = mkDboUser({
-                email: 'noemail@nodomain',
-                firstName: 'User',
-                lastName: 'Person',
-                status: 'active',
-                authType: 'simple',
-                verified: false,
-                password: false,
-            });
-
-            org = mkDboOrg({
-                name: 'No Org',
-                authType: 'simple',
-            });
-
             let sessionKey = await Ipc.queryPrimary({
-                messageName: '#SessionsCreateSession',
-                org: org,
+                messageName: '#SessionManagerCreateSession',
                 user: user,
             });
 
-            req.reply({ sessionKey: sessionKey });
+            req.reply({ newlyEstablishedSessionKey: sessionKey });
+        }
+        else if (await UserObj.empty(dbc)) {
+            let sessionKey = await Ipc.queryPrimary({
+                messageName: '#SessionManagerCreateBootstrapSession',
+            });
+
+            req.reply({ newlyEstablishedSessionKey: sessionKey });
         }
         else {
-            req.reply({
-                greeting: 'hello signin please',
-                status: 'successful',
-            });
+            req.reply(false);
         }
+
+        await dbc.rollback();
+        await dbc.free();
     }
 
     async [ mkWebAppEndpoint('SignSelfOut') ](req) {
