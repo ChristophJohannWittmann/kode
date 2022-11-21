@@ -23,13 +23,16 @@
 
 /*****
 *****/
-register(class OrgObj {
-    constructor(dbc) {
-        this.dbc = dbc;
+singleton(class Orgs {
+    constructor() {
     }
+});
 
-    static async get(dbc, oid) {
-        let dbo = getDboOrg(dbc, oid);
-        return dbo ? mkOrgObj(dbo) : null;
+
+/*****
+*****/
+register(class OrgObject extends DboOrg {
+    constructor(properties) {
+        super(properties);
     }
 });

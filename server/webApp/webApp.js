@@ -133,20 +133,27 @@ register(class WebApp extends Webx {
 
             if (message.messageName in this.handlers) {
                 let req = mkWebAppTransaction(message);
-                response = await this.query(req);
-                await req.commit();
+
+                if (WebAppTransaction.assign(req, message)) {
+                    response = await this.query(req);
+                    await req.commit();
+                }
+                else {
+                    response = EndpointContainer.internalError;
+                    await req.rollback();
+                }
             }
             else {
-                response = WebAppEndpointContainer.ignored;
+                response = EndpointContainer.ignored;
             }
 
-            if (response === WebAppEndpointContainer.internalError) {
+            if (response === EndpointContainer.internalError) {
                 rsp.endStatus(500);
             }
-            else if (response === WebAppEndpointContainer.unauthorized) {
+            else if (response === EndpointContainer.unauthorized) {
                 rsp.endStatus(401);
             }
-            else if (response === WebAppEndpointContainer.ignored) {
+            else if (response === EndpointContainer.ignored) {
                 rsp.end(200, 'application/json', toJson({
                     messageName: 'Ignored',
                     '#Trap': message['#Trap'],
@@ -207,13 +214,14 @@ register(class WebApp extends Webx {
             await this.buildCSS(PATH.join(env.kodePath, 'server/webApp/webApp.css'));
         }
 
-        //await mkDbmsEndpoints(this);
-        //await mkOrgEndpoints(this);
+        await mkDbmsEndpoints(this);
+        await mkOrgEndpoints(this);
         await mkSelfEndpoints(this);
-        //await mkSmtpEndpoints(this);
-        //await mkSystemEndpoints(this);
-        //await mkTemplateEndpoints(this);
-        //await mkUserEndpoints(this);
+        await mkSmtpEndpoints(this);
+        await mkSystemEndpoints(this);
+        await mkTemplateEndpoints(this);
+        await mkTicketEndpoints(this);
+        await mkUserEndpoints(this);
     }
 
     async onWebSocket(req, webSocket) {

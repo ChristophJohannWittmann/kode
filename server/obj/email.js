@@ -23,26 +23,16 @@
 
 /*****
 *****/
-register(class OrgEndpoints extends EndpointContainer {
-    constructor(webapp) {
-        super(webapp);
+singleton(class Emails {
+    constructor() {
     }
+});
 
-    async [ mkEndpoint('ActivateOrg', 'org') ](req) {
-    }
 
-    async [ mkEndpoint('DeactivateOrg', 'org') ](req) {
-    }
-
-    async [ mkEndpoint('GetOrgs', 'org') ](req) {
-    }
-
-    async [ mkEndpoint('ModifyOrg', 'org') ](req) {
-    }
-
-    async [ mkEndpoint('RecoverOrg', 'org') ](req) {
-    }
-
-    async [ mkEndpoint('RemoveOrg', 'org') ](req) {
+/*****
+*****/
+register(class EmailObject extends DboEmail {
+    constructor(properties) {
+        super(properties);
     }
 });

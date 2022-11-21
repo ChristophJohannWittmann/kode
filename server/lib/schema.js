@@ -207,7 +207,6 @@ mkDbSchema(
     {
         name: 'user',
         columns: [
-            { name: 'userName',     type: dbText, size: 100 },
             { name: 'emailOid',     type: dbInt64           },
             { name: 'firstName',    type: dbText, size: 100 },
             { name: 'lastName',     type: dbText, size: 100 },
@@ -219,7 +218,6 @@ mkDbSchema(
             { name: 'password',     type: dbBool            },
         ],
         indexes: [
-            'userName:asc',
             'lastName:asc',
             'firstName:asc',
             'lastName:asc, firstName:asc',

@@ -112,7 +112,7 @@ async function seedUser(dbc) {
     logPrimary('[ Seeding Initial User: Charlie Root ]');
 
     let user = await mkUserObject({
-        userName: 'username',
+        userName: 'charlie@domain.org',
         firstName: 'Charlie',
         lastName: 'Root',
         status: 'active',
@@ -122,8 +122,30 @@ async function seedUser(dbc) {
     }).save(dbc);
 
     await user.setPassword(dbc, 'password');
-    await user.setGrant(dbc, { x: 'user' });
-    await user.setGrant(dbc, { x: 'system' });
+    await user.setGrant(dbc, { permission: 'user' });
+    await user.setGrant(dbc, { permission: 'system' });
+
+    let domain = await mkDboDomain({
+        name: 'kodeprogramming.org',
+        tld: 'org',
+        verified: false,
+        lastVerified: mkTime(0),
+        error: '',
+    }).save(dbc);
+
+    let email = await mkDboEmail({
+        ownerType: 'user',
+        ownerOid: user.oid,
+        domainOid: domain.oid,
+        user: 'charlie',
+        addr: 'charlie@kodeprogramming.org',
+        verified: false,
+        lastVerified: mkTime(0),
+        error: '',
+    }).save(dbc);
+
+    user.emailOid = email.oid;
+    await user.save(dbc);
 }
 
 
@@ -198,7 +220,7 @@ async function seedUser(dbc) {
     require('./server/dbms/dbObject.js');
 
     require('./server/webApp/webApp.js');
-    require('./server/webApp/lib/endpoints.js');
+    require('./server/webApp/lib/endpoint.js');
     require('./server/webApp/lib/transaction.js');
     require('./server/webApp/lib/dbmsEndpoints.js');
     require('./server/webApp/lib/orgEndpoints.js');
@@ -206,6 +228,7 @@ async function seedUser(dbc) {
     require('./server/webApp/lib/smtpEndpoints.js');
     require('./server/webApp/lib/systemEndpoints.js');
     require('./server/webApp/lib/templateEndpoints.js');
+    require('./server/webApp/lib/ticketEndpoints.js');
     require('./server/webApp/lib/userEndpoints.js');
 
     if (CLUSTER.isPrimary) {

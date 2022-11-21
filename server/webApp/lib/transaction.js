@@ -31,9 +31,24 @@
 *****/
 register(class WebAppTransaction extends Message {
     constructor(message) {
-        super(message);
+        super();
         this.connectionMap = {};
         this.connectionArray = [];
+    }
+
+    static assign(webAppTransaction, message) {
+        let prototype = Reflect.getPrototypeOf(webAppTransaction);
+
+        for (let key of Object.keys(message)) {
+            if (key in prototype) {
+                 log(`Client Message Key: "${key}" reserved for internal server use.\n${toJson(message, true)}`);
+                 return false;
+            }
+
+            webAppTransaction[key] = message[key];
+        }
+
+        return true;
     }
 
     async commit() {

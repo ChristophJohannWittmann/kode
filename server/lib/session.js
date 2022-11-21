@@ -24,27 +24,49 @@
 /*****
 *****/
 register(class Session {
-    constructor(userObj) {
+    constructor(user) {
         return new Promise(async (ok, fail) => {
-            /*
-            this.contexts = {};
-            this.webSocket = null;
+            this.timeout = null;
+            this.webSocketWorker = null;
+            this.user = mkUserObject(user);
+            let dbc = await dbConnect();
 
-            for (let context of await Ipc.queryPrimary({ 'messageName': '#SecurityManagerListContexts' })) {
-                this.contexts[context.contextName] = unset();
-            }
-
-            user === false ? await this.loadBootstrapUser() : await this.loadUser(user);
             let seed = `${(new Date()).toString()}${this.user.userName}`;
             this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
 
             while (this.key in SessionManager.byKey) {
                 this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
             }
-            */
+
+            this.grants = mkStringSet((await this.user.getGrants(dbc)).map(grant => grant.context));
+
+            await dbc.rollback();
+            await dbc.free();
 
             ok(this);
         });
+    }
+
+    async authorize(permission, requestContext) {
+        if (permission) {
+            let context = mkContext(requestContext);
+            context.permission = permission;
+
+            if (this.grants.has(context.toBase64())) {
+                return true;
+            }
+            else if ('org' in context) {
+                delete context.org;
+
+                if (this.grants.has(context.toBase64())) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     async close() {

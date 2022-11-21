@@ -23,6 +23,53 @@
 
 /*****
 *****/
+singleton(class Users {
+    constructor() {
+        this.permissions = mkStringSet('system', 'dbms', 'smtp', 'org', 'user', 'ticket', 'template');
+    }
+
+    async authenticate(dbc, userName, password) {
+        let email = await selectOneDboEmail(dbc, `_addr='${userName}'`);
+
+        if (email && email.ownerType == 'user') {
+            let user = await getDboUser(dbc, email.ownerOid);
+
+            if (user && user.status == 'active') {
+                let credentials = await selectOneDboCredentials(dbc, `_user_oid=${user.oid} AND _type='password' AND _status='current'`)
+
+                if (credentials) {
+                    let crypto = await Crypto.digestUnsalted('sha512', `${user.oid}${password}${user.oid}`);
+
+                    if (crypto == credentials.crypto) {
+                        return user;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    async get(dbc, oid) {
+        return mkUserObject(await getDboUser(dbc, oid));
+    }
+
+    async selectByEmail(dbc, email) {
+    }
+
+    async selectByName(dbc, firstName, lastName) {
+    }
+
+    async selectByPhone(dbc, unformatted) {
+    }
+
+    async selectByUserName(dbc, userName, status) {
+    }
+});
+
+
+/*****
+*****/
 register(class UserObject extends DboUser {
     constructor(properties) {
         super(properties);
@@ -38,10 +85,11 @@ register(class UserObject extends DboUser {
     }
 
     async clearGrant(dbc, grant) {
+        return true;
     }
 
     async credentials(dbc) {
-        return (await selectOneDboCredentials(dbc, `_user_oid=${this.oid} AND _status='current'`));
+        return await selectOneDboCredentials(dbc, `_user_oid=${this.oid} AND _status='current'`);
     }
 
     async deactivate() {
@@ -50,27 +98,28 @@ register(class UserObject extends DboUser {
     }
 
     async getEmails(dbc) {
-        return (await selectDboEmail(dbc, `_owner_type='user' AND _owner_oid=${this.oid}`)).data;
+        return await selectDboEmail(dbc, `_owner_type='user' AND _owner_oid=${this.oid}`);
     }
 
     async getGrants(dbc) {
-        return (await selectDboGrant(dbc, `_user_oid=${this.oid}`)).data;
+        return await selectDboGrant(dbc, `_user_oid=${this.oid}`);
     }
 
     async getHistory(dbc, data0, date1) {
         if (date0) {
-            return (await selectDboUserLog(dbc, `_user_oid=${this.oid} AND _created BETWEEN '${date0.isoStr()}' AND '${date1.isoStr()}'`), `_created DESC`).data;
+            return (await selectDboUserLog(dbc, `_user_oid=${this.oid} AND _created BETWEEN '${date0.isoStr()}' AND '${date1.isoStr()}'`), `_created DESC`);
         }
         else {
-            return (await selectDboUserLog(dbc, `_user_oid=${this.oid}`), `_created DESC`).data;
+            return (await selectDboUserLog(dbc, `_user_oid=${this.oid}`), `_created DESC`);
         }
     }
 
     async getPhones(dbc) {
-        return (await selectDboPhone(dbc, `_owner_type='user' AND _owner_oid=${this.oid}`)).data;
+        return await selectDboPhone(dbc, `_owner_type='user' AND _owner_oid=${this.oid}`);
     }
 
-    async getPrimaryEmail() {
+    async getPrimaryEmail(dbc) {
+        return await selectOneDboUser(dbc, `_owner_type='user' AND _owner_oid=${this.oid}`);
     }
 
     async sendEmail(dbc, email) {
@@ -117,40 +166,5 @@ register(class UserObject extends DboUser {
     async zombify() {
         this.status = 'zombie';
         return this;
-    }
-});
-
-
-/*****
-*****/
-register(class Users {
-    constructor() {
-    }
-
-    async authenticate(dbc, userName, password) {
-        let user = await selectOneDboUser(dbc, `_user_name='${userName}' AND _status='active'`);
-
-        if (user) {
-            return user;
-        }
-
-        return false;
-    }
-
-    async get(dbc, oid) {
-        let dbo = getDboUser(dbc, oid);
-        return dbo ? mkUserObj(dbo) : null;
-    }
-
-    async selectByEmail(dbc, email) {
-    }
-
-    async selectByName(dbc, firstName, lastName) {
-    }
-
-    async selectByPhone(dbc, unformatted) {
-    }
-
-    async selectByUserName(dbc, userName, status) {
     }
 });

@@ -22,51 +22,57 @@
 
 
 /*****
+ * These are the endpoints that provide the user features that are available to
+ * all users regardless of permissions granted.  In other words, these are base-
+ * line features needed to be a user with a session.  Note that this container
+ * also includes the "SelfSignIn" endpoiont, which is marked as "nosession",
+ * which means there is no authorization required to use that endpoint.  All of
+ * the other endpoints require no specific granted features.
 *****/
-register(class SelfEndpoints extends WebAppEndpointContainer {
-    constructor(webapp) {
-        super(webapp);
+register(class SelfEndpoints extends EndpointContainer {
+    constructor(webApp) {
+        super(webApp);
     }
 
-    async [ mkWebAppEndpoint('AddSelfAddress') ](req) {
+    async [ mkEndpoint('AddSelfAddress') ](req) {
     }
 
-    async [ mkWebAppEndpoint('AddSelfEmail') ](req) {
+    async [ mkEndpoint('AddSelfEmail') ](req) {
     }
 
-    async [ mkWebAppEndpoint('AddSelfPhone') ](req) {
+    async [ mkEndpoint('AddSelfPhone') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ModifySelf') ](req) {
+    async [ mkEndpoint('ModifySelf') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ModifySelfAddress') ](req) {
+    async [ mkEndpoint('ModifySelfAddress') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ModifySelfEmail') ](req) {
+    async [ mkEndpoint('ModifySelfEmail') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ModifySelfPhone') ](req) {
+    async [ mkEndpoint('ModifySelfPhone') ](req) {
     }
 
-    async [ mkWebAppEndpoint('RemoveSelfAddress') ](req) {
+    async [ mkEndpoint('RemoveSelfAddress') ](req) {
     }
 
-    async [ mkWebAppEndpoint('RemoveSelfEmail') ](req) {
+    async [ mkEndpoint('RemoveSelfEmail') ](req) {
     }
 
-    async [ mkWebAppEndpoint('RemoveSelfPhone') ](req) {
+    async [ mkEndpoint('RemoveSelfPhone') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ResetSelfPassword') ](req) {
+    async [ mkEndpoint('ResetSelfPassword') ](req) {
     }
 
-    async [ mkWebAppEndpoint('SetSelfPassword') ](req) {
+    async [ mkEndpoint('SetSelfPassword') ](req) {
     }
 
-    async [ mkWebAppEndpoint('SignSelfIn') ](req) {
+    async [ mkEndpoint('SignSelfIn', 'nosession' ) ](req) {
         let dbc = await req.connect();
-        let user = await UserObj.authenticate(dbc, req.username, req.password);
+        let user = await Users.authenticate(dbc, req.username, req.password);
 
         if (user) {
             let sessionKey = await Ipc.queryPrimary({
@@ -74,14 +80,7 @@ register(class SelfEndpoints extends WebAppEndpointContainer {
                 user: user,
             });
 
-            req.reply({ newlyEstablishedSessionKey: sessionKey });
-        }
-        else if (await UserObj.empty(dbc)) {
-            let sessionKey = await Ipc.queryPrimary({
-                messageName: '#SessionManagerCreateBootstrapSession',
-            });
-
-            req.reply({ newlyEstablishedSessionKey: sessionKey });
+            req.reply({ '#NewlyEstablishedSessionKey': sessionKey });
         }
         else {
             req.reply(false);
@@ -91,6 +90,12 @@ register(class SelfEndpoints extends WebAppEndpointContainer {
         await dbc.free();
     }
 
-    async [ mkWebAppEndpoint('SignSelfOut') ](req) {
+    async [ mkEndpoint('SignSelfOut') ](req) {
+        let response = await Ipc.queryPrimary({
+            messageName: '#SessionManagerCloseSession',
+            session: req['#Session'],
+        });
+
+        req.reply({ '#CloseSession': true });
     }
 });

@@ -158,10 +158,15 @@ register(class Http extends Emitter {
     }
 
     handleIntercept(result) {
-        if (typeof result == 'object') {
-            if ('newlyEstablishedSessionKey' in result) {
-                webAppSettings.session = () => result.newlyEstablishedSessionKey;
-                return true;
+        if (result !== null) {
+            if (typeof result == 'object') {
+                if ('#NewlyEstablishedSessionKey' in result) {
+                    webAppSettings.session = () => result['#NewlyEstablishedSessionKey'];
+                    return true;
+                }
+                else if ('#CloseSession' in result) {
+                    console.log('** REMEMBER TO CLOSE CLIENT SESSION **')
+                }
             }
         }
 
@@ -216,20 +221,13 @@ register(class Http extends Emitter {
                 if (status.code >= 100 && status.code < 500) {
                     if (rsp.isMessage()) {
                         let message = rsp.getMessage();
+                        let result = rsp.getResult();
 
-                        if (status.code >= 500) {
-                            Trap.cancel(this.trap.id);
-                            console.log(fromJson(body));
+                        if (this.handleIntercept(result)) {
+                            Trap.pushReply(this.trap.id, true);
                         }
                         else {
-                            let result = rsp.getResult();
-
-                            if (this.handleIntercept(result)) {
-                                Trap.pushReply(this.trap.id, true);
-                            }
-                            else {
-                                Trap.pushReply(this.trap.id, result);
-                            }
+                            Trap.pushReply(this.trap.id, result);
                         }
                     }
                     else {

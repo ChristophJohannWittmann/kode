@@ -23,59 +23,59 @@
 
 /*****
 *****/
-register(class UserEndpoints extends WebAppEndpointContainer {
+register(class UserEndpoints extends EndpointContainer {
     constructor(webapp) {
         super(webapp);
     }
 
-    async [ mkWebAppEndpoint('ActivateUser', 'user') ](req) {
+    async [ mkEndpoint('ActivateUser', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('AddUserAddress') ](req) {
+    async [ mkEndpoint('AddUserAddress', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('AddUserEmail') ](req) {
+    async [ mkEndpoint('AddUserEmail', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('AddUserPhone') ](req) {
+    async [ mkEndpoint('AddUserPhone', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('DeactivateUser', 'user') ](req) {
+    async [ mkEndpoint('DeactivateUser', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('GetUsers', 'user') ](req) {
+    async [ mkEndpoint('GetUsers', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ModifyUser', 'user') ](req) {
+    async [ mkEndpoint('ModifyUser', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ModifyUserAddress') ](req) {
+    async [ mkEndpoint('ModifyUserAddress', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ModifyUserEmail') ](req) {
+    async [ mkEndpoint('ModifyUserEmail', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ModifyUserPhone') ](req) {
+    async [ mkEndpoint('ModifyUserPhone', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('RemoveUser', 'user') ](req) {
+    async [ mkEndpoint('RemoveUser', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('RemoveUserAddress') ](req) {
+    async [ mkEndpoint('RemoveUserAddress', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('RemoveUserEmail') ](req) {
+    async [ mkEndpoint('RemoveUserEmail', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('RemoveUserPhone') ](req) {
+    async [ mkEndpoint('RemoveUserPhone', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ResetUserPassword', 'user') ](req) {
+    async [ mkEndpoint('ResetUserPassword', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('SignUserOut', 'user') ](req) {
+    async [ mkEndpoint('SignUserOut', 'user') ](req) {
     }
 
-    async [ mkWebAppEndpoint('VerifyUser', 'user') ](req) {
+    async [ mkEndpoint('VerifyUser', 'user') ](req) {
     }
 });

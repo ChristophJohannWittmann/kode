@@ -23,29 +23,29 @@
 
 /*****
 *****/
-register(class SmtpEndpoints extends WebAppEndpointContainer {
+register(class SmtpEndpoints extends EndpointContainer {
     constructor(webapp) {
         super(webapp);
     }
 
-    async [ mkWebAppEndpoint('GetSmtpAddressStats', 'system') ](req) {
+    async [ mkEndpoint('GetSmtpAddressStats', 'smtp') ](req) {
     }
 
-    async [ mkWebAppEndpoint('GetSmtpDomainStats', 'system') ](req) {
+    async [ mkEndpoint('GetSmtpDomainStats', 'smtp') ](req) {
     }
 
-    async [ mkWebAppEndpoint('GetSmtpSettings', 'system') ](req) {
+    async [ mkEndpoint('GetSmtpSettings', 'smtp') ](req) {
     }
 
-    async [ mkWebAppEndpoint('SetSmtpSettings', 'system') ](req) {
+    async [ mkEndpoint('SetSmtpSettings', 'smtp') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ViewSmtpIncomingActivity', 'system') ](req) {
+    async [ mkEndpoint('ViewSmtpIncomingActivity', 'smtp') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ViewSmtpOutgoingActivity', 'system') ](req) {
+    async [ mkEndpoint('ViewSmtpOutgoingActivity', 'smtp') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ViewSmtpStats', 'system') ](req) {
+    async [ mkEndpoint('ViewSmtpStats', 'smtp') ](req) {
     }
 });

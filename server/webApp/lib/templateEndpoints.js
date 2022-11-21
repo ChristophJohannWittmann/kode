@@ -23,20 +23,20 @@
 
 /*****
 *****/
-register(class TemplateEndpoints extends WebAppEndpointContainer {
+register(class TemplateEndpoints extends EndpointContainer {
     constructor(webapp) {
         super(webapp);
     }
 
-    async [ mkWebAppEndpoint('CreateTemplate', 'template') ](req) {
+    async [ mkEndpoint('CreateTemplate', 'template') ](req) {
     }
 
-    async [ mkWebAppEndpoint('EraseTemplate', 'template') ](req) {
+    async [ mkEndpoint('EraseTemplate', 'template') ](req) {
     }
 
-    async [ mkWebAppEndpoint('GetTemplate', 'template') ](req) {
+    async [ mkEndpoint('GetTemplate', 'template') ](req) {
     }
 
-    async [ mkWebAppEndpoint('SaveTemplate', 'template') ](req) {
+    async [ mkEndpoint('SaveTemplate', 'template') ](req) {
     }
 });

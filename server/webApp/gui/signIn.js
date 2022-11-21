@@ -36,8 +36,8 @@ register(class SignIn extends Widget {
 
         this.credentials = mkActiveData({
             forgotPassword: false,
-            username: 'chris.wittmann@infosearch.online',
-            password: '',
+            username: 'charlie@kodeprogramming.org',
+            password: 'password',
         });
 
         this.createAuthenticationForm();
@@ -101,7 +101,14 @@ register(class SignIn extends Widget {
             password: this.credentials.password,
         });
 
-        console.log(webAppSettings.session());
+        rsp = await mkHttp().query({
+            messageName: 'SignSelfOut',
+            context: {
+                org: 12,
+                report: 27,
+            }
+        });
+
         if (rsp) {
         }
         else {

@@ -28,7 +28,6 @@ singleton(class SessionManager extends Daemon {
         return new Promise(async (ok, fail) => {
             super();
             this.byKey = {};
-            this.byOrg = {};
             this.byUser = {};
             ok(this);
         });
@@ -54,6 +53,15 @@ singleton(class SessionManager extends Daemon {
         }
     }
 
+    async onAuthorize(message) {
+        if (message.session && message.session in this.byKey) {
+            let authorized = await this.byKey[message.session].authorize(message.permission, message.context);
+            Message.reply(message, authorized);
+        }
+
+        Message.reply(message, false);
+    }
+
     async onCloseAllSession(message) {
     }
 
@@ -64,36 +72,28 @@ singleton(class SessionManager extends Daemon {
     }
 
     async onCloseSession(message) {
-    }
-
-    async onCreateBootstrapSession(message) {
-
-        let session = await mkSession(false);
-        /*
-        let dbc = await dbConnect();
-
-        if (UserObj.empty(dbc)) {
-            let session = mkSession();
-            await session.initBootstrap();
-            this.addSession(session);
-            Message.reply(message, session.key);
-        }
-        else {
-            Message.reply(message, false);
+        if ('session' in message) {
+            if (message.session in this.byKey) {
+                let session = this.byKey[message.session];
+                await session.close();
+                this.removeSession(session);
+                return Message.reply(message, true);
+            }
         }
 
-        await dbc.rollback();
-        await dbc.free();
-        */
+        Message.reply(message, false);        
     }
 
     async onCreateSession(message) {
-        /*
-        let session = mkSession();
-        await session.init(message.user);
-        this.addSession(session);
+        let session = await mkSession(message.user);
+        this.byKey[session.key] = session;
+
+        if (!(session.user.oid in this.byUser)) {
+            this.byUser[session.user.oid] = {};
+        }
+
+        this.byUser[session.user.oid][session.key] = session;
         Message.reply(message, session.key);
-        */
     }
 
     async onGetOrgSessions(message) {
@@ -104,7 +104,7 @@ singleton(class SessionManager extends Daemon {
 
     async onGetSession(message) {
         if ('session' in message) {
-            if (message['session'] in this.byKey) {
+            if (message.session in this.byKey) {
                 return Message.reply(message, this.byKey[message['session']]);
             }
         }
@@ -119,33 +119,18 @@ singleton(class SessionManager extends Daemon {
     }
 
     removeSession(session) {
-        delete this.byKey(session.key);
-        let group = this.byOrg[session.org.oid];
+        delete this.byKey[session.key];
 
-        if (group.length > 1) {
-            for (let i = 0; i < group.length; i++) {
-                if (group[i].key == session.key) {
-                    group.splice(i, 1);
-                    break;
-                }
+        if (session.user.oid in this.byUser) {
+            let sessions = this.byUser[session.user.oid];
+
+            if (session.key in sessions) {
+                delete sessions[session.user.oid];
             }
-        }
-        else {
-            delete byOrg[session.org.oid];
-        }
 
-        group = this.byUser[session.user.oid];
-
-        if (group.length > 1) {
-            for (let i = 0; i < group.length; i++) {
-                if (group[i].key == session.key) {
-                    group.splice(i, 1);
-                    break;
-                }
+            if (Object.keys(sessions).length == 0) {
+                delete this.byUser[session.user.oid];
             }
-        }
-        else {
-            delete byUser[session.user.oid];
         }
     }
 });

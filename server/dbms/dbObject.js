@@ -125,9 +125,6 @@ register(function defineDboType(schemaTable) {
                     if (key in fwdMap) {
                         this[key] = fwdMap[key].type.check(values[key]);
                     }
-                    else {
-                        throw new Error('DBO: "${prefix}${className}"" Attempt to set unknown property name: "' + key + '"');
-                    }
                 }
             }
         }

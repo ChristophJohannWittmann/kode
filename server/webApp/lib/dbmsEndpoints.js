@@ -23,26 +23,26 @@
 
 /*****
 *****/
-register(class DbmsEndpoints extends WebAppEndpointContainer {
+register(class DbmsEndpoints extends EndpointContainer {
     constructor(webapp) {
         super(webapp);
     }
 
-    async [ mkWebAppEndpoint('AnalyzeDbmsDatabase', 'global:system') ](req) {
+    async [ mkEndpoint('AnalyzeDbmsDatabase', 'dbms') ](req) {
     }
 
-    async [ mkWebAppEndpoint('EraseDbmsDatabase', 'global:system') ](req) {
+    async [ mkEndpoint('EraseDbmsDatabase', 'dbms') ](req) {
     }
 
-    async [ mkWebAppEndpoint('GetDbmsSchema', 'global:system') ](req) {
+    async [ mkEndpoint('GetDbmsSchema', 'dbms') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ListDbmsDatabases', 'global:system') ](req) {
+    async [ mkEndpoint('ListDbmsDatabases', 'dbms') ](req) {
     }
 
-    async [ mkWebAppEndpoint('ListDbmsSchemas', 'global:system') ](req) {
+    async [ mkEndpoint('ListDbmsSchemas', 'dbms') ](req) {
     }
 
-    async [ mkWebAppEndpoint('UpgradeDbmsDatabase', 'global:system') ](req) {
+    async [ mkEndpoint('UpgradeDbmsDatabase', 'dbms') ](req) {
     }
 });
