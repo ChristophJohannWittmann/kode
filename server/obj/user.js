@@ -25,7 +25,7 @@
 *****/
 singleton(class Users {
     constructor() {
-        this.permissions = mkStringSet('system', 'dbms', 'smtp', 'org', 'user', 'ticket', 'template');
+        this.permissions = mkStringSet('system', 'dbms', 'messaging', 'org', 'user', 'ticket', 'template');
     }
 
     async authenticate(dbc, userName, password) {

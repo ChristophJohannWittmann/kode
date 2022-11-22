@@ -54,6 +54,10 @@ register(class Time {
             this.jsDate = new Date(Date.now());
         }
     }
+
+    gregorian() {
+        return mkGregorian(this);
+    }
  
     isEQ(arg) {
         if (arg instanceof Date) {

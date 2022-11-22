@@ -103,8 +103,8 @@ register(class HttpResponse {
             this.status = 200;
             this.mime = mkMime('text/plain');
             this.charset = 'UTF-8';
-            this.language = mkLanguage();
             this.httpHeaders = {};
+            this.setLanguage();
             this.setEncoding();
             ok(this);
         });
@@ -130,7 +130,7 @@ register(class HttpResponse {
             content = args[0];
         }
 
-        this.setHeader('Content-Language', this.language.code());
+        this.setHeader('Content-Language', this.language);
 
         if (this.mime.type == 'string') {
             this.setHeader('Content-Type', `${this.mime.code}; charset="${this.charset}"`);
@@ -174,5 +174,9 @@ register(class HttpResponse {
     setHeader(headerName, value) {
         let key = headerName.toLowerCase();
         this.httpHeaders[key] = { name: headerName, value: value.toString() };
+    }
+
+    setLanguage() {
+        this.language = 'en_US';
     }
 });

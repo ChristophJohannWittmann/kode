@@ -23,29 +23,10 @@
 
 /*****
 *****/
-register(class SmtpEndpoints extends EndpointContainer {
-    constructor(webapp) {
-        super(webapp);
+singleton(class AppText {
+    constructor() {
     }
 
-    async [ mkEndpoint('GetSmtpAddressStats', 'smtp') ](req) {
-    }
-
-    async [ mkEndpoint('GetSmtpDomainStats', 'smtp') ](req) {
-    }
-
-    async [ mkEndpoint('GetSmtpSettings', 'smtp') ](req) {
-    }
-
-    async [ mkEndpoint('SetSmtpSettings', 'smtp') ](req) {
-    }
-
-    async [ mkEndpoint('ViewSmtpIncomingActivity', 'smtp') ](req) {
-    }
-
-    async [ mkEndpoint('ViewSmtpOutgoingActivity', 'smtp') ](req) {
-    }
-
-    async [ mkEndpoint('ViewSmtpStats', 'smtp') ](req) {
+    checkErrors() {
     }
 });

@@ -35,7 +35,7 @@ require('./framework/core.js');
 require('./framework/activeData.js');
 require('./framework/binaryServer.js');
 require('./framework/context.js');
-require('./framework/language.js');
+require('./framework/languages.js');
 require('./framework/message.js');
 require('./framework/mime.js');
 require('./framework/stringSet.js');
@@ -221,11 +221,11 @@ async function seedUser(dbc) {
 
     require('./server/webApp/webApp.js');
     require('./server/webApp/lib/endpoint.js');
+    require('./server/webApp/lib/messagingEndpoints.js');
     require('./server/webApp/lib/transaction.js');
     require('./server/webApp/lib/dbmsEndpoints.js');
     require('./server/webApp/lib/orgEndpoints.js');
     require('./server/webApp/lib/selfEndpoints.js');
-    require('./server/webApp/lib/smtpEndpoints.js');
     require('./server/webApp/lib/systemEndpoints.js');
     require('./server/webApp/lib/templateEndpoints.js');
     require('./server/webApp/lib/ticketEndpoints.js');

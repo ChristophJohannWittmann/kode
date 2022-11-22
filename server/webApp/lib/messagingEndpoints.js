@@ -23,18 +23,29 @@
 
 /*****
 *****/
-register(class Language {
-    constructor(code, region) {
-        this.langCode = 'en';
-        this.regionCode = 'US';
+register(class SmtpEndpoints extends EndpointContainer {
+    constructor(webapp) {
+        super(webapp);
     }
 
-    code() {
-        if (this.regionCode) {
-            return `${this.langCode.toLowerCase()}_${this.regionCode.toUpperCase()}`;
-        }
-        else {
-            return this.langCode.toLowerCase();
-        }
+    async [ mkEndpoint('GetSmtpAddressStats', 'messaging') ](req) {
+    }
+
+    async [ mkEndpoint('GetSmtpDomainStats', 'messaging') ](req) {
+    }
+
+    async [ mkEndpoint('GetSmtpSettings', 'messaging') ](req) {
+    }
+
+    async [ mkEndpoint('SetSmtpSettings', 'messaging') ](req) {
+    }
+
+    async [ mkEndpoint('ViewSmtpIncomingActivity', 'messaging') ](req) {
+    }
+
+    async [ mkEndpoint('ViewSmtpOutgoingActivity', 'messaging') ](req) {
+    }
+
+    async [ mkEndpoint('ViewSmtpStats', 'messaging') ](req) {
     }
 });
