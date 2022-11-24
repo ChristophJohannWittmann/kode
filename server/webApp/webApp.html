@@ -10,6 +10,9 @@
             ${css}
         </style>
         <script>
+            const txt = ${apptext};
+            Object.freeze(txt);
+
             const webAppSettings = {
                 authenticate: () => ${authenticate},
                 session: () => null,

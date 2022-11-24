@@ -22,53 +22,6 @@
 
 
 /*****
- * This is an object containing settings that need to be made available for all
- * module configurations, which mean they do NOT need to be added manually to the
- * module.json "configuration" property.  Instead, they are automatically addd
- * to the "configuration" property when that property is part of the module.json
- * settings.
-*****/
-const alwaysConfigurable = {
-    "references" : {
-        "required": false,
-        "type": "array",
-        "of": {
-            "type": "object",
-            "properties": {
-                "url": {
-                    "required": true,
-                    "type": "string"
-                },
-                "webx": {
-                    "required": false,
-                    "type": "string"
-                },
-                "path": {
-                    "required": false,
-                    "type": "string"
-                },
-                "css": {
-                    "required": false,
-                    "type": "string"
-                },
-                "panel": {
-                    "required": false,
-                    "type": "string"
-                },
-                "favicons": {
-                    "required": false,
-                    "type": "array",
-                    "of": {
-                        "type": "string"
-                    }
-                }
-            }
-        }
-    }
-};
-
-
-/*****
  * A module is an encapsulation of the data and functions that are required for
  * loading and executing the module content and programming code.  A module is
  * NOT coded as a nodeJS module.  The module is a directory with one config.js
@@ -126,10 +79,6 @@ register(class Module {
     getStatus() {
         return this.status;
     }
-
-    hasConfig() {
-        return 'configuration' in this.settings && typeof this.settings.configuration == 'object';
-    }
     
     async load() {
         await this.execute('validatePath');
@@ -139,25 +88,26 @@ register(class Module {
     }
 
     async loadConfig() {
-        this.config = mkModuleConfig(this);
+        this.configPath = PATH.join(env.configPath, `${this.settings.container}.json`);
 
-        if (this.hasConfig()) {
-            Object.assign(this.settings.configuration, alwaysConfigurable);
+        if (await pathExists(this.configPath)) {
+            let stats = await FILES.stat(this.configPath);
 
-            if (this.config.validateSettings()) {
-                let result = await this.config.load();
-
-                if (result !== true) {
-                    this.status = 'fail';
-                    this.prefix = '(validate)';
-                    this.failure = `Unable to load configuration file at: "${this.config.getPath()}".  "${result}"`;
+            if (stats.isFile()) {
+                try {
+                    let buffer = await FILES.readFile(this.configPath);
+                    this.config = fromJson(buffer.toString());
+                }
+                catch (e) {
+                    return `${e.stack}`;
                 }
             }
             else {
-                this.status = 'fail';
-                this.prefix = '(validate)';
-                this.failure = `Module configuration settings failed validation: "${result}"`;
+                return `Unable to open file.`;
             }
+        }
+        else {
+            return `Path does not exist.`;
         }
     }
 

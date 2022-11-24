@@ -38,5 +38,6 @@ register(async function bootstrap() {
 
     // -- test code
     appStack.push(mkSignIn());
+    //alert(txt.fwkUsername);
     // --
 });

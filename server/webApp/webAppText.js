@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Kode Programming, kodeprogramming.org
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,11 +22,21 @@
 
 
 /*****
+ * All of the text used within the web application framework for all languages
+ * by the development team.  Other languages will be added as needed and as
+ * requexted by influential end users and developer community organizations.
 *****/
-singleton(class AppText {
+register(class WebAppText extends MultilingualText {
     constructor() {
-    }
-
-    checkErrors() {
+        super({
+            fwkPassword: {
+                en: 'password',
+                de: 'Kennword',
+            },
+            fwkUsername: {
+                en: 'username',
+                de: 'Beneutzer',
+            },
+        });
     }
 });

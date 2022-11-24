@@ -86,6 +86,22 @@ register(class WebApp extends Webx {
         }
     }
 
+    calcApplicationLanguage(req) {
+        let acceptLanguage = req.acceptLanguage();
+
+        if (Object.keys(acceptLanguage).length) {
+            for (let lang in acceptLanguage) {
+                let language = this.multilingualText.hasLanguage(lang);
+
+                if (language) {
+                    return language;
+                }
+            }
+        }
+
+        return this.multilingualText.getLanguage();
+    }
+
     async handleGET(req, rsp) {
         let handlerName = `handleGet${req.query()}`;
 
@@ -93,6 +109,9 @@ register(class WebApp extends Webx {
             await this[handlerName](req, rsp);
         }
         else {
+            let language = this.calcApplicationLanguage(req);
+            let apptext = toJson(this.multilingualText.getLanguage(language));
+
             let doc = mkTextTemplate(Config.minify ? this.compactHtml : this.visualHtml).set({
                 css: this.compactCss,
                 title: this.module.settings.title,
@@ -102,6 +121,7 @@ register(class WebApp extends Webx {
                 url: this.reference.url,
                 authenticate: this.settings.authenticate,
                 websocket: this.settings.websocket,
+                apptext: apptext,
             });
 
             rsp.end(200, 'text/html', await doc.toString());
@@ -174,6 +194,7 @@ register(class WebApp extends Webx {
 
     async init(cssPath, htmlPath) {
         await super.init();
+        await this.loadApplicationText();
 
         this.framework = { '': await buildClientCode([
                 'framework/core.js',
@@ -222,6 +243,31 @@ register(class WebApp extends Webx {
         await mkTemplateEndpoints(this);
         await mkTicketEndpoints(this);
         await mkUserEndpoints(this);
+    }
+
+    async loadApplicationText() {
+        this.multilingualText = mkWebAppText();
+
+        if ('text' in this.settings) {
+            for (let definedPath of await this.settings.text) {
+                let path = absolutePath(this.module.path, definedPath);
+
+                if (path.endsWith('.js') && await pathExists(path)) {
+                    let stats = await FILES.stat(path);
+
+                    if (stats.isFile()) {
+                        console.log(path);
+                        let module = require(path);
+
+                        if (module instanceof Object) {
+                            this.multilingualText.setText(module);
+                        }
+                    }
+                }
+            }
+        }
+
+        this.multilingualText.finalize();
     }
 
     async onWebSocket(req, webSocket) {

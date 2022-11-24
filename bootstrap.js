@@ -205,7 +205,7 @@ async function seedUser(dbc) {
     require('./server/lib/ipc.js');
     require('./server/lib/logging.js');
     require('./server/lib/module.js');
-    require('./server/lib/moduleConfig.js');
+    require('./server/lib/multilingualText.js');
     require('./server/lib/pool.js');
     require('./server/lib/server.js');
     require('./server/lib/utility.js');
@@ -220,6 +220,7 @@ async function seedUser(dbc) {
     require('./server/dbms/dbObject.js');
 
     require('./server/webApp/webApp.js');
+    require('./server/webApp/webAppText.js');
     require('./server/webApp/lib/endpoint.js');
     require('./server/webApp/lib/messagingEndpoints.js');
     require('./server/webApp/lib/transaction.js');
