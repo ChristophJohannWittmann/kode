@@ -22,18 +22,22 @@
 
 
 /*****
- * A layout is a gui object that's a helper for managing child widget layouts.
- * The concept is that the layout is constructed with two arguments: (1) the
- * widget that will be managed, and (2) options or specifications for the layout
- * helper object.  Then, as child widgets are added to the GUI, the manager is
- * used to add the objects to ensure they HTML surface is structured / formatted
- * as provided by the layout manager.  Note that the GridLayout is responsible
- * for configuring the style rule for the individual widget based on the given
- * row and column options during construction.
+ * This is a composite widgets whose layout is formatted according to the rules
+ * of the CSS3 grid layout 
 *****/
-register(class GridLayout {  
-    constructor(widget, opts) {
-        this.widget = widget;
+register(class WGridLayout extends Widget {  
+    constructor(tagName, layout) {
+        let opts;
+
+        if (typeof tagName == 'string') {
+            super(tagName);
+            opts = layout;
+        }
+        else {
+            super('div');
+            opts = tagName;
+        }
+
         this.cells = [];
 
         if (Array.isArray(opts.rows)) {
@@ -80,7 +84,7 @@ register(class GridLayout {
             this.colGap = '0px';
         }
 
-        this.widget.styleRule.set({
+        this.styleRule.set({
             display: 'grid',
             gridTemplateRows: `${this.rows.join(' ')}`,
             gridTemplateColumns: `${this.cols.join(' ')}`,
@@ -92,10 +96,10 @@ register(class GridLayout {
         for (let i = 0; i < this.rows.length; i++) {
             for (let j = 0; j < this.cols.length; j++) {
                 let placeholder = mkWidget('div');
-                placeholder[GridLayout.PlaceholderKey] = true;
+                placeholder[WGridLayout.PlaceholderKey] = true;
                 placeholder.setClassName('fill');
                 this.cells.push(placeholder);
-                this.widget.append(placeholder);
+                this.append(placeholder);
             }
         }
     }
@@ -109,7 +113,7 @@ register(class GridLayout {
             for (let j = 0; j < this.cols.length; j++) {
                 let index = this.calcIndex(i, j);
 
-                if (!this.cells[index][GridLayout.PlaceholderKey]) {
+                if (!this.cells[index][WGridLayout.PlaceholderKey]) {
                     let placeholder = mkWidget('div');
                     placeholder[WGridLayout.PlaceholderKey] = true;
                     this.cells[index].replace(placeholder);
@@ -124,7 +128,7 @@ register(class GridLayout {
     clearAt(rowIndex, colIndex) {
         let index = this.calcIndex(rowIndex, colIndex);
 
-        if (!this.cells[index][GridLayout.PlaceholderKey]) {
+        if (!this.cells[index][WGridLayout.PlaceholderKey]) {
             let placeholder = mkWidget('div');
             placeholder[WGridLayout.PlaceholderKey] = true;
             this.cells[index].replace(placeholder);
@@ -136,13 +140,13 @@ register(class GridLayout {
 
     clearColGap() {
         this.colGap = '0px';
-        this.widget.styleRule.settings().colGap = this.colGap;
+        this.styleRule.settings().colGap = this.colGap;
         return this;
     }
 
     clearRowGap() {
         this.colGap = '0px';
-        this.widget.styleRule.settings().colGap = this.colGap;
+        this.styleRule.settings().colGap = this.colGap;
         return this;
     }
 
@@ -169,7 +173,7 @@ register(class GridLayout {
             this.colGap = '0px';
         }
 
-        this.widget.styleRule.settings().colGap = this.colGap;
+        this.styleRule.settings().colGap = this.colGap;
         return this;
     }
 
@@ -184,7 +188,7 @@ register(class GridLayout {
             this.rowGap = '0px';
         }
 
-        this.widget.styleRule.settings().rowGap = this.rowGap;
+        this.styleRule.settings().rowGap = this.rowGap;
         return this;
     }
 

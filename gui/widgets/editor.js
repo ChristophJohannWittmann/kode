@@ -23,7 +23,7 @@
 
 /*****
 *****/
-register(class Editor extends Widget {
+register(class WEditor extends Widget {
     constructor() {
         super('div');
     }

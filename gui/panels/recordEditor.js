@@ -23,7 +23,7 @@
 
 /*****
 *****/
-register(class RecordEditor extends Widget {
+register(class WRecordEditor extends Widget {
     constructor() {
         super();
     }

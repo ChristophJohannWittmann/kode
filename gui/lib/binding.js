@@ -268,6 +268,38 @@ register(class InnerHtmlBinding extends Binding {
 
 
 /*****
+ * A map binding is a very useful type of binding.  The active data key is used
+ * as a lookup into a jabascript object, whose value must be a preconstructed
+ * widget.  So the active data key value is used to find the appropriate widget
+ * and set the bound widget's childen equal to the widget founding using the
+ * active data key value.  If an unmapped key value is provided, the bound
+ * widget's children will be cleared.
+*****/
+register(class MapBinding extends Binding {
+    constructor(widget, activeData, key, mapping) {
+        super(widget, activeData, key);
+        this.mapping = mapping;
+        this.onActiveDataChanged();
+    }
+
+    onActiveDataChanged() {
+        let mapKey = this.activeData[this.key];
+
+        if (mapKey in this.mapping) {
+            this.widget.clear();
+            this.widget.append(this.mapping[mapKey]);
+        }
+        else {
+            this.widget.clear();
+        }
+    }
+
+    onWidgetChanged(value) {
+    }
+});
+
+
+/*****
  * A value binding is a direct binding between the value attribute of a widget
  * and a key of an active data object.  Value bindings are bidirectional.
  * A change to the widget updates the active Data object, and a change in the

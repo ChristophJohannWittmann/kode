@@ -23,95 +23,120 @@
 
 /*****
 *****/
-register(class SignIn extends Widget {
+register(class WSignIn extends WGridLayout {
     constructor() {
-        super();
-
-        this.layout = mkGridLayout(this, {
+        super({
             rows: ['auto', '350px', 'auto'],
             rowGap: '0px',
             cols: ['auto', '400px', 'auto'],
             colGap: '0px',
         });
 
-        this.credentials = mkActiveData({
-            forgotPassword: false,
+        this.data = mkActiveData({
+            mode: 'Authenticate',
             username: 'charlie@kodeprogramming.org',
             password: 'password',
         });
 
-        this.createAuthenticationForm();
-        this.createForgotPasswordForm();
-
-        this.layout.setAt(1, 1, this.challengeForm);
+        this.setAt(1, 1, mkWidget('div')
+            .bind(this.data, 'mode', {
+                'Authenticate': new AuthenticateForm(this.data),
+                'ForgotPassword': new ForGotPasswordForm(this.data),
+            })
+        );
     }
 
-    createAuthenticationForm() {
-        this.challengeForm = mkWidget('form')
-        .setClasses('flex-h-cc colors-2 border-style-solid border-width-1 border-radius-2');
+    async signInFailed(message) {
+        console.log(message);
+    }
 
-        const challengeLayout = mkGridLayout(this.challengeForm, {
+    async signInSucceded(message) {
+        console.log(message);
+    }
+});
+
+
+/*****
+*****/
+class AuthenticateForm extends WGridLayout {
+    constructor(data) {
+        super('form', {
             rows: ['2fr', 'auto', '3px', 'auto', '8px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
             cols: ['350px'],
         });
 
-        challengeLayout.setAt(1, 0, mkWidget('div').set('Username').setClasses('flex-h-sc font-weight-bold font-size-4'));
-        challengeLayout.setAt(3, 0, mkIEmail()
-        .bind(this.credentials, 'username'))
+        this.data = data;
+        this.setClasses('flex-h-cc colors-2 border-style-solid border-width-1 border-radius-2');
+
+        this.setAt(1, 0, mkWidget('div').set(txt.fwUsername).setClasses('flex-h-sc font-weight-bold font-size-4'));
+        this.setAt(3, 0, mkIEmail()
+        .bind(this.data, 'username'))
         .setAttribute('autofocus')
         .setAttribute('autocomplete', 'email');
 
-        challengeLayout.setAt(5, 0, mkWidget('div').set('Password').setClasses('flex-h-sc font-weight-bold font-size-4'));
-        challengeLayout.setAt(7, 0, mkIPassword()
-        .bind(this.credentials, 'password'))
+        this.setAt(5, 0, mkWidget('div').set(txt.fwPassword).setClasses('flex-h-sc font-weight-bold font-size-4'));
+        this.setAt(7, 0, mkIPassword()
+        .bind(this.data, 'password'))
         .setAttribute('autocomplete', 'current-password');
 
-        challengeLayout.setAt(9, 0,
+        this.setAt(9, 0,
             mkIButton('button')
-            .setAttribute('value', 'Sign In')
+            .setAttribute('value', txt.fwSignIn)
             .on('html.click', message => this.onSignIn())
         )
 
-        challengeLayout.setAt(11, 0,
+        this.setAt(11, 0,
             mkIButton('button')
-            .setAttribute('value', 'Forgot Password')
-            .on('html.click', message => this.onForgotPassword())
+            .setAttribute('value', txt.fwForgotPassword)
+            .on('html.click', message => this.data.mode = 'ForgotPassword')
         )
-    }
-
-    createForgotPasswordForm() {
-    }
-
-    onAuthenticate() {
-        console.log('onAuthenticate()');
-    }
-
-    onForgotPassword() {
-        console.log('onForgotPassword()');
-    }
-
-    async onResetPassword() {
-        console.log('onResetPassword()');
     }
 
     async onSignIn() {
         let rsp = await mkHttp().query({
             messageName: 'SignSelfIn',
-            username: this.credentials.username,
-            password: this.credentials.password,
-        });
-
-        rsp = await mkHttp().query({
-            messageName: 'SignSelfOut',
-            context: {
-                org: 12,
-                report: 27,
-            }
+            username: this.data.username,
+            password: this.data.password,
         });
 
         if (rsp) {
+            this.send({ messageName: 'SignInSucceded' });
+            /*
+            rsp = await mkHttp().query({
+                messageName: 'SignSelfOut',
+                context: {
+                    org: 12,
+                    report: 27,
+                }
+            });
+            */
         }
         else {
+            this.send({ messageName: 'SignInFailed' });
         }
     }
-});
+}
+
+
+/*****
+*****/
+class ForGotPasswordForm extends Widget {
+    constructor(data) {
+        super('div');
+        this.data = data;
+        let h1 = mkWidget('h1').set('Hello Forgot Password.');
+        h1.enablePropagation('click');
+        this.append(h1);
+        this.on('html.click', message => this.data.mode = 'Authenticate');
+    }
+}
+/*
+class ResetPasswordForm extends WGridLayout {
+    constructor(parent) {
+        super('form', {
+            rows: [],
+            cols: [],
+        });
+    }
+}
+*/

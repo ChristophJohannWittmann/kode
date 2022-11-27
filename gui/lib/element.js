@@ -236,8 +236,11 @@ register(class HtmlText extends HtmlNode {
  * with an HMTLElement fits within the framework API for events and messaging.
 *****/
 register(class HtmlElement extends HtmlNode {
+    static propagationKey = Symbol('propagation');
+
     constructor(arg) {
         super(reducio(arg));
+        this.node[HtmlElement.propagationKey] = {};
     }
 
     append(...args) {
@@ -306,6 +309,14 @@ register(class HtmlElement extends HtmlNode {
         return copy;
     }
 
+    disablePropagation(eventName) {
+        delete this.node[HtmlElement.propagationKey][eventName];
+    }
+
+    enablePropagation(eventName) {
+        this.node[HtmlElement.propagationKey][eventName] = true;
+    }
+
     getAttribute(name) {
         return this.node.getAttribute(name);
     }
@@ -366,14 +377,20 @@ register(class HtmlElement extends HtmlNode {
 
         if (!(mesageName in this.node.LISTENERS)) {
             this.node.addEventListener(mesageName, event => {
-                if (Object.is(event.target, this.node)) {
-                    this.node.EMITTER.send({
-                        messageName: event.type,
-                        htmlElement: this,
-                        widget: this[Widget.widgetKey],
-                        event: event,
-                    });
+                if (!Object.is(this.node, event.target)) {
+                    let propagation = event.target[HtmlElement.propagationKey];
+
+                    if (!propagation || !(event.type in propagation)) {
+                        return;
+                    }
                 }
+
+                this.node.EMITTER.send({
+                    messageName: event.type,
+                    htmlElement: this,
+                    widget: this[Widget.widgetKey],
+                    event: event,
+                });
             });
         }
 
@@ -389,14 +406,20 @@ register(class HtmlElement extends HtmlNode {
 
         if (!(mesageName in this.node.LISTENERS)) {
             this.node.addEventListener(mesageName, event => {
-                if (Object.is(event.target, this.node)) {
-                    this.node.EMITTER.send({
-                        messageName: event.type,
-                        htmlElement: this,
-                        widget: this[Widget.widgetKey],
-                        event: event,
-                    });
+                if (!Object.is(this.node, event.target)) {
+                    let propagation = event.target[HtmlElement.propagationKey];
+
+                    if (!propagation || !(event.type in propagation)) {
+                        return;
+                    }
                 }
+
+                this.node.EMITTER.send({
+                    messageName: event.type,
+                    htmlElement: this,
+                    widget: this[Widget.widgetKey],
+                    event: event,
+                });
             });
         }
 
@@ -502,6 +525,8 @@ register(class HtmlElement extends HtmlNode {
         else {
             let widget = mkWidget('DUMMY');
             widget.htmlElement = this;
+            widget.setAttribute('widgetclass', 'Widget');
+            widget.brand(this);
             return widget;
         }
     }

@@ -23,7 +23,7 @@
 
 /*****
 *****/
-register(class TextEditor extends Editor {
+register(class WTextEditor extends WEditor {
     constructor() {
         super();
     }

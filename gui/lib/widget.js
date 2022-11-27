@@ -42,14 +42,14 @@ register(class Widget extends Emitter {
     constructor(tagName) {
         super();
         this.id = Widget.nextId++;
-        this.widgetId = Widget.nextId++;
-        this.selector = `widget${this.widgetId}`;
+        this.selector = `widget${this.id}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
         this[Widget.bindingKey] = 'innerHtml';
 
         if (typeof tagName == 'string' || tagName === undefined) {
             this.htmlElement = htmlElement(tagName === undefined ? 'div' : tagName);
             this.htmlElement.setAttribute('id', this.selector);
+            this.htmlElement[Widget.blockingKey] = false;
             this.brand(this.htmlElement);
             this.setAttribute('widgetclass', `${Reflect.getPrototypeOf(this).constructor.name}`);
         }
@@ -70,9 +70,14 @@ register(class Widget extends Emitter {
         return this;
     }
 
-    bind(activeData, key, attributeName) {
-        if (attributeName) {
-            mkAttributeBinding(this, activeData, key, attributeName);
+    bind(activeData, key, arg) {
+        if (arg) {
+            if (typeof arg == 'string') {
+                mkAttributeBinding(this, activeData, key, attributeName);
+            }
+            else if (typeof arg == 'object') {
+                mkMapBinding(this, activeData, key, arg);
+            }
         }
         else if (this[Widget.bindingKey] == 'innerHtml') {
             mkInnerHtmlBinding(this, activeData, key);
@@ -165,6 +170,14 @@ register(class Widget extends Emitter {
     dir() {
         this.htmlElement.dir();
         return this;
+    }
+
+    disablePropagation(eventName) {
+        this.htmlElement.disablePropagation(eventName);
+    }
+
+    enablePropagation(eventName) {
+        this.htmlElement.enablePropagation(eventName);
     }
 
     get() {

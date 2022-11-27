@@ -29,13 +29,17 @@
 register(class WebAppText extends MultilingualText {
     constructor() {
         super({
-            fwkPassword: {
-                en: 'password',
-                de: 'Kennword',
+            fwForgotPassword: {
+                en: 'Forgot Password',
             },
-            fwkUsername: {
-                en: 'username',
-                de: 'Beneutzer',
+            fwPassword: {
+                en: 'Password',
+            },
+            fwSignIn: {
+                en: 'Sign In',
+            },
+            fwUsername: {
+                en: 'Username',
             },
         });
     }
