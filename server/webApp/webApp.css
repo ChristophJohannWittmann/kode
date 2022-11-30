@@ -960,3 +960,47 @@ body {
     padding: 0px;
     margin: 0px;
 }
+
+
+/***********************************************
+ * Basic Table
+ ***********************************************/
+[widget-style=table-basic] {
+    height: 100%;
+    width: 100%;
+    border-collapse: collapse;
+}
+[widget-style=table-basic-tbody] {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+[widget-style=table-basic-tbody] {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+[widget-style=table-basic-tbody-row] {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+[widget-style=table-basic-tbody-cell] {
+}
+[widget-style=table-basic-thead] {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+[widget-style=table-basic-thead-row] {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+[widget-style=table-basic-thead-cell] {
+}

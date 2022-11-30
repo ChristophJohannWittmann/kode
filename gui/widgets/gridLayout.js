@@ -23,7 +23,9 @@
 
 /*****
  * This is a composite widgets whose layout is formatted according to the rules
- * of the CSS3 grid layout 
+ * of the CSS3 grid layout.  This type of widget limits its capabilities to a
+ * grid of uniform sized tiles.  If you want a more complex overloapping set of
+ * gridded areas, see the WAreaLayout works and if it's right for you.
 *****/
 register(class WGridLayout extends Widget {  
     constructor(tagName, layout) {

@@ -23,12 +23,12 @@
 
 /*****
  * TextArea handlers are singleton objects whose job is to add type specific
- * editing features to a plain old WText widget.  These handlers are not trivial
+ * editing features to a plain old WTextArea widget.  These handlers are not trivial
  * and can required significant programming efforts.  The core functionality for
  * building a value-added editor is to create a singleton instance subclassing
  * TextAreaHandler with features that can enhance or automate the editing feature
  * set.  We want the final text editing instances to be singletons to increase
- * WText construction performance.
+ * WTextArea construction performance.
 *****/
 register(class EntryFilter {
     constructor() {

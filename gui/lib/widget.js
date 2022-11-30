@@ -70,6 +70,11 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    attach(widget) {
+        widget.append(this);
+        return this;
+    }
+
     bind(activeData, key, arg) {
         if (arg) {
             if (typeof arg == 'string') {
@@ -110,7 +115,7 @@ register(class Widget extends Emitter {
     }
 
     children() {
-        return this.htmlElement.children();
+        return this.htmlElement.children.map(child => child.widget());
     }
 
     clear() {
@@ -188,6 +193,10 @@ register(class Widget extends Emitter {
         return this.htmlElement.getAttribute(name);
     }
 
+    getStyle(propertyName) {
+        return this.htmlElement.node.style[propertyName];
+    }
+
     getWidgetStyle() {
         return this.getAttribute('widget-style');
     }
@@ -198,6 +207,14 @@ register(class Widget extends Emitter {
 
     hasClassName(className) {
         return this.htmlElement.hasClassName(className);
+    }
+
+    insertAfter(...args) {
+        this.htmlElement.insertAfter(...args);
+    }
+
+    insertBefore(...args) {
+        this.htmlElement.insertBefore(...args);
     }
 
     log() {
@@ -343,6 +360,11 @@ register(class Widget extends Emitter {
             value: className,
         });
 
+        return this;
+    }
+
+    setStyle(propertyName, value) {
+        this.htmlElement.node.style[propertyName] = value;
         return this;
     }
 

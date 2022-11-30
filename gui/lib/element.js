@@ -349,6 +349,10 @@ register(class HtmlElement extends HtmlNode {
         return this.node.innerHTML;
     }
 
+    getStyle(propertyName, value) {
+        return this.node.style[propertyName];
+    }
+
     hasAttribute(name) {
         return mkStringSet(this.node.getAttributeNames()).has(name);
     }
@@ -502,6 +506,11 @@ register(class HtmlElement extends HtmlNode {
 
     setInnerHtml(innerHtml) {
         this.node.innerHTML = innerHtml;
+        return this;
+    }
+
+    setStyle(propertyName, value) {
+        this.node.style[propertyName] = value;
         return this;
     }
 

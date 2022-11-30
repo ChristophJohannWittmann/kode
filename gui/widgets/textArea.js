@@ -30,7 +30,7 @@
  * integrates the textarea HTML element into the framework and provides an OO-
  * usability wrapper for the underlying textarea features.
 *****/
-register(class WText extends InputBaseWidget {
+register(class WTextArea extends InputBaseWidget {
     constructor(entryFilter) {
         super('textarea', 'textarea');
         this.tabSize = 4;
