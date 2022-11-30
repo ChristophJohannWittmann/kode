@@ -36,6 +36,11 @@ register(class WStack extends Widget {
         this.setAttribute('widget-style', 'stack');
     }
 
+    clear() {
+        super.clear();
+        this.stack = [];
+    }
+
     contains(widget) {
         return this.indexOf(widget) >= 0;
     }

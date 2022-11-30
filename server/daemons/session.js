@@ -55,11 +55,11 @@ singleton(class SessionManager extends Daemon {
 
     async onAuthorize(message) {
         if (message.session && message.session in this.byKey) {
-            let authorized = await this.byKey[message.session].authorize(message.permission, message.context);
-            Message.reply(message, authorized);
+            let authorization = await this.byKey[message.session].authorize(message.permission, message.context);
+            Message.reply(message, authorization);
         }
 
-        Message.reply(message, false);
+        Message.reply(message, { granted: false, user: { oid: 0 } });
     }
 
     async onCloseAllSession(message) {
@@ -81,11 +81,11 @@ singleton(class SessionManager extends Daemon {
             }
         }
 
-        Message.reply(message, false);        
+        Message.reply(message, true);        
     }
 
     async onCreateSession(message) {
-        let session = await mkSession(message.user);
+        let session = await mkSession(message.user, message.idleMinutes);
         this.byKey[session.key] = session;
 
         if (!(session.user.oid in this.byUser)) {
@@ -113,6 +113,17 @@ singleton(class SessionManager extends Daemon {
     }
 
     async onNotifySessions(message) {
+    }
+
+    async onSweep(message) {
+        if ('session' in message) {
+            if (message.session in this.byKey) {
+                let session = this.byKey[message.session];
+                return Message.reply(message, session.sweep());
+            }
+        }
+
+        Message.reply(message, []);
     }
 
     async onTouchSession(message) {

@@ -75,7 +75,8 @@ if (CLUSTER.isWorker) {
 
                 if (resource && resource.category == 'webx') {
                     try {
-                        await resource.value.upgrade(httpReq, socket, headPacket);
+                        let req = await mkHttpRequest(this, httpReq);
+                        await resource.value.upgrade(req, socket, headPacket);
                     }
                     catch (e) {
                         log(`Web Socket Upgrade Request Error: ${httpReq.url}`, e);

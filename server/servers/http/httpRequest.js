@@ -251,6 +251,16 @@ register(class HttpRequest {
         return this.parsedUrl.query !== null ? this.parsedUrl.query : '';
     }
 
+    async reference() {
+        let resource = await ResourceLibrary.get(this.url());
+
+        if (resource) {
+            return resource.reference;
+        }
+
+        return null;
+    }
+
     search() {
         return this.parsedUrl.search !== null ? this.parsedUrl.search : '';
     }

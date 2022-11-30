@@ -40,6 +40,7 @@ class Resource {
             this.oneTime = false;
             this.url = reference.expandedUrl;
             this.value = null;
+            this.reference = reference;
 
             if ('path' in reference) {
                 this.category = 'content';

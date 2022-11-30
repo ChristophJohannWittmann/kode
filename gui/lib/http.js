@@ -47,6 +47,16 @@ class HttpResponse {
         }
     }
 
+    getPending() {
+        if (this.isMessage()) {
+            let message = this.getMessage();
+
+            if (message.messageName == 'PostResponse') {
+                return message.pending;
+            }
+        }
+    }
+
     getReadyState() {
         switch (this.req.readyState) {
             case 0:
@@ -159,13 +169,17 @@ register(class Http extends Emitter {
 
     handleIntercept(result) {
         if (result !== null) {
-            if (typeof result == 'object') {
-                if ('#NewlyEstablishedSessionKey' in result) {
-                    webAppSettings.session = () => result['#NewlyEstablishedSessionKey'];
+            if (typeof result == 'object' && '#Control' in result) {
+                if (result['#Control'] == 'SignedIn') {
+                    webAppSettings.session = () => result.sessionKey;
+                    webAppSettings.password = () => result.setPassword;
+                    webAppSettings.verify = () => result.verifyEmail;
+
                     return true;
                 }
-                else if ('#CloseSession' in result) {
-                    console.log('** REMEMBER TO CLOSE CLIENT SESSION **')
+                else if (result['#Control'] == 'CloseSession') {
+                    send({ messageName: '#Close' });
+                    return true;
                 }
             }
         }
@@ -228,6 +242,10 @@ register(class Http extends Emitter {
                         }
                         else {
                             Trap.pushReply(this.trap.id, result);
+                        }
+
+                        for (let pending of rsp.getPending()) {
+                            this.send(pending);
                         }
                     }
                     else {

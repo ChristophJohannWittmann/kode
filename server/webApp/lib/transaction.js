@@ -32,12 +32,12 @@
 register(class WebAppTransaction extends Message {
     constructor(message) {
         super();
-        this.connectionMap = {};
-        this.connectionArray = [];
+        this['#connectionMap'] = {};
+        this['#connectionArray'] = [];
     }
 
-    static assign(webAppTransaction, message) {
-        let prototype = Reflect.getPrototypeOf(webAppTransaction);
+    static async assign(trx, message) {
+        let prototype = Reflect.getPrototypeOf(trx);
 
         for (let key of Object.keys(message)) {
             if (key in prototype) {
@@ -45,14 +45,14 @@ register(class WebAppTransaction extends Message {
                  return false;
             }
 
-            webAppTransaction[key] = message[key];
+            trx[key] = message[key];
         }
-
+        
         return true;
     }
 
     async commit() {
-        for (let connection of this.connectionArray) {
+        for (let connection of this['#connectionArray']) {
             await connection.commit();
             await connection.free();
         }
@@ -66,24 +66,36 @@ register(class WebAppTransaction extends Message {
             dbName = undefined;
         }
 
-        if (dbName in this.connectionMap) {
+        if (dbName in this['#connectionMap']) {
             if (force) {
                 connection = await dbConnect(dbName);
                 await connection.startTransaction();
-                this.connectionArray.push(connection);                
+                this['#connectionArray'].push(connection);                
             }
             else {
-                connection = this.connectionMap[dbName];
+                connection = this['#connectionMap'][dbName];
             }
         }
         else {
             connection = await dbConnect(dbName);
             await connection.startTransaction();
-            this.connectionMap[dbName] = connection;
-            this.connectionArray.push(connection);
+            this['#connectionMap'][dbName] = connection;
+            this['#connectionArray'].push(connection);
         }
 
         return connection;
+    }
+
+    incomingRequestData() {
+        let msg = {};
+
+        for (let key of Object.keys(this)) {
+            if (!key.startsWith('#') && key != 'password') {
+                msg[key] = this[key];
+            }
+        }
+
+        return msg;
     }
 
     reply(value) {
@@ -91,7 +103,7 @@ register(class WebAppTransaction extends Message {
     }
 
     async rollback() {
-        for (let connection of this.connectionArray) {
+        for (let connection of this['#connectionArray']) {
             await connection.rollback();
             await connection.free();
         }

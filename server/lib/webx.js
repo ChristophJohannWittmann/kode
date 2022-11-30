@@ -37,6 +37,7 @@ register(class Webx extends Emitter {
         this.module = module;
         this.reference = reference;
         this.webxName = this.reference.webx;
+        this.webSocket = null;
         this.settings = this.module.settings.webx[this.webxName];
         this.module.container[this.webxName] = this;
     }
@@ -86,10 +87,10 @@ register(class Webx extends Emitter {
         return this;
     }
 
-    async upgrade(httpReq, socket, headPacket) {
+    async upgrade(req, socket, headPacket) {
         if (this.settings.websocket) {
             if (Reflect.has(this, 'onWebSocket')) {
-                let secureKey = httpReq.headers['sec-websocket-key'];
+                let secureKey = req.header('sec-websocket-key');
                 let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
                 let webSocket = mkWebSocket(socket, req.headers['sec-websocket-extensions'], headPacket);
                 
@@ -106,7 +107,7 @@ register(class Webx extends Emitter {
                 }
             
                 socket.write(headers.join('\r\n'));
-                await this.onWebSocket(mkHttpReq(httpReq), webSocket);
+                await this.onWebSocket(req, webSocket);
             }
         }
     }

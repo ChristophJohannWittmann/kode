@@ -14,7 +14,7 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR AY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
@@ -37,6 +37,7 @@
 register(class WebApp extends Webx {
     constructor(module, reference) {
         super(module, reference);
+        this.sockets = {};
     }
 
     async buildCSS(path) {
@@ -112,16 +113,17 @@ register(class WebApp extends Webx {
             let language = this.calcApplicationLanguage(req);
             let apptext = toJson(this.multilingualText.getLanguage(language));
 
-            let doc = mkTextTemplate(Config.minify ? this.compactHtml : this.visualHtml).set({
+            let doc = mkTextTemplate(this.reference.minify ? this.compactHtml : this.visualHtml).set({
                 css: this.compactCss,
                 title: this.module.settings.title,
                 description: this.module.settings.description,
                 links: this.links,
-                bodyClasses: this.settings.bodyClasses,
                 url: this.reference.url,
                 authenticate: this.settings.authenticate,
                 websocket: this.settings.websocket,
                 apptext: apptext,
+                homeView: this.settings.homeView,
+                container: this.module.settings.container,
             });
 
             rsp.end(200, 'text/html', await doc.toString());
@@ -152,15 +154,17 @@ register(class WebApp extends Webx {
             let message = req.message();
 
             if (message.messageName in this.handlers) {
-                let req = mkWebAppTransaction(message);
+                let trx = mkWebAppTransaction(message);
+                trx['#Reference'] = await req.reference();
+                trx['#Authenticate'] = this.settings.authenticate;
 
-                if (WebAppTransaction.assign(req, message)) {
-                    response = await this.query(req);
-                    await req.commit();
+                if (await WebAppTransaction.assign(trx, message)) {
+                    response = await this.query(trx);
+                    await trx.commit();
                 }
                 else {
                     response = EndpointContainer.internalError;
-                    await req.rollback();
+                    await trx.rollback();
                 }
             }
             else {
@@ -183,6 +187,7 @@ register(class WebApp extends Webx {
                 rsp.end(200, 'application/json', toJson({
                     messageName: 'PostResponse',
                     response: response,
+                    pending: await Ipc.queryPrimary({ messageName: '#SessionManagerSweep', session: message['#Session'] }),
                     '#Trap': message['#Trap'],
                 }));
             }
@@ -237,6 +242,7 @@ register(class WebApp extends Webx {
 
         await mkDbmsEndpoints(this);
         await mkOrgEndpoints(this);
+        await mkPublicEndpoints(this);
         await mkSelfEndpoints(this);
         await mkSmtpEndpoints(this);
         await mkSystemEndpoints(this);
@@ -271,7 +277,11 @@ register(class WebApp extends Webx {
     }
 
     async onWebSocket(req, webSocket) {
-        console.log(websocket);
-        //this.webSockets[webSocket.id] = webSocket;
+        if (this.settings.authorize) {
+            let sessionKey = req.header('session-key');
+            //webSocket.setKey(sessionKey); ???
+        }
+        else {
+        }
     }
 });

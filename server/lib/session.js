@@ -24,11 +24,12 @@
 /*****
 *****/
 register(class Session {
-    constructor(user) {
+    constructor(user, idleMinutes) {
         return new Promise(async (ok, fail) => {
             this.timeout = null;
-            this.webSocketWorker = null;
             this.user = mkUserObject(user);
+            this.idleMinutes = idleMinutes;
+            this.pendingMessages = [];
             let dbc = await dbConnect();
 
             let seed = `${(new Date()).toString()}${this.user.userName}`;
@@ -53,33 +54,30 @@ register(class Session {
             context.permission = permission;
 
             if (this.grants.has(context.toBase64())) {
-                return true;
+                return { granted: true, user: this.user };
             }
             else if ('org' in context) {
                 delete context.org;
 
                 if (this.grants.has(context.toBase64())) {
-                    return true;
+                    return { granted: true, user: this.user };
                 }
             }
 
-            return false;
+            return { granted: false, user: this.user };
         }
 
-        return true;
+        return { granted: true, user: this.user };
     }
 
     async close() {
-        /*
-        if (this.webSocket) {
-            this.webSocket.sendClient({
-                messageName: '#CloseSession'
-            });
-
-            await this.webSocket.close();
-            Sessions.removeSession(this);
+        if (this.timeout) {
+            clearInterval(this.timeout);
         }
-        */
+    }
+
+    queue(message) {
+        this.pendingMessages.push(message);
     }
 
     setSecurityContext(contextName, value) {
@@ -87,11 +85,21 @@ register(class Session {
         return this;
     }
 
+    sweep() {
+        if (this.pendingMessages.length) {
+            let pendingMessages = this.pendingMessages;
+            this.pendingMessages = [];
+            return pendingMessages;
+        }
+
+        return this.pendingMessages;
+    }
+
     touch() {
         if (this.timeout) {
             clearTimeout(this.timeout);
         }
 
-        this.timeout = setTimeout(() => this.close(), Config.sessionIdle*60*1000);
+        this.timeout = setTimeout(() => this.close(), this.idleMinutes*60*1000);
     }
 });

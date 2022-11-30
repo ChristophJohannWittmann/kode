@@ -30,8 +30,9 @@
  * completed unguarded or controlled.  The primary example of an uncontrolled
  * or unguarded enpoint is "SignSelfIn".
 *****/
-register(function mkEndpoint(name, permission) {
-    return `#ENDPOINT#${toJson({ name: name, permission: permission })}`
+register(function mkEndpoint(name, permission, flags) {
+    flags = typeof flags == 'object' ? flags : {};
+    return `#ENDPOINT#${toJson({ name: name, permission: permission, flags: flags })}`
 });
 
 
@@ -54,26 +55,98 @@ register(class EndpointContainer {
             if (propertyName.startsWith('#ENDPOINT#')) {
                 let endpoint = fromJson(propertyName.substr(10));
 
-                webapp.on(endpoint.name, async req => {
-                    try {
-                        if (endpoint.permission == 'nosession' || await Ipc.queryPrimary({
-                            messageName: '#SessionManagerAuthorize',
-                            session: req['#Session'],
-                            permission: endpoint.permission,
-                            context: req.context ? req.context : null,
-                        })) {
-                            await this[propertyName](req);
+                webapp.on(endpoint.name, async trx => {
+                    let session = trx['#Session'] ? trx['#Session'] : '';
 
+                    try {
+                        if (endpoint.flags.unprotected) {
+                            let result = await this[propertyName](trx);
+
+                            await mkDboWebappLog({
+                                userOid: 0n,
+                                session: session,
+                                endpoint: endpoint.name,
+                                status: 'ok',
+                                request: trx.incomingRequestData(),
+                            }).save(await trx.connect());
+
+                            trx.reply(result);
                         }
                         else {
-                            return EndpointContainer.unauthorized;
+                            let authorization = await this.authorize(trx, endpoint);
+
+                            if (authorization.granted) {
+                                let result = await this[propertyName](trx);
+
+                                await mkDboWebappLog({
+                                    userOid: authorization.user.oid,
+                                    session: session,
+                                    endpoint: endpoint.name,
+                                    status: 'ok',
+                                    request: trx.incomingRequestData(),
+                                }).save(await trx.connect());
+
+                                trx.reply(result);
+                            }
+                            else {
+                                await mkDboWebappLog({
+                                    userOid: authorization.user.oid,
+                                    session: session,
+                                    endpoint: endpoint.name,
+                                    status: 'unauthorized',
+                                    request: trx.incomingRequestData(),
+                                }).save(await trx.connect());
+
+                                trx.reply(EndpointContainer.unauthorized);
+                            }
                         }
                     }
                     catch (e) {
-                        return EndpointContainer.internalError;
+                        log(`${e.stack}`);
+
+                        await mkDboWebappLog({
+                            userOid: 0n,
+                            session: session,
+                            endpoint: endpoint.name,
+                            status: 'error',
+                            request: trx.incomingRequestData(),
+                            error: `${e.stack}`,
+                        }).save(await trx.connect());
+
+                        trx.reply(EndpointContainer.internalError);
                     }
                 });
             }
+        }
+    }
+
+    async authorize(trx, endpoint) {
+        if (trx['#Authenticate']) {
+            let authorization = await Ipc.queryPrimary({
+                messageName: '#SessionManagerAuthorize',
+                session: trx['#Session'],
+                permission: endpoint.permission,
+                context: trx.context ? trx.context : null,
+            });
+
+            if (authorization.granted) {
+                if (!authorization.user.verified) {
+                    if (!endpoint.flags.verify) {
+                        authorization.granted = false;
+                    }
+                }
+
+                if (!authorization.user.password) {
+                    if (!endpoint.flags.password) {
+                        authorization.granted = false;
+                    }
+                }
+            }
+
+            return authorization;
+        }
+        else {
+            return { granted: true, user: mkDboUser({ firstname: 'anonymous', lastname: 'anonymous' }) };
         }
     }
 });

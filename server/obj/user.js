@@ -35,16 +35,23 @@ singleton(class Users {
             let user = await getDboUser(dbc, email.ownerOid);
 
             if (user && user.status == 'active') {
-                let credentials = await selectOneDboCredentials(dbc, `_user_oid=${user.oid} AND _type='password' AND _status='current'`)
+                if (user.failures < 5) {
+                    let credentials = await selectOneDboCredentials(dbc, `_user_oid=${user.oid} AND _type='password' AND _status='current'`)
 
-                if (credentials) {
-                    let crypto = await Crypto.digestUnsalted('sha512', `${user.oid}${password}${user.oid}`);
+                    if (credentials) {
+                        let crypto = await Crypto.digestUnsalted('sha512', `${user.oid}${password}${user.oid}`);
 
-                    if (crypto == credentials.crypto) {
-                        return user;
+                        if (crypto == credentials.crypto) {
+                            user.failures = 0;
+                            await user.save(dbc);
+                            return user;
+                        }
                     }
                 }
             }
+
+            user.failures++;
+            await user.save(dbc);
         }
 
         return false;

@@ -9,20 +9,25 @@
         <style title="WebApp">
             ${css}
         </style>
+        <script src="?CLIENTFRAMEWORK"></script>
+        <script>setContainer('${container}');</script>
+        <script src="?CLIENTAPPLICATION"></script>
         <script>
-            const txt = ${apptext};
-            Object.freeze(txt);
+            const txx = ${apptext};
+            Object.freeze(txx);
 
             const webAppSettings = {
                 authenticate: () => ${authenticate},
+                verify: () => false,
+                password: () => false,
+                container: () => ${container},
+                homeView: () => ${container}.mk${homeView}(),
                 session: () => null,
                 url: () => '${url}',
                 websocket: () => ${websocket},
-            }
+            };
         </script>
-        <script src="?CLIENTFRAMEWORK"></script>
-        <script src="?CLIENTAPPLICATION"></script>
     </head>
-    <body class="fill margin-0 padding-0 ${bodyClasses}" onload="bootstrap()">
+    <body onload="bootstrap()">
     </body>
 </html>

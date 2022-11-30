@@ -23,7 +23,7 @@
 
 /*****
 *****/
-register(class WSignIn extends WGridLayout {
+register(class FWSignInView extends WGridLayout {
     constructor() {
         super({
             rows: ['auto', '350px', 'auto'],
@@ -40,19 +40,47 @@ register(class WSignIn extends WGridLayout {
 
         this.setAt(1, 1, mkWidget('div')
             .bind(this.data, 'mode', {
-                'Authenticate': new AuthenticateForm(this.data),
-                'ForgotPassword': new ForGotPasswordForm(this.data),
+                'Authenticate': new AuthenticateForm(this.data).on('SignIn', message => this.signIn(message)),
+                'ForgotPassword': new ForgotCredentialsForm(this.data).on('ResetPassword', message => this.resetPassword(message)),
             })
         );
     }
 
-    async signInFailed(message) {
-        console.log(message);
+    async resetPassword(message) {
+        await mkHttp().query({
+            messageName: 'PublicResetPassword',
+            username: this.data.username,
+        });
+
+        setTimeout(() => this.data.mode = 'Authenticate', 2000);
     }
 
-    async signInSucceded(message) {
-        console.log(message);
+    async signIn(message) {
+        let rsp = await mkHttp().query({
+            messageName: 'PublicSignIn',
+            username: this.data.username,
+            password: this.data.password,
+        });
+
+        if (rsp) {
+            send({ messageName: '#SignedIn' })
+        }
+        else {
+            console.log('What a bummer.  Could not sign in.')
+        }
     }
+
+    /****************************************************
+     * NOTE FOR LATER
+     * **************************************************
+        rsp = await mkHttp().query({
+            messageName: 'SignSelfOut',
+            context: {
+                org: 12,
+                report: 27,
+            }
+        });
+    *****************************************************/
 });
 
 
@@ -68,75 +96,62 @@ class AuthenticateForm extends WGridLayout {
         this.data = data;
         this.setClasses('flex-h-cc colors-2 border-style-solid border-width-1 border-radius-2');
 
-        this.setAt(1, 0, mkWidget('div').set(txt.fwUsername).setClasses('flex-h-sc font-weight-bold font-size-4'));
+        this.setAt(1, 0, mkWidget('div').set(txx.fwSignInUsername).setClasses('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(3, 0, mkIEmail()
         .bind(this.data, 'username'))
         .setAttribute('autofocus')
         .setAttribute('autocomplete', 'email');
 
-        this.setAt(5, 0, mkWidget('div').set(txt.fwPassword).setClasses('flex-h-sc font-weight-bold font-size-4'));
+        this.setAt(5, 0, mkWidget('div').set(txx.fwSignInPassword).setClasses('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(7, 0, mkIPassword()
         .bind(this.data, 'password'))
         .setAttribute('autocomplete', 'current-password');
 
         this.setAt(9, 0,
             mkIButton('button')
-            .setAttribute('value', txt.fwSignIn)
-            .on('html.click', message => this.onSignIn())
+            .setAttribute('value', txx.fwSignInSignIn)
+            .on('html.click', message => this.send({ messageName: 'SignIn' }))
         )
 
         this.setAt(11, 0,
             mkIButton('button')
-            .setAttribute('value', txt.fwForgotPassword)
+            .setAttribute('value', txx.fwSignInForgotPassword)
             .on('html.click', message => this.data.mode = 'ForgotPassword')
         )
-    }
-
-    async onSignIn() {
-        let rsp = await mkHttp().query({
-            messageName: 'SignSelfIn',
-            username: this.data.username,
-            password: this.data.password,
-        });
-
-        if (rsp) {
-            this.send({ messageName: 'SignInSucceded' });
-            /*
-            rsp = await mkHttp().query({
-                messageName: 'SignSelfOut',
-                context: {
-                    org: 12,
-                    report: 27,
-                }
-            });
-            */
-        }
-        else {
-            this.send({ messageName: 'SignInFailed' });
-        }
     }
 }
 
 
 /*****
 *****/
-class ForGotPasswordForm extends Widget {
+class ForgotCredentialsForm extends WGridLayout {
     constructor(data) {
-        super('div');
-        this.data = data;
-        let h1 = mkWidget('h1').set('Hello Forgot Password.');
-        h1.enablePropagation('click');
-        this.append(h1);
-        this.on('html.click', message => this.data.mode = 'Authenticate');
-    }
-}
-/*
-class ResetPasswordForm extends WGridLayout {
-    constructor(parent) {
         super('form', {
-            rows: [],
-            cols: [],
+            rows: ['2fr', 'auto', '20px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
+            cols: ['350px'],
         });
+
+        this.data = data;
+        this.setClasses('flex-h-cc colors-2 border-style-solid border-width-1 border-radius-2');
+
+        this.setAt(1, 0, mkWidget('div').set(txx.fwForgotInstructions));
+
+        this.setAt(3, 0, mkWidget('div').set(txx.fwForgotEmail).setClasses('flex-h-sc font-weight-bold font-size-4'));
+        this.setAt(5, 0, mkIEmail()
+        .bind(this.data, 'username'))
+        .setAttribute('autofocus')
+        .setAttribute('autocomplete', 'email');
+
+        this.setAt(7, 0,
+            mkIButton('button')
+            .setAttribute('value', txx.fwForgotReset)
+            .on('html.click', message => this.send({ messageName: 'ResetPassword' }))
+        )
+
+        this.setAt(9, 0,
+            mkIButton('button')
+            .setAttribute('value', txx.fwForgotSignIn)
+            .on('html.click', message => this.data.mode = 'Authenticate')
+        )
     }
 }
-*/

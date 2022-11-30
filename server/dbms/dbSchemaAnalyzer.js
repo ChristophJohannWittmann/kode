@@ -65,7 +65,7 @@ class DbTableDiff {
     async downgrade() {
         if (!this.isUpgrade) {
             let dbc = await dbConnect(this.settings);
-            dbc.query(`DROP TABLE _${this.tableInfo.name}`);
+            await dbc.query(`DROP TABLE _${this.tableInfo.name}`);
             await dbc.free();
         }
     }
@@ -120,7 +120,7 @@ class DbColumnDiff {
     async downgrade() {
         if (!this.isUpgrade) {
             let dbc = await dbConnect(this.settings);
-            dbc.query(`ALTER TABLE _${toSnakeCase(this.columnInfo.table.name)} DROP COLUMN _${toSnakeCase(this.columnInfo.name)};`);
+            await dbc.query(`ALTER TABLE _${toSnakeCase(this.columnInfo.table.name)} DROP COLUMN _${toSnakeCase(this.columnInfo.name)};`);
             await dbc.free();
         }
     }
@@ -142,7 +142,12 @@ class DbColumnDiff {
                 type = dbTypes(this.settings)[this.columnInfo.type.name()];
             }
 
-            dbc.query(`ALTER TABLE _${toSnakeCase(this.columnInfo.table.name)} ADD COLUMN _${toSnakeCase(this.columnInfo.name)} ${type.type()};`);
+            let types = dbTypes(dbc.settings);
+            let dbType = types[this.columnInfo.type.name()];
+            let value = dbType.encode(this.columnInfo.type.init());
+
+            await dbc.query(`ALTER TABLE _${toSnakeCase(this.columnInfo.table.name)} ADD COLUMN _${toSnakeCase(this.columnInfo.name)} ${type.type()};`);
+            await dbc.query(`UPDATE _${toSnakeCase(this.columnInfo.table.name)} SET _${toSnakeCase(this.columnInfo.name)}=${value}`);
             await dbc.free();
         }
     }

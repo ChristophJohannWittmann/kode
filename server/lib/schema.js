@@ -216,6 +216,7 @@ mkDbSchema(
             { name: 'authType',     type: dbText, size:  20 },
             { name: 'verified',     type: dbBool            },
             { name: 'password',     type: dbBool            },
+            { name: 'failures',     type: dbInt32           },
         ],
         indexes: [
             'lastName:asc',
@@ -225,15 +226,20 @@ mkDbSchema(
         ]
     },
     {
-        name: 'userLog',
+        name: 'webappLog',
         columns: [
-            { name: 'userOid',      type: dbInt64           },
-            { name: 'endpoint',     type: dbText,  size: 40 },
-            { name: 'details',      type: dbJson            },
+            { name: 'userOid',      type: dbInt64             },
+            { name: 'session',      type: dbText,  size:  100 },
+            { name: 'endpoint',     type: dbText,  size:   40 },
+            { name: 'status',       type: dbText,  size:   40 },
+            { name: 'request',      type: dbJson              },
+            { name: 'error',        type: dbText,  size: 1000 },
         ],
         indexes: [
             'userOid:asc',
+            'session:asc',
             'endpoint:asc',
+            'status:asc',
         ]
     },
 );

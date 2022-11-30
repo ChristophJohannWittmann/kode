@@ -23,20 +23,9 @@
 
 /*****
 *****/
-register(class TemplateEndpoints extends EndpointContainer {
-    constructor(webapp) {
-        super(webapp);
-    }
-
-    async [ mkEndpoint('CreateTemplate', 'template') ](trx) {
-    }
-
-    async [ mkEndpoint('EraseTemplate', 'template') ](trx) {
-    }
-
-    async [ mkEndpoint('GetTemplate', 'template') ](trx) {
-    }
-
-    async [ mkEndpoint('SaveTemplate', 'template') ](trx) {
+register(class FWVerifyEmailView extends Widget {
+    constructor() {
+        super('h1');
+        this.set('FWVerifyEmailView').on('html.click', message => queryServer('SelfSignOut'));
     }
 });

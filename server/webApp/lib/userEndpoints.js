@@ -28,54 +28,54 @@ register(class UserEndpoints extends EndpointContainer {
         super(webapp);
     }
 
-    async [ mkEndpoint('ActivateUser', 'user') ](req) {
+    async [ mkEndpoint('ActivateUser', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('AddUserAddress', 'user') ](req) {
+    async [ mkEndpoint('AddUserAddress', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('AddUserEmail', 'user') ](req) {
+    async [ mkEndpoint('AddUserEmail', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('AddUserPhone', 'user') ](req) {
+    async [ mkEndpoint('AddUserPhone', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('DeactivateUser', 'user') ](req) {
+    async [ mkEndpoint('DeactivateUser', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('GetUsers', 'user') ](req) {
+    async [ mkEndpoint('GetUsers', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('ModifyUser', 'user') ](req) {
+    async [ mkEndpoint('ModifyUser', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('ModifyUserAddress', 'user') ](req) {
+    async [ mkEndpoint('ModifyUserAddress', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('ModifyUserEmail', 'user') ](req) {
+    async [ mkEndpoint('ModifyUserEmail', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('ModifyUserPhone', 'user') ](req) {
+    async [ mkEndpoint('ModifyUserPhone', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('RemoveUser', 'user') ](req) {
+    async [ mkEndpoint('RemoveUser', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('RemoveUserAddress', 'user') ](req) {
+    async [ mkEndpoint('RemoveUserAddress', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('RemoveUserEmail', 'user') ](req) {
+    async [ mkEndpoint('RemoveUserEmail', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('RemoveUserPhone', 'user') ](req) {
+    async [ mkEndpoint('RemoveUserPhone', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('ResetUserPassword', 'user') ](req) {
+    async [ mkEndpoint('ResetUserPassword', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('SignUserOut', 'user') ](req) {
+    async [ mkEndpoint('SignUserOut', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('VerifyUser', 'user') ](req) {
+    async [ mkEndpoint('VerifyUser', 'user') ](trx) {
     }
 });

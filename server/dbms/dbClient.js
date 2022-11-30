@@ -186,7 +186,7 @@ register(function dbSized(arg) {
 });
 
 register(function dbTypes(arg) {
-    let settings = mkDbSettings(arg); 
+    let settings = mkDbSettings(arg);
     return DbClient.clients[settings.dbms].dbTypes();
 });
 

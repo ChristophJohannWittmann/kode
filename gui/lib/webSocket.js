@@ -23,7 +23,7 @@
 
 /*****
 *****/
-register(class WSocket extends Emitter {
+register(class Websocket extends Emitter {
     constructor() {
         super();
     }

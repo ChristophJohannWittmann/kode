@@ -28,39 +28,39 @@ register(class SystemEndpoints extends EndpointContainer {
         super(webapp);
     }
 
-    async [ mkEndpoint('DiscardTlsCertificate', 'system') ](req) {
+    async [ mkEndpoint('DiscardTlsCertificate', 'system') ](trx) {
     }
 
-    async [ mkEndpoint('GetAcmeCertificate', 'system') ](req) {
+    async [ mkEndpoint('GetAcmeCertificate', 'system') ](trx) {
     }
 
-    async [ mkEndpoint('GetServerConfig', 'system') ](req) {
+    async [ mkEndpoint('GetServerConfig', 'system') ](trx) {
     }
 
-    async [ mkEndpoint('GetSystemInformation', 'system') ](req) {
+    async [ mkEndpoint('GetSystemInformation', 'system') ](trx) {
     }
 
-    async [ mkEndpoint('GetTlsSettings', 'system') ](req) {
+    async [ mkEndpoint('GetTlsSettings', 'system') ](trx) {
     }
 
-    async [ mkEndpoint('ResolveDnsName', 'system') ](req) {
+    async [ mkEndpoint('ResolveDnsName', 'system') ](trx) {
     }
 
-    async [ mkEndpoint('RestartServer', 'system') ](req) {
+    async [ mkEndpoint('RestartServer', 'system') ](trx) {
     }
 
-    async [ mkEndpoint('SetServerConfig', 'system') ](req) {
+    async [ mkEndpoint('SetServerConfig', 'system') ](trx) {
     }
 
-    async [ mkEndpoint('SetTlsSettings', 'system') ](req) {
+    async [ mkEndpoint('SetTlsSettings', 'system') ](trx) {
     }
 
-    async [ mkEndpoint('StartNetwowrkInterface', 'system') ](req) {
+    async [ mkEndpoint('StartNetwowrkInterface', 'system') ](trx) {
     }
 
-    async [ mkEndpoint('StoptNetwowrkInterface', 'system') ](req) {
+    async [ mkEndpoint('StoptNetwowrkInterface', 'system') ](trx) {
     }
 
-    async [ mkEndpoint('ShutdownServer', 'system') ](req) {
+    async [ mkEndpoint('ShutdownServer', 'system') ](trx) {
     }
 });

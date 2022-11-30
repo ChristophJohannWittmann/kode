@@ -29,17 +29,29 @@
 register(class WebAppText extends MultilingualText {
     constructor() {
         super({
-            fwForgotPassword: {
-                en: 'Forgot Password',
+            fwForgotEmail: {
+                en: `Enter email address here`,
             },
-            fwPassword: {
-                en: 'Password',
+            fwForgotInstructions: {
+                en: `Enter your email adddress and click "Reset Password Now".  If you have an active account, an email with a password reset link will be sent to you.`,
             },
-            fwSignIn: {
-                en: 'Sign In',
+            fwForgotReset: {
+                en: `Reset Password Now`,
             },
-            fwUsername: {
-                en: 'Username',
+            fwForgotSignIn: {
+                en: `Back to sign in`,
+            },
+            fwSignInForgotPassword: {
+                en: `Forgot Password`,
+            },
+            fwSignInPassword: {
+                en: `Password`,
+            },
+            fwSignInSignIn: {
+                en: `Sign In`,
+            },
+            fwSignInUsername: {
+                en: `Email`,
             },
         });
     }

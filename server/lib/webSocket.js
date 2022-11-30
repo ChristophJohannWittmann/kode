@@ -23,25 +23,24 @@
 
 /*****
 *****/
-register(class WSocket {
-    static _socketId = 1;
+register(class WebSocket {
+    static sockets = {};
 
     constructor(socket, extensions, headData) {
-        this._socketId = $WebSocket._socketId++;
-        this._socket = socket;
-        this._socket.setTimeout(0);
-        this._socket.setNoDelay();
-        this._sessionId = '';
-        this._frameParser = $FrameParser(this, headData);
-        this._frameBuilder = $FrameBuilder();
-        this._buildExtensionMap(extensions);
+        this.socket = socket;
+        this.socket.setTimeout(0);
+        this.socket.setNoDelay();
+        this.sessionId = '';
+        this.frameParser = new FrameParser(this, headData);
+        this.frameBuilder = new FrameBuilder();
+        this.buildExtensionMap(extensions);
   
         this.type = '';
         this.payload = [];
         this.state = 'Ready';
 
-        this._interval = setInterval(() => {
-            this.send({messageName: '$Ping'});
+        this.interval = setInterval(() => {
+            this.send({messageName: '#Ping'});
         }, 15000);
     }
   

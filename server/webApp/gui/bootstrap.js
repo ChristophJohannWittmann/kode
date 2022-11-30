@@ -22,6 +22,33 @@
 
 
 /*****
+*****/
+on('#SignedIn', message => {
+    views.pop();
+    views.push(webAppSettings.homeView());
+
+    if (webAppSettings.password()) {
+        views.push(mkFWPasswordView());
+    }
+
+    if (webAppSettings.verify()) {
+        views.push(mkFWVerifyEmailView());
+    }
+});
+
+
+/*****
+*****/
+on('#Close', message => {
+    views.clear();
+    views.push(mkFWSignInView());
+    webAppSettings.veryify = () => false;
+    webAppSettings.password = () => false;
+    webAppSettings.session = () => null;
+});
+
+
+/*****
  * This is the startup or bootstrap function for the client framework code.
  * This is called when the body has been loaded with the onload="bootstrop()"
  * HTML attribute.  This ensures a standard environment initialization accross
@@ -33,11 +60,39 @@ register(async function bootstrap() {
     window.styleSheet = doc.getStyleSheet('WebApp');
     await onSingletons();
 
-    window.appStack = mkWStack();
-    doc.body().append(appStack);
+    window.views = mkWStack();
+    doc.body().append(views);
 
-    // -- test code
-    appStack.push(mkWSignIn());
-    //alert(txt.fwkUsername);
-    // --
+    if (webAppSettings.authenticate()) {
+        views.push(mkFWSignInView());
+    }
+    else {
+        views.push(webAppSettings.homeView());
+
+        if (webAppSettings.websocket()) {
+            console.log('connect web socket');
+        }
+    }
 });
+
+
+/*****
+*****/
+(() => {
+    let webSocket = null;
+
+    register(async function queryServer(messageName, context, data) {
+        if (webSocket) {
+        }
+        else {
+            return await mkHttp().query({ messageName: messageName });
+        }
+    });
+
+    register(function sendServer(messageName, context, data) {
+        if (webSocket) {
+        }
+        else {
+        }
+    });
+})();
