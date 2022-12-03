@@ -941,6 +941,24 @@ body {
 
 
 /***********************************************
+ * Hot Spot
+ ***********************************************/
+[widget-style=hotspot] {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-weight: bold;
+}
+[widget-style=hotspot]:hover {
+    color: darkorange;
+    cursor:  pointer;
+}
+
+
+/***********************************************
  * View Stack
  ***********************************************/
 [widget-style=stack] {
@@ -976,31 +994,22 @@ body {
     padding: 0px;
     margin: 0px;
 }
-[widget-style=table-basic-tbody] {
-    height: 100%;
-    width: 100%;
-    padding: 0px;
-    margin: 0px;
-}
-[widget-style=table-basic-tbody-row] {
-    height: 100%;
-    width: 100%;
-    padding: 0px;
-    margin: 0px;
-}
-[widget-style=table-basic-tbody-cell] {
-}
 [widget-style=table-basic-thead] {
     height: 100%;
     width: 100%;
     padding: 0px;
     margin: 0px;
 }
-[widget-style=table-basic-thead-row] {
-    height: 100%;
-    width: 100%;
+[widget-style=table-basic-tbody-tr] {
     padding: 0px;
     margin: 0px;
 }
-[widget-style=table-basic-thead-cell] {
+[widget-style=table-basic-thead-tr] {
+    padding: 0px;
+    margin: 0px;
+}
+[widget-style=table-basic-td] {
+    height: 40px;
+}
+[widget-style=table-basic-th] {
 }

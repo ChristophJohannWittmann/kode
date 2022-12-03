@@ -51,10 +51,12 @@ class HttpResponse {
         if (this.isMessage()) {
             let message = this.getMessage();
 
-            if (message.messageName == 'PostResponse') {
+            if (Array.isArray(message.pending)) {
                 return message.pending;
             }
         }
+
+        return [];
     }
 
     getReadyState() {
@@ -178,6 +180,11 @@ register(class Http extends Emitter {
                     return true;
                 }
                 else if (result['#Control'] == 'CloseSession') {
+                    send({ messageName: '#Close' });
+                    return true;
+                }
+                else if (result['#Control'] == 'CloseApplication') {
+                    alert('PLEASE SIGN IN TO USE.');
                     send({ messageName: '#Close' });
                     return true;
                 }

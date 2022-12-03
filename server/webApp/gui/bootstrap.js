@@ -81,15 +81,15 @@ register(async function bootstrap() {
 (() => {
     let webSocket = null;
 
-    register(async function queryServer(messageName, context, data) {
+    register(async function queryServer(message) {
         if (webSocket) {
         }
         else {
-            return await mkHttp().query({ messageName: messageName });
+            return await mkHttp().query(message);
         }
     });
 
-    register(function sendServer(messageName, context, data) {
+    register(function sendServer(message) {
         if (webSocket) {
         }
         else {

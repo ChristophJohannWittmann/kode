@@ -22,6 +22,10 @@
 
 
 /*****
+ * A singleton class used for selecting and manipulating UserObjects, which
+ * are extensions of the DboUser wrapper class.  The select functions simplify
+ * DBMS operations since searching and selecting may be complex and required
+ * in multiple back-end coponents of the server framework.
 *****/
 singleton(class Users {
     constructor() {
@@ -62,20 +66,44 @@ singleton(class Users {
     }
 
     async selectByEmail(dbc, email) {
+        let dboEmail = await selectOneDboEmail(dbc, `_addr='${email}'`);
+
+        if (dboEmail && dboEmail.ownerType == 'user') {
+            let user = await getDboUser(dbc, dboEmail.ownerOid);
+
+            if (user && user.status == 'active') {
+                return mkUserObject(user);
+            }
+        }
+
+        return null;
     }
 
     async selectByName(dbc, firstName, lastName) {
-    }
+        let selected = [];
 
-    async selectByPhone(dbc, unformatted) {
-    }
+        if (firstName) {
+            if (lastName) {
+                return await selectDboUser(dbc, `_first_name ilike '${firstName.toLowerCase()}' AND _last_name ilike '${lastName.toLowerCase()}`);
+            }
+            else {
+                return await selectDboUser(dbc, `_first_name ilike '${firstName}'`);
+            }
+        }
+        else if (lastName) {
+            return await selectDboUser(dbc, `_last_name ilike '${lastName.toLowerCase()}'`);
+        }
 
-    async selectByUserName(dbc, userName, status) {
+        return selected.map(user => mkUserObject(user));
     }
 });
 
 
 /*****
+ * The UserObject is an extension of the DboUser class, which is a wrapper for
+ * DBMS user records.  These functions encapsulate the manipulation of user data
+ * in a single class.  User objects extend their features to include supporting
+ * DBMS objects: credentials, grants, addresses, emails, and phone numbers.
 *****/
 register(class UserObject extends DboUser {
     constructor(properties) {
@@ -88,10 +116,16 @@ register(class UserObject extends DboUser {
     }
 
     async checkPasswordHistory() {
+        // ********************************************************
+        // -- TODO --
+        // ********************************************************
         return true;
     }
 
     async clearGrant(dbc, grant) {
+        // ********************************************************
+        // -- TODO --
+        // ********************************************************
         return true;
     }
 
@@ -130,10 +164,16 @@ register(class UserObject extends DboUser {
     }
 
     async sendEmail(dbc, email) {
+        // ********************************************************
+        // -- TODO --
+        // ********************************************************
         return this;
     }
 
     async sendMMS(dbc, mms) {
+        // ********************************************************
+        // -- TODO --
+        // ********************************************************
         return this;
     }
 

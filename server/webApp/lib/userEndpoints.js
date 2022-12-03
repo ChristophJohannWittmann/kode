@@ -28,54 +28,66 @@ register(class UserEndpoints extends EndpointContainer {
         super(webapp);
     }
 
-    async [ mkEndpoint('ActivateUser', 'user') ](trx) {
+    async [ mkEndpoint('UserActivate', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('AddUserAddress', 'user') ](trx) {
+    async [ mkEndpoint('UserAddAddress', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('AddUserEmail', 'user') ](trx) {
+    async [ mkEndpoint('UserAddUEmail', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('AddUserPhone', 'user') ](trx) {
+    async [ mkEndpoint('UserAddPhone', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('DeactivateUser', 'user') ](trx) {
+    async [ mkEndpoint('UserDeactivate', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('GetUsers', 'user') ](trx) {
+    async [ mkEndpoint('UserModify', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('ModifyUser', 'user') ](trx) {
+    async [ mkEndpoint('UserModifyAddress', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('ModifyUserAddress', 'user') ](trx) {
+    async [ mkEndpoint('UserModifyEmail', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('ModifyUserEmail', 'user') ](trx) {
+    async [ mkEndpoint('UserModifyPhone', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('ModifyUserPhone', 'user') ](trx) {
+    async [ mkEndpoint('UserRemove', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('RemoveUser', 'user') ](trx) {
+    async [ mkEndpoint('UserRemoveAddress', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('RemoveUserAddress', 'user') ](trx) {
+    async [ mkEndpoint('UserRemoveEmail', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('RemoveUserEmail', 'user') ](trx) {
+    async [ mkEndpoint('UserRemovePhone', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('RemoveUserPhone', 'user') ](trx) {
+    async [ mkEndpoint('UserResetPassword', 'user') ](trx) {
     }
 
-    async [ mkEndpoint('ResetUserPassword', 'user') ](trx) {
+    async [ mkEndpoint('UserSelectByEmail', 'user') ](trx) {
+        return await Users.selectByEmail(
+            await trx.connect(),
+            trx.data.email
+        );
     }
 
-    async [ mkEndpoint('SignUserOut', 'user') ](trx) {
+    async [ mkEndpoint('UserSelectByName', 'user') ](trx) {
+        return await Users.selectByName(
+            await trx.connect(),
+            trx.data.firstName,
+            trx.data.lastName,
+        );
     }
 
-    async [ mkEndpoint('VerifyUser', 'user') ](trx) {
+    async [ mkEndpoint('UserSignOut', 'user') ](trx) {
+    }
+
+    async [ mkEndpoint('UserVerify', 'user') ](trx) {
     }
 });

@@ -22,6 +22,11 @@
 
 
 /*****
+ * A session is used for associated a single user endpoint with a server user
+ * context.  The server context is always a webx or an extension of a webx.  The
+ * first reason for developing the session was to support web applcations, which
+ * are web extensions.  A session can also be associated with another endpoint
+ * that's a host that's not on a client application.
 *****/
 register(class Session {
     constructor(user, idleMinutes) {
@@ -74,6 +79,8 @@ register(class Session {
         if (this.timeout) {
             clearInterval(this.timeout);
         }
+
+        SessionManager.removeSession(this);
     }
 
     queue(message) {

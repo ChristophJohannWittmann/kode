@@ -365,6 +365,10 @@ register(class HtmlElement extends HtmlNode {
         return key in this.node.dataset;
     }
 
+    length() {
+        return this.children().length;
+    }
+
     off(messageName, handler) {
         if ('EMITTER' in this.node) {
             this.node.EMITTER.off(messageName, handler);

@@ -22,6 +22,11 @@
 
 
 /*****
+ * For security and architectural purposes, session objects exist only in the
+ * primary server process.  This daemon provides theh linkage between the
+ * web extension endpoints and the overall security architecture.  This daemon
+ * is responsible interfacing with other server components for all aspects of
+ * session management.
 *****/
 singleton(class SessionManager extends Daemon {
     constructor() {
@@ -33,42 +38,25 @@ singleton(class SessionManager extends Daemon {
         });
     }
 
-    addSession(session) {
-        if (!(session.key in this.byKey)) {
-            this.byKey[session.key] = session;
-        }
-
-        if (session.org.oid in this.byOrg) {
-            this.byOrg[session.org.oid].push(session);
-        }
-        else {
-            this.byOrg[session.org.oid] = [session];
-        }
-
-        if (session.user.oid in this.byUser) {
-            this.byUser[session.user.oid].push(session);
-        }
-        else {
-            this.byUser[session.user.oid] = [session];
-        }
-    }
-
     async onAuthorize(message) {
         if (message.session && message.session in this.byKey) {
             let authorization = await this.byKey[message.session].authorize(message.permission, message.context);
-            Message.reply(message, authorization);
+            return Message.reply(message, authorization);
         }
 
-        Message.reply(message, { granted: false, user: { oid: 0 } });
+        Message.reply(message, { granted: false, user: { oid: 0n } });
     }
 
     async onCloseAllSession(message) {
-    }
-
-    async onCloseOrgSessions(message) {
+        // ********************************************************
+        // -- TODO --
+        // ********************************************************
     }
 
     async onCloseUserSessions(message) {
+        // ********************************************************
+        // -- TODO --
+        // ********************************************************
     }
 
     async onCloseSession(message) {
@@ -77,29 +65,33 @@ singleton(class SessionManager extends Daemon {
                 let session = this.byKey[message.session];
                 await session.close();
                 this.removeSession(session);
-                return Message.reply(message, true);
             }
         }
 
-        Message.reply(message, true);        
+        Message.reply(message, true);
     }
 
     async onCreateSession(message) {
         let session = await mkSession(message.user, message.idleMinutes);
         this.byKey[session.key] = session;
 
-        if (!(session.user.oid in this.byUser)) {
-            this.byUser[session.user.oid] = {};
+        if (session.user.oid in this.byUser) {
+            this.byUser[session.user.oid].push(session);
+        }
+        else {
+            this.byUser[session.user.oid] = [session];
         }
 
-        this.byUser[session.user.oid][session.key] = session;
+        session.touch();
         Message.reply(message, session.key);
     }
 
-    async onGetOrgSessions(message) {
-    }
-
     async onGetUserSessions(message) {
+        if (message.userOid in this.byUser) {
+
+        }
+
+        Message.reply(message, []);
     }
 
     async onGetSession(message) {
@@ -113,6 +105,9 @@ singleton(class SessionManager extends Daemon {
     }
 
     async onNotifySessions(message) {
+        // ********************************************************
+        // -- TODO --
+        // ********************************************************
     }
 
     async onSweep(message) {
@@ -127,6 +122,14 @@ singleton(class SessionManager extends Daemon {
     }
 
     async onTouchSession(message) {
+        if ('session' in message) {
+            if (message.session in this.byKey) {
+                let session = this.byKey[message.session];
+                session.touch();
+            }
+        }
+
+        Message.reply(message, true);
     }
 
     removeSession(session) {

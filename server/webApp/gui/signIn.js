@@ -69,18 +69,6 @@ register(class FWSignInView extends WGridLayout {
             console.log('What a bummer.  Could not sign in.')
         }
     }
-
-    /****************************************************
-     * NOTE FOR LATER
-     * **************************************************
-        rsp = await mkHttp().query({
-            messageName: 'SignSelfOut',
-            context: {
-                org: 12,
-                report: 27,
-            }
-        });
-    *****************************************************/
 });
 
 

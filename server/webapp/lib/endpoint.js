@@ -70,6 +70,11 @@ register(class EndpointContainer {
                                 request: trx.incomingRequestData(),
                             }).save(await trx.connect());
 
+                            await Ipc.queryPrimary({
+                                messageName: '#SessionManagerTouchSession',
+                                session: session,
+                            });
+
                             trx.reply(result);
                         }
                         else {
@@ -85,6 +90,11 @@ register(class EndpointContainer {
                                     status: 'ok',
                                     request: trx.incomingRequestData(),
                                 }).save(await trx.connect());
+
+                                await Ipc.queryPrimary({
+                                    messageName: '#SessionManagerTouchSession',
+                                    session: session,
+                                });
 
                                 trx.reply(result);
                             }

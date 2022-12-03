@@ -63,7 +63,6 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            type: 'innerHTML',
             widget: this,
         });
 
@@ -78,7 +77,7 @@ register(class Widget extends Emitter {
     bind(activeData, key, arg) {
         if (arg) {
             if (typeof arg == 'string') {
-                mkAttributeBinding(this, activeData, key, attributeName);
+                mkAttributeBinding(this, activeData, key, arg);
             }
             else if (typeof arg == 'object') {
                 mkMapBinding(this, activeData, key, arg);
@@ -115,7 +114,7 @@ register(class Widget extends Emitter {
     }
 
     children() {
-        return this.htmlElement.children.map(child => child.widget());
+        return this.htmlElement.children().map(child => child.widget());
     }
 
     clear() {
@@ -215,6 +214,10 @@ register(class Widget extends Emitter {
 
     insertBefore(...args) {
         this.htmlElement.insertBefore(...args);
+    }
+
+    length() {
+        return this.htmlElement.length();
     }
 
     log() {
@@ -371,6 +374,10 @@ register(class Widget extends Emitter {
     setWidgetStyle(widgetStyle) {
         this.setAttribute('widget-style', widgetStyle);
         return this;
+    }
+
+    [Symbol.iterator]() {
+        return this.children()[Symbol.iterator]();
     }
 
     tagName() {

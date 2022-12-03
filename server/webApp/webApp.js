@@ -175,7 +175,12 @@ register(class WebApp extends Webx {
                 rsp.endStatus(500);
             }
             else if (response === EndpointContainer.unauthorized) {
-                rsp.endStatus(401);
+                rsp.end(200, 'application/json', toJson({
+                    messageName: 'PostResponse',
+                    response: { '#Control': 'CloseApplication' },
+                    '#Trap': message['#Trap'],
+                    pending: [],
+                }));
             }
             else if (response === EndpointContainer.ignored) {
                 rsp.end(200, 'application/json', toJson({
@@ -187,8 +192,8 @@ register(class WebApp extends Webx {
                 rsp.end(200, 'application/json', toJson({
                     messageName: 'PostResponse',
                     response: response,
-                    pending: await Ipc.queryPrimary({ messageName: '#SessionManagerSweep', session: message['#Session'] }),
                     '#Trap': message['#Trap'],
+                    pending: await Ipc.queryPrimary({ messageName: '#SessionManagerSweep', session: message['#Session'] }),
                 }));
             }
         }

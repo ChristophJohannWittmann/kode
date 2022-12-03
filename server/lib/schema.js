@@ -158,7 +158,7 @@ mkDbSchema(
             { name: 'ownerOid',     type: dbInt64             },
             { name: 'country',      type: dbText, size:    10 },
             { name: 'number',       type: dbText, size:    30 },
-            { name: 'unformatted',  type: dbText, size:   200 },
+            { name: 'canonical',    type: dbText, size:    50 },
             { name: 'mms',          type: dbBool              },
             { name: 'verified',     type: dbBool              },
             { name: 'lastVerified', type: dbTime              },
@@ -166,7 +166,7 @@ mkDbSchema(
         ],
         indexes: [
             'ownerType:asc, ownerOid:asc',
-            'unformatted:asc',
+            'canonical:asc',
         ]
     },
     {

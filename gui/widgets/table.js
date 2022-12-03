@@ -21,170 +21,114 @@
 *****/
 
 
-(() => {
-    /*****
-    *****/
-    register(class WTable extends Widget {
-        constructor(tableStyle) {
-            super('table');
-            this.tableStyle = tableStyle ? tableStyle : 'table-basic';
-            this.setWidgetStyle(this.tableStyle);
-            this.head = null;
-            this.body = new WRows('tbody', this.tableStyle, 'tr', 'td');
-            this.append(this.body);
+/*****
+ * Wrapper that Implements a convenient API for building and dynamically managing
+ * HTML tables.  Note that we assume we're using the table as a GUI panel for
+ * viewing and editing rows of data.  We're not using this widget class group
+ * for managing the layout of an HTML surface area.
+*****/
+register(class WTable extends Widget {
+    constructor(widgetStyle) {
+        super('table');
+        this.setWidgetStyle(widgetStyle ? widgetStyle : 'table-basic');
+        this.append(mkWTableBody(this.getWidgetStyle()));
+    }
+
+    createHead() {
+        if (!this.hasHead()) {
+            this.getBody().insertBefore(mkTableHead(this.getWidgetStyle()));
         }
 
-        createHead() {
-            if (!this.head) {
-                this.head = new WRows('thead', this.tableStyle, 'tr', 'th');
-                this.body.insertBefore(this.head);
+        return this;
+    }
+
+    getBody() {
+        for (let child of this) {
+            if (child.tagName() == 'tbody') {
+                return child;
             }
-
-            return this;
-        }
-
-        getBody() {
-            return this.body;
-        }
-
-        getHead() {
-            return this.head;
-        }
-
-        hasHead() {
-            return this.head !== null;
-        }
-
-        removeHead() {
-            if (this.head) {
-                this.head.remove();
-                this.head = null;
-            }
-
-            return this;
-        }
-
-        [Symbol.iterator]() {
-            return this.body.children()[Symbol.iterator]();
-        }
-    });
-
-
-    /*****
-    *****/
-    class WRows extends Widget {
-        constructor(containerTag, tableStyle, rowTag, cellTag) {
-            super(containerTag);
-            this.tableStyle = `${tableStyle}-${containerTag}`;
-            this.rowTag = rowTag;
-            this.cellTag = cellTag;
-            this.setWidgetStyle(this.tableStyle);
-        }
-
-        appendRow(...values) {
-            let row = new WRow(this.tableStyle, this.rowTag, this.cellTag);
-            row.appendCells(...values);
-            this.append(row);
-            return this;
-        }
-
-        appendRows(...rows) {
-            for (let row of rows) {
-                let newRow = new WRow(this.tableStyle, this.rowTag, this.cellTag);
-                newRow.appendCells(row);
-                this.append(newRow);
-            }
-
-            return this;
-        }
-
-        removeRow(arg) {
-            this.childAt(index).remove();
-            return this;
-        }
-
-        removeRows(index0, index1) {
-            for (let i = 0; i < index1 - index0; i++) {
-                this.childAt(index0).remove();
-            }
-
-            return this;
-        }
-
-        replaceRow(index, ...values) {
-            let row = new WRow(this.tableStyle, this.rowTag, this.cellTag);
-            row.appendCells(...values);
-            this.childAt(index).replace(row);
-            return this;
-        }
-
-        replaceRows(index0, index1, ...rows) {
-            this.removeRows(index0, index1);
-
-            for (let row of rows) {
-                let newRow = new WRow(this.tableStyle, this.rowTag, this.cellTag);
-                newRow.appendCells(row);
-                this.insertBefore(index1, newRow);                
-            }
-
-            return this;
-        }
-
-        length() {
-            return this.children().length;
         }
     }
 
-
-    /*****
-    *****/
-    class WRow extends Widget {
-        constructor(tableStyle, rowTag, cellTag) {
-            super(rowTag);
-            this.cellTag = cellTag;
-            this.rowStyle = `${tableStyle}-row`;
-            this.cellStyle = `${tableStyle}-cell`;
-            this.setWidgetStyle(this.rowStyle);
-        }
-
-        appendCells(...values) {
-            for (let value of values) {
-                let cell = mkWidget(this.cellTag);
-                cell.setWidgetStyle(this.cellStyle);
-                cell.append(value);
-                this.append(cell);
+    getHead() {
+        for (let child of this) {
+            if (child.tagName() == 'thead') {
+                return child;
             }
-
-            return this;
-        }
-
-        clearCell(index) {
-            this.childAt(index).clear();
-            return this;
-        }
-
-        insertCellAfter(index, value) {
-            this.childAt(index).insertAfter(value);
-            return this;
-        }
-
-        insertCellBefore(index, value) {
-            this.childAt(index).insertBefore(value);
-            return this;
-        }
-
-        length() {
-            return this.children().length;
-        }
-
-        removeCell(index) {
-            this.childAt(index).remove();
-            return this;
-        }
-
-        setCell(index, value) {
-            this.childAt(index).replace(value);
-            return this;
         }
     }
-})();
+
+    hasHead() {
+        return this.getHead() != null;
+    }
+
+    removeHead() {
+        let head = this.getHead();
+
+        if (head) {
+            head.remove();
+        }
+
+        return this;
+    }
+});
+
+register(class WTableBody extends Widget {
+    constructor(tableWidgetStyle) {
+        super('tbody');
+        this.tableWidgetStyle = tableWidgetStyle;
+        this.setWidgetStyle(`${tableWidgetStyle}-tbody`);
+    }
+
+    mkRow() {
+        let row = mkWTableBodyRow(this.tableWidgetStyle);
+        this.append(row);
+        return row;
+    }
+});
+
+register(class WTableHead extends Widget {
+    constructor(tableWidgetStyle) {
+        super('thead');
+        this.tableWidgetStyle = tableWidgetStyle;
+        this.setWidgetStyle(`${tableWidgetStyle}-thead`);
+    }
+
+    mkRow() {
+        let row = mkWTableHeadRow(this.tableWidgetStyle);
+        this.append(row);
+        return row;
+    }
+});
+
+register(class WTableBodyRow extends Widget {
+    constructor(tableWidgetStyle) {
+        super('tr');
+        this.tableWidgetStyle = tableWidgetStyle;
+        this.setWidgetStyle(`${tableWidgetStyle}-body-tr`);
+    }
+
+    mkCell(value) {
+        let cell = mkWidget('td');
+        cell.setWidgetStyle(`${this.tableWidgetStyle}-td`);
+        cell.append(value);
+        this.append(cell);
+        return this;
+    }
+});
+
+register(class WTableHeadRow extends Widget {
+    constructor(tableWidgetStyle) {
+        super('tr');
+        this.tableWidgetStyle = tableWidgetStyle;
+        this.setWidgetStyle(`${tableWidgetStyle}-head-tr`);
+    }
+
+    mkCell(value) {
+        let cell = mkWidget('td');
+        cell.setWidgetStyle(`${this.tableWidgetStyle}-td`);
+        cell.append(value);
+        this.append(cell);
+        return this;
+    }
+});
