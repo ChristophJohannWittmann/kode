@@ -35,6 +35,10 @@ register(class Emitter extends NonJsonable {
         this.handlers = {};
         this.silent = false;
     }
+
+    handles(messageName) {
+        return messageName in this.handlers;
+    }
   
     length(messageName) {
         if (messageName in this.handlers) {

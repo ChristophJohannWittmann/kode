@@ -71,15 +71,15 @@ if (CLUSTER.isWorker) {
             }
 
             this.nodeHttpServer.on('upgrade', async (httpReq, socket, headPacket) => {
-                let resource = ResourceLibrary.get(httpReq.pathname());
+                let req = await mkHttpRequest(this, httpReq);
+                let resource = await ResourceLibrary.get(req.pathname());
 
                 if (resource && resource.category == 'webx') {
                     try {
-                        let req = await mkHttpRequest(this, httpReq);
                         await resource.value.upgrade(req, socket, headPacket);
                     }
                     catch (e) {
-                        log(`Web Socket Upgrade Request Error: ${httpReq.url}`, e);
+                        log(`Web Socket Upgrade Request Error: ${req.url()}`, e);
                     }
                 }
             });

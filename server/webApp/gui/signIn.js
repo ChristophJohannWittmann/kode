@@ -56,14 +56,14 @@ register(class FWSignInView extends WGridLayout {
     }
 
     async signIn(message) {
-        let rsp = await mkHttp().query({
+        let rsp = await queryServer({
             messageName: 'PublicSignIn',
             username: this.data.username,
             password: this.data.password,
         });
 
         if (rsp) {
-            send({ messageName: '#SignedIn' })
+            signIn(rsp);
         }
         else {
             console.log('What a bummer.  Could not sign in.')

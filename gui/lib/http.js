@@ -47,18 +47,6 @@ class HttpResponse {
         }
     }
 
-    getPending() {
-        if (this.isMessage()) {
-            let message = this.getMessage();
-
-            if (Array.isArray(message.pending)) {
-                return message.pending;
-            }
-        }
-
-        return [];
-    }
-
     getReadyState() {
         switch (this.req.readyState) {
             case 0:
@@ -88,16 +76,6 @@ class HttpResponse {
 
     getResponseType() {
         return this.req.responseType;
-    }
-
-    getResult() {
-        if (this.isMessage()) {
-            let message = this.getMessage();
-
-            if (message.messageName == 'PostResponse') {
-                return message.response;
-            }
-        }
     }
 
     getStatus() {
@@ -169,31 +147,6 @@ register(class Http extends Emitter {
         return this;
     }
 
-    handleIntercept(result) {
-        if (result !== null) {
-            if (typeof result == 'object' && '#Control' in result) {
-                if (result['#Control'] == 'SignedIn') {
-                    webAppSettings.session = () => result.sessionKey;
-                    webAppSettings.password = () => result.setPassword;
-                    webAppSettings.verify = () => result.verifyEmail;
-
-                    return true;
-                }
-                else if (result['#Control'] == 'CloseSession') {
-                    send({ messageName: '#Close' });
-                    return true;
-                }
-                else if (result['#Control'] == 'CloseApplication') {
-                    alert('PLEASE SIGN IN TO USE.');
-                    send({ messageName: '#Close' });
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     get(url) {
         this.request('GET', url);
         return this.trap.promise;
@@ -208,7 +161,7 @@ register(class Http extends Emitter {
         return this.trap.promise;
     }
 
-    query(message) {
+    queryServer(message) {
         message = message instanceof Message ? message : mkMessage(message);
         message['#Session'] = webAppSettings.session();
         message['#Trap'] = this.trap.id;
@@ -239,32 +192,18 @@ register(class Http extends Emitter {
                 let rsp = new HttpResponse(this.req);
                 let status = rsp.getStatus();
 
-                if (status.code >= 100 && status.code < 500) {
-                    if (rsp.isMessage()) {
-                        let message = rsp.getMessage();
-                        let result = rsp.getResult();
+                if (rsp.isMessage()) {
+                    let message = rsp.getMessage();
+                    let pending = '#Pending' in message ? message['#Pending'] : [];
+                    delete message['#Pending'];
+                    Trap.pushReply(this.trap.id, message.response);
 
-                        if (this.handleIntercept(result)) {
-                            Trap.pushReply(this.trap.id, true);
-                        }
-                        else {
-                            Trap.pushReply(this.trap.id, result);
-                        }
-
-                        for (let pending of rsp.getPending()) {
-                            this.send(pending);
-                        }
+                    for (let pendingMessage of pending) {
+                        global.send(pendingMessage);
                     }
-                    else {
-                        Trap.pushReply(this.trap.id, rsp);
-                    }
-                }
-                else if (status.code >= 500) {
-                    Trap.cancel(this.trap.id);
-                    console.log(fromJson(body));
                 }
                 else {
-                    Trap.cancel(this.trap.id);
+                    Trap.pushReply(this.trap.id, rsp);
                 }
             }
         };

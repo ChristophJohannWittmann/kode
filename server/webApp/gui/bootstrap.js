@@ -21,78 +21,106 @@
 *****/
 
 
-/*****
-*****/
-on('#SignedIn', message => {
-    views.pop();
-    views.push(webAppSettings.homeView());
-
-    if (webAppSettings.password()) {
-        views.push(mkFWPasswordView());
-    }
-
-    if (webAppSettings.verify()) {
-        views.push(mkFWVerifyEmailView());
-    }
-});
-
-
-/*****
-*****/
-on('#Close', message => {
-    views.clear();
-    views.push(mkFWSignInView());
-    webAppSettings.veryify = () => false;
-    webAppSettings.password = () => false;
-    webAppSettings.session = () => null;
-});
-
-
-/*****
- * This is the startup or bootstrap function for the client framework code.
- * This is called when the body has been loaded with the onload="bootstrop()"
- * HTML attribute.  This ensures a standard environment initialization accross
- * web applications and a standard initiialization sequence.
-*****/
-register(async function bootstrap() {
-    window.win = mkWin(window);
-    window.doc = win.doc();
-    window.styleSheet = doc.getStyleSheet('WebApp');
-    await onSingletons();
-
-    window.views = mkWStack();
-    doc.body().append(views);
-
-    if (webAppSettings.authenticate()) {
-        views.push(mkFWSignInView());
-    }
-    else {
-        views.push(webAppSettings.homeView());
-
-        if (webAppSettings.websocket()) {
-            console.log('connect web socket');
-        }
-    }
-});
-
-
-/*****
-*****/
 (() => {
+    /*****
+    *****/
     let webSocket = null;
 
-    register(async function queryServer(message) {
-        if (webSocket) {
+
+    /*****
+     * This is the startup or bootstrap function for the client framework code.
+     * This is called when the body has been loaded with the onload="bootstrop()"
+     * HTML attribute.  This ensures a standard environment initialization accross
+     * web applications and a standard initiialization sequence.
+    *****/
+    register(async function bootstrap() {
+        window.win = mkWin(window);
+        window.doc = win.doc();
+        window.styleSheet = doc.getStyleSheet('WebApp');
+        await onSingletons();
+
+        window.views = mkWStack();
+        doc.body().append(views);
+
+        if (webAppSettings.authenticate()) {
+            views.push(mkFWSignInView());
         }
         else {
-            return await mkHttp().query(message);
+            views.push(webAppSettings.homeView());
+
+            if (webAppSettings.websocket()) {
+                webSocket = mkWebsocket(webAppSettings.url());
+            }
         }
     });
 
-    register(function sendServer(message) {
+
+    /*****
+    *****/
+    on('#CloseApp', message => {
+        signOut();
+    });
+
+
+    /*****
+    *****/
+    register(async function queryServer(message) {
         if (webSocket) {
+            return await webSocket.queryServer(message);
         }
         else {
+            return await mkHttp().queryServer(message);
+        }
+    });
+
+    register(async function sendServer(message) {
+        if (webSocket) {
+            return await webSocket.sendServer(message);
+        }
+        else {
+            mkHttp().queryServer(message);
+        }
+    });
+
+
+    /*****
+    *****/
+    register(function signIn(userSettings) {
+        views.pop();
+        views.push(webAppSettings.homeView());
+        webAppSettings.session = () => userSettings.sessionKey;
+        webAppSettings.password = () => userSettings.setPassword;
+        webAppSettings.verify = () => userSettings.verifyEmail;
+
+        if (webAppSettings.password()) {
+            views.push(mkFWPasswordView());
+        }
+
+        if (webAppSettings.verify()) {
+            views.push(mkFWVerifyEmailView());
+        }
+
+        if (webAppSettings.websocket()) {
+            webSocket = mkWebsocket(doc.location().href);
+            webSocket.sendServer({ messageName: '#SocketSession' })
+        }
+    });
+
+
+    /*****
+    *****/
+    register(function signOut() {
+        if (webAppSettings.authenticate()) {
+            if (webSocket) {
+                webSocket.close();
+                webSocket = null;
+            }
+
+            views.clear();
+            views.push(mkFWSignInView());
+            webAppSettings.veryify = () => false;
+            webAppSettings.password = () => false;
+            webAppSettings.session = () => null;
         }
     });
 })();

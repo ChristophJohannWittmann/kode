@@ -49,7 +49,6 @@ register(class PublicEndpoints extends EndpointContainer {
             });
 
             return {
-                '#Control': 'SignedIn',
                 sessionKey: sessionKey,
                 verifyEmail: !user.verified,
                 setPassword: !user.password,

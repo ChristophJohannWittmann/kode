@@ -23,56 +23,54 @@
 
 /*****
 *****/
-register(class WebSocket {
-    static sockets = {};
-
+register(class WebSocket extends Emitter {
     constructor(socket, extensions, headData) {
+        super();
         this.socket = socket;
         this.socket.setTimeout(0);
         this.socket.setNoDelay();
-        this.sessionId = '';
         this.frameParser = new FrameParser(this, headData);
         this.frameBuilder = new FrameBuilder();
-        this.buildExtensionMap(extensions);
+        this.analyzeExtensions(extensions);
   
         this.type = '';
         this.payload = [];
         this.state = 'Ready';
-
-        this.interval = setInterval(() => {
-            this.send({messageName: '#Ping'});
-        }, 15000);
     }
   
-    buildExtensionMap(extensions) {
-        let extensionMap = {};
-  
+    analyzeExtensions(extensions) {
+        this.extensions = {
+            perMessageDeflate: false,
+        };
+
         extensions.split(';').forEach(extension => {
             let [ left, right ] = extension.trim().split('=');
-            extensionMap[left] = right;
+
+            switch (left) {
+                case 'permessage-deflate':
+                    this.extensions.perMessageDeflate = true;
+                    break;
+            }
         });
-  
-        this._extensions = $WebSocketExtensions(extensionMap);
     }
 
     close() {
         this.state = 'Closing';
 
-        if (this._socket) {
-            let frames = this._frameBuilder.build('', 0x8);
-            frames.forEach(frame => this._socket.write(frame));
+        if (this.socket) {
+            let frames = this.frameBuilder.build('', 0x8);
+            frames.forEach(frame => this.socket.write(frame));
         }
     }
 
     destroy() {
         this.state = 'Closed';
-        clearInterval(this._interval);
-        this._socket.destroy();
+        this.socket.destroy();
     }
 
     onError(error) {
-        this._socket.destroy(error);
-        this._socket = null;
+        this.socket.destroy(error);
+        this.socket = null;
     }
 
     onFrame(frame) {
@@ -127,37 +125,15 @@ register(class WebSocket {
     }
   
     async onMessage(payload) {
-        let message;
-  
-        if (this.type == 'string') {
-            message = $Message($fromJson(payload.toString()));
-        }
-
-        if (message.messageName == '$Ping') {
-            this.send({messageName: '$Pong'});
-        }
-        else if (message.messageName == '$SocketSession') {
-            this._sessionId = message.sessionId;
-        }
-        else if (message.messageName != '$Pong') {
-            try {
-                if (message.$wsQuery) {
-                    let reply = await Cls$MessageHandler.query(message, message.sessionId);
-                    this.send(reply);
-                }
-                else {
-                    Cls$MessageHandler.send(message, message.sessionId);
-                }
-            }
-            catch (e) {
-                $log(e);
-                await rsp.respond500();
-                return;
-            }
-        }
+        this.send({
+            messageName: '#MessageReceived',
+            type: this.type,
+            payload: payload,
+        });
     }
 
-    query(message) {
+    queryMessage(message) {
+        /*
         if (!(message instanceof Cls$Message)) {
             message = $Message(message);
         }
@@ -168,6 +144,7 @@ register(class WebSocket {
         Cls$ReturnTrap.setExpected(trap.id(), 1);
         this.send(message);
         return trap.promise();
+        */
     }
 
     reset() {
@@ -175,19 +152,15 @@ register(class WebSocket {
         this.payload = [];
         this.state = 'Ready';
     }
-  
-    secWebSocketExtensions() {
-        return this._extensions.secWebSocketExtensions();
-    }
 
-    send(message) {
-        if (this._socket) {
-            if (!(message instanceof Cls$Message)) {
-                message = $Message(message);
+    sendMessage(message) {
+        if (this.socket) {
+            if (!(message instanceof Message)) {
+                message = mkMessage(message);
             }
 
-            let frames = this._frameBuilder.build($toJson(message), 0x1);
-            frames.forEach(frame => this._socket.write(frame));
+            let frames = this.frameBuilder.build(toJson(message), 0x1);
+            frames.forEach(frame => this.socket.write(frame));
         }
     }
 });
@@ -200,22 +173,22 @@ class FrameBuilder {
 
     build(payload, opcode) {
         let frames = [];
-        this._payload = payload;
-        this._messageOpcode = opcode;
-        this._frameOpcode = this._messageOpcode;
+        this.payload = payload;
+        this.messageOpcode = opcode;
+        this.frameOpcode = this.messageOpcode;
 
-        while (this._payload.length) {
-            if (this._payload.length <= $FrameBuilder._maxPayloadLength) {
-                frames.push(this.buildFrame(this._payload.length, 0x80));
-                this._payload = '';
+        while (this.payload.length) {
+            if (this.payload.length <= FrameBuilder._maxPayloadLength) {
+                frames.push(this.buildFrame(this.payload.length, 0x80));
+                this.payload = '';
             }
             else {
-                let slice = payload.slice(0, $FrameBuilder._maxPayloadLength);
+                let slice = payload.slice(0, FrameBuilder._maxPayloadLength);
                 frames.push(this.buildFrame(slice.length, 0x00));
-                this._payload = this._payload.slice($FrameBuilder._maxPayloadLength)
+                this.payload = this.payload.slice(FrameBuilder._maxPayloadLength)
             }
 
-            this._frameOpcode = 0;
+            this.frameOpcode = 0;
         }
 
         return frames;
@@ -227,7 +200,7 @@ class FrameBuilder {
         if (payloadLength > 65536) {
             headerLength += 4;
             var frame = Buffer.alloc(headerLength + payloadLength);
-            frame[0] = ctl | this._frameOpcode;
+            frame[0] = ctl | this.frameOpcode;
             frame[1] = 127;
             frame.writeUInt32BE((payloadLength & 0xffff0000) >> 32, 2);
             frame.writeUInt32BE(payloadLength & 0x0000ffff, 6);
@@ -235,18 +208,18 @@ class FrameBuilder {
         else if (payloadLength > 125) {
             headerLength += 2;
             var frame = Buffer.alloc(headerLength + payloadLength);
-            frame[0] = ctl | this._frameOpcode;
+            frame[0] = ctl | this.frameOpcode;
             frame[1] = 126;
             frame.writeUInt16BE(payloadLength, 2);
         }
         else {
             var frame = Buffer.alloc(headerLength + payloadLength);
-            frame[0] = ctl | this._frameOpcode;
+            frame[0] = ctl | this.frameOpcode;
             frame[1] = payloadLength;
         }
 
         for (let i = 0; i < payloadLength; i++) {
-            frame[i + headerLength] = this._payload.charCodeAt(i);
+            frame[i + headerLength] = this.payload.charCodeAt(i);
         }
 
         return frame;
@@ -258,12 +231,12 @@ class FrameBuilder {
 *****/
 class FrameParser {
     constructor(webSocket, headData) {
-        this._webSocket = webSocket;
-        this._socket = webSocket._socket;
-        this._socket.on('data', data => this.onData(data));
-        this._socket.on('error', error => this.onError(error));
-        this._state = 'GetInfo';
-        this._rawFrame = Buffer.from(headData);
+        this.webSocket = webSocket;
+        this.socket = webSocket.socket;
+        this.socket.on('data', data => this.onData(data));
+        this.socket.on('error', error => this.onError(error));
+        this.state = 'GetInfo';
+        this.rawFrame = Buffer.from(headData);
 
         this.analyzers = {
             GetInfo: this.getInfo,
@@ -276,32 +249,32 @@ class FrameParser {
 
     getExtended() {
         if (this.payloadExtention == 'large') {
-            if (this._rawFrame.length >= this.maskOffset) {
-                this.payloadLength = this._rawFrame.readUInt32BE(2) << 32 | this._rawFrame.readUInt32BE(6);
-                this._state = 'GetMask';
+            if (this.rawFrame.length >= this.maskOffset) {
+                this.payloadLength = this.rawFrame.readUInt32BE(2) << 32 | this.rawFrame.readUInt32BE(6);
+                this.state = 'GetMask';
             }
         }
         else if (this.payloadExtention == 'medium') {
-            if (this._rawFrame.length >= this.maskOffset) {
-                this.payloadLength = this._rawFrame.readUInt16BE(2);
-                this._state = 'GetMask';
+            if (this.rawFrame.length >= this.maskOffset) {
+                this.payloadLength = this.rawFrame.readUInt16BE(2);
+                this.state = 'GetMask';
             }
         }
         else {
-            this._state = 'GetMask';
+            this.state = 'GetMask';
         }
     }
 
     getInfo() {
-        if (this._rawFrame.length >= 4) {
-            this.fin =  (this._rawFrame[0] & 0x80) === 0x80;
-            this.rsv1 = (this._rawFrame[0] & 0x40) === 0x40;
-            this.rsv2 = (this._rawFrame[0] & 0x20) === 0x20;
-            this.rsv3 = (this._rawFrame[0] & 0x10) === 0x10;
-            this.opcode = this._rawFrame[0] & 0x0f;
+        if (this.rawFrame.length >= 4) {
+            this.fin =  (this.rawFrame[0] & 0x80) === 0x80;
+            this.rsv1 = (this.rawFrame[0] & 0x40) === 0x40;
+            this.rsv2 = (this.rawFrame[0] & 0x20) === 0x20;
+            this.rsv3 = (this.rawFrame[0] & 0x10) === 0x10;
+            this.opcode = this.rawFrame[0] & 0x0f;
 
-            this.masking = (this._rawFrame[1] & 0x08);
-            this.payloadLength = this._rawFrame[1] & 0x7f;
+            this.masking = (this.rawFrame[1] & 0x08);
+            this.payloadLength = this.rawFrame[1] & 0x7f;
             this.payloadExtention = 'none';
 
             if (this.payloadLength == 126) {
@@ -319,53 +292,53 @@ class FrameParser {
                 this.headerLength = 6;
             }
 
-            this._state = 'GetExtended';
+            this.state = 'GetExtended';
         }
     }
 
     getMask() {
-        if (this._rawFrame.length >= this.maskOffset + 4) {
+        if (this.rawFrame.length >= this.maskOffset + 4) {
             this.mask = [];
 
             for (let i = 0; i < 4; i++) {
-                this.mask.push(this._rawFrame[i + this.maskOffset]);
+                this.mask.push(this.rawFrame[i + this.maskOffset]);
             }
 
-            this._state = 'GetPayload';
+            this.state = 'GetPayload';
         }
     }
 
     getPayload() {
-        if (this._rawFrame.length >= this.headerLength + this.payloadLength) {
-            this._state = 'HaveFrame';
+        if (this.rawFrame.length >= this.headerLength + this.payloadLength) {
+            this.state = 'HaveFrame';
         }
     }
 
     onData(buffer) {
-        this._rawFrame = Buffer.concat([this._rawFrame, buffer]);
+        this.rawFrame = Buffer.concat([this.rawFrame, buffer]);
 
-        while(this._state in this.analyzers) {
-            let state = this._state;
-            Reflect.apply(this.analyzers[this._state], this, []);
+        while(this.state in this.analyzers) {
+            let state = this.state;
+            Reflect.apply(this.analyzers[this.state], this, []);
 
-            if (this._state == state) {
+            if (this.state == state) {
                 break;
             }
         }
     }
 
     onError(error) {
-        this._webSocket.onError(error);
+        this.webSocket.onError(error);
     }
 
     onFrame() {
         let frameLength = this.headerLength + this.payloadLength;
-        let nextFrame = Buffer.from(this._rawFrame.slice(frameLength));
-        this._rawFrame = this._rawFrame.slice(0, frameLength);
-        this._webSocket.onFrame(this);
+        let nextFrame = Buffer.from(this.rawFrame.slice(frameLength));
+        this.rawFrame = this.rawFrame.slice(0, frameLength);
+        this.webSocket.onFrame(this);
 
-        this._state = 'GetInfo';
-        this._rawFrame = nextFrame;
+        this.state = 'GetInfo';
+        this.rawFrame = nextFrame;
         delete this.fin;
         delete this.rsv1;
         delete this.rsv2;
@@ -380,7 +353,7 @@ class FrameParser {
     }
 
     payload() {
-        let slice = this._rawFrame.slice(this.headerLength);
+        let slice = this.rawFrame.slice(this.headerLength);
         let decoded = Buffer.alloc(slice.length);
 
         for (let i = 0; i < slice.length; i++) {

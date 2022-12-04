@@ -37,7 +37,6 @@ register(class Webx extends Emitter {
         this.module = module;
         this.reference = reference;
         this.webxName = this.reference.webx;
-        this.webSocket = null;
         this.settings = this.module.settings.webx[this.webxName];
         this.module.container[this.webxName] = this;
     }
@@ -61,7 +60,6 @@ register(class Webx extends Emitter {
             }
         }
         else {
-            console.log('GOT HERE  501');
             rsp.endStatus(501);
         }
     }
@@ -92,7 +90,7 @@ register(class Webx extends Emitter {
             if (Reflect.has(this, 'onWebSocket')) {
                 let secureKey = req.header('sec-websocket-key');
                 let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
-                let webSocket = mkWebSocket(socket, req.headers['sec-websocket-extensions'], headPacket);
+                let webSocket = mkWebSocket(socket, req.header('sec-websocket-extensions'), headPacket);
                 
                 let headers = [
                     'HTTP/1.1 101 Switching Protocols',
@@ -101,10 +99,6 @@ register(class Webx extends Emitter {
                     `Sec-WebSocket-Accept: ${hash}`,
                     '\r\n'
                 ];
-      
-                if (webSocket.secWebSocketExtensions()) {
-                    headers.append(`Sec-WebSocket-Extensions: ${webSocket.secWebSocketExtensions()}`);
-                }
             
                 socket.write(headers.join('\r\n'));
                 await this.onWebSocket(req, webSocket);

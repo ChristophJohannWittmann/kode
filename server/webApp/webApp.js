@@ -37,7 +37,7 @@
 register(class WebApp extends Webx {
     constructor(module, reference) {
         super(module, reference);
-        this.sockets = {};
+        this.webSockets = {};
     }
 
     async buildCSS(path) {
@@ -148,57 +148,122 @@ register(class WebApp extends Webx {
         rsp.end(this.framework[rsp.encoding]);
     }
 
-    async handlePOST(req, rsp) {
-        if (req.isMessage() && 'messageName' in req.message()) {
+    async handleMessage(message) {
+        if (this.handles(message.messageName)) {
             let response;
-            let message = req.message();
+            let trx = mkWebAppTransaction(message);
+            trx['#Reference'] = await this.reference;
+            trx['#Authenticate'] = this.settings.authenticate;
 
-            if (message.messageName in this.handlers) {
-                let trx = mkWebAppTransaction(message);
-                trx['#Reference'] = await req.reference();
-                trx['#Authenticate'] = this.settings.authenticate;
-
-                if (await WebAppTransaction.assign(trx, message)) {
-                    response = await this.query(trx);
-                    await trx.commit();
-                }
-                else {
-                    response = EndpointContainer.internalError;
-                    await trx.rollback();
-                }
+            if (await WebAppTransaction.assign(trx, message)) {
+                response = await this.query(trx);
+                await trx.commit();
             }
             else {
-                response = EndpointContainer.ignored;
+                response = EndpointContainer.internalError;
+                await trx.rollback();
             }
 
             if (response === EndpointContainer.internalError) {
-                rsp.endStatus(500);
+                if ('#Trap' in message) {
+                    return {
+                        messageName: '#InternalServerError',
+                        '#Trap': message['#Trap'],
+                        '#Code': EndpointContainer.internalError,
+                    };
+                }
+                else {
+                    return false;
+                }
             }
             else if (response === EndpointContainer.unauthorized) {
-                rsp.end(200, 'application/json', toJson({
-                    messageName: 'PostResponse',
-                    response: { '#Control': 'CloseApplication' },
-                    '#Trap': message['#Trap'],
-                    pending: [],
-                }));
-            }
-            else if (response === EndpointContainer.ignored) {
-                rsp.end(200, 'application/json', toJson({
-                    messageName: 'Ignored',
-                    '#Trap': message['#Trap'],
-                }));
+                await Ipc.queryPrimary({
+                    messageName: '#SessionManagerCloseSession',
+                    session: message['#Session'],
+                });
+
+                if ('#Trap' in message) {
+                    return {
+                        messageName: '#CloseApp',
+                        '#Code': EndpointContainer.unauthorized
+                    };
+                }
+                else {
+                    return false;
+                }
             }
             else {
-                rsp.end(200, 'application/json', toJson({
-                    messageName: 'PostResponse',
-                    response: response,
+                if ('#Trap' in message) {
+                    return {
+                        messageName: message.messageName,
+                        response: response,
+                        '#Trap': message['#Trap'],
+                        '#Pending': await Ipc.queryPrimary({ messageName: '#SessionManagerSweep', session: message['#Session'] }),
+                        '#Code': 'ok',
+                    };
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        else {
+            if ('#Trap' in message) {
+                return {
+                    messageName: '#Ignored',
+                    response: '',
                     '#Trap': message['#Trap'],
-                    pending: await Ipc.queryPrimary({ messageName: '#SessionManagerSweep', session: message['#Session'] }),
-                }));
+                    '#Pending': await Ipc.queryPrimary({ messageName: '#SessionManagerSweep', session: message['#Session'] }),
+                    '#Code': EndpointContainer.ignored,
+                };
+            }
+            else {
+                return false;
+            }
+        }
+    }
+
+    async handlePOST(req, rsp) {
+        if (req.isMessage() && 'messageName' in req.message()) {
+            let message = req.message();
+            let response = await this.handleMessage(message);
+
+            let code = response['#Code'];
+            delete response['#Code'];
+
+            if (code == EndpointContainer.internalError) {
+                rsp.end(500, 'application/json', toJson(response));
+            }
+            else if (code == EndpointContainer.unauthorized) {
+                rsp.end(401, 'application/json', toJson(response));
+            }
+            else {
+                rsp.end(200, 'application/json', toJson(response));
             }
         }
         else {
             rsp.endStatus(400);
+        }
+    }
+
+    async handleWebSocket(webSocket, webSocketMessage) {
+        if (webSocketMessage.type == 'string') {
+            try {
+                let message = fromJson(webSocketMessage.payload.toString());
+
+                if (message.messageName == '#SocketSession') {
+                    this.webSockets['#Session'] = webSocket;
+                }
+                else if (message.messageName == '#Ping') {
+                    webSocket.sendMessage({ messageName: '#Pong' });
+                }
+                else {
+                    let response = await this.handleMessage(message);
+                    webSocket.sendMessage(response);
+                }
+            }
+            catch (e) {
+            }
         }
     }
 
@@ -267,7 +332,6 @@ register(class WebApp extends Webx {
                     let stats = await FILES.stat(path);
 
                     if (stats.isFile()) {
-                        console.log(path);
                         let module = require(path);
 
                         if (module instanceof Object) {
@@ -282,11 +346,6 @@ register(class WebApp extends Webx {
     }
 
     async onWebSocket(req, webSocket) {
-        if (this.settings.authorize) {
-            let sessionKey = req.header('session-key');
-            //webSocket.setKey(sessionKey); ???
-        }
-        else {
-        }
+        webSocket.on('#MessageReceived', message => this.handleWebSocket(webSocket, message));
     }
 });
