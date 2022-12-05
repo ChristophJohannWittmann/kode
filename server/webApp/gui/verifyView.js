@@ -1,5 +1,6 @@
 /*****
- * Copyright (c) 2017-2022 Christoph Wittmann, chris.wittmann@icloud.com
+ * Copyright (c) 2017-2022 Kode Programming
+ * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +24,9 @@
 
 /*****
 *****/
-register(class FWPasswordView extends Widget {
+register(class FWVerifyEmailView extends Widget {
     constructor() {
         super('h1');
-        this.set('FWSetPasswordView').on('html.click', message => queryServer('SelfSignOut'));
+        this.set('FWVerifyEmailView').on('html.click', message => queryServer('SelfSignOut'));
     }
 });
