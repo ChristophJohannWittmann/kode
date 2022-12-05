@@ -131,32 +131,27 @@ register(class EndpointContainer {
     }
 
     async authorize(trx, endpoint) {
-        if (trx['#Authenticate']) {
-            let authorization = await Ipc.queryPrimary({
-                messageName: '#SessionManagerAuthorize',
-                session: trx['#Session'],
-                permission: endpoint.permission,
-                context: trx.context ? trx.context : null,
-            });
+        let authorization = await Ipc.queryPrimary({
+            messageName: '#SessionManagerAuthorize',
+            session: trx['#Session'],
+            permission: endpoint.permission,
+            context: trx.context ? trx.context : null,
+        });
 
-            if (authorization.granted) {
-                if (!authorization.user.verified) {
-                    if (!endpoint.flags.verify) {
-                        authorization.granted = false;
-                    }
-                }
-
-                if (!authorization.user.password) {
-                    if (!endpoint.flags.password) {
-                        authorization.granted = false;
-                    }
+        if (authorization.granted) {
+            if (!authorization.user.verified) {
+                if (!endpoint.flags.verify) {
+                    authorization.granted = false;
                 }
             }
 
-            return authorization;
+            if (!authorization.user.password) {
+                if (!endpoint.flags.password) {
+                    authorization.granted = false;
+                }
+            }
         }
-        else {
-            return { granted: true, user: mkDboUser({ firstname: 'anonymous', lastname: 'anonymous' }) };
-        }
+
+        return authorization;
     }
 });

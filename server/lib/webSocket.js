@@ -22,6 +22,14 @@
 
 
 /*****
+ * The websocket object for the server.  Websockets are single-use and discarded
+ * after they have been closed.  The WebSocket class is primarily an initializer
+ * and a container for the frame builder and frame parser.  The frame build is
+ * there to generate the frames for outgoing messages, while the frame parse
+ * waits for incoming data from the socket and then parses frames as data arrives.
+ * When the frame parse finishes a frame, the onFrame() method is called to enable
+ * the WebSocket instances to assemble frames, and then to emit a notification
+ * when a complete message has been received.
 *****/
 register(class WebSocket extends Emitter {
     constructor(socket, extensions, headData) {
@@ -29,9 +37,9 @@ register(class WebSocket extends Emitter {
         this.socket = socket;
         this.socket.setTimeout(0);
         this.socket.setNoDelay();
-        this.frameParser = new FrameParser(this, headData);
-        this.frameBuilder = new FrameBuilder();
         this.analyzeExtensions(extensions);
+        this.frameParser = new FrameParser(this, headData);
+        this.frameBuilder = new FrameBuilder(this.extensions);
   
         this.type = '';
         this.payload = [];
@@ -133,18 +141,19 @@ register(class WebSocket extends Emitter {
     }
 
     queryMessage(message) {
-        /*
-        if (!(message instanceof Cls$Message)) {
-            message = $Message(message);
-        }
+        if (this.socket) {
+            if (!(message instanceof Message)) {
+                message = mkMessage(message);
+            }
 
-        let trap = $ReturnTrap();
-        message.$wsQuery = true;
-        message.$returnTrapId = trap.id();
-        Cls$ReturnTrap.setExpected(trap.id(), 1);
-        this.send(message);
-        return trap.promise();
-        */
+            let trap = mkTrap();
+            Trap.setExpected(trap, 1);
+            message['#Trap'] = trap.id;
+
+            let frames = this.frameBuilder.build(toJson(message), 0x1);
+            frames.forEach(frame => this.socket.write(frame));
+            return trap.promise;
+        }
     }
 
     reset() {
@@ -167,9 +176,18 @@ register(class WebSocket extends Emitter {
 
 
 /*****
+ * The frame builder object is responsible for implementing the framing protocol
+ * for outgoing messages.  In websocket protocol, messages are sent and received
+ * as a series of one or more frames, which have very specific instructions for
+ * laying them out according to RFC 6455, https://www.rfc-editor.org/rfc/rfc6455.
+ * This code implements that protocol by building one or more outgoing frames.
 *****/
 class FrameBuilder {
-    static _maxPayloadLength = 50000;
+    static maxPayLoadLength = 50000;
+
+    constructor(extensions) {
+        this.extensions = extensions;
+    }
 
     build(payload, opcode) {
         let frames = [];
@@ -178,14 +196,14 @@ class FrameBuilder {
         this.frameOpcode = this.messageOpcode;
 
         while (this.payload.length) {
-            if (this.payload.length <= FrameBuilder._maxPayloadLength) {
+            if (this.payload.length <= FrameBuilder.maxPayLoadLength) {
                 frames.push(this.buildFrame(this.payload.length, 0x80));
                 this.payload = '';
             }
             else {
-                let slice = payload.slice(0, FrameBuilder._maxPayloadLength);
+                let slice = payload.slice(0, FrameBuilder.maxPayLoadLength);
                 frames.push(this.buildFrame(slice.length, 0x00));
-                this.payload = this.payload.slice(FrameBuilder._maxPayloadLength)
+                this.payload = this.payload.slice(FrameBuilder.maxPayLoadLength)
             }
 
             this.frameOpcode = 0;
@@ -228,6 +246,14 @@ class FrameBuilder {
 
 
 /*****
+ * The frame parse awaits incoming data. over the system socket and parses that
+ * incoming data to form websocket protocol frames, which are then passed off to
+ * the WebSocket instance.  The sneaky part of this algorithm is that we don't
+ * want to assume that frames arrive intact.  Frames may appear in bits and pieces
+ * with extra bits and pieces at either the front or back end.  When there're
+ * extra bytes, we assume those bytes belong to the next incoming frame.  Hence,
+ * this protocol will recognize the frame regardless of the chunk size of the
+ * incoming data.
 *****/
 class FrameParser {
     constructor(webSocket, headData) {

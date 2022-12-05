@@ -22,6 +22,15 @@
 
 
 /*****
+ * The framework encapsulation and enhancement of the browser's builtin in
+ * websocket class.  One important featue is that the websocket can be either
+ * connected or not.  When a user sends a message to the server, the websocket
+ * wil automatically establish a new connection if not already connected.  This
+ * ensures that we don't need to worry about Apple's aggressive socket-closing
+ * functionality built into its browsers.  Also note that an automatical ping
+ * function is started when the socket is connected so we don't need to worry
+ * about aggressive time outs.  The application layer is then able to control
+ * the socket-life duration.
 *****/
 register(class Websocket extends Emitter {
     constructor(url) {

@@ -76,7 +76,7 @@ register(class SelfEndpoints extends EndpointContainer {
             session: trx['#Session'],
         });
 
-        return { '#Control': 'CloseSession' };
+        return true;
     }
 
     async [ mkEndpoint('SelfVerifyEmail', undefined, { verify: true }) ](trx) {

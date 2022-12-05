@@ -119,7 +119,6 @@ register(class WebApp extends Webx {
                 description: this.module.settings.description,
                 links: this.links,
                 url: this.reference.url,
-                authenticate: this.settings.authenticate,
                 websocket: this.settings.websocket,
                 apptext: apptext,
                 homeView: this.settings.homeView,
@@ -153,7 +152,6 @@ register(class WebApp extends Webx {
             let response;
             let trx = mkWebAppTransaction(message);
             trx['#Reference'] = await this.reference;
-            trx['#Authenticate'] = this.settings.authenticate;
 
             if (await WebAppTransaction.assign(trx, message)) {
                 response = await this.query(trx);
