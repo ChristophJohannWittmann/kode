@@ -98,9 +98,14 @@ register(class Webx extends Emitter {
                     'Upgrade: websocket',
                     'Connection: upgrade',
                     `Sec-WebSocket-Accept: ${hash}`,
-                    '\r\n'
                 ];
+
+
+                if (webSocket.extensions.length) {
+                    headers.push(`Sec-WebSocket-Extensions: ${webSocket.secWebSocketExtensions()}`);
+                }
             
+                headers.push('\r\n');
                 socket.write(headers.join('\r\n'));
                 await this.onWebSocket(req, webSocket);
             }

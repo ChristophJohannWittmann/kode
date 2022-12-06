@@ -48,17 +48,25 @@ register(class WebSocket extends Emitter {
     }
   
     analyzeExtensions(extensions) {
-        this.extensions = {
-            perMessageDeflate: false,
-        };
+        this.extensions = [];
+
+        const supported = mkStringSet(
+            //'permessage-deflate',
+        );
 
         extensions.split(';').forEach(extension => {
             let [ left, right ] = extension.trim().split('=');
 
-            switch (left) {
-                case 'permessage-deflate':
-                    this.extensions.perMessageDeflate = true;
-                    break;
+            if (supported.has(left)) {
+                let rsv = this.extensions.length + 1;
+
+                if (rsv >=1 && rsv <= 3) {
+                    this.extensions.push({
+                        rsv: rsv,
+                        name: left,
+                        value: right,
+                    });
+                }
             }
         });
     }
@@ -161,6 +169,17 @@ register(class WebSocket extends Emitter {
         this.type = '';
         this.payload = [];
         this.state = 'Ready';
+    }
+
+    secWebSocketExtensions() {
+        return this.extensions.map(ext => {
+            if (ext.value === undefined) {
+                return ext.name;
+            }
+            else {
+                return `${ext.name}=${ext.value}`;
+            }
+        }).join('; ');
     }
 
     sendMessage(message) {
