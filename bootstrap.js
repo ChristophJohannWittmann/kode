@@ -223,9 +223,9 @@ async function seedUser(dbc) {
     require('./server/webApp/webApp.js');
     require('./server/webApp/webAppText.js');
     require('./server/webApp/lib/endpoint.js');
-    require('./server/webApp/lib/messagingEndpoints.js');
-    require('./server/webApp/lib/transaction.js');
+    require('./server/webApp/lib/configEndpoints.js');
     require('./server/webApp/lib/dbmsEndpoints.js');
+    require('./server/webApp/lib/messagingEndpoints.js');
     require('./server/webApp/lib/orgEndpoints.js');
     require('./server/webApp/lib/publicEndpoints.js');
     require('./server/webApp/lib/selfEndpoints.js');
@@ -233,6 +233,7 @@ async function seedUser(dbc) {
     require('./server/webApp/lib/templateEndpoints.js');
     require('./server/webApp/lib/ticketEndpoints.js');
     require('./server/webApp/lib/userEndpoints.js');
+    require('./server/webApp/lib/transaction.js');
 
     if (CLUSTER.isPrimary) {
         require('./server/lib/daemon.js');

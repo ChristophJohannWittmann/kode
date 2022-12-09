@@ -324,6 +324,7 @@ register(class ValueBinding extends Binding {
 
     onActiveDataChanged() {
         this.widget.silence();
+
         if (this.key) {
             this.widget.setValue(this.activeData[this.key]);
         }

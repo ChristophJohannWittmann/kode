@@ -67,6 +67,16 @@ register(class IButton extends WInput {
 register(class ICheckbox extends WInput {
     constructor() {
         super('checkbox');
+        this.setWidgetStyle('checkbox');
+    }
+
+    getValue() {
+        return this.hasAttribute('checked');
+    }
+
+    setValue(value) {
+        !value ? this.clearAttribute('checked') : this.setAttribute('checked');
+        return this;
     }
 });
 
@@ -133,6 +143,15 @@ register(class IPassword extends WInput {
 register(class IRadio extends WInput {
     constructor() {
         super('radio');
+    }
+
+    getValue() {
+        return this.hasAttribute('checked');
+    }
+
+    setValue(value) {
+        !value ? this.clearAttribute('checked') : this.setAttribute('checked');
+        return this;
     }
 });
 

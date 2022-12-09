@@ -23,6 +23,18 @@
 
 
 /*****
+ * Base class is used for identifying any of the defined Dbo object classes.
+ * You can do "instanceof DboBase" to check whether an object is some sort of
+ * subclasss of an object that is part of a database schema.
+*****/
+register(class DboBASE extends Jsonable {
+    constructor() {
+        super();
+    }
+});
+
+
+/*****
  * The heart of an application is managing DBMS records, which is performed
  * often and there's lots of code doing so.  The purpose of this template is to
  * register classes and functions take care of the drudgery of writing code to
@@ -51,7 +63,7 @@ register(function defineDboType(schemaTable) {
     }));
     
     eval(`
-    register(class ${className} extends Jsonable {
+    register(class ${className} extends DboBASE {
         constructor(values) {
             super();
             this.init();
@@ -107,6 +119,20 @@ register(function defineDboType(schemaTable) {
 
             let result = await dbc.query(sql.join(' '), true);
             this.oid = result.data;
+        }
+
+        meta() {
+            let meta = {};
+
+            for (let property in fwdMap) {
+                meta[property] = {
+                    name: property,
+                    dbType: global[fwdMap[property].type.name()],
+                    dbTypeName: fwdMap[property].type.name(),
+                };
+            }
+
+            return meta;
         }
 
         async save(dbc) {

@@ -78,7 +78,7 @@ register(class Websocket extends Emitter {
         else if ('#Trap' in message) {
             let trapId = message['#Trap'];
             delete this.awaiting[trapId];
-            Trap.pushReply(trapId, message);
+            Trap.pushReply(trapId, message.response);
         }
         else {
             this.send(message);

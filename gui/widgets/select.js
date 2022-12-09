@@ -191,6 +191,12 @@ register(class WSelect extends InputBaseWidget {
         return false;
     }
 
+    removeGroup(label) {
+    }
+
+    removeOption(value) {
+    }
+
     setOptions(options) {
         this.clear();
         let values = mkStringSet();

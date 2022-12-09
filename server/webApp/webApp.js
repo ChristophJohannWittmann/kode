@@ -273,12 +273,11 @@ register(class WebApp extends Webx {
         this.framework = { '': await buildClientCode([
                 'framework/core.js',
                 'framework',
+                'gui/lib/entryFilter.js',
                 'gui/lib',
                 'gui/widgets/inputBase.js',
-                'gui/widgets/textArea/entryFilter.js',
+                'gui/widgets/input.js',
                 'gui/widgets',
-                'gui/editors',
-                'gui/panels',
                 'server/webApp/gui',
             ])
         };
@@ -309,6 +308,7 @@ register(class WebApp extends Webx {
             await this.buildCSS(PATH.join(env.kodePath, 'server/webApp/webApp.css'));
         }
 
+        await mkConfigEndpoints(this);
         await mkDbmsEndpoints(this);
         await mkOrgEndpoints(this);
         await mkPublicEndpoints(this);

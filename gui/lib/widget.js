@@ -40,23 +40,32 @@ register(class Widget extends Emitter {
     static widgetKey = Symbol('widget');
     static bindingKey = Symbol('binding');
 
-    constructor(tagName) {
+    constructor(...args) {
         super();
         this.id = Widget.nextId++;
         this.selector = `widget${this.id}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
         this[Widget.bindingKey] = 'innerHtml';
 
-        if (typeof tagName == 'string' || tagName === undefined) {
-            this.htmlElement = htmlElement(tagName === undefined ? 'div' : tagName);
-            this.htmlElement.setAttribute('id', this.selector);
-            this.htmlElement[Widget.blockingKey] = false;
-            this.brand(this.htmlElement);
-            this.setAttribute('widgetclass', `${Reflect.getPrototypeOf(this).constructor.name}`);
+        let tagName = 'div';
+        this.dynamo = null;
+        let children = [];
+
+        for (let arg of args) {
+            if (typeof arg == 'string') {
+                tagName = arg;
+            }
+            else if (ActiveData.isActiveData(arg)) {
+                this.dynamo = arg;
+            }
         }
-        else {
-            throw new Error(`mkWidget(), expecting a tagName string: ${tagName}`);
-        }
+
+        this.htmlElement = htmlElement(tagName);
+        this.htmlElement.setAttribute('id', this.selector);
+        this.htmlElement[Widget.blockingKey] = false;
+        this.brand(this.htmlElement);
+        this.setAttribute('widgetclass', `${Reflect.getPrototypeOf(this).constructor.name}`);
+        this.append(...children);
     }
 
     append(...args) {
@@ -313,7 +322,6 @@ register(class Widget extends Emitter {
     }
 
     set(innerHtml) {
-        this.htmlElement.clear();
         this.htmlElement.setInnerHtml(innerHtml);
 
         this.send({

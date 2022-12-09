@@ -30,6 +30,9 @@
 register(class WebAppText extends MultilingualText {
     constructor() {
         super({
+            // ****************************************************************
+            // Forgot
+            // ****************************************************************
             fwForgotEmail: {
                 en: `Enter email address here`,
             },
@@ -45,6 +48,10 @@ register(class WebAppText extends MultilingualText {
             fwSignInForgotPassword: {
                 en: `Forgot Password`,
             },
+
+            // ****************************************************************
+            // SignIn
+            // ****************************************************************
             fwSignInPassword: {
                 en: `Password`,
             },
@@ -53,6 +60,44 @@ register(class WebAppText extends MultilingualText {
             },
             fwSignInUsername: {
                 en: `Email`,
+            },
+
+            // ****************************************************************
+            // Misc
+            // ****************************************************************
+            fwMiscActive: {
+                en: `Active`,
+            },
+
+            // ****************************************************************
+            // Net
+            // ****************************************************************
+            fwNetAcme: {
+                en: `ACME Provider`,
+            },
+            fwNetAddress: {
+                en: `IP Address`,
+            },
+            fwNetCaCert: {
+                en: `Certificate Authority`,
+            },
+            fwNetCert: {
+                en: `Certificate`,
+            },
+            fwNetDomain: {
+                en: `Domain`,
+            },
+            fwNetHost: {
+                en: `Host`,
+            },
+            fwNetInterface: {
+                en: `Network Interface`,
+            },
+            fwNetPrivateKey: {
+                en: `Private Key`,
+            },
+            fwNetPublicKey: {
+                en: `Public Key`,
             },
         });
     }

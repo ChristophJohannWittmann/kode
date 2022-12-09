@@ -23,14 +23,22 @@
 
 
 /*****
- * This is a very simple extennsion to the base classs and simply abbreviates
- * code for constructing views, i.e., complex user widgets.  With a single
- * call, a single HTML element is constructed bound bound to an active data key.
- * This results is an autonomously changing element on the view.
+ * This is a base class for widgets that need to dynamically morph based on
+ * changes to a value in an active data repository.  In essence, changes to the
+ * value will cause the onChange() method to be invoked.  It's a powerful base
+ * class.
 *****/
-register(class WBound extends Widget {
-    constructor(activeData, key, tagName) {
-        super(tagName ? tagName : 'div');
-        this.bind(activeData, key);
+register(class WDynamic extends Widget {
+    constructor(tagName, activeData, key) {
+        super(tagName);
+
+        ActiveData.on(activeData, message => {
+            if (message.action == 'change' && message.key == key) {
+                this.onChange(message.oldValue, message.newValue);
+            }
+        });
+    }
+
+    onChange(oldValue, newValue) {
     }
 });

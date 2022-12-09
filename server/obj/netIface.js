@@ -24,8 +24,18 @@
 
 /*****
 *****/
-register(class WCssEditor extends WEditor {
+singleton(class NetIfaces {
     constructor() {
-        super();
+    }
+});
+
+
+/*****
+*****/
+register(class NetIface {
+    constructor(name) {
+        return new Promise(async (ok, fail) => {
+            ok(this);
+        });
     }
 });

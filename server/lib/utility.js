@@ -57,6 +57,34 @@ register(async function execShell(script) {
 
 
 /*****
+ isFile() and isDirectory() are used for performing a one-line asynchronouse
+ check on an absolute path provides as the single argument to the function.
+*****/
+register(async function isDirectory(path) {
+    if (await pathExists(path)) {
+        let stats = await FILES.stat(path);
+        return stats.isDirectory();
+    }
+
+    return false;
+});
+
+
+/*****
+ isFile() and isDirectory() are used for performing a one-line asynchronouse
+ check on an absolute path provides as the single argument to the function.
+*****/
+register(async function isFile(path) {
+    if (await pathExists(path)) {
+        let stats = await FILES.stat(path);
+        return stats.isFile();
+    }
+
+    return false;
+});
+
+
+/*****
  * This function will minify a file based on the content extension of either
  * .js, .css, or .html.  The returned product is nicely compactified and minified
  * to ensure maximum performance over give bandwidth.
