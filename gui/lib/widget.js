@@ -41,6 +41,7 @@ register(class Widget extends Emitter {
     static bindingKey = Symbol('binding');
 
     constructor(...args) {
+        console.log(args);
         super();
         this.id = Widget.nextId++;
         this.selector = `widget${this.id}`;
@@ -48,15 +49,10 @@ register(class Widget extends Emitter {
         this[Widget.bindingKey] = 'innerHtml';
 
         let tagName = 'div';
-        this.dynamo = null;
-        let children = [];
 
         for (let arg of args) {
             if (typeof arg == 'string') {
                 tagName = arg;
-            }
-            else if (ActiveData.isActiveData(arg)) {
-                this.dynamo = arg;
             }
         }
 
@@ -64,8 +60,7 @@ register(class Widget extends Emitter {
         this.htmlElement.setAttribute('id', this.selector);
         this.htmlElement[Widget.blockingKey] = false;
         this.brand(this.htmlElement);
-        this.setAttribute('widgetclass', `${Reflect.getPrototypeOf(this).constructor.name}`);
-        this.append(...children);
+        this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
     }
 
     append(...args) {

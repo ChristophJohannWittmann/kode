@@ -23,10 +23,66 @@
 
 
 /*****
+ * The HotSpot widget is shortcut widget for placing a non-button, non-anchor
+ * (i.e., WLink) spot to use for users to click on.  The hot-spot is primarily
+ * useful because it has its own widget-style = "hotspot".
 *****/
 register(class WHotSpot extends Widget {
     constructor() {
         super('span');
         this.setAttribute('widget-style', 'hotspot');
+    }
+});
+
+
+/*****
+ * The following are shortcut classes for creating widgets for frequently used
+ * HTML elements.  There are not other features other than the shortcut itself.
+*****/
+register(class WDiv extends Widget {
+    constructor(...args) {
+        super('div', ...args);
+    }
+});
+
+register(class WSpan extends Widget {
+    constructor(...args) {
+        super('span', ...args);
+    }
+});
+
+register(class WH1 extends Widget {
+    constructor(...args) {
+        super('h1', ...args);
+    }
+});
+
+register(class WH2 extends Widget {
+    constructor(...args) {
+        super('h2', ...args);
+    }
+});
+
+register(class WH3 extends Widget {
+    constructor(...args) {
+        super('h3', ...args);
+    }
+});
+
+register(class WH4 extends Widget {
+    constructor(...args) {
+        super('h4', ...args);
+    }
+});
+
+register(class WH5 extends Widget {
+    constructor(...args) {
+        super('h5', ...args);
+    }
+});
+
+register(class WH6 extends Widget {
+    constructor(...args) {
+        super('h6', ...args);
     }
 });

@@ -126,6 +126,18 @@ register(class Time {
     isoTimeStr() {
         return this.jsDate.toISOString().split('T')[1];
     }
+
+    jsDateStr() {
+        return this.jsDate.toISOString().substr(0, 10);
+    }
+
+    jsDateTimeStr() {
+        return this.jsDate.toISOString().substr(0, 16);
+    }
+
+    jsTimeStr() {
+        return this.jsDate.toISOString().substr(11, 5);
+    }
   
     utcStr() {
         return this.jsDate.toUTCString();

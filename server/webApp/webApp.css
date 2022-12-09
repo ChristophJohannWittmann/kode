@@ -813,7 +813,7 @@ body {
 
 
 /***********************************************
- * Checkbox Input
+ * Input Checkbox
  ***********************************************/
 [widget-style=checkbox] {
     width: 32px;
@@ -851,6 +851,122 @@ body {
 
 
 /***********************************************
+ * Input Radio
+ ***********************************************/
+[widget-style=radio] {
+    width: 32px;
+    height: 32px;
+    font-family: inherit;
+    font-size: inherit;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: var(--border-radius-1);
+    outline-width: var(--outline-width-4);
+    outline-color: inherit;
+    background-color: var(--background-color-1);
+    text-decoration: none;
+    cursor: pointer;
+}
+[widget-style=radio]:disabled {
+    padding-top: var(--padding-2);
+    padding-bottom: var(--padding-2);
+    border-style: var(--border-style);
+    border-width: var(--border-width);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size);
+    font-family: var(--font-family);
+    cursor:  default;
+}
+[widget-style=radio]:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-color: var(--outline-color);
+}
+
+
+/***********************************************
+ * Scalar
+ ***********************************************/
+[widget-style=scalar] {
+    font-family: inherit;
+    font-size: inherit;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: var(--border-radius-1);
+    outline-width: var(--outline-width-4);
+    outline-color: inherit;
+    background-color: var(--background-color-1);
+    text-decoration: none;
+}
+[widget-style=scalardisabled] {
+    padding-top: var(--padding-2);
+    padding-bottom: var(--padding-2);
+    border-style: var(--border-style);
+    border-width: var(--border-width);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size);
+    font-family: var(--font-family);
+    opacity: .5;
+}
+[widget-style=scalar]:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-color: var(--outline-color);
+}
+[widget-style=scalar]:invalid {
+    color: var(--error-color);
+    border-color: var(--error-border-color);
+    outline-color: var(--error-outline-color);
+}
+
+
+/***********************************************
+ * Scalar Checkbox
+ ***********************************************/
+[widget-style=scalarcheckbox] {
+    width: 32px;
+    height: 32px;
+    font-family: inherit;
+    font-size: inherit;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: var(--border-radius-1);
+    outline-width: var(--outline-width-4);
+    outline-color: inherit;
+    background-color: var(--background-color-1);
+    text-decoration: none;
+    cursor: pointer;
+}
+[widget-style=scalarcheckbox]:disabled {
+    padding-top: var(--padding-2);
+    padding-bottom: var(--padding-2);
+    border-style: var(--border-style);
+    border-width: var(--border-width);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size);
+    font-family: var(--font-family);
+    cursor:  default;
+}
+[widget-style=scalarcheckbox]:focus {
+    border-color: transparent;
+    outline-style: solid;
+    outline-color: var(--outline-color);
+}
+
+
+/***********************************************
  * Select
  ***********************************************/
 [widget-style=select] {
@@ -869,7 +985,7 @@ body {
     text-decoration: none;
     cursor: pointer;
 }
-[widget-style=selectdisabled] {
+[widget-style=select]:disabled {
     font-family: inherit;
     font-size: inherit;
     padding-top: 12px;
@@ -887,6 +1003,49 @@ body {
     outline-color: var(--outline-color);
 }
 [widget-style=select]:invalid {
+    color: var(--error-color);
+    border-color: var(--error-border-color);
+    outline-color: var(--error-outline-color);
+}
+
+
+/***********************************************
+ * Scalar Select
+ ***********************************************/
+[widget-style=scalarselect] {
+    font-family: inherit;
+    font-size: inherit;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: var(--border-radius-1);
+    outline-width: var(--outline-width-2);
+    outline-color: inherit;
+    background-color: var(--background-color-1);
+    text-decoration: none;
+    cursor: pointer;
+}
+[widget-style=scalarselect]:disabled {
+    font-family: inherit;
+    font-size: inherit;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: var(--border-radius-1);
+    text-decoration: none;
+    opacity: .5;
+}
+[widget-style=scalarselect]:focus {
+    border-color: transparent;
+    outline-color: var(--outline-color);
+}
+[widget-style=scalarselect]:invalid {
     color: var(--error-color);
     border-color: var(--error-border-color);
     outline-color: var(--error-outline-color);

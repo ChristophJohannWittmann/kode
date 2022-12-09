@@ -32,35 +32,84 @@ register(class WObjectEditor extends WTable {
     }
 
     addDbo(dbo, options) {
-        return this;
-    }
+        for (let property in dbo) {
+            if (!property.startsWith('#')) {
+                let value = dbo[property];
 
-    addObj(obj, options) {
-        if (options) {
-            for (let property in obj) {
-                if (!property.startsWith('#')) {
-                    if (typeof obj[property] != 'object') {
-                        if (property in options) {
-                            this.fields[property] = obj[property];
-                            let opts = options[property];
+                if (typeof value != 'object' || value instanceof Time || value instanceof Date) {
+                    let readonly = this.readonly;
+
+                    if (options && options[property]) {
+                        let opts = clone(options[property]);
+
+                        if (!opts.hidden) {
+                            this.fields[property] = value;
+
+                            if ('readonly' in opts) {
+                                readonly = readonly || opts.readonly;
+                            }
+
+                            if (!('type' in opts)) {
+                                opts.type = WScalar.selectType(this.fields[property]);
+                            }
 
                             this.getBody().mkRow()
                             .mkCell(opts.label ? opts.label : property)
-                            .mkCell(mkWActiveValue(this.fields, property, opts));
+                            .mkCell(mkWScalar(this.fields, property, opts));
                         }
+                    }
+                    else {
+                        this.fields[property] = value;
+                        let readonly = this.readonly || WScalar.dboReadonlyByDefault(property);
+                        let type = WScalar.selectType(this.fields[property]);
+                        let opts = { readonly: readonly, type: type };
+
+                        this.getBody().mkRow()
+                        .mkCell(property)
+                        .mkCell(mkWScalar(this.fields, property, opts));
                     }
                 }
             }
         }
-        else {
-            for (let property in obj) {
-                if (!property.startsWith('#')) {
-                    if (typeof obj[property] != 'object') {
-                        this.fields[property] = obj[property];
+
+        return this;
+    }
+
+    addObj(obj, options) {
+        for (let property in obj) {
+            if (!property.startsWith('#')) {
+                let value = obj[property];
+
+                if (typeof value != 'object' || value instanceof Time || value instanceof Date) {
+                    let readonly = this.readonly;
+
+                    if (options && options[property]) {
+                        let opts = clone(options[property]);
+
+                        if (!opts.hidden) {
+                            this.fields[property] = value;
+
+                            if ('readonly' in opts) {
+                                readonly = readonly || opts.readonly;
+                            }
+
+                            if (!('type' in opts)) {
+                                opts.type = WScalar.selectType(this.fields[property]);
+                            }
+
+                            this.getBody().mkRow()
+                            .mkCell(opts.label ? opts.label : property)
+                            .mkCell(mkWScalar(this.fields, property, opts));
+                        }
+                    }
+                    else {
+                        this.fields[property] = value;
+                        let type = WScalar.selectType(this.fields[property]);
+                        let opts = { readonly: this.readonly, type: type };
 
                         this.getBody().mkRow()
                         .mkCell(property)
-                        .mkCell(mkWActiveValue(this.fields, property, { type: ValueTypeText }));
+                        .mkCell(mkWScalar(this.fields, property, opts));
                     }
                 }
             }

@@ -90,7 +90,7 @@ register(class ActiveData {
             if (key in nakedActiveData) {
                 let oldValue = ActiveData.value(nakedActiveData[key]);
  
-                if (typeof value == 'object') {
+                if (typeof value == 'object' && !(value instanceof Date) && !(value instanceof Time)) {
                     ActiveData.assign(nakedActiveData[ActiveData.proxyKey], value);
                 }
                 else {
@@ -118,7 +118,7 @@ register(class ActiveData {
                         nakedActiveData.push(value);
                     }
                 }
-                else if (typeof value == 'object') {
+                else if (typeof value == 'object' && !(value instanceof Date) && !(value instanceof Time)) {
                     ActiveData.suppress = true;
                     nakedActiveData[key] = new ActiveData(value, nakedActiveData, key);
                     ActiveData.suppress = false;
@@ -151,7 +151,7 @@ register(class ActiveData {
             init = false;
             activeData = new Array();
         }
-        else if (arg === false) {
+        else if (arg === false || arg instanceof Date || arg instanceof Time) {
             init = false;
             activeData = new Object();
         }

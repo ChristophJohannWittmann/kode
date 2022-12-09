@@ -539,7 +539,7 @@ register(class HtmlElement extends HtmlNode {
         else {
             let widget = mkWidget('DUMMY');
             widget.htmlElement = this;
-            widget.setAttribute('widgetclass', 'Widget');
+            widget.setAttribute('widget-class', 'Widget');
             widget.brand(this);
             return widget;
         }

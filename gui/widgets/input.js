@@ -90,11 +90,41 @@ register(class IDate extends WInput {
     constructor() {
         super('date');
     }
+
+    getValue() {
+        return mkTime(this.getAttribute('value'));
+    }
+
+    setValue(value) {
+        if (value instanceof Time) {
+            this.setAttribute('value', value.jsDateStr());
+        }
+        else if (value instanceof Date) {
+            this.setAttribute('value', mkTime(value).jsDateStr());
+        }
+
+        return this;
+    }
 });
 
 register(class IDateTime extends WInput {
     constructor() {
         super('datetime-local');
+    }
+
+    getValue() {
+        return mkTime(this.getAttribute('value'));
+    }
+
+    setValue(value) {
+        if (value instanceof Time) {
+            this.setAttribute('value', value.jsDateTimeStr());
+        }
+        else if (value instanceof Date) {
+            this.setAttribute('value', mkTime(value).jsDateTimeStr());
+        }
+
+        return this;
     }
 });
 
@@ -143,6 +173,7 @@ register(class IPassword extends WInput {
 register(class IRadio extends WInput {
     constructor() {
         super('radio');
+        this.setWidgetStyle('radio');
     }
 
     getValue() {
@@ -195,6 +226,21 @@ register(class ITime extends WInput {
     constructor() {
         super('time');
     }
+
+    getValue() {
+        return mkTime(this.getAttribute('value'));
+    }
+
+    setValue(value) {
+        if (value instanceof Time) {
+            this.setAttribute('value', value.jsTimeStr());
+        }
+        else if (value instanceof Date) {
+            this.setAttribute('value', mkTime(value).jsTimeStr());
+        }
+
+        return this;
+    }
 });
 
 register(class IUrl extends WInput {
@@ -207,5 +253,23 @@ register(class IUrl extends WInput {
 register(class IWeek extends WInput {
     constructor() {
         super('week');
+    }
+});
+
+
+/*****
+ * Extended input types.  These are input types with some features to enhanced
+ * what's available in HTML 5.  Many of these are simply text inputs using custom
+ * verification regular expressions.
+*****/
+register(class IHost extends IText {
+    constructor() {
+        super();
+    }
+});
+
+register(class IIp extends IText {
+    constructor() {
+        super();
     }
 });

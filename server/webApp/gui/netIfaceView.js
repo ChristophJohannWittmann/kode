@@ -29,6 +29,40 @@ register(class FWNetIfaceView extends Widget {
         super('div');
 
         (async () => {
+            /*
+            let user = await queryServer({
+                messageName: 'UserSelectByEmail',
+                email: 'charlie@kodeprogramming.org',
+            });
+
+            this.append(
+                mkWObjectEditor()
+                .addDbo(user, {
+                    status: {
+                        type: ScalarEnum,
+                        choices: [
+                            { value: 'active', text: 'Active' },
+                            { value: 'paused', text: 'Suspended' },
+                        ],
+                        label: 'User Status',
+                    },
+                    failures: {
+                        readonly: true,
+                    },
+                    verified: {
+                        readonly: true,
+                    },
+                    password: {
+                        readonly: true,
+                    },
+                    updated: {
+                        type: ScalarTime,
+                    }
+                })
+            );
+
+            return;
+            */
             let iface = await queryServer({
                 messageName: 'ConfigGetNetIface',
                 ifaceName: ifaceName
@@ -45,50 +79,50 @@ register(class FWNetIfaceView extends Widget {
                     active: {
                         label: txx.fwMiscActive,
                         readonly: true,
-                        type: ValueTypeBool,
+                        type: ScalarBool,
                     },
                     address: {
                         label: txx.fwNetAddress,
                         readonly: false,
-                        type: ValueTypeIp,
+                        type: ScalarIp,
                     },
                     domain: {
                         label: txx.fwNetDomain,
                         readonly: false,
-                        type: ValueTypeHost,
+                        type: ScalarHost,
                     },
                     host: {
                         label: txx.fwNetHost,
                         readonly: false,
-                        type: ValueTypeText,
+                        type: ScalarText,
                     },
                 })
                 .addObj(iface.tls, {
                     acme: {
                         label: txx.fwNetAcme,
                         readonly: false,
-                        type: ValueTypeEnum,
-                        values: acme,
+                        type: ScalarEnum,
+                        choices: acme,
                     },
                     publicKey: {
                         label: txx.fwNetPublicKey,
                         readonly: true,
-                        type: ValueTypeText,
+                        type: ScalarText,
                     },
                     privateKey: {
                         label: txx.fwNetPrivateKey,
                         readonly: true,
-                        type: ValueTypeText,
+                        type: ScalarText,
                     },
                     cert: {
                         label: txx.fwNetCert,
                         readonly: true,
-                        type: ValueTypeText,
+                        type: ScalarText,
                     },
                     caCert: {
                         label: txx.fwNetCaCert,
                         readonly: true,
-                        type: ValueTypeText,
+                        type: ScalarText,
                     },
                 })
             );
