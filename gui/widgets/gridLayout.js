@@ -29,10 +29,9 @@
  * gridded areas, see the WAreaLayout works and if it's right for you.
 *****/
 register(class WGridLayout extends Widget {  
-    constructor(...args) {
-        super(...args);
+    constructor(opts) {
+        super(opts.tagName);
         this.cells = [];
-        let opts = branded('grid', ...args);
 
         if (Array.isArray(opts.rows)) {
             this.rows = opts.rows;

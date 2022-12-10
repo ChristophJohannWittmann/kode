@@ -40,23 +40,14 @@ register(class Widget extends Emitter {
     static widgetKey = Symbol('widget');
     static bindingKey = Symbol('binding');
 
-    constructor(...args) {
-        console.log(args);
+    constructor(tagName) {
         super();
         this.id = Widget.nextId++;
         this.selector = `widget${this.id}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
         this[Widget.bindingKey] = 'innerHtml';
 
-        let tagName = 'div';
-
-        for (let arg of args) {
-            if (typeof arg == 'string') {
-                tagName = arg;
-            }
-        }
-
-        this.htmlElement = htmlElement(tagName);
+        this.htmlElement = htmlElement(tagName ? tagName : 'div');
         this.htmlElement.setAttribute('id', this.selector);
         this.htmlElement[Widget.blockingKey] = false;
         this.brand(this.htmlElement);

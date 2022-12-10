@@ -26,12 +26,12 @@
 *****/
 register(class FWSignInView extends WGridLayout {
     constructor() {
-        super(brand('grid', {
+        super({
             rows: ['auto', '350px', 'auto'],
             rowGap: '0px',
             cols: ['auto', '400px', 'auto'],
             colGap: '0px',
-        }));
+        });
 
         this.data = mkActiveData({
             mode: 'Authenticate',
@@ -77,10 +77,11 @@ register(class FWSignInView extends WGridLayout {
 *****/
 class AuthenticateForm extends WGridLayout {
     constructor(data) {
-        super('form', brand('grid', {
+        super({
+            tagName: 'form',
             rows: ['2fr', 'auto', '3px', 'auto', '8px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
             cols: ['350px'],
-        }));
+        });
 
         this.data = data;
         this.setClasses('flex-h-cc colors-2 border-style-solid border-width-1 border-radius-2');
@@ -115,10 +116,11 @@ class AuthenticateForm extends WGridLayout {
 *****/
 class ForgotCredentialsForm extends WGridLayout {
     constructor(data) {
-        super('form', brand('grid', {
+        super({
+            tagName: 'form',
             rows: ['2fr', 'auto', '20px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
             cols: ['350px'],
-        }));
+        });
 
         this.data = data;
         this.setClasses('flex-h-cc colors-2 border-style-solid border-width-1 border-radius-2');

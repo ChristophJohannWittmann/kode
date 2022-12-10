@@ -22,6 +22,21 @@
 *****/
 
 
+/**
+ * Here's a little kludge or adjustment to the underlying PG module.  When the
+ * PG, and new Date() as well, are used to convert the timezoneless timestamp
+ * from the PG server to a js timesstamp, js automatically shifts the timezeone
+ * to UTC, from a value that's already in UTC. Hence, we have a problem.  The
+ * solution is to mark each time with +0000 to indicate that it's already in
+ * UTC and thus shouldn't be converted.  XXX
+ */
+const parser1114 = npmPG.types.getTypeParser(1114);
+
+npmPG.types.setTypeParser(1114, function(dateText) {
+    return parser1114(`${dateText}+0000`);
+});
+
+
 /*****
  * Need to escape a value such that it can be saved in the database as a string
  * value.  Generally, we know the DBMS standard escape sequences.  Since we're

@@ -43,7 +43,6 @@ require('./framework/stringSet.js');
 require('./framework/textTemplate.js');
 require('./framework/time.js');
 require('./framework/utility.js');
-require('./framework/calendars/gregorian.js');
 
 
 /*****

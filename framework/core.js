@@ -399,33 +399,4 @@
             return value;
         }
     )});
- 
- 
-    /*****
-     * Branding can be useful for distinguishing between several objects that
-     * belong to the same array.  For instance, when sever args are passed to
-     * a function.  Branding provides a mechanism for distinguishing between one
-     * of several elements of an array or arguments of an argument array.
-    *****/
-    const brandKey = Symbol('brand-key');
-
-    register(function brand(name, obj) {
-        let branded = new Object({branded: obj});
-        branded[brandKey] = name;
-        return branded;
-    });
-
-    register(function branded(name, ...args) {
-        for (let arg of args) {
-            if (typeof arg == 'object') {
-                if (brandKey in arg) {
-                    if (arg[brandKey] == name) {
-                        return arg.branded;
-                    }
-                }
-            }
-        }
-
-        return null;
-    });
 })();
