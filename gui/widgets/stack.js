@@ -34,7 +34,7 @@ register(class WStack extends Widget {
     constructor() {
         super('div');
         this.stack = [];
-        this.setAttribute('widget-style', 'stack');
+        this.setWidgetStyle('stack');
     }
 
     clear() {

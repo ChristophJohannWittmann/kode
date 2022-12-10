@@ -24,7 +24,7 @@
 
 /*****
  * The HTML "a" element or anchor is called a link with the widgetverse.  The
- * widget-style is set to "link", which provides the UI look and feel needed for
+ * widget style is set to "link", which provides the UI look and feel needed for
  * links.  Links can also be used like buttons by not setting the href, although
  * that is discouraged since input type="button" is a stanard widget thats geared
  * up for use as a button.
@@ -50,7 +50,7 @@ register(class WLink extends Widget {
 
     constructor() {
         super('a');
-        this.setAttribute('widget-style', 'link')
+        this.setWidgetStyle('link')
         .setAttribute('referrerpolicy', 'no-referrer')
         .setAttribute('href', '#')
         .setAttribute('onclick', 'return false');

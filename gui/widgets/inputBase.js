@@ -44,13 +44,13 @@ register(class InputBaseWidget extends Widget {
 
     disable() {
         this.setAttribute('disabled');
-        this.setAttribute('widget-style', `${this.getAttribute('widget-style')}disabled`);
+        this.setWidgetStyle(`${this.getWidgetStyle()}disabled`);
         return this;
     }
 
     enable() {
         this.clearAttribute('disabled');
-        this.setAttribute('widget-style', this.getAttribute('widget-style'));
+        this.setWidgetStyle(this.getWidgetStyle());
         return this;
     }
 

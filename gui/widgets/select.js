@@ -270,7 +270,7 @@ register(class WSelect extends InputBaseWidget {
 register(class WOptGroup extends Widget {
     constructor() {
         super('optgroup');
-        this.setAttribute('widget-style', 'optgroup');
+        this.setWidgetStyle('optgroup');
     }
 
     add(value, text) {
@@ -346,7 +346,7 @@ register(class WOption extends Widget {
     constructor(value, text, selectWidget, groupWidget) {
         super('option');
         this.setAttribute('value', value);
-        this.setAttribute('widget-style', 'option');
+        this.setWidgetStyle('option');
         this.set(text);
         this.selectWidget = selectWidget;
         this.groupWidget = groupWidget;

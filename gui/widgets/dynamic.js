@@ -29,16 +29,31 @@
  * class.
 *****/
 register(class WDynamic extends Widget {
-    constructor(tagName, activeData, key) {
+    constructor(tagName, activeData) {
         super(tagName);
 
         ActiveData.on(activeData, message => {
             if (message.action == 'change' && message.key == key) {
-                this.onChange(message.oldValue, message.newValue);
+                let methodName = `on${message.key[0].toUpperCase()}${message.key.substr(1)}Changed`;
+
+                if (methodName in this) {
+                    this[methodName]();
+                }
+            }
+            else if (message.action == 'add' && message.key == key) {
+                let methodName = `on${message.key[0].toUpperCase()}${message.key.substr(1)}Added`;
+
+                if (methodName in this) {
+                    this[methodName]();
+                }
+            }
+            else if (message.action == 'delete' && message.key == key) {
+                let methodName = `on${message.key[0].toUpperCase()}${message.key.substr(1)}Deleted`;
+
+                if (methodName in this) {
+                    this[methodName]();
+                }
             }
         });
-    }
-
-    onChange(oldValue, newValue) {
     }
 });

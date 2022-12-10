@@ -25,12 +25,12 @@
 /*****
  * The HotSpot widget is shortcut widget for placing a non-button, non-anchor
  * (i.e., WLink) spot to use for users to click on.  The hot-spot is primarily
- * useful because it has its own widget-style = "hotspot".
+ * useful because it has its own widget style of "hotspot".
 *****/
 register(class WHotSpot extends Widget {
     constructor() {
         super('span');
-        this.setAttribute('widget-style', 'hotspot');
+        this.setWidgetStyle('hotspot');
     }
 });
 

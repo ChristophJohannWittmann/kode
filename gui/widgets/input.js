@@ -60,7 +60,7 @@ register(class WInput extends InputBaseWidget {
 register(class IButton extends WInput {
     constructor() {
         super('button');
-        this.setAttribute('widget-style', 'button');
+        this.setWidgetStyle('button');
     }
 });
 

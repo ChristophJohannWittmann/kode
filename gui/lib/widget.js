@@ -42,8 +42,7 @@ register(class Widget extends Emitter {
 
     constructor(tagName) {
         super();
-        this.id = Widget.nextId++;
-        this.selector = `widget${this.id}`;
+        this.selector = `widget${Widget.nextId++}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
         this[Widget.bindingKey] = 'innerHtml';
 
@@ -62,11 +61,6 @@ register(class Widget extends Emitter {
             widget: this,
         });
 
-        return this;
-    }
-
-    attach(widget) {
-        widget.append(this);
         return this;
     }
 
