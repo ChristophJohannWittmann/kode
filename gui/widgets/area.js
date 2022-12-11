@@ -22,11 +22,25 @@
 *****/
 
 
-/*****
-*****/
-register(class FWVerifyEmailView extends WGrid {
-    constructor() {
-        super('h1');
-        this.set('FWVerifyEmailView').on('html.click', message => queryServer('SelfSignOut'));
+(() => {
+    /*****
+    *****/
+    class Area {
+        constructor() {
+        }
     }
-});
+
+
+    /*****
+    *****/
+    register(class WArea extends Widget {
+        constructor(opts) {
+            super(opts.tagName);
+            this.area = {};
+        }
+
+        [Symbol.iterator]() {
+            return Object.values(this.areas)[Symbol.iterator]();
+        }
+    });
+})();

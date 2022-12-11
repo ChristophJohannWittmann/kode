@@ -24,9 +24,77 @@
 
 /*****
 *****/
-register(class FWVerifyEmailView extends WGrid {
+register(class WPanel extends WArea {
     constructor() {
-        super('h1');
-        this.set('FWVerifyEmailView').on('html.click', message => queryServer('SelfSignOut'));
+        super({
+            tagName: 'div',
+            rows: [
+                {
+                    height: 1,
+                    columns: [
+                        { area: 'title',   width: 7 },
+                        { area: 'control', width: 3 },,
+                    ],
+                },
+            ]
+        });
+
+        /*
+        this.ctl = mkActiveData({
+            title: '',
+            readonly: true,
+            modified: true,
+            closable: true,
+        });
+
+        this.controls = mkGridLayout({
+            rows: ['30px', 'auto'],
+            rowGap: '0px',
+            cols: [],
+            colGap: '1px',
+        }).setWidgetStyle('panel-controller');
+        */
+    }
+
+    clearClosable() {
+    }
+
+    clearContent() {
+    }
+
+    clearModified() {
+    }
+
+    clearTitle() {
+    }
+
+    getClosable() {
+    }
+
+    getContent() {
+    }
+
+    getModified() {
+    }
+
+    getTitle() {
+    }
+
+    setClosable() {
+    }
+
+    setContent(widget) {
+    }
+
+    setModified() {
+    }
+
+    setReadOnly() {
+    }
+
+    setReadWrite() {
+    }
+
+    setTitle(title) {
     }
 });

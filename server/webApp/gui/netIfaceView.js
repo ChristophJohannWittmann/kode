@@ -24,12 +24,12 @@
 
 /*****
 *****/
-register(class FWNetIfaceView extends Widget {
+register(class FWNetIfaceView extends WPanel {
     constructor(ifaceName) {
-        super('div');
+        super();
 
         (async () => {
-            /*
+            return;
             let user = await queryServer({
                 messageName: 'UserSelectByEmail',
                 email: 'charlie@kodeprogramming.org',
@@ -62,7 +62,6 @@ register(class FWNetIfaceView extends Widget {
             );
 
             return;
-            */
             let iface = await queryServer({
                 messageName: 'ConfigGetNetIface',
                 ifaceName: ifaceName

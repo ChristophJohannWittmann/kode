@@ -24,13 +24,11 @@
 
 /*****
 *****/
-register(class FWSignInView extends WGridLayout {
+register(class FWSignInView extends WGrid {
     constructor() {
         super({
             rows: ['auto', '350px', 'auto'],
-            rowGap: '0px',
             cols: ['auto', '400px', 'auto'],
-            colGap: '0px',
         });
 
         this.data = mkActiveData({
@@ -75,7 +73,7 @@ register(class FWSignInView extends WGridLayout {
 
 /*****
 *****/
-class AuthenticateForm extends WGridLayout {
+class AuthenticateForm extends WGrid {
     constructor(data) {
         super({
             tagName: 'form',
@@ -114,7 +112,7 @@ class AuthenticateForm extends WGridLayout {
 
 /*****
 *****/
-class ForgotCredentialsForm extends WGridLayout {
+class ForgotCredentialsForm extends WGrid {
     constructor(data) {
         super({
             tagName: 'form',

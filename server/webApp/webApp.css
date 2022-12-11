@@ -1156,20 +1156,9 @@ body {
 
 
 /***********************************************
- * View Stack
+ * Stack
  ***********************************************/
 [widget-style=stack] {
-    height: 100%;
-    width: 100%;
-    padding: 0px;
-    margin: 0px;
-}
-
-
-/***********************************************
- * Panel
- ***********************************************/
-[widget-style=panel] {
     height: 100%;
     width: 100%;
     padding: 0px;
@@ -1209,4 +1198,29 @@ body {
     height: 40px;
 }
 [widget-style=table-basic-th] {
+}
+
+
+/***********************************************
+ * Panel
+ ***********************************************/
+[widget-style=panel] {
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+[widget-style=panel-controller] {
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+    vertical-align: : middle;
+}
+[widget-style=panel-title] {
+    padding: 6px;
+    vertical-align: : middle;
+}
+[widget-style=panel-controls] {
+    padding: 6px;
+    text-align: : right;
 }

@@ -23,12 +23,15 @@
 
 
 /*****
- * This is a composite widgets whose layout is formatted according to the rules
- * of the CSS3 grid layout.  This type of widget limits its capabilities to a
- * grid of uniform sized tiles.  If you want a more complex overloapping set of
- * gridded areas, see the WAreaLayout works and if it's right for you.
+ * This widget encapsulates the logic necessary for creating and managing a grid
+ * using the CSS display = grid setting.  In esssence, given a set of rows and
+ * columns, the constructor adds the settings to the grid widget's individual
+ * style class, selector #id, to display this widget as per the provided row and
+ * column settings.
 *****/
-register(class WGridLayout extends Widget {  
+register(class WGrid extends Widget {
+    static PlaceholderKey = Symbol('wgrid-placeholder');
+    
     constructor(opts) {
         super(opts.tagName);
         this.cells = [];
@@ -89,7 +92,7 @@ register(class WGridLayout extends Widget {
         for (let i = 0; i < this.rows.length; i++) {
             for (let j = 0; j < this.cols.length; j++) {
                 let placeholder = mkWidget('div');
-                placeholder[WGridLayout.PlaceholderKey] = true;
+                placeholder[WGrid.PlaceholderKey] = true;
                 placeholder.setClassName('fill');
                 this.cells.push(placeholder);
                 this.append(placeholder);
@@ -106,9 +109,9 @@ register(class WGridLayout extends Widget {
             for (let j = 0; j < this.cols.length; j++) {
                 let index = this.calcIndex(i, j);
 
-                if (!this.cells[index][WGridLayout.PlaceholderKey]) {
+                if (!this.cells[index][WGrid.PlaceholderKey]) {
                     let placeholder = mkWidget('div');
-                    placeholder[WGridLayout.PlaceholderKey] = true;
+                    placeholder[WGrid.PlaceholderKey] = true;
                     this.cells[index].replace(placeholder);
                     this.cells[index] = placeholder;
                 }
@@ -121,9 +124,9 @@ register(class WGridLayout extends Widget {
     clearAt(rowIndex, colIndex) {
         let index = this.calcIndex(rowIndex, colIndex);
 
-        if (!this.cells[index][WGridLayout.PlaceholderKey]) {
+        if (!this.cells[index][WGrid.PlaceholderKey]) {
             let placeholder = mkWidget('div');
-            placeholder[WGridLayout.PlaceholderKey] = true;
+            placeholder[WGrid.PlaceholderKey] = true;
             this.cells[index].replace(placeholder);
             this.cells[index] = placeholder;
         }
