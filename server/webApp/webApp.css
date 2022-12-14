@@ -1170,7 +1170,6 @@ body {
  * Basic Table
  ***********************************************/
 [widget-style=table-basic] {
-    height: 100%;
     width: 100%;
     border-collapse: collapse;
 }
@@ -1205,22 +1204,29 @@ body {
  * Panel
  ***********************************************/
 [widget-style=panel] {
-    height: 100%;
     width: 100%;
     margin: 0px;
     padding: 0px;
-}
-[widget-style=panel-controller] {
-    width: 100%;
-    margin: 0px;
-    padding: 0px;
-    vertical-align: : middle;
+    border-collapse: collapse;
 }
 [widget-style=panel-title] {
-    padding: 6px;
-    vertical-align: : middle;
+    width: 100%;
+    height: 40px;
+    text-align: left;
+    vertical-align: middle;
+    margin: 0;
+    padding-left: 6px;
+    padding-right: 6px;
 }
-[widget-style=panel-controls] {
-    padding: 6px;
-    text-align: : right;
+[widget-style=panel-ctls] {
+    height: 40px;
+    text-align: right;
+    vertical-align: middle;
+    margin: 0;
+    padding-left: 6px;
+    padding-right: 6px;
+}
+[widget-style=panel-content] {
+    height: 100%;
+    width: 100%;
 }

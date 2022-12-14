@@ -24,22 +24,11 @@
 
 /*****
 *****/
-register(class WPanel extends WArea {
+register(class WPanel extends Widget {
     constructor() {
-        super({
-            tagName: 'div',
-            rows: [
-                {
-                    height: 1,
-                    columns: [
-                        { area: 'title',   width: 7 },
-                        { area: 'control', width: 3 },,
-                    ],
-                },
-            ]
-        });
+        super('table');
+        super.setWidgetStyle('panel');
 
-        /*
         this.ctl = mkActiveData({
             title: '',
             readonly: true,
@@ -47,54 +36,87 @@ register(class WPanel extends WArea {
             closable: true,
         });
 
-        this.controls = mkGridLayout({
-            rows: ['30px', 'auto'],
-            rowGap: '0px',
-            cols: [],
-            colGap: '1px',
-        }).setWidgetStyle('panel-controller');
-        */
+        super.append(mkWidget('tbody').append(
+            mkWidget('tr').append(
+                mkWidget('td').setWidgetStyle('panel-title').append(
+                    mkWH2().setStyle('display', 'inline')
+                ),
+                mkWidget('td').setWidgetStyle('panel-ctls').append(
+                    mkWHotSpot().set('close'),
+                    mkWHotSpot().set('done'),
+                ),
+            ),
+            mkWidget('tr').append(
+                mkWidget('td')
+                .setAttribute('colspan', '2')
+                .setWidgetStyle('panel-content')
+            )
+        ));
+
+        this.heading = super.childAt(0).childAt(0).setStyle('display', 'none');
+        this.title = this.heading.childAt(0).childAt(0);
+        this.ctls = this.heading.childAt(1);
+        this.content = super.childAt(0).childAt(1).childAt(0);
     }
 
-    clearClosable() {
+    append(...args) {
+        this.content.append(...args);
+        return this;
     }
 
-    clearContent() {
+    childAt(index) {
+        this.content.childAt(index);
+        return null;
     }
 
-    clearModified() {
+    children() {
+        return this.content.children();
+    }
+
+    clear() {
+        this.content.clear();
+        return this;
     }
 
     clearTitle() {
+        this.title.set('');
+        return this;
     }
 
-    getClosable() {
-    }
-
-    getContent() {
-    }
-
-    getModified() {
+    get() {
+        return this.content.get();
     }
 
     getTitle() {
+        return this.title.get();
     }
 
-    setClosable() {
+    hideHeading() {
+        this.heading.setStyle('display', 'none');
+        return this;
     }
 
-    setContent(widget) {
+    prepend(...args) {
+        this.content.prepend(...args);
+        return this;
     }
 
-    setModified() {
-    }
-
-    setReadOnly() {
-    }
-
-    setReadWrite() {
+    set(innerHtml) {
+        this.content.set(innerHtml);
+        return this;
     }
 
     setTitle(title) {
+        this.title.set(title);
+        return this;
+    }
+
+    showHeading() {
+        this.heading.setStyle('display', 'inline');
+        return this;
+    }
+
+    [Symbol.iterator]() {
+        return this.content[Symbol.iterator]();
     }
 });

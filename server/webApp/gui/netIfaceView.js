@@ -27,9 +27,29 @@
 register(class FWNetIfaceView extends WPanel {
     constructor(ifaceName) {
         super();
-
+        this.showHeading();
+        this.setTitle(`Network Interface: "${ifaceName}"`);
+        /*
+        super({
+            tagName: 'div',
+            areas: {
+                title: {
+                    row: 0,
+                    col: [0, 4],
+                },
+                ctls: {
+                    row: 0,
+                    col: 5,
+                },
+                content: {
+                    row: [1, 29],
+                    col: [0, 5],
+                },
+            }
+        });
+        */
         (async () => {
-            return;
+            /*
             let user = await queryServer({
                 messageName: 'UserSelectByEmail',
                 email: 'charlie@kodeprogramming.org',
@@ -62,6 +82,7 @@ register(class FWNetIfaceView extends WPanel {
             );
 
             return;
+            */
             let iface = await queryServer({
                 messageName: 'ConfigGetNetIface',
                 ifaceName: ifaceName
@@ -72,7 +93,6 @@ register(class FWNetIfaceView extends WPanel {
             })).map(ca => ({ value: ca.provider, text: ca.name }));
 
             this.append(
-                mkWidget('h1').set(`${txx.fwNetInterface}: "${ifaceName}"`),
                 mkWObjectEditor()
                 .addObj(iface, {
                     active: {

@@ -30,8 +30,8 @@
  * column settings.
 *****/
 register(class WGrid extends Widget {
-    static PlaceholderKey = Symbol('wgrid-placeholder');
-    
+    static PlaceholderKey = Symbol('WGridPlaceholder');
+
     constructor(opts) {
         super(opts.tagName);
         this.cells = [];
@@ -60,25 +60,8 @@ register(class WGrid extends Widget {
             this.cols = ['auto'];
         }
 
-        if (typeof opts.rowGap == 'number') {
-            this.rowGap = `${opts.rowGap}px`;
-        }
-        else if (typeof opts.rowGap == 'string') {
-            this.rowGap = opts.rowGap;
-        }
-        else {
-            this.rowGap = '0px';
-        }
-
-        if (typeof opts.colGap == 'number') {
-            this.colGap = `${opts.colGap}px`;
-        }
-        else if (typeof opts.colGap == 'string') {
-            this.colGap = opts.colGap;
-        }
-        else {
-            this.colGap = '0px';
-        }
+        this.setRowGap(opts.rowGap);
+        this.setColGap(opts.colGap);
 
         this.styleRule.set({
             display: 'grid',
