@@ -29,21 +29,13 @@ register(class WPanel extends Widget {
         super('table');
         super.setWidgetStyle('panel');
 
-        this.ctl = mkActiveData({
-            title: '',
-            readonly: true,
-            modified: true,
-            closable: true,
-        });
-
         super.append(mkWidget('tbody').append(
             mkWidget('tr').append(
                 mkWidget('td').setWidgetStyle('panel-title').append(
                     mkWH2().setStyle('display', 'inline')
                 ),
                 mkWidget('td').setWidgetStyle('panel-ctls').append(
-                    mkWHotSpot().set('close'),
-                    mkWHotSpot().set('done'),
+                    mkWHotSpot().set('action-goes-here'),
                 ),
             ),
             mkWidget('tr').append(
@@ -57,6 +49,7 @@ register(class WPanel extends Widget {
         this.title = this.heading.childAt(0).childAt(0);
         this.ctls = this.heading.childAt(1);
         this.content = super.childAt(0).childAt(1).childAt(0);
+        this.controls = {};
     }
 
     append(...args) {

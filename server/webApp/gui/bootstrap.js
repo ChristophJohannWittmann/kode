@@ -41,13 +41,14 @@
      * web applications and a standard initiialization sequence.
     *****/
     register(async function bootstrap() {
+        await onSingletons();
         window.win = mkWin(window);
         window.doc = win.doc();
         window.styleSheet = doc.getStyleSheet('WebApp');
-        await onSingletons();
-        window.views = mkWStack();
-        doc.body().append(views);
-        views.push(mkFWSignInView());
+        window.html = mkWHtml(doc.getHtml());
+        window.head = mkWHead(doc.getHead());
+        window.body = mkWBody(doc.getBody());
+        body.push(mkFWSignInView());
     });
 
 
@@ -96,18 +97,18 @@
      * to the server.
     *****/
     register(function signIn(sessionState) {
-        views.pop();
-        views.push(webAppSettings.homeView());
+        body.pop();
+        body.push(webAppSettings.homeView());
         webAppSettings.session = () => sessionState.sessionKey;
         webAppSettings.password = () => sessionState.setPassword;
         webAppSettings.verify = () => sessionState.verifyEmail;
 
         if (webAppSettings.password()) {
-            views.push(mkFWPasswordView());
+            body.push(mkFWPasswordView());
         }
 
         if (webAppSettings.verify()) {
-            views.push(mkFWVerifyEmailView());
+            body.push(mkFWVerifyEmailView());
         }
 
         if (webAppSettings.websocket()) {
@@ -129,8 +130,8 @@
             webSocket = null;
         }
 
-        views.clear();
-        views.push(mkFWSignInView());
+        body.clear();
+        body.push(mkFWSignInView());
         webAppSettings.veryify = () => false;
         webAppSettings.password = () => false;
         webAppSettings.session = () => null;

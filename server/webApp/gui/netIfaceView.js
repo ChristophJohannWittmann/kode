@@ -27,8 +27,10 @@
 register(class FWNetIfaceView extends WPanel {
     constructor(ifaceName) {
         super();
-        this.showHeading();
+
         this.setTitle(`Network Interface: "${ifaceName}"`);
+        this.showHeading();
+        
         /*
         super({
             tagName: 'div',

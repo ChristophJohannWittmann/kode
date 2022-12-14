@@ -277,6 +277,7 @@ register(class WebApp extends Webx {
                 'gui/lib',
                 'gui/widgets/inputBase.js',
                 'gui/widgets/input.js',
+                'gui/widgets/stack.js',
                 'gui/widgets',
                 'gui/panels/panel.js',
                 'gui/panels',

@@ -86,10 +86,6 @@ register(class Doc extends Emitter {
         return this.doc.activeElement;
     }
 
-    body() {
-        return mkHtmlElement(this.doc.body);
-    }
-
     characterSet() {
         return this.doc.characterSet;
     }
@@ -100,6 +96,18 @@ register(class Doc extends Emitter {
 
     direction() {
         return this.doc.dir;
+    }
+
+    getBody() {
+        return mkHtmlElement(this.doc.body);
+    }
+
+    getHead() {
+        return mkHtmlElement(this.doc.head);
+    }
+
+    getHtml() {
+        return mkHtmlElement(this.doc.documentElement);
     }
 
     getStyleSheet(title) {
@@ -127,16 +135,8 @@ register(class Doc extends Emitter {
         return styleSheets;
     }
 
-    head() {
-        return mkHtmlElement(this.doc.head);
-    }
-
     hidden() {
         return this.doc.hidden;
-    }
-
-    html() {
-        return mkHtmlElement(this.doc.documentElement);
     }
 
     location() {
