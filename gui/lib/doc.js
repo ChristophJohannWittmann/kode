@@ -151,18 +151,6 @@ register(class Doc extends Emitter {
         return this.doc.referer;
     }
 
-    query(selector) {
-        if (typeof selector == 'string' && selector != '') {
-            let selected = this.doc.querySelector(selector);
-
-            if (selected) {
-                return mkHtmlElement(selected);
-            }
-        }
-
-        return null;
-    }
-
     queryAll(selector) {
         let selected = [];
       
@@ -175,6 +163,18 @@ register(class Doc extends Emitter {
         }
 
         return selected;
+    }
+
+    queryOne(selector) {
+        if (typeof selector == 'string' && selector != '') {
+            let selected = this.doc.querySelector(selector);
+
+            if (selected) {
+                return mkHtmlElement(selected);
+            }
+        }
+
+        return null;
     }
 
     title() {

@@ -48,6 +48,7 @@
         window.html = mkWHtml(doc.getHtml());
         window.head = mkWHead(doc.getHead());
         window.body = mkWBody(doc.getBody());
+        window.home = null;
         body.push(mkFWSignInView());
     });
 
@@ -98,7 +99,9 @@
     *****/
     register(function signIn(sessionState) {
         body.pop();
-        body.push(webAppSettings.homeView());
+        window.home = webAppSettings.homeView()
+        body.push(window.home);
+
         webAppSettings.session = () => sessionState.sessionKey;
         webAppSettings.password = () => sessionState.setPassword;
         webAppSettings.verify = () => sessionState.verifyEmail;
@@ -132,6 +135,7 @@
 
         body.clear();
         body.push(mkFWSignInView());
+        window.home = null;
         webAppSettings.veryify = () => false;
         webAppSettings.password = () => false;
         webAppSettings.session = () => null;

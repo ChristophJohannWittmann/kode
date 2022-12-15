@@ -318,6 +318,26 @@ register(class HtmlElement extends HtmlNode {
         this.node[HtmlElement.propagationKey][eventName] = true;
     }
 
+    enum() {
+        let array = [];
+        let stack = [this.node];
+
+        while(stack.length) {
+            let node = stack.pop();
+
+            for (let i = 0; i < node.childNodes.length; i++) {
+                let child = node.childNodes.item(i);
+
+                if (child instanceof Element) {
+                    stack.push(child);
+                    array.push(mkHtmlElement(child));
+                }
+            }
+        }
+
+        return array;
+    }
+
     getAttribute(name) {
         return this.node.getAttribute(name);
     }
@@ -457,18 +477,6 @@ register(class HtmlElement extends HtmlNode {
         return this;
     }
 
-    query(selector) {
-        if (typeof selector == 'string' && selector != '') {
-            let selected = this.node.querySelector(selector);
-
-            if (selected) {
-                return mkHtmlElement(selected);
-            }
-        }
-
-        return null;
-    }
-
     queryAll(selector) {
         let selected = [];
   
@@ -481,6 +489,18 @@ register(class HtmlElement extends HtmlNode {
         }
   
         return selected
+    }
+
+    queryOne(selector) {
+        if (typeof selector == 'string' && selector != '') {
+            let selected = this.node.querySelector(selector);
+
+            if (selected) {
+                return mkHtmlElement(selected);
+            }
+        }
+
+        return null;
     }
 
     setAttribute(name, value) {
