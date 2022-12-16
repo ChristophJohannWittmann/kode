@@ -29,7 +29,30 @@
  * and area names to manage the content of the widget.  This code uses an
  * implied grid of equally sized cells.  It's implied because the browser seems
  * to compute the entire grid size from the starting and ending coordinates of
- * each of the areas.
+ * each of the areas.  Here's an example of the opts parameter for the ctor:
+ * 
+ * {
+ *      tagName: 'div',
+ *      areas: {
+ *          title: {
+ *              row: 0,
+ *              col: [0, 4],
+ *          },
+ *          ctls: {
+ *              row: 0,
+ *              col: 5,
+ *          },
+ *          content: {
+ *              row: [1, 29],
+ *              col: [0, 5],
+ *          },
+ *      }
+ *  }
+ * 
+ * "tagName" is optional.  "areas" is an object that describes each of the
+ * uniquely named area.  The area name is also its key.  I've noticed that
+ * the browser computes the overall grid dimensions based on the bounds of
+ * the individual areas.
 *****/
 register(class WArea extends Widget {
     constructor(opts) {

@@ -36,14 +36,30 @@ register(class WInput extends InputBaseWidget {
     constructor(type) {
         super('input', 'input');
         this.setAttribute('type', type);
+        this.valid = true;
 
         this.on('html.input', message => {
             this.valueChanged(message.event.target.value);
+            let valid = this.isValid();
+
+            if (valid != this.valid) {
+                this.valid = valid;
+
+                this.send({
+                    messageName: 'Input.Validity',
+                    valid: valid,
+                    widget: this,
+                });
+            }
         });
     }
 
     getValue() {
         return this.getAttribute('value');
+    }
+
+    isValid() {
+        return this.htmlElement.node.checkValidity();
     }
 
     setValue(value) {
@@ -246,7 +262,6 @@ register(class ITime extends WInput {
 register(class IUrl extends WInput {
     constructor() {
         super('url');
-        mkPlaceholderHelper(this);
     }
 });
 
@@ -271,5 +286,6 @@ register(class IHost extends IText {
 register(class IIp extends IText {
     constructor() {
         super();
+        this.setAttribute('pattern', `[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}`);
     }
 });

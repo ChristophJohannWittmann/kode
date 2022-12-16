@@ -24,67 +24,12 @@
 
 /*****
 *****/
-register(class FWNetIfaceView extends WPanel {
+register(class FWNetIfaceView extends Widget {
     constructor(ifaceName) {
-        super();
+        super('form');
+        this.append(mkWSectionTitle(3, `${txx.fwNetInterface} "${ifaceName}"`));
 
-        this.setDisplay(`Network Interface: "${ifaceName}"`);
-        this.showHeading();
-
-        /*
-        super({
-            tagName: 'div',
-            areas: {
-                title: {
-                    row: 0,
-                    col: [0, 4],
-                },
-                ctls: {
-                    row: 0,
-                    col: 5,
-                },
-                content: {
-                    row: [1, 29],
-                    col: [0, 5],
-                },
-            }
-        });
-        */
         (async () => {
-            /*
-            let user = await queryServer({
-                messageName: 'UserSelectByEmail',
-                email: 'charlie@kodeprogramming.org',
-            });
-
-            this.append(
-                mkWObjectEditor()
-                .addDbo(user, {
-                    status: {
-                        type: ScalarEnum,
-                        choices: [
-                            { value: 'active', text: 'Active' },
-                            { value: 'paused', text: 'Suspended' },
-                        ],
-                        label: 'User Status',
-                    },
-                    failures: {
-                        readonly: true,
-                    },
-                    verified: {
-                        readonly: true,
-                    },
-                    password: {
-                        readonly: true,
-                    },
-                    updated: {
-                        type: ScalarTime,
-                    }
-                })
-            );
-
-            return;
-            */
             let iface = await queryServer({
                 messageName: 'ConfigGetNetIface',
                 ifaceName: ifaceName
@@ -94,59 +39,60 @@ register(class FWNetIfaceView extends WPanel {
                 messageName: 'ConfigListAcmeProviders',
             })).map(ca => ({ value: ca.provider, text: ca.name }));
 
-            this.append(
-                mkWObjectEditor()
-                .addObj(iface, {
-                    active: {
-                        label: txx.fwMiscActive,
-                        readonly: true,
-                        type: ScalarBool,
-                    },
-                    address: {
-                        label: txx.fwNetAddress,
-                        readonly: false,
-                        type: ScalarIp,
-                    },
-                    domain: {
-                        label: txx.fwNetDomain,
-                        readonly: false,
-                        type: ScalarHost,
-                    },
-                    host: {
-                        label: txx.fwNetHost,
-                        readonly: false,
-                        type: ScalarText,
-                    },
-                })
-                .addObj(iface.tls, {
-                    acme: {
-                        label: txx.fwNetAcme,
-                        readonly: false,
-                        type: ScalarEnum,
-                        choices: acme,
-                    },
-                    publicKey: {
-                        label: txx.fwNetPublicKey,
-                        readonly: true,
-                        type: ScalarText,
-                    },
-                    privateKey: {
-                        label: txx.fwNetPrivateKey,
-                        readonly: true,
-                        type: ScalarText,
-                    },
-                    cert: {
-                        label: txx.fwNetCert,
-                        readonly: true,
-                        type: ScalarText,
-                    },
-                    caCert: {
-                        label: txx.fwNetCaCert,
-                        readonly: true,
-                        type: ScalarText,
-                    },
-                })
-            );
+            this.editor = mkWObjectEditor()
+            .addObj(iface, {
+                active: {
+                    label: txx.fwMiscActive,
+                    readonly: true,
+                    type: ScalarBool,
+                },
+                address: {
+                    label: txx.fwNetAddress,
+                    readonly: false,
+                    type: ScalarIp,
+                },
+                domain: {
+                    label: txx.fwNetDomain,
+                    readonly: false,
+                    type: ScalarHost,
+                },
+                host: {
+                    label: txx.fwNetHost,
+                    readonly: false,
+                    type: ScalarText,
+                },
+            })
+            .addObj(iface.tls, {
+                acme: {
+                    label: txx.fwNetAcme,
+                    readonly: false,
+                    type: ScalarEnum,
+                    choices: acme,
+                },
+                publicKey: {
+                    label: txx.fwNetPublicKey,
+                    readonly: true,
+                    type: ScalarText,
+                },
+                privateKey: {
+                    label: txx.fwNetPrivateKey,
+                    readonly: true,
+                    type: ScalarText,
+                },
+                cert: {
+                    label: txx.fwNetCert,
+                    readonly: true,
+                    type: ScalarText,
+                },
+                caCert: {
+                    label: txx.fwNetCaCert,
+                    readonly: true,
+                    type: ScalarText,
+                },
+            });
+
+            this.append(this.editor);
+            this.editor.on('Widget.Validity', message => console.log(message));
         })();
     }
 });

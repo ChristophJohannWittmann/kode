@@ -398,14 +398,14 @@ register(class HtmlElement extends HtmlNode {
         return this;
     }
 
-    on(mesageName, handler) {
+    on(messageName, handler) {
         if (!('EMITTER' in this.node)) {
             this.node.EMITTER = mkEmitter();
             this.node.LISTENERS = new Object();
         }
 
-        if (!(mesageName in this.node.LISTENERS)) {
-            this.node.addEventListener(mesageName, event => {
+        if (!(messageName in this.node.LISTENERS)) {
+            this.node.addEventListener(messageName, event => {
                 if (!Object.is(this.node, event.target)) {
                     let propagation = event.target[HtmlElement.propagationKey];
 
@@ -423,18 +423,18 @@ register(class HtmlElement extends HtmlNode {
             });
         }
 
-        this.node.EMITTER.on(mesageName, handler);
+        this.node.EMITTER.on(messageName, handler);
         return this;
     }
 
-    once(mesageName, handler) {
+    once(messageName, handler) {
         if (!('EMITTER' in this.node)) {
             this.node.EMITTER = mkEmitter();
             this.node.LISTENERS = new Object();
         }
 
-        if (!(mesageName in this.node.LISTENERS)) {
-            this.node.addEventListener(mesageName, event => {
+        if (!(messageName in this.node.LISTENERS)) {
+            this.node.addEventListener(messageName, event => {
                 if (!Object.is(this.node, event.target)) {
                     let propagation = event.target[HtmlElement.propagationKey];
 
@@ -452,7 +452,7 @@ register(class HtmlElement extends HtmlNode {
             });
         }
 
-        this.node.EMITTER.once(mesageName, handler);
+        this.node.EMITTER.once(messageName, handler);
         return this;
     }
 

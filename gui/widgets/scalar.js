@@ -150,6 +150,43 @@ register(class WScalar extends Widget {
         return !this.readonly;
     }
 
+    isValid() {
+        return this.editor.htmlElement.node.checkValidity();
+    }
+
+    off(messageName, handler) {
+        if (messageName == 'Input.Validity') {
+            this.editor.off(messageName, handler);
+        }
+        else {
+            super.off(messageName, handler);
+        }
+
+        return this;
+    }
+
+    on(messageName, handler, filter) {
+        if (messageName == 'Input.Validity') {
+            this.editor.on(messageName, handler, filter);
+        }
+        else {
+            super.on(messageName, handler, filter);            
+        }
+
+        return this;
+    }
+
+    once(messageName, handler, filter) {
+        if (messageName == 'Input.Validity') {
+            this.editor.once(messageName, handler, filter);
+        }
+        else {
+            super.once(messageName, handler, filter);            
+        }
+
+        return this;
+    }
+
     static selectType(value) {
         if (typeof value == 'object') {
             if (value instanceof Date || value instanceof Time) {

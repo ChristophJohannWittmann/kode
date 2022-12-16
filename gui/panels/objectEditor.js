@@ -23,10 +23,19 @@
 
 
 /*****
+ * The object editor provides a ready-made panel for viewing and editing objects.
+ * There are two primary methods for adding fields to be edited: addDbo() and
+ * addObj().  AddObj() are for objects in general, while addDbo() is specifically
+ * written to facilitate editing of Dbo Objects by being aware of the semantics
+ * of some of the common DBMS table columns.  This form automatically builds a
+ * form-like table used for viewing and editing object properties.  Additionally,
+ * each method accepts options data, which specifies editing and viewing options
+ * for each field.
 *****/
 register(class WObjectEditor extends WTable {
     constructor(readonly) {
         super();
+        this.invalid = 0;
         this.fields = mkActiveData();
         this.readonly = readonly ? readonly : false;
     }
@@ -55,7 +64,11 @@ register(class WObjectEditor extends WTable {
 
                             this.getBody().mkRow()
                             .mkCell(opts.label ? opts.label : property)
-                            .mkCell(mkWScalar(this.fields, property, opts));
+                            .mkCell(
+                                mkWScalar(this.fields, property, opts)
+                                .on('Widget.Changed', message => this.onValueChanged(message))
+                                .on('Input.Validity', message => this.onValidityChanged(message))
+                            );
                         }
                     }
                     else {
@@ -66,7 +79,11 @@ register(class WObjectEditor extends WTable {
 
                         this.getBody().mkRow()
                         .mkCell(property)
-                        .mkCell(mkWScalar(this.fields, property, opts));
+                        .mkCell(
+                            mkWScalar(this.fields, property, opts)
+                            .on('Widget.Changed', message => this.onValueChanged(message))
+                            .on('Input.Validity', message => this.onValidityChanged(message))
+                        );
                     }
                 }
             }
@@ -99,7 +116,11 @@ register(class WObjectEditor extends WTable {
 
                             this.getBody().mkRow()
                             .mkCell(opts.label ? opts.label : property)
-                            .mkCell(mkWScalar(this.fields, property, opts));
+                            .mkCell(
+                                mkWScalar(this.fields, property, opts)
+                                .on('Widget.Changed', message => this.onValueChanged(message))
+                                .on('Input.Validity', message => this.onValidityChanged(message))
+                            );
                         }
                     }
                     else {
@@ -109,13 +130,54 @@ register(class WObjectEditor extends WTable {
 
                         this.getBody().mkRow()
                         .mkCell(property)
-                        .mkCell(mkWScalar(this.fields, property, opts));
+                        .mkCell(
+                            mkWScalar(this.fields, property, opts)
+                            .on('Widget.Changed', message => this.onValueChanged(message))
+                            .on('Input.Validity', message => this.onValidityChanged(message))
+                        );
                     }
                 }
             }
         }
 
         return this;
+    }
+
+    isValid() {
+        return this.invalid == 0;
+    }
+
+    onValidityChanged(message) {
+        if (message.valid) {
+            this.invalid--;
+
+            if (this.invalid == 0) {
+                this.send({
+                    messageName: 'Widget.Validity',
+                    valid: true,
+                    widget: this,
+                })
+            }
+        }
+        else {
+            this.invalid++;
+
+            if (this.invalid == 1) {
+                this.send({
+                    messageName: 'Widget.Validity',
+                    valid: false,
+                    widget: this,
+                })
+            }
+        }
+    }
+
+    onValueChanged(message) {
+        this.send({
+            messageName: 'Widget.Changed',
+            changed: message.widget,
+            widget: this,
+        });
     }
 
     value() {

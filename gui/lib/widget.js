@@ -39,9 +39,11 @@ register(class Widget extends Emitter {
     static initialized = {};
     static widgetKey = Symbol('widget');
     static bindingKey = Symbol('binding');
+    static handlerKey = Symbol('handler');
 
     constructor(arg) {
         super();
+        this[Widget.handlerKey] = {};
         this.selector = `widget${Widget.nextId++}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
         this[Widget.bindingKey] = 'innerHtml';
@@ -221,33 +223,35 @@ register(class Widget extends Emitter {
     }
 
     off(messageName, handler) {
+        super.off(messageName, handler);
+
         if (messageName.startsWith('html.')) {
-            this.htmlElement.off(messageName.substr(5), handler)
-        }
-        else {
-            super.off(messageName, handler);
+            if (messageName in this[Widget.handlerKey]) {
+                if (this[Widget.handlerKey][messageName].count-- <= 0) {
+                    this.htmlElement.off(messageName.substr(5), this[Widget.handlerKey][messageName].handler);
+                    delete this[Widget.handlerKey][messageName];
+                }
+            }
         }
 
         return this;
     }
 
     on(messageName, handler, filter) {
+        super.on(messageName, handler, filter);
+
         if (messageName.startsWith('html.')) {
-            this.htmlElement.on(messageName.substr(5), handler, filter)
-        }
-        else {
-            super.on(messageName, handler, filter);
+            this.registerHandler(messageName, false);
         }
 
         return this;
     }
 
     once(messageName, handler, filter) {
+        super.once(messageName, handler, filter);
+
         if (messageName.startsWith('html.')) {
-            this.htmlElement.once(messageName.substr(5), handler, filter)
-        }
-        else {
-            super.once(messageName, handler, filter);
+            this.registerHandler(messageName, true);
         }
 
         return this;
@@ -257,7 +261,7 @@ register(class Widget extends Emitter {
         let parent = this.htmlElement.parent();
 
         if (parent) {
-            return parent.widget();    
+            return parent.widget();
         }
     }
 
@@ -271,6 +275,27 @@ register(class Widget extends Emitter {
         });
 
         return this;
+    }
+
+    registerHandler(messageName, once) {
+        if (messageName in this[Widget.handlerKey]) {
+            this[Widget.handlerKey][messageName].count++;
+            return this[Widget.handlerKey][messageName].handler;
+        }
+        else {
+            let handler = message => {
+                message.messageName = `html.${message.messageName}`;
+                this.send(message);
+            };
+
+            this[Widget.handlerKey][messageName] = {
+                count: 1,
+                handler: handler,
+            };
+
+            once ? this.htmlElement.once(messageName.substr(5), handler) : this.htmlElement.on(messageName.substr(5), handler);
+            return handler;
+        }
     }
 
     remove() {

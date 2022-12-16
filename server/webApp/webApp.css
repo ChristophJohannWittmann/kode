@@ -1255,3 +1255,13 @@ body {
     margin: 0px;
     padding: 0px;
 }
+
+
+/***********************************************
+ * Section Title
+ ***********************************************/
+[widget-style=section-title] {
+    width: 100%;
+    padding-left: 8px;
+    padding-right: 8px;
+}

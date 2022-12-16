@@ -36,53 +36,72 @@ register(class WHotSpot extends Widget {
 
 
 /*****
+*****/
+register(class WSectionTitle extends Widget {
+    constructor(number, text) {
+        super();
+        this.setWidgetStyle('section-title');
+        this.append(mkWHr());
+        this.append(mkWidget(`h${number}`).set(text));
+        this.append(mkWHr());
+    }
+});
+
+
+/*****
  * The following are shortcut classes for creating widgets for frequently used
  * HTML elements.  There are not other features other than the shortcut itself.
 *****/
 register(class WDiv extends Widget {
-    constructor(...args) {
-        super('div', ...args);
+    constructor() {
+        super('div');
     }
 });
 
 register(class WSpan extends Widget {
-    constructor(...args) {
-        super('span', ...args);
+    constructor() {
+        super('span');
     }
 });
 
 register(class WH1 extends Widget {
-    constructor(...args) {
-        super('h1', ...args);
+    constructor() {
+        super('h1');
     }
 });
 
 register(class WH2 extends Widget {
-    constructor(...args) {
-        super('h2', ...args);
+    constructor() {
+        super('h2');
     }
 });
 
 register(class WH3 extends Widget {
-    constructor(...args) {
-        super('h3', ...args);
+    constructor() {
+        super('h3');
     }
 });
 
 register(class WH4 extends Widget {
-    constructor(...args) {
-        super('h4', ...args);
+    constructor() {
+        super('h4');
     }
 });
 
 register(class WH5 extends Widget {
-    constructor(...args) {
-        super('h5', ...args);
+    constructor() {
+        super('h5');
     }
 });
 
 register(class WH6 extends Widget {
-    constructor(...args) {
-        super('h6', ...args);
+    constructor() {
+        super('h6');
+    }
+});
+
+register(class WHr extends Widget {
+    constructor() {
+        super('hr');
     }
 });
