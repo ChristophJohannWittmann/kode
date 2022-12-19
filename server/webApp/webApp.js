@@ -272,6 +272,7 @@ register(class WebApp extends Webx {
 
         this.framework = { '': await buildClientCode([
                 'framework/core.js',
+                'framework/message.js',
                 'framework',
                 'gui/lib/entryFilter.js',
                 'gui/lib',

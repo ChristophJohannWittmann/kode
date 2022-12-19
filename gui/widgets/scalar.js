@@ -122,7 +122,9 @@ define('ScalarWeek', {
  * that there should be a common way to view and edit the set of scalar values
  * on widget, whether the value is self standading or part of a non-scalar data
  * cluster such as an object or an array.  Other non-scalar types will include
- * a subset selector, e.g., something with radio buttons.
+ * a subset selector, e.g., something with radio buttons.  One useful feature is
+ * the ability to rename the messages, which enables one to provide a more
+ * coherent set of message names for messages from the proxied object.
 *****/
 register(class WScalar extends Widget {
     static dboReadonly = mkStringSet('oid', 'created', 'updated');
@@ -132,6 +134,10 @@ register(class WScalar extends Widget {
         this.viewer = opts.type.mkViewer(opts).bind(activeData, key);
         this.editor = opts.type.mkEditor(opts).bind(activeData, key);
         opts.readonly ? this.setReadOnly() : this.setReadWrite();
+
+        let proxy =mkMessageProxy(this);
+        proxy.route(this.editor, 'Widget.Changed', 'Scalar.Changed');
+        proxy.route(this.editor, 'Input.Validity', 'Scalar.Validity');
     }
 
     static dboReadonlyByDefault(propertyName) {

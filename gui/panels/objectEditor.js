@@ -66,8 +66,8 @@ register(class WObjectEditor extends WTable {
                             .mkCell(opts.label ? opts.label : property)
                             .mkCell(
                                 mkWScalar(this.fields, property, opts)
-                                .on('Widget.Changed', message => this.onValueChanged(message))
-                                .on('Input.Validity', message => this.onValidityChanged(message))
+                                .on('Scalar.Changed', message => this.onValueChanged(message))
+                                .on('Scalar.Validity', message => this.onValidityChanged(message))
                             );
                         }
                     }
@@ -81,8 +81,8 @@ register(class WObjectEditor extends WTable {
                         .mkCell(property)
                         .mkCell(
                             mkWScalar(this.fields, property, opts)
-                            .on('Widget.Changed', message => this.onValueChanged(message))
-                            .on('Input.Validity', message => this.onValidityChanged(message))
+                            .on('Scalar.Changed', message => this.onValueChanged(message))
+                            .on('Scalar.Validity', message => this.onValidityChanged(message))
                         );
                     }
                 }
@@ -118,8 +118,8 @@ register(class WObjectEditor extends WTable {
                             .mkCell(opts.label ? opts.label : property)
                             .mkCell(
                                 mkWScalar(this.fields, property, opts)
-                                .on('Widget.Changed', message => this.onValueChanged(message))
-                                .on('Input.Validity', message => this.onValidityChanged(message))
+                                .on('Scalar.Changed', message => this.onValueChanged(message))
+                                .on('Scalar.Validity', message => this.onValidityChanged(message))
                             );
                         }
                     }
@@ -132,8 +132,8 @@ register(class WObjectEditor extends WTable {
                         .mkCell(property)
                         .mkCell(
                             mkWScalar(this.fields, property, opts)
-                            .on('Widget.Changed', message => this.onValueChanged(message))
-                            .on('Input.Validity', message => this.onValidityChanged(message))
+                            .on('Scalar.Changed', message => this.onValueChanged(message))
+                            .on('Scalar.Validity', message => this.onValidityChanged(message))
                         );
                     }
                 }
@@ -153,7 +153,7 @@ register(class WObjectEditor extends WTable {
 
             if (this.invalid == 0) {
                 this.send({
-                    messageName: 'Widget.Validity',
+                    messageName: 'Scalar.Validity',
                     valid: true,
                     widget: this,
                 })
@@ -164,7 +164,7 @@ register(class WObjectEditor extends WTable {
 
             if (this.invalid == 1) {
                 this.send({
-                    messageName: 'Widget.Validity',
+                    messageName: 'Scalar.Validity',
                     valid: false,
                     widget: this,
                 })
@@ -174,7 +174,7 @@ register(class WObjectEditor extends WTable {
 
     onValueChanged(message) {
         this.send({
-            messageName: 'Widget.Changed',
+            messageName: 'Scalar.Changed',
             changed: message.widget,
             widget: this,
         });

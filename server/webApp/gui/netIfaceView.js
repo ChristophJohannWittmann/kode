@@ -69,13 +69,13 @@ register(class FWNetIfaceView extends Widget {
                     type: ScalarEnum,
                     choices: acme,
                 },
-                publicKey: {
-                    label: txx.fwNetPublicKey,
+                privateKey: {
+                    label: txx.fwNetPrivateKey,
                     readonly: true,
                     type: ScalarText,
                 },
-                privateKey: {
-                    label: txx.fwNetPrivateKey,
+                publicKey: {
+                    label: txx.fwNetPublicKey,
                     readonly: true,
                     type: ScalarText,
                 },
@@ -92,7 +92,11 @@ register(class FWNetIfaceView extends Widget {
             });
 
             this.append(this.editor);
-            this.editor.on('Widget.Validity', message => console.log(message));
+
+            this.editor.on('Scalar.Validity', message => {
+                console.log(message);
+                
+            });
         })();
     }
 });
