@@ -30,7 +30,7 @@
  * controls and a logo or title or some other such branding or informational
  * data.  The heading can either be shown or hidden.
 *****/
-register(class WPanel extends Widget {
+register(class WPanel extends WContainer {
     constructor() {
         super();
         super.setWidgetStyle('panel');
@@ -106,19 +106,42 @@ register(class WPanel extends Widget {
     }
 
     onStackChanged(message) {
-        if (this.stack.length() > 1) {
-            if (!('BACK' in this.ctls)) {
-                this.prependCtl('BACK', mkWHotSpot()
-                    .set('Back')
-                    .on('html.click', message => {
-                        this.stack.pop();
-                    })
-                );
+        if (message.type in { push:0, pop:0 }) {
+            let top = this.stack.top();
+
+            if (top) {
+                if ('panelCtls' in top && typeof top.panelCtls == 'object') {
+                    for (let ctlName in top.panelCtls) {
+                        this.removeCtl(ctlName);
+                    }
+                }
             }
-        }
-        else if (this.stack.length() <= 1) {
-            if ('BACK' in this.ctls) {
-                this.removeCtl('BACK');
+
+            if (this.stack.length() > 1) {
+                if (!('BACK' in this.ctls)) {
+                    this.prependCtl('BACK', mkWHotSpot()
+                        .set('Back')
+                        .on('html.click', message => {
+                            this.stack.pop();
+                        })
+                    );
+                }
+            }
+            else if (this.stack.length() == 1) {
+                if ('BACK' in this.ctls) {
+                    this.removeCtl('BACK');
+                }
+            }
+
+            top = this.stack.top();
+
+            if (top) {
+                if ('panelCtls' in top && typeof top.panelCtls == 'object') {
+                    for (let ctlName of Object.keys(top.panelCtls).reverse()) {
+                        let ctl = top.panelCtls[ctlName];
+                        this.prepentCtl(ctlName, ctl);
+                    }
+                }
             }
         }
     }
@@ -196,7 +219,7 @@ register(class WPanel extends Widget {
 
     unwireStack() {
         if (this.stack && this.stackHandler) {
-            this.stack.off('StackWidget.Changed', this.stackHandler);
+            this.stack.off('Widget.Changed', this.stackHandler);
             this.stack = null;
             this.stackHandler = null;
         }
@@ -207,7 +230,7 @@ register(class WPanel extends Widget {
             this.stack = stack;
             this.stack.setAttribute('panel-ctl', 'STACK');
             this.stackHandler = message => this.onStackChanged(message);
-            this.stack.on('StackWidget.Changed', this.stackHandler);
+            this.stack.on('Widget.Changed', this.stackHandler);
         }
     }
 });

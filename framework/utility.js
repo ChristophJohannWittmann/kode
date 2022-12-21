@@ -242,6 +242,22 @@ register(function clone(src) {
 
 
 /*****
+ * Function to create a shallow copy of the original or src object.  A shallow
+ * copy is especially useful when the src contains browser-based DOM objects, in
+ * which case a deep clone is not practical to generated.
+*****/
+register(function copy(src) {
+    let copy = {};
+
+    for (let property in src) {
+        copy[property] = src[property];
+    }
+
+    return copy;
+});
+
+
+/*****
  * Takes a single character and builds a string that's as long as the specified
  * count parameter.  It's not padding, it's just a repeating sequence of the
  * same char that's resturned as a string.

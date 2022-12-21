@@ -24,30 +24,38 @@
 
 /*****
 *****/
-register(async function loadConfigFile(name) {
-    let exists = true;
-    const filePath = PATH.join(env.configPath, `${name}.json`);
+register(class WContainer extends Widget {
+    static wireable = [
+        'Widget.Changed',
+        'Widget.Modified',
+        'Widget.Validity',
+    ];
 
-    class ServerSettings {
-        constructor() {
-            return new Promise(async (ok, fail) => {
-                if (await isFile(filePath)) {
-                    try {
-                        let buffer = await FILES.readFile(filePath);
-                        let object = fromJson(buffer.toString());
-                        Object.assign(this, object);
-                    }
-                    catch (e) {}
+    constructor() {
+        super();
+        this.wired = new WeakMap();
+    }
+
+    onWidgetChanged(message) {
+        console.log(message);
+    }
+
+    onWidgetModified(message) {
+    }
+
+    onWidgetValidity(message) {
+    }
+
+    wire(widget) {
+        if (widget instanceof Widget) {
+            if (!this.wired.has(widget)) {
+                for (let wireable of WContainer.wireable) {
+                    widget.on(wireable, message => this[`on${wireable.replaceAll('.', '')}`]);
                 }
-
-                ok(this);
-            });
-        }
-
-        [Symbol.iterator]() {
-            Object.keys(this)[Symbol.iterator]();
+            }
         }
     }
 
-    return await (new ServerSettings());
+    unwire(widget) {
+    }
 });

@@ -126,7 +126,7 @@ define('ScalarWeek', {
  * the ability to rename the messages, which enables one to provide a more
  * coherent set of message names for messages from the proxied object.
 *****/
-register(class WScalar extends Widget {
+define('WScalar', class WScalar extends Widget {
     static dboReadonly = mkStringSet('oid', 'created', 'updated');
 
     constructor(activeData, key, opts) {
@@ -135,9 +135,9 @@ register(class WScalar extends Widget {
         this.editor = opts.type.mkEditor(opts).bind(activeData, key);
         opts.readonly ? this.setReadOnly() : this.setReadWrite();
 
-        let proxy =mkMessageProxy(this);
-        proxy.route(this.editor, 'Widget.Changed', 'Scalar.Changed');
-        proxy.route(this.editor, 'Input.Validity', 'Scalar.Validity');
+        let proxy = mkMessageProxy(this);
+        proxy.route(this.editor, 'Widget.Changed');
+        proxy.route(this.editor, 'Widget.Validity');
     }
 
     static dboReadonlyByDefault(propertyName) {
@@ -161,35 +161,17 @@ register(class WScalar extends Widget {
     }
 
     off(messageName, handler) {
-        if (messageName == 'Input.Validity') {
-            this.editor.off(messageName, handler);
-        }
-        else {
-            super.off(messageName, handler);
-        }
-
+        super.off(messageName, handler);
         return this;
     }
 
     on(messageName, handler, filter) {
-        if (messageName == 'Input.Validity') {
-            this.editor.on(messageName, handler, filter);
-        }
-        else {
-            super.on(messageName, handler, filter);            
-        }
-
+        super.on(messageName, handler, filter);
         return this;
     }
 
     once(messageName, handler, filter) {
-        if (messageName == 'Input.Validity') {
-            this.editor.once(messageName, handler, filter);
-        }
-        else {
-            super.once(messageName, handler, filter);            
-        }
-
+        super.once(messageName, handler, filter);
         return this;
     }
 
@@ -221,5 +203,29 @@ register(class WScalar extends Widget {
         this.append(this.editor);
         this.readonly = false;
         return this;
+    }
+});
+
+
+/*****
+ * This is where scalar subclasses are registered as they defined.  The subclass
+ * map is essential to selecting which WScalar subclass to create when calling
+ * mkWScalar().
+*****/
+define('ScalarSubclasses', {
+});
+
+
+/*****
+ * The reason for taking this syntactically longer approach to defined WScalar
+ * is that I want to be able to call mkScalar() with a opts.type value that
+ * can be used to select from a WScalar subclass to construct.
+*****/
+define(`mkWScalar`, (activeData, key, opts) => {
+    if (opts && opts.type in ScalarSubclasses) {
+        return ScalarSubclasses[opts.type](activeData, key, opts);
+    }
+    else {
+        return new WScalar(activeData, key, opts)
     }
 });

@@ -30,7 +30,7 @@
  * Config singleton instance is whatever value is returned back by the singleton
  * constructor's promise resolution.
 *****/
-singleton(class Config {    
+singleton(class Config {
     async loadSystem() {
         if (!env.configPath || !await pathExists(env.configPath)) {
             return `Configuration directory not found: "${env.configPath}"`;
@@ -40,6 +40,12 @@ singleton(class Config {
 
         if (!stats.isDirectory()) {
             return `Configuration directory is not a standard directory" "${env.configPath}"`;
+        }
+
+        FILES.chmod(env.configPath, 0o700);
+
+        for (let path of await recurseFiles(env.configPath)) {
+            FILES.chmod(path, 0o600);
         }
 
         let serverConfigPath = PATH.join(env.configPath, 'builtin.json');
@@ -53,6 +59,7 @@ singleton(class Config {
         if (!stats.isFile()) {
             return `Server configuration path is not a regular file: "${serverConfigPath}"`;
         }
+
         
         let buffer = await FILES.readFile(serverConfigPath);
         let systemConfig = fromJson(buffer.toString());

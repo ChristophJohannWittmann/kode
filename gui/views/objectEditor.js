@@ -36,7 +36,9 @@ register(class WObjectEditor extends WTable {
     constructor(readonly) {
         super();
         this.invalid = 0;
-        this.fields = mkActiveData();
+        this.modified = false;
+        this.unmodified = {};
+        this.modifiable = mkActiveData();
         this.readonly = readonly ? readonly : false;
     }
 
@@ -52,37 +54,39 @@ register(class WObjectEditor extends WTable {
                         let opts = clone(options[property]);
 
                         if (!opts.hidden) {
-                            this.fields[property] = value;
+                            this.unmodified[property] = value;
+                            this.modifiable[property] = value;
 
                             if ('readonly' in opts) {
                                 readonly = readonly || opts.readonly;
                             }
 
                             if (!('type' in opts)) {
-                                opts.type = WScalar.selectType(this.fields[property]);
+                                opts.type = WScalar.selectType(this.modifiable[property]);
                             }
 
                             this.getBody().mkRow()
                             .mkCell(opts.label ? opts.label : property)
                             .mkCell(
-                                mkWScalar(this.fields, property, opts)
-                                .on('Scalar.Changed', message => this.onValueChanged(message))
-                                .on('Scalar.Validity', message => this.onValidityChanged(message))
+                                mkWScalar(this.modifiable, property, opts)
+                                .on('Widget.Changed', message => this.onValueChanged(message))
+                                .on('Widget.Validity', message => this.onValidityChanged(message))
                             );
                         }
                     }
                     else {
-                        this.fields[property] = value;
+                        this.unmodified[property] = value;
+                        this.modifiable[property] = value;
                         let readonly = this.readonly || WScalar.dboReadonlyByDefault(property);
-                        let type = WScalar.selectType(this.fields[property]);
+                        let type = WScalar.selectType(this.modifiable[property]);
                         let opts = { readonly: readonly, type: type };
 
                         this.getBody().mkRow()
                         .mkCell(property)
                         .mkCell(
-                            mkWScalar(this.fields, property, opts)
-                            .on('Scalar.Changed', message => this.onValueChanged(message))
-                            .on('Scalar.Validity', message => this.onValidityChanged(message))
+                            mkWScalar(this.modifiable, property, opts)
+                            .on('Widget.Changed', message => this.onValueChanged(message))
+                            .on('Widget.Validity', message => this.onValidityChanged(message))
                         );
                     }
                 }
@@ -104,36 +108,38 @@ register(class WObjectEditor extends WTable {
                         let opts = clone(options[property]);
 
                         if (!opts.hidden) {
-                            this.fields[property] = value;
+                            this.unmodified[property] = value;
+                            this.modifiable[property] = value;
 
                             if ('readonly' in opts) {
                                 readonly = readonly || opts.readonly;
                             }
 
                             if (!('type' in opts)) {
-                                opts.type = WScalar.selectType(this.fields[property]);
+                                opts.type = WScalar.selectType(this.modifiable[property]);
                             }
 
                             this.getBody().mkRow()
                             .mkCell(opts.label ? opts.label : property)
                             .mkCell(
-                                mkWScalar(this.fields, property, opts)
-                                .on('Scalar.Changed', message => this.onValueChanged(message))
-                                .on('Scalar.Validity', message => this.onValidityChanged(message))
+                                mkWScalar(this.modifiable, property, opts)
+                                .on('Widget.Changed', message => this.onValueChanged(message))
+                                .on('Widget.Validity', message => this.onValidityChanged(message))
                             );
                         }
                     }
                     else {
-                        this.fields[property] = value;
-                        let type = WScalar.selectType(this.fields[property]);
+                        this.unmodified[property] = value;
+                        this.modifiable[property] = value;
+                        let type = WScalar.selectType(this.modifiable[property]);
                         let opts = { readonly: this.readonly, type: type };
 
                         this.getBody().mkRow()
                         .mkCell(property)
                         .mkCell(
-                            mkWScalar(this.fields, property, opts)
-                            .on('Scalar.Changed', message => this.onValueChanged(message))
-                            .on('Scalar.Validity', message => this.onValidityChanged(message))
+                            mkWScalar(this.modifiable, property, opts)
+                            .on('Widget.Changed', message => this.onValueChanged(message))
+                            .on('Widget.Validity', message => this.onValidityChanged(message))
                         );
                     }
                 }
@@ -141,6 +147,10 @@ register(class WObjectEditor extends WTable {
         }
 
         return this;
+    }
+
+    isModified() {
+        return !areEqual(this.unmodified, ActiveData.value(this.modifiable));
     }
 
     isValid() {
@@ -153,7 +163,7 @@ register(class WObjectEditor extends WTable {
 
             if (this.invalid == 0) {
                 this.send({
-                    messageName: 'Scalar.Validity',
+                    messageName: 'Widget.Validity',
                     valid: true,
                     widget: this,
                 })
@@ -164,7 +174,7 @@ register(class WObjectEditor extends WTable {
 
             if (this.invalid == 1) {
                 this.send({
-                    messageName: 'Scalar.Validity',
+                    messageName: 'Widget.Validity',
                     valid: false,
                     widget: this,
                 })
@@ -173,14 +183,28 @@ register(class WObjectEditor extends WTable {
     }
 
     onValueChanged(message) {
+        let modified = this.isModified();
+
         this.send({
-            messageName: 'Scalar.Changed',
+            messageName: 'Widget.Changed',
             changed: message.widget,
             widget: this,
+            modified: modified,
         });
+
+        if (modified != this.modified) {
+            this.modified = modified;
+            
+            this.send({
+                messageName: 'Widget.Modified',
+                changed: message.widget,
+                widget: this,
+                modified: this.modified,
+            });
+        }
     }
 
     value() {
-        return ActiveData.value(this.fields);
+        return ActiveData.value(this.modifiable);
     }
 });

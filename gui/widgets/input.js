@@ -46,7 +46,7 @@ register(class WInput extends InputBaseWidget {
                 this.valid = valid;
 
                 this.send({
-                    messageName: 'Input.Validity',
+                    messageName: 'Widget.Validity',
                     valid: valid,
                     widget: this,
                 });

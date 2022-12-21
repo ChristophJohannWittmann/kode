@@ -93,10 +93,12 @@ register(class FWNetIfaceView extends Widget {
 
             this.append(this.editor);
 
-            this.editor.on('Scalar.Validity', message => {
-                console.log(message);
-                
-            });
+            let proxy = mkMessageProxy(this);
+            proxy.route(this.editor, 'Widget.Changed');
+            proxy.route(this.editor, 'Widget.Modified');
+            proxy.route(this.editor, 'Widget.Validity');
+            
+            this.getPanel().wire(this);
         })();
     }
 });

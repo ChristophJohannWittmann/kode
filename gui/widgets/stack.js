@@ -66,7 +66,7 @@ register(class WStack extends Widget {
             }
 
             this.send({
-                messageName: 'StackWidget.Changed',
+                messageName: 'Widget.Changed',
                 type: 'insert',
                 widget: this,
                 index: index,
@@ -96,7 +96,7 @@ register(class WStack extends Widget {
             this.stack.splice(toIndex+1, 0, widget);
 
             this.send({
-                messageName: 'StackWidget.Changed',
+                messageName: 'Widget.Changed',
                 type: 'move',
                 widget: this,
                 fromIndex: fromIndex,
@@ -111,7 +111,7 @@ register(class WStack extends Widget {
             this.stack.splice(toIndex-1, 0, widget);
 
             this.send({
-                messageName: 'StackWidget.Changed',
+                messageName: 'Widget.Changed',
                 type: 'move',
                 widget: this,
                 fromIndex: fromIndex,
@@ -130,7 +130,7 @@ register(class WStack extends Widget {
                 this.stack.unshift(widget);
 
                 this.send({
-                    messageName: 'StackWidget.Changed',
+                    messageName: 'Widget.Changed',
                     type: 'move',
                     widget: this,
                     fromIndex: fromIndex,
@@ -150,7 +150,7 @@ register(class WStack extends Widget {
                 this.stack.splice(fromIndex-1, 0, widget);
 
                 this.send({
-                    messageName: 'StackWidget.Changed',
+                    messageName: 'Widget.Changed',
                     type: 'move',
                     widget: this,
                     fromIndex: fromIndex,
@@ -170,7 +170,7 @@ register(class WStack extends Widget {
                 this.stack.push(widget);
 
                 this.send({
-                    messageName: 'StackWidget.Changed',
+                    messageName: 'Widget.Changed',
                     type: 'move',
                     widget: this,
                     fromIndex: fromIndex,
@@ -190,7 +190,7 @@ register(class WStack extends Widget {
                 this.stack.splice(fromIndex+1, 0, widget);
 
                 this.send({
-                    messageName: 'StackWidget.Changed',
+                    messageName: 'Widget.Changed',
                     type: 'move',
                     widget: this,
                     fromIndex: fromIndex,
@@ -215,8 +215,8 @@ register(class WStack extends Widget {
             }
 
             this.send({
-                messageName: 'StackWidget.Changed',
-                type: 'remove',
+                messageName: 'Widget.Changed',
+                type: 'pop',
                 widget: this,
                 removed: top,
             });
@@ -238,7 +238,7 @@ register(class WStack extends Widget {
         }
 
         this.send({
-            messageName: 'StackWidget.Changed',
+            messageName: 'Widget.Changed',
             type: 'remove',
             widget: this,
             removed: shifted,
@@ -259,8 +259,8 @@ register(class WStack extends Widget {
         }
 
         this.send({
-            messageName: 'StackWidget.Changed',
-            type: 'add',
+            messageName: 'Widget.Changed',
+            type: 'push',
             widget: this,
             added: widget,
             index: this.stack.length-1,
@@ -273,8 +273,8 @@ register(class WStack extends Widget {
         this.stack.unshift(widget);
 
         this.send({
-            messageName: 'StackWidget.Changed',
-            type: 'add',
+            messageName: 'Widget.Changed',
+            type: 'insert',
             widget: this,
             added: widget,
             index: 0,
@@ -291,7 +291,7 @@ register(class WStack extends Widget {
             this.stack.splice(index, 1);
 
             this.send({
-                messageName: 'StackWidget.Changed',
+                messageName: 'Widget.Changed',
                 type: 'remove',
                 widget: this,
                 removed: widget,

@@ -60,22 +60,22 @@ register(class ConfigEndpoints extends EndpointContainer {
 
         if (iface.tls) {
             if (!iface.tls.privateKey) {
-                iface.tls.privateKey = '...';
+                iface.tls.privateKey = '[NONE]';
             }
             else {
                 iface.tls.privateKey = '[Private Key]';
             }
 
             if (!iface.tls.publicKey) {
-                iface.tls.publicKey = '...';
+                iface.tls.publicKey = '[NONE]';
             }
 
             if (!iface.tls.cert) {
-                iface.tls.cert = '...';
+                iface.tls.cert = '[NONE]';
             }
 
             if (!iface.tls.caCert) {
-                iface.tls.caCert = '...';
+                iface.tls.caCert = '[NONE]';
             }
         }
 
@@ -94,5 +94,27 @@ register(class ConfigEndpoints extends EndpointContainer {
     }
 
     async [ mkEndpoint('ConfigListNetIfaces', 'system') ](trx) {
+        let config = await loadConfigFile('builtin');
+        return Object.keys(config.network);
+    }
+
+    async [ mkEndpoint('UpdateNetIface', 'system') ](trx) {
+        let config = await loadConfigFile('builtin');
+
+        if (trx.ifaceName in config.network) {
+            for (let property in config.network[trx.ifaceName]) {
+                if (property in trx) {
+                    config.network[ifaceName][property] = trx[property];
+                }
+            }
+
+            for (let property in config.network[trx.ifaceName].tls) {
+                if (property in trx) {
+                    config.network[ifaceName].tls[property] = trx[property];
+                }
+            }
+        }
+
+        console.log(config.network);
     }
 });

@@ -24,30 +24,8 @@
 
 /*****
 *****/
-register(async function loadConfigFile(name) {
-    let exists = true;
-    const filePath = PATH.join(env.configPath, `${name}.json`);
-
-    class ServerSettings {
-        constructor() {
-            return new Promise(async (ok, fail) => {
-                if (await isFile(filePath)) {
-                    try {
-                        let buffer = await FILES.readFile(filePath);
-                        let object = fromJson(buffer.toString());
-                        Object.assign(this, object);
-                    }
-                    catch (e) {}
-                }
-
-                ok(this);
-            });
-        }
-
-        [Symbol.iterator]() {
-            Object.keys(this)[Symbol.iterator]();
-        }
+register(class FWHomeBase extends WPanel {
+    constructor() {
+        super();
     }
-
-    return await (new ServerSettings());
 });

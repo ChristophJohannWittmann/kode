@@ -44,7 +44,8 @@ register(class Widget extends Emitter {
     constructor(arg) {
         super();
         this[Widget.handlerKey] = {};
-        this.selector = `widget${Widget.nextId++}`;
+        this.id = Widget.nextId++;
+        this.selector = `widget${this.id}`;
         this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
         this[Widget.bindingKey] = 'innerHtml';
 
@@ -187,6 +188,34 @@ register(class Widget extends Emitter {
 
     getAttribute(name) {
         return this.htmlElement.getAttribute(name);
+    }
+
+    getContainer() {
+        let parent = this.parent();
+
+        while (parent) {
+            if (parent instanceof WContainer) {
+                return parent;
+            }
+
+            parent = parent.parent();
+        }
+
+        return parent;
+    }
+
+    getPanel() {
+        let parent = this.parent();
+
+        while (parent) {
+            if (parent instanceof WPanel) {
+                return parent;
+            }
+
+            parent = parent.parent();
+        }
+
+        return parent;
     }
 
     getStyle(propertyName) {

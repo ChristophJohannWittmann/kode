@@ -56,10 +56,10 @@ register(class MessageProxy extends Emitter {
 
         if (source) {
             if (message.messageName in source.messages) {
-                let messageEntry = source.messages[message.messageName];
-                message.messageName = messageEntry.messageOut;
-                this.send(message);
-                message.messageName = messageEntry.messageIn;
+                let msg = copy(message);
+                msg.EMITTER = this.emitter;
+                msg.messageName = source.messages[message.messageName].messageOut;
+                this.send(msg);
             }
         }
     }

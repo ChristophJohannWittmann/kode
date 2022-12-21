@@ -280,8 +280,9 @@ register(class WebApp extends Webx {
                 'gui/widgets/input.js',
                 'gui/widgets/stack.js',
                 'gui/widgets',
-                'gui/panels/panel.js',
-                'gui/panels',
+                'gui/views/container.js',
+                'gui/views/panel.js',
+                'gui/views',
                 'server/webApp/gui',
             ])
         };
