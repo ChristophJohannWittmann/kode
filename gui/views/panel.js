@@ -62,9 +62,9 @@ register(class WPanel extends WContainer {
         return this;
     }
 
-    appendCtl(name, ctl) {        
-        if (!(name in this.ctls)) {
-            this.ctls[name] = ctl;
+    appendCtl(ctl) {        
+        if (!(ctl.name in this.ctls)) {
+            this.ctls[ctl.name] = ctl;
             this.control.append(ctl);
         }
 
@@ -118,19 +118,16 @@ register(class WPanel extends WContainer {
             }
 
             if (this.stack.length() > 1) {
-                if (!('BACK' in this.ctls)) {
-                    this.prependCtl('BACK', mkWHotSpot()
-                        .set('Back')
-                        .on('html.click', message => {
-                            this.stack.pop();
-                        })
-                    );
-                }
+                this.prependCtl(
+                    mkWCtl('back')
+                    .set(txx.fwNavBack)
+                    .on('html.click', message => {
+                        this.stack.pop();
+                    })
+                );
             }
             else if (this.stack.length() == 1) {
-                if ('BACK' in this.ctls) {
-                    this.removeCtl('BACK');
-                }
+                this.removeCtl('back');
             }
 
             top = this.stack.top();
@@ -151,9 +148,9 @@ register(class WPanel extends WContainer {
         return this;
     }
 
-    prependCtl(name, ctl) {  
-        if (!(name in this.ctls)) {
-            this.ctls[name] = ctl;
+    prependCtl(ctl) {  
+        if (!(ctl.name in this.ctls)) {
+            this.ctls[ctl.name] = ctl;
             this.control.prepend(ctl);
         }
 

@@ -23,13 +23,11 @@
 
 
 /*****
- * This should be used as the base class for all webapp applications.  Over time,
- * additional features will be added to this class that are specific to features
- * or functionality required for the home view of an application.  This class
- * extends WPanel which extends WContainer which extends Widget.
 *****/
-register(class FWHomeBase extends WPanel {
-    constructor() {
-        super();
+register(class WCtl extends Widget {
+    constructor(name) {
+        super('span');
+        this.name = name;
+        this.setWidgetStyle('hotspot');
     }
 });
