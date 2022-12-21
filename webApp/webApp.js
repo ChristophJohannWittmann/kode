@@ -283,7 +283,7 @@ register(class WebApp extends Webx {
                 'gui/views/container.js',
                 'gui/views/panel.js',
                 'gui/views',
-                'server/webApp/gui',
+                'webApp/gui',
             ])
         };
 
@@ -304,13 +304,13 @@ register(class WebApp extends Webx {
         }
 
         await this.buildLinks();
-        await this.buildHTML(PATH.join(env.kodePath, 'server/webApp/webApp.html'));
+        await this.buildHTML(PATH.join(env.kodePath, 'webApp/webApp.html'));
 
         if (this.settings.colorsCss) {
             await this.buildCSS(this.reference.css);
         }
         else {
-            await this.buildCSS(PATH.join(env.kodePath, 'server/webApp/webApp.css'));
+            await this.buildCSS(PATH.join(env.kodePath, 'webApp/webApp.css'));
         }
 
         await mkConfigEndpoints(this);

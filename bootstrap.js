@@ -219,20 +219,20 @@ async function seedUser(dbc) {
     require('./server/dbms/dbSchemaAnalyzer.js');
     require('./server/dbms/dbObject.js');
 
-    require('./server/webApp/webApp.js');
-    require('./server/webApp/webAppText.js');
-    require('./server/webApp/lib/endpoint.js');
-    require('./server/webApp/lib/configEndpoints.js');
-    require('./server/webApp/lib/dbmsEndpoints.js');
-    require('./server/webApp/lib/messagingEndpoints.js');
-    require('./server/webApp/lib/orgEndpoints.js');
-    require('./server/webApp/lib/publicEndpoints.js');
-    require('./server/webApp/lib/selfEndpoints.js');
-    require('./server/webApp/lib/systemEndpoints.js');
-    require('./server/webApp/lib/templateEndpoints.js');
-    require('./server/webApp/lib/ticketEndpoints.js');
-    require('./server/webApp/lib/userEndpoints.js');
-    require('./server/webApp/lib/transaction.js');
+    require('./webApp/webApp.js');
+    require('./webApp/webAppText.js');
+    require('./webApp/lib/endpoint.js');
+    require('./webApp/lib/configEndpoints.js');
+    require('./webApp/lib/dbmsEndpoints.js');
+    require('./webApp/lib/messagingEndpoints.js');
+    require('./webApp/lib/orgEndpoints.js');
+    require('./webApp/lib/publicEndpoints.js');
+    require('./webApp/lib/selfEndpoints.js');
+    require('./webApp/lib/systemEndpoints.js');
+    require('./webApp/lib/templateEndpoints.js');
+    require('./webApp/lib/ticketEndpoints.js');
+    require('./webApp/lib/userEndpoints.js');
+    require('./webApp/lib/transaction.js');
 
     if (CLUSTER.isPrimary) {
         require('./server/lib/daemon.js');

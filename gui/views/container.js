@@ -37,7 +37,6 @@ register(class WContainer extends Widget {
     }
 
     onWidgetChanged(message) {
-        console.log(message);
     }
 
     onWidgetModified(message) {
@@ -50,7 +49,7 @@ register(class WContainer extends Widget {
         if (widget instanceof Widget) {
             if (!this.wired.has(widget)) {
                 for (let wireable of WContainer.wireable) {
-                    widget.on(wireable, message => this[`on${wireable.replaceAll('.', '')}`]);
+                    widget.on(wireable, message => this[`on${wireable.replaceAll('.', '')}`](message));
                 }
             }
         }
