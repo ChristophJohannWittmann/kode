@@ -28,6 +28,6 @@ register(class WCtl extends Widget {
     constructor(name) {
         super('span');
         this.name = name;
-        this.setWidgetStyle('hotspot');
+        this.setWidgetStyle('ctl');
     }
 });

@@ -1156,6 +1156,24 @@ body {
 
 
 /***********************************************
+ * Ctl
+ ***********************************************/
+[widget-style=ctl] {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-weight: bold;
+}
+[widget-style=ctl]:hover {
+    color: darkorange;
+    cursor:  pointer;
+}
+
+
+/***********************************************
  * Stack
  ***********************************************/
 [widget-style=stack] {
