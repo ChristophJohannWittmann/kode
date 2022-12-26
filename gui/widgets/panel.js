@@ -23,17 +23,24 @@
 
 
 /*****
+ * Panel is the base class for "complex" widgets, which represent a substantial
+ * part or all of a visual feature.  The panel works with the application object
+ * to provide the implicet navigation for pushing and popping views on a stack.
+ * The heading is a strip at the top of the page containing implicit navigation
+ * controls and a logo or title or some other such branding or informational
+ * data.  The heading can either be shown or hidden.
 *****/
-register(class WContainer extends Widget {
-    static wireable = [
+register(class WPanel extends Widget {
+    static wires = mkStringSet(
         'Widget.Changed',
         'Widget.Modified',
         'Widget.Validity',
-    ];
+    );
 
-    constructor() {
-        super();
-        this.wired = new WeakMap();
+    constructor(tagName) {
+        super(tagName ? tagName : 'div');
+        this.circuits = {};
+        this.setWidgetStyle('panel');
     }
 
     onWidgetChanged(message) {
@@ -46,13 +53,19 @@ register(class WContainer extends Widget {
     }
 
     wire(widget) {
-        if (widget instanceof Widget) {
-            if (!this.wired.has(widget)) {
-                for (let wireable of WContainer.wireable) {
-                    widget.on(wireable, message => this[`on${wireable.replaceAll('.', '')}`](message));
-                }
+        if (!widget.selector in this.circuits) {
+            let circuit = { widget: widget };
+
+            for (let wire of WPanel.wires) {
+                let handler = message => this[`on${wire.replaceAll('.', '')}`](message);
+                circuit[wire] = handler;
+                widget.on(wire, handler);
             }
+
+            this.circuits.set()
         }
+
+        return this;
     }
 
     unwire(widget) {

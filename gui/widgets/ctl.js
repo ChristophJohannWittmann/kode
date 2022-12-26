@@ -23,11 +23,74 @@
 
 
 /*****
+ * A ctl is a small control providing the functionality required for controls
+ * on a menu or navbar.  WCtl objects are implement with a SPAN and are here
+ * to ensure a specific WCtl interface is implemented.  This base class contains
+ * zero functionality, but is useful because it (1) defines the WCtl API, (2)
+ * provides basic features, and (3) provides an empty stub API for features that
+ * can be extended by derived classes.
 *****/
 register(class WCtl extends Widget {
-    constructor(name) {
-        super('span');
-        this.name = name;
-        this.setWidgetStyle('ctl');
+    constructor() {
+        super('div');
+        this.menu = null;
+
+        this.on('html.click', message => {
+            this.send({
+                messageName: 'Widget.Click',
+                widget: this,
+                event: message.event,
+            });
+        });
+
+        this.on('html.dblclick', message => {
+            this.send({
+                messageName: 'Widget.DoubleClick',
+                widget: this,
+                event: message.event,
+            });
+        });
+
+        doc.on('contextmenu', message => {
+            if (Widget.widgetKey in message.event.target) {
+                let widget = message.event.target[Widget.widgetKey];
+
+                if (widget.selector == this.selector) {
+                    message.event.preventDefault();
+                    this.openMenu();
+                }
+            }
+        });
+    }
+
+    closeMenu() {
+        if (this.menu) {
+        }
+
+        return this;
+    }
+
+    disable() {
+        return this;
+    }
+
+    enable() {
+        return this;
+    }
+
+    openMenu() {
+        if (this.menu) {
+        }
+
+        return this;
+    }
+});
+
+
+/*****
+*****/
+register(class WCtls extends Widget {
+    constructor(tagName) {
+        super(tagName);
     }
 });

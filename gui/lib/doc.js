@@ -40,6 +40,7 @@ register(class Doc extends Emitter {
             'animationend',
             'animationiteration',
             'animationstart',
+            'contextmenu',
             'copy',
             'cut',
             'paste',
@@ -78,7 +79,10 @@ register(class Doc extends Emitter {
             'transitionrun',
             'transitionstart',
         ].forEach(eventName => this.doc.addEventListener(eventName, event => {
-            this.send({ messageName: eventName, event: event });
+            this.send({
+                messageName: eventName,
+                event: mkHtmlEvent(event)
+            });
         }));
     }
 

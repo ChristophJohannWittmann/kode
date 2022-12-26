@@ -63,7 +63,7 @@ register(class WGrid extends Widget {
         this.setRowGap(opts.rowGap);
         this.setColGap(opts.colGap);
 
-        this.styleRule.set({
+        this.setStyle({
             display: 'grid',
             gridTemplateRows: `${this.rows.join(' ')}`,
             gridTemplateColumns: `${this.cols.join(' ')}`,
@@ -119,13 +119,13 @@ register(class WGrid extends Widget {
 
     clearColGap() {
         this.colGap = '0px';
-        this.styleRule.settings().colGap = this.colGap;
+        this.setStyle('col-gap', this.colGap);
         return this;
     }
 
     clearRowGap() {
         this.colGap = '0px';
-        this.styleRule.settings().colGap = this.colGap;
+        this.setStyle('col-gap', '');
         return this;
     }
 
@@ -152,7 +152,7 @@ register(class WGrid extends Widget {
             this.colGap = '0px';
         }
 
-        this.styleRule.settings().colGap = this.colGap;
+        this.setStyle('col-gap', this.colGap);
         return this;
     }
 
@@ -166,8 +166,8 @@ register(class WGrid extends Widget {
         else {
             this.rowGap = '0px';
         }
-
-        this.styleRule.settings().rowGap = this.rowGap;
+        
+        this.setStyle('col-gap', this.colGap);
         return this;
     }
 

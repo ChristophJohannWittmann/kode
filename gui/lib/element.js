@@ -23,6 +23,54 @@
 
 
 /*****
+ * A wrapper class for native DOM-related events.  The intention is to provide
+ * additional data and additional features to enhance code that uses and handles
+ * HTML-generated events.
+*****/
+(() => {
+    const eventKey = Symbol('event');
+
+    const eventProxy = {
+        get: (ev, name) => {
+            if (name in ev) {
+                return ev[name];
+            }
+            else if (name in ev[eventKey]) {
+                return ev[eventKey][name];
+            }
+            else {
+                return null;
+            }
+        },
+    };
+
+    register(class HtmlEvent extends NonJsonable {
+        constructor(event) {
+            super();
+            this[eventKey] = event;
+            return new Proxy(this, eventProxy);
+        }
+
+        composedPath(...args) {
+            return this[eventKey].composedPath(...args);
+        }
+
+        preventDefault(...args) {
+            return this[eventKey].preventDefault(...args);
+        }
+
+        stopImmediatePropagation(...args) {
+            return this[eventKey].stopImmediatePropagation(...args);
+        }
+
+        stopPropagation(...args) {
+            return this[eventKey].stopPropagation(...args);
+        }
+    });
+})();
+
+
+/*****
  * Normalization means to convert the passed element into either a standard DOM
  * Text object or a standard HTMLElement object.  An acceptable argument must
  * be either of those two or one of the wrapper types, HtmlText or HtmlElement.
@@ -418,7 +466,7 @@ register(class HtmlElement extends HtmlNode {
                     messageName: event.type,
                     htmlElement: this,
                     widget: this[Widget.widgetKey],
-                    event: event,
+                    event: mkHtmlEvent(event),
                 });
             });
         }
@@ -447,7 +495,7 @@ register(class HtmlElement extends HtmlNode {
                     messageName: event.type,
                     htmlElement: this,
                     widget: this[Widget.widgetKey],
-                    event: event,
+                    event: mkHtmlEvent(event),
                 });
             });
         }

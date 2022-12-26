@@ -46,7 +46,6 @@ register(class Widget extends Emitter {
         this[Widget.handlerKey] = {};
         this.id = Widget.nextId++;
         this.selector = `widget${this.id}`;
-        this.styleRule = styleSheet.createRule(`#${this.selector} {}`);
         this[Widget.bindingKey] = 'innerHtml';
 
         if (arg instanceof HtmlElement) {
@@ -169,6 +168,15 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    clearStyle() {
+        for (let i = 0; i < this.htmlElement.node.style.length; i++) {
+            let styleProperty = this.htmlElement.node.style.item(i);
+            this.htmlElement.node.style.removeProperty(styleProperty);
+        }
+
+        return this;
+    }
+
     dir() {
         this.htmlElement.dir();
         return this;
@@ -190,20 +198,6 @@ register(class Widget extends Emitter {
         return this.htmlElement.getAttribute(name);
     }
 
-    getContainer() {
-        let parent = this.parent();
-
-        while (parent) {
-            if (parent instanceof WContainer) {
-                return parent;
-            }
-
-            parent = parent.parent();
-        }
-
-        return parent;
-    }
-
     getPanel() {
         let parent = this.parent();
 
@@ -218,8 +212,20 @@ register(class Widget extends Emitter {
         return parent;
     }
 
-    getStyle(propertyName) {
-        return this.htmlElement.node.style[propertyName];
+    getStyle(arg) {
+        if (arg) {
+            return this.htmlElement.node.style[arg];
+        }
+        else {
+            let style = {};
+
+            for (let i = 0; i < this.htmlElement.node.style.length; i++) {
+                let styleProperty = this.htmlElement.node.style.item(i);
+                style[styleProperty] = this.htmlElement.node.style[styleProperty];
+            }
+
+            return style;
+        }
     }
 
     getWidgetStyle() {
@@ -414,8 +420,17 @@ register(class Widget extends Emitter {
         return this;
     }
 
-    setStyle(propertyName, value) {
-        this.htmlElement.node.style[propertyName] = value;
+    setStyle(arg, value) {
+        if (typeof arg == 'object') {
+            for (let property in arg) {
+                let value = arg[property];
+                this.htmlElement.node.style[property] = value;
+            }
+        }
+        else {
+            this.htmlElement.node.style[arg] = value;
+        }
+
         return this;
     }
 

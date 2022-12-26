@@ -24,10 +24,10 @@
 
 /*****
 *****/
-register(class FWNetIfaceView extends Widget {
+register(class FWNetIfaceView extends WPanel {
     constructor(ifaceName) {
         super('form');
-        this.append(mkWSectionTitle(3, `${txx.fwNetInterface} "${ifaceName}"`));
+        //this.append(mkWSectionTitle(3, `${txx.fwNetInterface} "${ifaceName}"`));
 
         (async () => {
             let iface = await queryServer({
