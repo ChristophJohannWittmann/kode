@@ -1267,14 +1267,14 @@ body {
     align-items: center;
     background-color: lightgray;
 }
-.navbar01-ctl {
+[widget-style=navbar01-ctls-ctl] {
     margin-left: 6px;
     margin-right: 6px;
     margin-top: 3px;
     margin-bottom: 3px;
     cursor: pointer;
 }
-.navbar01-ctl:hover {
+[widget-style=navbar01-ctls-ctl]:hover {
     color: var(--hover-color);
     background-color: var(--hover-background);
 }

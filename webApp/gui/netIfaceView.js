@@ -27,7 +27,7 @@
 register(class FWNetIfaceView extends WPanel {
     constructor(ifaceName) {
         super('form');
-        //this.append(mkWSectionTitle(3, `${txx.fwNetInterface} "${ifaceName}"`));
+        this.append(mkWidget('h3').set(`${txx.fwNetInterface} "${ifaceName}"`));
 
         (async () => {
             let iface = await queryServer({

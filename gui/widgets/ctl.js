@@ -88,9 +88,133 @@ register(class WCtl extends Widget {
 
 
 /*****
+ * In essence, the WCtls widget manages a rectangular space on the GUI with a set
+ * of contorllers or ctls.  Each ctl must extend WCtl and will be layed out in an
+ * ordered manner in the specified direction: up, down, left, or right.  The WCtls
+ * widget has the features necessary for a stack-like application area, because
+ * the calling code can push() and pop() widgets on and off of the stack.  That
+ * pushing and popping would presumeably bne driven by adding or removing a view
+ * to that stack.
 *****/
 register(class WCtls extends Widget {
-    constructor(tagName) {
+    constructor(tagName, horz, fwd) {
         super(tagName);
+        this.fwd = fwd;
+        this.horz = horz;
+        this.map = new WeakMap();
+
+        if (this.horz) {
+        }
+        else {
+        }
+    }
+
+    clear() {
+        this.clear();
+        this.map = new WeakMap();
+        return this;
+    }
+
+    getAll() {
+        return this.children();
+    }
+
+    getAt(index) {
+        return this.childAt(index);
+    }
+
+    insertAfter(anchor, ctl) {
+        if (this.map.has(anchor) && !this.map.has(ctl)) {
+            ctl.setWidgetStyle(`${this.getWidgetStyle()}-ctl`);
+            this.fwd ? anchor.insertAfter(ctl) : this.anchor.insertBefore(ctl);
+            this.ctlMap.set(ctl, ctl);
+        }
+
+        return this;
+    }
+
+    insertBefore(anchor, ctl) {
+        if (this.map.has(anchor) && !this.map.has(ctl)) {
+            ctl.setWidgetStyle(`${this.getWidgetStyle()}-ctl`);
+            this.fwd ? anchor.insertBefore(ctl) : this.anchor.insertAfter(ctl);
+            this.ctlMap.set(ctl, ctl);
+        }
+
+        return this;
+    }
+
+    length() {
+        return this.children().length;
+    }
+
+    pop() {
+        if (this.length() > 0) {
+            let ctl = this.fwd ? this.children()[this.length() - 1] : this.children()[0];
+            this.map.delete(ctl);
+            ctl.remove();
+        }
+
+        return this;
+    }
+
+    push(ctl) {
+        if (ctl instanceof WCtl && !this.map.has(ctl)) {
+            ctl.setWidgetStyle(`${this.getWidgetStyle()}-ctl`);
+            this.map[name] = ctl;
+            this.fwd ? this.append(ctl) : this.prepend(ctl);
+        }
+
+        return this;
+    }
+
+    removeAt(index) {
+        if (this.lenth() > 0) {
+            if (this.index < this.length()) {
+                let ctl = this.children()[index];
+                this.map.delete(ctl);
+                ctl.remove();
+            }
+        }
+    }
+
+    remove(ctl) {
+        if (this.map.has(ctl)) {
+            this.map.delete(ctl);
+            ctl.remove();
+        }
+
+        return this;
+    }
+
+    setWidgetStyle(widgetStyle) {
+        super.setWidgetStyle(widgetStyle);
+
+        for (let ctl of this) {
+            ctl.setWidgetStyle(`${widgetStyle}-ctl`);
+        }
+    }
+
+    shift() {
+        if (this.length() > 0) {
+            let ctl = this.fwd ? this.children()[0] : this.children()[this.length() - 1];
+            this.map.delete(ctl);
+            ctl.remove();
+        }
+
+        return this;
+    }
+
+    [Symbol.iterator]() {
+        return this.children()[Symbol.iterator]();
+    }
+
+    unshift(ctl) {
+        if (ctl instanceof WCtl && !this.map.has(ctl)) {
+            ctl.setWidgetStyle(`${this.getWidgetStyle()}-ctl`);
+            this.map[name] = ctl;
+            this.fwd ? this.prepend(ctl) : this.append(ctl);
+        }
+
+        return this;
     }
 });
