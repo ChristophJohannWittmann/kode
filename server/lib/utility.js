@@ -240,21 +240,22 @@ register(async function recurseFiles(...args) {
 
 
 /*****
- * Write data to a temporary file and have the temporary file path returned.
- * Optionally, apply an extension to the filename.  Some applications like to
- * have the associated extension in the filename.  The complement functions
- * are there to read and delete a previously created complement function.
+ * A utility to simplify dealing with temporary files.  Each function call writes
+ * a new file to the temporary directory/folder.  The return valus is a handle
+ * the provides both a read() and rm() function, which simplifies code that uses
+ * the temporary file and then wants to clean up.
 *****/
-let tempId = 1;
+let nextTempId = 1;
 
-register(async function readTemp(path) {
-});
-
-register(async function rmTemp(path) {
-});
-
-register(async function writeTemp(content, ext) {
-    let path = PATH.join(env.tempPath, ext ? `PID${env.pid}U${tempId++}.${ext}` : `PID${env.pid}U${tempId++}`);
+register(async function writeTemp(content) {
+    let tempId = nextTempId++;
+    let path = PATH.join(env.tempPath, `PID${env.pid}U${tempId}`);
     await FILES.writeFile(path, content);
-    return path;
+
+    return {
+        tempId: tempId,
+        path: path,
+        read: async () => await FILES.read(path),
+        rm: async () => await FILES.rm(path),
+    };
 });
