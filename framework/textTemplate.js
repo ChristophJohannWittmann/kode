@@ -104,10 +104,6 @@ register(class TextTemplate {
         return this;
     }
 
-    symbols() {
-        return this.symbols;
-    }
-
     toString() {
         let text;
         eval('text=`' + this.text + '`');

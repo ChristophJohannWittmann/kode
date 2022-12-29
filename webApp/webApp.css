@@ -4,45 +4,7 @@
 @media (prefers-color-scheme: light) {
     :root {
         color-scheme: light dark;
-
-        --error-color: crimson;
-        --error-border-color: crimson;
-        --error-outline-color: crimson;
-
-        --color-1: #696969;
-        --background-color-1: #FFFFFF;
-        --background-button-1: #F5F5F5;
-        --border-color-1: #4682B4;
-        --outline-color-1: #4682B4;
-        --link-color-1: #6B8E23;
-        --hover-color-1: #C0C0C0;
-        --hover-background-1: darkorange;
-
-        --color-2: #5C5D5E;
-        --background-color-2: #EEF3F9;
-        --background-button-2: #F5F5F5;
-        --border-color-2: #7EB9E4;
-        --outline-color-2: #7EB9E4;
-        --hover-color-2: #C0C0C0;
-        --hover-background-2: darkorange;
-
-        --color-3: #696969;
-        --background-color-3: #FFFFFF;
-        --background-button-3: #F5F5F5;
-        --border-color-3: #4682B4;
-        --outline-color-3: #4682B4;
-        --link-color-3: #6B8E23;
-        --hover-color-3: #FF8C00;
-        --hover-background-3: darkorange;
-
-        --color-4: #696969;
-        --background-color-4: #FFFFFF;
-        --background-button-4: #F5F5F5;
-        --border-color-4: #4682B4;
-        --outline-color-4: #4682B4;
-        --link-color-4: #6B8E23;
-        --hover-color-4: #FF8C00;
-        --hover-background-4: darkorange;
+${light}
     }
     .lite {}
     .dark { display: none; }
@@ -50,6 +12,7 @@
 @media (prefers-color-scheme: dark) {
     :root {
         color-scheme: light dark;
+${dark}
     }
     .lite { display: none; }
     .dark {}

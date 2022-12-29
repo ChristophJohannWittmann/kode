@@ -71,8 +71,11 @@ if (CLUSTER.isPrimary) console.log(`[ Loading NPM Modules ]`);
  * Imported NPM Modules, which are enumerated in the package.json directory
  * for the framework.
 *****/
-global.npmPG        = require('pg');
-global.npmGZIP      = require('node-gzip');
+global.npmPG           = require('pg');
+global.npmCssMinifier  = require('clean-css');
+global.npmHtmlMinifier = require('html-minifier');
+global.npmJsMinifier   = require('terser');
+global.npmGZIP         = require('node-gzip');
 
 
 /*****
@@ -100,6 +103,7 @@ global.env = {
     modulePath:     PATH.join(__dirname, './modules'),
     daemonPath:     PATH.join(__dirname, './server/daemons'),
     serverPath:     PATH.join(__dirname, './server/servers'),
+    tempPath:       '/tmp',
 };
 
 

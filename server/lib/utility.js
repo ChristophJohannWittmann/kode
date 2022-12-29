@@ -85,13 +85,76 @@ register(async function isFile(path) {
 
 
 /*****
- * This function will minify a file based on the content extension of either
- * .js, .css, or .html.  The returned product is nicely compactified and minified
- * to ensure maximum performance over give bandwidth.
+ * Minify our CSS before sending off to the client.  The primary purpose is to
+ * decrease the data-transfer footprint of the stylesheet before transfer.  It
+ * also provides a bit of obfuscation to make some of the more interesting bits
+ * of this framework more difficult to reverse engineer.  (Not really important.)
 *****/
-register(async function minify(path) {
-    let minifyPath = PATH.join(env.nodeModulePath, 'minify/bin/minify.js');
-    return (await execShell(`node ${minifyPath} ${path}`)).stdout.trim();
+register(async function minifyCss(verbose) {
+    const options = {};
+    return await (new npmCssMinifier(options).minify(verbose)).styles;
+});
+
+
+/*****
+ * Minify HTML markup text to have a smaller download size.  Our Primary goal
+ * is NOT to obfuscate the HTML markup, but rather to provide a more modest
+ * download footprint for generated javascript in a non-testing environment.
+*****/
+register(async function minifyHtml(verbose) {
+    const options = {
+        collapseInlineTagWhitespace: true,
+        collapseWhitespace: true,
+        removeHtmlComments: true,
+        removeTagWhitespace: true,
+    };
+
+    return (await npmHtmlMinifier.minify(verbose, options));
+});
+
+
+/*****
+ * Minify our javascript code being sent to the client.  Kode javascript is
+ * difficult to minify for browser use because we use a number of features in
+ * javascript that are somewhat advanced and are potentially destroyed with
+ * full on minification.  We're not really looking for mangling.  We're just
+ * trying to compress the code a bit to reduce the size of the download.
+*****/
+register(async function minifyJs(verbose) {
+    const options = {
+        compress: {
+            arrows: false,
+            booleans: false,
+            collapse_vars: false,
+            comparisons: false,
+            computed_props: false,
+            conditionals: false,
+            dead_code: false,
+            directives: false,
+            evaluate: false,
+            hoist_props: false,
+            if_return: false,
+            inline: false,
+            keep_fargs: false,
+            loops: false,
+            negate_iife: false,
+            properties: false,
+            reduce_vars: false,
+            reduce_funcs: false,
+            sequences: false,
+            side_effects: false,
+            switches: false,
+            typeofs: false,
+            unused: false,
+        },
+        mangle: {
+            keep_classnames: true,
+            keep_fnames: true,
+            reserved: [],
+        }
+    };
+
+    return (await npmJsMinifier.minify({ code: verbose }, options)).code;
 });
 
 
@@ -179,12 +242,19 @@ register(async function recurseFiles(...args) {
 /*****
  * Write data to a temporary file and have the temporary file path returned.
  * Optionally, apply an extension to the filename.  Some applications like to
- * have the associated extension in the filename.
+ * have the associated extension in the filename.  The complement functions
+ * are there to read and delete a previously created complement function.
 *****/
 let tempId = 1;
 
+register(async function readTemp(path) {
+});
+
+register(async function rmTemp(path) {
+});
+
 register(async function writeTemp(content, ext) {
-    let path = ext ? `PID${env.pid}U${tempId++}.${ext}` : `PID${env.pid}U${tempId++}`;
+    let path = PATH.join(env.tempPath, ext ? `PID${env.pid}U${tempId++}.${ext}` : `PID${env.pid}U${tempId++}`);
     await FILES.writeFile(path, content);
     return path;
 });

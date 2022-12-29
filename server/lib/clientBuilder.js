@@ -34,7 +34,7 @@
  * itself.  Don't worry about it.  This code will dedupe file names.  The result
  * is that the individually specified file will appear before the others.
 *****/
-register(async function buildClientCode(paths) {
+register(async function buildClientCode(paths, debug) {
     let raw = [];
     let fileArray = [];
     let fileSet = mkStringSet();
@@ -52,7 +52,7 @@ register(async function buildClientCode(paths) {
         let stats = await FILES.stat(path);
 
         if (stats.isFile() && path.endsWith('.js')) {
-            let code = Config.minify ? await minify(path) : (await FILES.readFile(path)).toString();
+            let code = (await FILES.readFile(path)).toString();
             fileSet.set(path);
             raw.push(code);
         }
@@ -62,12 +62,17 @@ register(async function buildClientCode(paths) {
 
                 if (stats.isFile() && filePath.endsWith('.js') && !fileSet.has(filePath) && !filePath.endsWith('Server.js')) {
                     fileSet.set(filePath);
-                    let code = Config.minify ? await minify(filePath) : (await FILES.readFile(filePath)).toString();
+                    let code = (await FILES.readFile(filePath)).toString();
                     raw.push(code);
                 }
             }
         }
     }
 
-    return raw.join('');
+    if (debug) {
+        return raw.join('');
+    }
+    else {
+        return await minifyJs(raw.join(''));
+    }
 });

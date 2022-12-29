@@ -59,7 +59,7 @@ register(class FWNetIfaceView extends WPanel {
                 host: {
                     label: txx.fwNetHost,
                     readonly: false,
-                    type: ScalarText,
+                    type: ScalarHost,
                 },
             })
             .addObj(iface.tls, {
@@ -100,5 +100,9 @@ register(class FWNetIfaceView extends WPanel {
             
             this.getPanel().wire(this);
         })();
+    }
+
+    async save() {
+        console.log(ActiveData.value(this.editor.modifiable));
     }
 });

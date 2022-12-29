@@ -23,6 +23,95 @@
 
 
 /*****
+ * Default CSS colors for the built in style sheet.  If the developer does not
+ * provide alternate colors in the module.json file, use these colors here for
+ * the GUI.
+*****/
+const builtinCssVariables = {
+    light: {
+        error_color: 'crimson',
+        error_border_color: 'crimson',
+        error_outline_color: 'crimson',
+
+        color_1: '#696969',
+        background_color_1: '#FFFFFF',
+        background_button_1: '#F5F5F5',
+        border_color_1: '#4682B4',
+        outline_color_1: '#4682B4',
+        link_color_1: '#6B8E23',
+        hover_color_1: '#C0C0C0',
+        hover_background_1: 'darkorange',
+
+        color_2: '#5C5D5E',
+        background_color_2: '#EEF3F9',
+        background_button_2: '#F5F5F5',
+        border_color_2: '#7EB9E4',
+        outline_color_2: '#7EB9E4',
+        hover_color_2: '#C0C0C0',
+        hover_background_2: 'darkorange',
+
+        color_3: '#696969',
+        background_color_3: '#FFFFFF',
+        background_button_3: '#F5F5F5',
+        border_color_3: '#4682B4',
+        outline_color_3: '#4682B4',
+        link_color_3: '#6B8E23',
+        hover_color_3: '#FF8C00',
+        hover_background_3: 'darkorange',
+
+        color_4: '#696969',
+        background_color_4: '#FFFFFF',
+        background_button_4: '#F5F5F5',
+        border_color_4: '#4682B4',
+        outline_color_4: '#4682B4',
+        link_color_4: '#6B8E23',
+        hover_color_4: '#FF8C00',
+        hover_background_4: 'darkorange',
+    },
+    dark: {
+        error_color: 'crimson',
+        error_border_color: 'crimson',
+        error_outline_color: 'crimson',
+
+        color_1: '#696969',
+        background_olor_1: '#FFFFFF',
+        background_button_1: '#F5F5F5',
+        border_color_1: '#4682B4',
+        outline_color_1: '#4682B4',
+        link_color_1: '#6B8E23',
+        hover_color_1: '#C0C0C0',
+        hover_background_1: 'darkorange',
+
+        color_2: '#5C5D5E',
+        background_color_2: '#EEF3F9',
+        background_button_2: '#F5F5F5',
+        border_color_2: '#7EB9E4',
+        outline_color_2: '#7EB9E4',
+        hover_color_2: '#C0C0C0',
+        hover_background_2: 'darkorange',
+
+        color_3: '#696969',
+        background_color_3: '#FFFFFF',
+        background_button_3: '#F5F5F5',
+        border_color_3: '#4682B4',
+        outline_color_3: '#4682B4',
+        link_color_3: '#6B8E23',
+        hover_color_3: '#FF8C00',
+        hover_background_3: 'darkorange',
+
+        color_4: '#696969',
+        background_color_4: '#FFFFFF',
+        background_button_4: '#F5F5F5',
+        border_color_4: '#4682B4',
+        outline_color_4: '#4682B4',
+        link_color_4: '#6B8E23',
+        hover_color_4: '#FF8C00',
+        hover_background_4: 'darkorange',
+    }
+};
+
+
+/*****
  * A webapp is just one specific type of web extension and probably the most
  * frequencly employed.  A webapp is an extension with specific behavior: (1)
  * an undecorated GET results in responding with a dynamically built HTML doc,
@@ -41,14 +130,61 @@ register(class WebApp extends Webx {
         this.webSockets = {};
     }
 
-    async buildCSS(path) {
-        this.visualCss = (await FILES.readFile(path)).toString();
-        this.compactCss = await minify(path);
+    async buildCSS(path, variables) {
+        if (variables) {
+            let template = mkTextTemplate((await FILES.readFile(path)).toString());
+
+            for (let symbol in template.symbols) {
+                if (symbol in variables) {
+                    template.set(symbol, variables[symbol]);
+                }
+                else {
+                    template.set(symbol, '');
+                }
+            }
+
+            var verboseCss = template.toString();
+        }
+        else {
+            var verboseCss = (await FILES.readFile(path)).toString();
+        }
+
+        if (this.reference.debug) {
+            return verboseCss;
+        }
+        else {
+            return await minifyCss(verboseCss);
+        }
     }
 
-    async buildHTML(path) {
-        this.visualHtml = (await FILES.readFile(path)).toString();
-        this.compactHtml = await minify(path);
+    buildCssVariables(cssVariables) {
+        const schemeSettings = {};
+
+        for (let section in cssVariables) {
+            schemeSettings[section] = [];
+
+            for (let settingName in cssVariables[section]) {
+                schemeSettings[section].push(`        --${settingName.replaceAll('_', '-')}: ${cssVariables[section][settingName]};`);
+            }
+
+            schemeSettings[section] = schemeSettings[section].join('\n');
+        }
+
+        return schemeSettings;
+    }
+
+    async buildHTML() {
+        let html = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html'))).toString();
+
+        if (this.reference.debug) {
+            var htmlJs = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html.js'))).toString();
+        }
+        else {
+            html = await minifyHtml(html);
+            var htmlJs = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html.js.min'))).toString();
+        }
+
+        return html.replace('${webAppJs}', htmlJs);
     }
 
     async buildLinks() {
@@ -110,12 +246,15 @@ register(class WebApp extends Webx {
         if (handlerName in this) {
             await this[handlerName](req, rsp);
         }
+        else if (req.query().startsWith('STYLESHEET')) {
+            await this.handleGetSTYLESHEET(req, rsp);
+        }
         else {
             let language = this.calcApplicationLanguage(req);
             let apptext = toJson(this.multilingualText.getLanguage(language));
 
-            let doc = mkTextTemplate(this.reference.minify ? this.compactHtml : this.visualHtml).set({
-                css: this.compactCss,
+            let doc = mkTextTemplate(this.html).set({
+                styleSheets: this.styleSheetLinks,
                 title: this.module.settings.title,
                 description: this.module.settings.description,
                 links: this.links,
@@ -146,6 +285,25 @@ register(class WebApp extends Webx {
 
         rsp.preEncoded = true;
         rsp.end(this.framework[rsp.encoding]);
+    }
+
+    async handleGetSTYLESHEET(req, rsp) {
+        if (req.query().indexOf('/') > 0) {
+            let [ path, number ] = req.query().trim().split('/');
+            let index = parseInt(number);
+
+            if (index >= 0 && index < this.styleSheets.length) {
+                if (!(rsp.encoding in this.styleSheets[index])) {
+                    this.styleSheets[index][rsp.encoding] = await compress(rsp.encoding, this.styleSheets[index]['']);
+                }
+
+                rsp.preEncoded = true;
+                rsp.end(200, 'text/css', this.styleSheets[index][rsp.encoding]);
+                return;
+            }
+        }
+
+        rsp.endStatus(404);
     }
 
     async handleMessage(message) {
@@ -282,7 +440,7 @@ register(class WebApp extends Webx {
                 'gui/widgets/panel.js',
                 'gui/widgets',
                 'webApp/gui',
-            ])
+            ], this.reference.debug)
         };
 
         if (this.settings.server) {
@@ -297,19 +455,40 @@ register(class WebApp extends Webx {
 
         if (this.settings.client) {
             this.clientApplication = {
-                '': await buildClientCode(this.settings.client.map(path => absolutePath(this.module.path, path)))
+                '': await buildClientCode(
+                        this.settings.client.map(path => absolutePath(this.module.path, path)),
+                        this.reference.debug
+                    )
             };
         }
 
         await this.buildLinks();
-        await this.buildHTML(PATH.join(env.kodePath, 'webApp/webApp.html'));
+        this.html = await this.buildHTML();
+        this.styleSheets = [];
 
-        if (this.settings.colorsCss) {
-            await this.buildCSS(this.reference.css);
+        if (this.settings.cssVariables) {
+            let variables = this.buildCssVariables(this.settings.cssVariables);
+            this.styleSheets.push({ '': await this.buildCSS(PATH.join(env.kodePath, 'webApp/webApp.css'), variables) });
         }
         else {
-            await this.buildCSS(PATH.join(env.kodePath, 'webApp/webApp.css'));
+            let variables = this.buildCssVariables(builtinCssVariables);
+            this.styleSheets.push({ '': await this.buildCSS(PATH.join(env.kodePath, 'webApp/webApp.css'), variables) });
         }
+
+        if (this.settings.cssSheets) {
+            for (let cssSheetPath of this.settings.cssSheets) {
+                let absPath = absolutePath(this.module.path, cssSheetPath);
+                this.styleSheets.push({ '': await this.buildCSS(absPath) });
+            }
+        }
+
+        let links = [];
+
+        for (let i = 0; i < this.styleSheets.length; i++) {
+            links.push(`<link rel="stylesheet" href="?STYLESHEET/${i}">`);
+        }
+
+        this.styleSheetLinks = `\n        ${links.join('\n        ')}`;
 
         await mkConfigEndpoints(this);
         await mkDbmsEndpoints(this);

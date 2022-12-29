@@ -65,9 +65,9 @@ register(class WObjectEditor extends WTable {
                                 opts.type = WScalar.selectType(this.modifiable[property]);
                             }
 
-                            this.getBody().mkRow()
-                            .mkCell(opts.label ? opts.label : property)
-                            .mkCell(
+                            this.getBody().mkRowAppend()
+                            .mkCellAppend(opts.label ? opts.label : property)
+                            .mkCellAppend(
                                 mkWScalar(this.modifiable, property, opts)
                                 .on('Widget.Changed', message => this.onValueChanged(message))
                                 .on('Widget.Validity', message => this.onValidityChanged(message))
@@ -81,9 +81,9 @@ register(class WObjectEditor extends WTable {
                         let type = WScalar.selectType(this.modifiable[property]);
                         let opts = { readonly: readonly, type: type };
 
-                        this.getBody().mkRow()
-                        .mkCell(property)
-                        .mkCell(
+                        this.getBody().mkRowAppend()
+                        .mkCellAppend(property)
+                        .mkCellAppend(
                             mkWScalar(this.modifiable, property, opts)
                             .on('Widget.Changed', message => this.onValueChanged(message))
                             .on('Widget.Validity', message => this.onValidityChanged(message))
@@ -119,9 +119,9 @@ register(class WObjectEditor extends WTable {
                                 opts.type = WScalar.selectType(this.modifiable[property]);
                             }
 
-                            this.getBody().mkRow()
-                            .mkCell(opts.label ? opts.label : property)
-                            .mkCell(
+                            this.getBody().mkRowAppend()
+                            .mkCellAppend(opts.label ? opts.label : property)
+                            .mkCellAppend(
                                 mkWScalar(this.modifiable, property, opts)
                                 .on('Widget.Changed', message => this.onValueChanged(message))
                                 .on('Widget.Validity', message => this.onValidityChanged(message))
@@ -134,9 +134,9 @@ register(class WObjectEditor extends WTable {
                         let type = WScalar.selectType(this.modifiable[property]);
                         let opts = { readonly: this.readonly, type: type };
 
-                        this.getBody().mkRow()
-                        .mkCell(property)
-                        .mkCell(
+                        this.getBody().mkRowAppend()
+                        .mkCellAppend(property)
+                        .mkCellAppend(
                             mkWScalar(this.modifiable, property, opts)
                             .on('Widget.Changed', message => this.onValueChanged(message))
                             .on('Widget.Validity', message => this.onValidityChanged(message))
