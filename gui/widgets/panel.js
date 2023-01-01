@@ -43,13 +43,18 @@ register(class WPanel extends Widget {
         this.setWidgetStyle('panel');
     }
 
-    onWidgetChanged(message) {
+    isModified() {
+        return false;
     }
 
-    onWidgetModified(message) {
+    isValid() {
+        return false;
     }
 
-    onWidgetValidity(message) {
+    async revert() {
+    }
+
+    async save() {
     }
 
     wire(widget) {
@@ -69,5 +74,13 @@ register(class WPanel extends Widget {
     }
 
     unwire(widget) {
+        if (widget.selector in this.circuits) {
+            let circuit = this.circuits[widget.selector];
+            delete this.circuits[widget.selector];
+
+            for (let wire of WPanel.wires) {
+                widget.off(wire, circuit[wire].handler);
+            }
+        }
     }
 });

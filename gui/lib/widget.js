@@ -65,6 +65,7 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
+            type: 'add',
             widget: this,
         });
 
@@ -119,7 +120,7 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            type: 'innerHTML',
+            type: 'remove',
             widget: this,
         });
 
@@ -305,7 +306,7 @@ register(class Widget extends Emitter {
 
         this.send({
             messageName: 'Widget.Changed',
-            type: 'innerHTML',
+            type: 'add',
             widget: this,
         });
 
@@ -340,7 +341,7 @@ register(class Widget extends Emitter {
             this.htmlElement.remove();
 
             this.send({
-                messageName: 'Widget.Changed',
+                messageName: 'remove',
                 type: 'innerHTML',
                 widget: parent.widget(),
             });
@@ -350,7 +351,7 @@ register(class Widget extends Emitter {
     }
 
     replace(...widgets) {
-        let parent = this.htmlElement.parent();
+        let parent = this.htmlElement.parent().widget();
 
         if (parent) {
             let filtered = widgets.filter(w => w instanceof Widget);
@@ -358,9 +359,17 @@ register(class Widget extends Emitter {
 
             this.send({
                 messageName: 'Widget.Changed',
-                type: 'innerHTML',
-                widget: parent.widget(),
+                type: 'remove',
+                widget: this,
             });
+
+            for (let childWidget of filtered) {
+                this.send({
+                    messageName: 'Widget.Changed',
+                    type: 'add',
+                    widget: this,
+                });
+            }
         }
 
         return this;

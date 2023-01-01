@@ -31,22 +31,28 @@
  * horizontal title bar at the top of some panel.  The left contains a title,
  * image or organization logo, while the right is a dedicated area for controls.
 *****/
-register(class WNavBar01 extends WPanel {
-    constructor(fwd) {
+register(class WNavBar extends WPanel {
+    constructor() {
         super();
-        this.ctls = mkWCtls('div', true, fwd);
+        this.ctls = mkWCtls();
         this.info = mkWidget('div');
         this.append(this.info, this.ctls);
-        this.setWidgetStyle('navbar01');
-    }
-
-    getCtls() {
-        return this.ctls;
+        this.setOrientation('horz');
     }
 
     getInfo() {
         let info = this.ctls.children();
         return info.length ? info[0] : null;
+    }
+
+    pop() {
+        this.ctls.pop();
+        return this;
+    }
+
+    push(ctl) {
+        this.ctls.push(ctl)
+        return this;
     }
 
     setInfo(arg) {
@@ -55,20 +61,14 @@ register(class WNavBar01 extends WPanel {
         return this;
     }
 
-    setWidgetStyle(widgetStyle) {
-        if (widgetStyle.startsWith('navbar')) {
-            super.setWidgetStyle(widgetStyle);
-            this.info.setWidgetStyle(`${widgetStyle}-info`);
-            this.ctls.setWidgetStyle(`${widgetStyle}-ctls`);
+    setOrientation(orientation) {
+        this.orientation = orientation;
+
+        if (orientation in { vert:0, horz:0 }) {
+            this.setWidgetStyle(`navbar-${this.orientation}`);
+            this.info.setWidgetStyle(`navbar-info-${this.orientation}`)
         }
-    }
-});
 
-
-/*****
-*****/
-register(class WNavBar02 extends WPanel {
-    constructor() {
-        super();
+        return this;
     }
 });

@@ -1190,32 +1190,9 @@ body {
 
 
 /***********************************************
- * NavBar
+ * Ctls
  ***********************************************/
-[widget-style=navbar01] {
-    display:  flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    width: 100%;
-    margin: 0px;
-    padding: 0px;
-}
-[widget-style=navbar01-info] {
-    flex: 3;
-    margin: 0px;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    padding: 0px;
-    padding-left: 8px;
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-    background-color: darkorange;
-}
-[widget-style=navbar01-ctls] {
+[widget-style=ctls-horz] {
     flex: 1;
     margin: 0px;
     margin-top: 8px;
@@ -1228,16 +1205,89 @@ body {
     flex-wrap: wrap;
     justify-content: flex-end;
     align-items: center;
-    background-color: lightgray;
 }
-[widget-style=navbar01-ctls-ctl] {
+[widget-style=ctls-vert] {
+    flex: 1;
+    margin: 0px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding: 0px;
+    padding-right: 8px;
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+}
+[widget-style=ctls-horz-ctl] {
     margin-left: 6px;
     margin-right: 6px;
     margin-top: 3px;
     margin-bottom: 3px;
     cursor: pointer;
 }
-[widget-style=navbar01-ctls-ctl]:hover {
+[widget-style=ctls-vert-ctl] {
+    margin-left: 6px;
+    margin-right: 6px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    cursor: pointer;
+}
+[widget-style=ctls-horz-ctl]:hover {
     color: var(--hover-color);
     background-color: var(--hover-background);
+}
+[widget-style=ctls-vert-ctl]:hover {
+    color: var(--hover-color);
+    background-color: var(--hover-background);
+}
+
+
+/***********************************************
+ * Nav Bar
+ ***********************************************/
+[widget-style=navbar-horz] {
+    display:  flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+[widget-style=navbar-vert] {
+    display:  flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+[widget-style=navbar-info-horz] {
+    flex: 3;
+    margin: 0px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding: 0px;
+    padding-left: 8px;
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+[widget-style=navbar-info-vert] {
+    flex: 3;
+    margin: 0px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding: 0px;
+    padding-left: 8px;
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
 }

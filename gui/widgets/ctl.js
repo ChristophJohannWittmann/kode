@@ -97,16 +97,11 @@ register(class WCtl extends Widget {
  * to that stack.
 *****/
 register(class WCtls extends Widget {
-    constructor(tagName, horz, fwd) {
-        super(tagName);
-        this.fwd = fwd;
-        this.horz = horz;
+    constructor() {
+        super('div');
+        this.setDirection('rev');
+        this.setOrientation('horz');
         this.map = new WeakMap();
-
-        if (this.horz) {
-        }
-        else {
-        }
     }
 
     clear() {
@@ -126,7 +121,7 @@ register(class WCtls extends Widget {
     insertAfter(anchor, ctl) {
         if (this.map.has(anchor) && !this.map.has(ctl)) {
             ctl.setWidgetStyle(`${this.getWidgetStyle()}-ctl`);
-            this.fwd ? anchor.insertAfter(ctl) : this.anchor.insertBefore(ctl);
+            this.dir == 'fwd' ? anchor.insertAfter(ctl) : this.anchor.insertBefore(ctl);
             this.ctlMap.set(ctl, ctl);
         }
 
@@ -136,7 +131,7 @@ register(class WCtls extends Widget {
     insertBefore(anchor, ctl) {
         if (this.map.has(anchor) && !this.map.has(ctl)) {
             ctl.setWidgetStyle(`${this.getWidgetStyle()}-ctl`);
-            this.fwd ? anchor.insertBefore(ctl) : this.anchor.insertAfter(ctl);
+            this.dir == 'fwd' ? anchor.insertBefore(ctl) : this.anchor.insertAfter(ctl);
             this.ctlMap.set(ctl, ctl);
         }
 
@@ -149,7 +144,7 @@ register(class WCtls extends Widget {
 
     pop() {
         if (this.length() > 0) {
-            let ctl = this.fwd ? this.children()[this.length() - 1] : this.children()[0];
+            let ctl = this.dir == 'fwd' ? this.children()[this.length() - 1] : this.children()[0];
             this.map.delete(ctl);
             ctl.remove();
         }
@@ -161,7 +156,7 @@ register(class WCtls extends Widget {
         if (ctl instanceof WCtl && !this.map.has(ctl)) {
             ctl.setWidgetStyle(`${this.getWidgetStyle()}-ctl`);
             this.map[name] = ctl;
-            this.fwd ? this.append(ctl) : this.prepend(ctl);
+            this.dir == 'fwd' ? this.append(ctl) : this.prepend(ctl);
         }
 
         return this;
@@ -186,17 +181,26 @@ register(class WCtls extends Widget {
         return this;
     }
 
-    setWidgetStyle(widgetStyle) {
-        super.setWidgetStyle(widgetStyle);
-
-        for (let ctl of this) {
-            ctl.setWidgetStyle(`${widgetStyle}-ctl`);
+    setDirection(dir) {
+        if (dir in { fwd:0, rev:0 }) {
+            this.dir = dir;
         }
+
+        return this;
+    }
+
+    setOrientation(orientation) {
+        if (orientation in { horz:0, vert:0 }) {
+            this.orientation = orientation;
+            this.setWidgetStyle(`ctls-${orientation}`);
+        }
+
+        return this;
     }
 
     shift() {
         if (this.length() > 0) {
-            let ctl = this.fwd ? this.children()[0] : this.children()[this.length() - 1];
+            let ctl = this.dir == 'fwd' ? this.children()[0] : this.children()[this.length() - 1];
             this.map.delete(ctl);
             ctl.remove();
         }
@@ -212,7 +216,7 @@ register(class WCtls extends Widget {
         if (ctl instanceof WCtl && !this.map.has(ctl)) {
             ctl.setWidgetStyle(`${this.getWidgetStyle()}-ctl`);
             this.map[name] = ctl;
-            this.fwd ? this.prepend(ctl) : this.append(ctl);
+            this.dir == 'fwd' ? this.prepend(ctl) : this.append(ctl);
         }
 
         return this;

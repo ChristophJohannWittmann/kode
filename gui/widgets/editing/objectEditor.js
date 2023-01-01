@@ -204,6 +204,10 @@ register(class WObjectEditor extends WTable {
         }
     }
 
+    async revert() {
+        return this;
+    }
+
     value() {
         return ActiveData.value(this.modifiable);
     }

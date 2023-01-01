@@ -72,8 +72,8 @@ register(class WebAppText extends MultilingualText {
             // ****************************************************************
             // Nav
             // ****************************************************************
-            fwNavBack: {
-                en: `Back`,
+            fwNavDone: {
+                en: `Done`,
             },
             fwNavSignout: {
                 en: `Signout`,

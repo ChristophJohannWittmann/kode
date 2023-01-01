@@ -102,7 +102,20 @@ register(class FWNetIfaceView extends WPanel {
         })();
     }
 
+    isModified() {
+        return this.editor.isModified();
+    }
+
+    isValid() {
+        return this.editor.isValid();
+    }
+
+    async revert() {
+        await this.editor.revert();
+        return this;
+    }
+
     async save() {
-        console.log(ActiveData.value(this.editor.modifiable));
+        console.log('Saving NetIFace...');
     }
 });
