@@ -41,8 +41,13 @@ register(class WPanel extends Widget {
         super(tagName ? tagName : 'div');
         this.circuits = mkMessageProxy(this);
         this.setWidgetStyle('panel');
-        this.valid = true;
-        this.modified = false;
+
+        this.invalid = 0;
+        this.modified = 0;
+
+        this.on('Widget.Changed', async message => await this.onChanged(message));
+        this.on('Widget.Modified', async message => await this.onModified(message));
+        this.on('Widget.Validity', async message => await this.onValidity(message));
     }
 
     append(...args) {
@@ -85,22 +90,22 @@ register(class WPanel extends Widget {
     }
 
     isModified() {
-        return this.modified;
+        return this.modified > 0;
     }
 
     isValid() {
-        return this.valid;
+        return this.invalid == 0;
     }
 
     async onChanged(message) {
     }
 
     async onModified(message) {
-        this.modified = message.modified;
+        message.modified ? this.modified++ : this.modified--;
     }
 
     async onValidity(message) {
-        this.valid = message.valid;
+        message.valid ? this.invalid-- : this.invalid++;
     }
 
     prepend(...args) {
@@ -114,11 +119,14 @@ register(class WPanel extends Widget {
     }
 
     async revert() {
-        return this;
+        for (let widget of this) {
+            if (typeof widget.revert == 'function') {
+                await widget.revert();
+            }
+        }
     }
 
     async save() {
-        return this;
     }
 
     wire(widget) {
@@ -130,6 +138,14 @@ register(class WPanel extends Widget {
     unwire(widget) {
         for (let wire of WPanel.wires) {
             this.circuits.unroute(widget, wire);
+        }
+    }
+
+    async update() {
+        for (let widget of this) {
+            if (typeof widget.update == 'function') {
+                await widget.update();
+            }
         }
     }
 });

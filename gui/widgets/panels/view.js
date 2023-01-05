@@ -52,10 +52,7 @@ register(class WView extends WPanel {
         .on('Widget.Click', async message => this.onCancel(message));
 
         this.on('Widget.Cancel', async message => await this.onCancel(message));
-        this.on('Widget.Changed', async message => await this.onChanged(message));
         this.on('Widget.Done', async message => await this.onDone(message));
-        this.on('Widget.Modified', async message => await this.onModified(message));
-        this.on('Widget.Validity', async message => await this.onValidity(message));
     }
 
     async onCancel(message) {
@@ -72,15 +69,12 @@ register(class WView extends WPanel {
     }
 
     async onDone(message) {
-        if (this.valid) {
-            if (this.modified) {
+        if (this.isValid()) {
+            if (this.isModified()) {
                 await this.save();
             }
 
             this.pop();
-        }
-        else {
-            console.log('dialog to confirm closing out.');
         }
     }
 
@@ -156,10 +150,31 @@ register(class WView extends WPanel {
         return this;
     }
 
+    async revert() {
+        let top = this.top();
+
+        if (top && typeof top.revert == 'function') {
+            await top.revert();
+        }
+    }
+
     async save() {
+        let top = this.top();
+
+        if (top && typeof top.save == 'function') {
+            await top.save();
+        }
     }
 
     top() {
         return this.stack.top();
+    }
+
+    async update() {
+        let top = this.top();
+
+        if (top && typeof top.update == 'function') {
+            await top.update();
+        }
     }
 });

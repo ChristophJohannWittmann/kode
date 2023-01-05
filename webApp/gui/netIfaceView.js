@@ -27,11 +27,12 @@
 register(class FWNetIfaceView extends WPanel {
     constructor(ifaceName) {
         super('form');
+        this.ifaceName = ifaceName;
         this.append(mkWidget('h3').set(`${txx.fwNetInterface} "${ifaceName}"`));
         this.editor = mkWObjectEditor();
 
         (async () => {
-            let iface = await queryServer({
+            this.iface = await queryServer({
                 messageName: 'ConfigGetNetIface',
                 ifaceName: ifaceName
             });
@@ -40,7 +41,7 @@ register(class FWNetIfaceView extends WPanel {
                 messageName: 'ConfigListAcmeProviders',
             })).map(ca => ({ value: ca.provider, text: ca.name }));
 
-            this.editor.addObj(iface, {
+            this.editor.addObj(this.iface, {
                 active: {
                     label: txx.fwMiscActive,
                     readonly: true,
@@ -62,7 +63,7 @@ register(class FWNetIfaceView extends WPanel {
                     type: ScalarHost,
                 },
             })
-            .addObj(iface.tls, {
+            .addObj(this.iface.tls, {
                 acme: {
                     label: txx.fwNetAcme,
                     readonly: false,
@@ -95,22 +96,30 @@ register(class FWNetIfaceView extends WPanel {
         })();
     }
 
-    isModified() {
-        return this.editor.isModified();
-    }
-
-    isValid() {
-        console.log(this.editor);
-        return this.editor.isValid();
-    }
-
     async revert() {
         await this.editor.revert();
-        return this;
+    }
+
+    async save() {
+        let message = {
+            messageName: 'UpdateNetIface',
+            ifaceName: this.ifaceName,
+        };
+
+        for (let field of this.editor.fields()) {
+            if (field.name in this.iface) {
+                message[field.name] = field.value;
+            }
+            else if (field.name == 'acme') {
+                message.acme = field.value;
+            }
+        }
+
+        let result = await queryServer(message);
+        console.log(result);
     }
 
     async update() {
-        this.editor.update();
-        return this;
+        await this.editor.update();
     }
 });

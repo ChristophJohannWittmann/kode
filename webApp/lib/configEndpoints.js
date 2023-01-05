@@ -104,17 +104,16 @@ register(class ConfigEndpoints extends EndpointContainer {
         if (trx.ifaceName in config.network) {
             for (let property in config.network[trx.ifaceName]) {
                 if (property in trx) {
-                    config.network[ifaceName][property] = trx[property];
+                    config.network[trx.ifaceName][property] = trx[property];
                 }
             }
 
-            for (let property in config.network[trx.ifaceName].tls) {
-                if (property in trx) {
-                    config.network[ifaceName].tls[property] = trx[property];
-                }
+            if (trx.acme != config.network[trx.ifaceName].acme) {
+                config.network[trx.ifaceName].acme = trx.acme;
             }
         }
 
         console.log(config.network);
+        return 'hello';
     }
 });

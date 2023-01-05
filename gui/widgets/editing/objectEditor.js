@@ -149,6 +149,11 @@ register(class WObjectEditor extends WTable {
         return this;
     }
 
+    fields() {
+        const values = ActiveData.value(this.modifiable);
+        return Object.entries(values).map(entry => ({ name: entry[0], value: entry[1] }));
+    }
+
     isModified() {
         return !areEqual(this.unmodified, ActiveData.value(this.modifiable));
     }

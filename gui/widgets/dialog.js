@@ -21,36 +21,45 @@
  * THE SOFTWARE.
 *****/
 
+register(function doKludgeConfirm(text) {
+    return confirm(text);
+});
+register(function doKludgeAlert(text) {
+    alert(text);
+});
+
 
 /*****
 *****/
-register(async function loadConfigFile(name) {
-    let exists = true;
-    const filePath = PATH.join(env.configPath, `${name}.json`);
-
-    class ServerSettings {
-        constructor() {
-            return new Promise(async (ok, fail) => {
-                if (await isFile(filePath)) {
-                    try {
-                        let buffer = await FILES.readFile(filePath);
-                        let object = fromJson(buffer.toString());
-                        Object.assign(this, object);
-                    }
-                    catch (e) {}
-                }
-
-                ok(this);
-            });
-        }
-
-        [Symbol.iterator]() {
-            Object.keys(this)[Symbol.iterator]();
-        }
-
-        async save() {
-        }
+register(class WFloater extends Widget {
+    constructor() {
+        super('div');
     }
+});
 
-    return await (new ServerSettings());
+
+/*****
+*****/
+register(class WDialog extends WFloater {
+    constructor() {
+        super();
+    }
+});
+
+
+/*****
+*****/
+register(class WConfirmDialog extends WDialog {
+    constructor() {
+        super();
+    }
+});
+
+
+/*****
+*****/
+register(class WInfoDialog extends WDialog {
+    constructor() {
+        super();
+    }
 });
