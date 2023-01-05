@@ -1,0 +1,165 @@
+/*****
+ * Copyright (c) 2017-2022 Kode Programming
+ * https://github.com/KodeProgramming/kode/blob/main/LICENSE
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+*****/
+
+
+/*****
+ * The WView class extends WPanel to provide features associated with a view.
+ * A view is an area of the window, or all of it, that's a Wstack, on which
+ * panels or views are pushed and popped.  What's really important about this
+ * is the need to dynamically the WCtl objects in a WCtls panel in response to
+ * events within the WStack and it's descenents.
+*****/
+register(class WView extends WPanel {
+    constructor(tagName, horz, fwd) {
+        super(tagName ? tagName : 'div');
+
+        this.nav = mkWNavBar();
+        this.stack = mkWStack();
+
+        this.append(this.nav);
+        this.append(this.stack);
+
+        this.proxy = mkMessageProxy(this);
+
+        this.done =
+        mkWCtl()
+        .set(txx.fwNavDone)
+        .on('Widget.Click', async message => this.onDone(message));
+
+        this.cancel =
+        mkWCtl()
+        .set(txx.fwNavCancel)
+        .on('Widget.Click', async message => this.onCancel(message));
+
+        this.on('Widget.Cancel', async message => await this.onCancel(message));
+        this.on('Widget.Changed', async message => await this.onChanged(message));
+        this.on('Widget.Done', async message => await this.onDone(message));
+        this.on('Widget.Modified', async message => await this.onModified(message));
+        this.on('Widget.Validity', async message => await this.onValidity(message));
+    }
+
+    async onCancel(message) {
+        let widget = this.stack.top();
+        await widget.revert();
+        this.cancel.remove();
+
+        if (!this.valid) {
+            this.valid = true;
+            this.done.enable();
+        }
+
+        return this;
+    }
+
+    async onDone(message) {
+        if (this.valid) {
+            if (this.modified) {
+                await this.save();
+            }
+
+            this.pop();
+        }
+        else {
+            console.log('dialog to confirm closing out.');
+        }
+    }
+
+    async onModified(message) {
+        super.onModified(message);
+
+        if (message.modified) {
+            this.nav.push(this.cancel);
+        }
+        else {
+            this.nav.pop();
+        }
+    }
+
+    async onValidity(message) {
+        super.onValidity(message);
+        message.valid ? this.done.enable() : this.done.disable();
+    }
+
+    pop() {
+        if (this.stack.length() > 1) {
+            let widget = this.nav.pop();
+            this.unwire(widget);
+        }
+
+        this.stack.pop();
+        let top = this.stack.top();
+
+        if (top) {
+            if (typeof top.isValid == 'function') {
+                this.valid = top.isValid();
+            }
+            else {
+                this.valid = true;
+            }
+
+            if (typeof top.isModified == 'function') {
+                this.modified = top.isModified();
+            }
+            else {
+                this.modified = false;
+            }
+        }
+        else {
+            this.valid = true;
+            this.modified = false;
+        }
+
+        return this;
+    }
+
+    push(widget) {
+        if (this.stack.length() == 1) {
+            this.nav.push(this.done);
+        }
+
+        if (typeof widget.isValid == 'function') {
+            this.valid = widget.isValid();
+        }
+        else {
+            this.valid = true;
+        }
+
+        if (typeof widget.isModified == 'function') {
+            this.modified = widget.isModified();
+        }
+        else {
+            this.modified = false;
+        }
+
+        this.stack.push(widget);
+        this.wire(widget);
+        return this;
+    }
+
+    async save() {
+    }
+
+    top() {
+        return this.stack.top();
+    }
+});

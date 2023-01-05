@@ -39,48 +39,97 @@ register(class WPanel extends Widget {
 
     constructor(tagName) {
         super(tagName ? tagName : 'div');
-        this.circuits = {};
+        this.circuits = mkMessageProxy(this);
         this.setWidgetStyle('panel');
+        this.valid = true;
+        this.modified = false;
     }
 
-    isModified() {
-        return false;
-    }
+    append(...args) {
+        super.append(...args);
 
-    isValid() {
-        return false;
-    }
-
-    async revert() {
-    }
-
-    async save() {
-    }
-
-    wire(widget) {
-        if (!widget.selector in this.circuits) {
-            let circuit = { widget: widget };
-
-            for (let wire of WPanel.wires) {
-                let handler = message => this[`on${wire.replaceAll('.', '')}`](message);
-                circuit[wire] = handler;
-                widget.on(wire, handler);
-            }
-
-            this.circuits.set()
+        for (let widget of args) {
+            this.wire(widget);
         }
 
         return this;
     }
 
-    unwire(widget) {
-        if (widget.selector in this.circuits) {
-            let circuit = this.circuits[widget.selector];
-            delete this.circuits[widget.selector];
+    clear() {
+        for (let widget of this.children()) {
+            this.unwire(widget);
+        }
 
-            for (let wire of WPanel.wires) {
-                widget.off(wire, circuit[wire].handler);
-            }
+        super.clear();
+        return this;
+    }
+
+    insertAfter(...args) {
+        super.insertAfter(...args);
+
+        for (let widget of args) {
+            this.wire(widget);
+        }
+
+        return this;
+    }
+
+    insertBefore(...args) {
+        super.insertBefore(...args);
+
+        for (let widget of args) {
+            this.wire(widget);
+        }
+
+        return this;
+    }
+
+    isModified() {
+        return this.modified;
+    }
+
+    isValid() {
+        return this.valid;
+    }
+
+    async onChanged(message) {
+    }
+
+    async onModified(message) {
+        this.modified = message.modified;
+    }
+
+    async onValidity(message) {
+        this.valid = message.valid;
+    }
+
+    prepend(...args) {
+        super.prepend(...args);
+
+        for (let widget of args) {
+            this.wire(widget);
+        }
+
+        return this;
+    }
+
+    async revert() {
+        return this;
+    }
+
+    async save() {
+        return this;
+    }
+
+    wire(widget) {
+        for (let wire of WPanel.wires) {
+            this.circuits.route(widget, wire);
+        }
+    }
+
+    unwire(widget) {
+        for (let wire of WPanel.wires) {
+            this.circuits.unroute(widget, wire);
         }
     }
 });

@@ -71,10 +71,12 @@ register(class WCtl extends Widget {
     }
 
     disable() {
+        console.log('ctl.js: disable()');
         return this;
     }
 
     enable() {
+        console.log('ctl.js: enable()');
         return this;
     }
 

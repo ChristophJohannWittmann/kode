@@ -29,26 +29,10 @@
  * parent object.  The purpose of the MessageProxy is to provide this feature
  * in a manner that's relatively easy to implement on constructed objects.
 *****/
-register(class MessageProxy extends Emitter {
+register(class MessageProxy {
     constructor(emitter) {
-        super();
         this.emitter = emitter;
         this.sources = new WeakMap();
-
-        this.emitter.off = (messageName, handler) => {
-            Reflect.apply(this.off, this, [messageName, handler])
-            return this.emitter;
-        };
-
-        this.emitter.on = (messageName, handler, filter) => {
-            Reflect.apply(this.on, this, [messageName, handler, filter])
-            return this.emitter;
-        };
-
-        this.emitter.once = (messageName, handler, filter) => {
-            Reflect.apply(this.once, this, [messageName, handler, filter])
-            return this.emitter;
-        };
     }
 
     handle(message, emitter) {
@@ -59,7 +43,7 @@ register(class MessageProxy extends Emitter {
                 let msg = copy(message);
                 msg.EMITTER = this.emitter;
                 msg.messageName = source.messages[message.messageName].messageOut;
-                this.send(msg);
+                this.emitter.send(msg);
             }
         }
     }
@@ -72,14 +56,7 @@ register(class MessageProxy extends Emitter {
                 emitter: emitter,
                 messages: {},
                 handler: message => this.handle(message, emitter),
-                off: emitter.off,
-                on: emitter.on,
-                once: emitter.once,
             });
-
-            emitter.off = this.off;
-            emitter.on = this.on;
-            emitter.once = this.once;
 
             this.sources.set(emitter, source);
         }
@@ -90,7 +67,7 @@ register(class MessageProxy extends Emitter {
                 messageOut: messageOut ? messageOut : messageIn,
             };
 
-            Reflect.apply(source.on, source.emitter, [messageIn, source.handler]);
+            Reflect.apply(emitter.on, emitter, [messageIn, source.handler]);
         }
 
         return this;
@@ -100,6 +77,7 @@ register(class MessageProxy extends Emitter {
         let source = this.sources.get(emitter);
 
         if (source) {
+            Reflect.apply(emitter.off, source.emitter, [messageName, source.handler]);
             delete source.messages[messageName];
         }
 

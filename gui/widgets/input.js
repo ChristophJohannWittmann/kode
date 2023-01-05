@@ -63,7 +63,8 @@ register(class WInput extends InputBaseWidget {
     }
 
     setValue(value) {
-        this.setAttribute('value', value);
+        this.htmlElement.node.value = value;
+        return this;
     }
 });
 

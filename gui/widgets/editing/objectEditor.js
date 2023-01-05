@@ -189,6 +189,7 @@ register(class WObjectEditor extends WTable {
             messageName: 'Widget.Changed',
             changed: message.widget,
             widget: this,
+            type: 'value',
             modified: modified,
         });
 
@@ -197,7 +198,6 @@ register(class WObjectEditor extends WTable {
             
             this.send({
                 messageName: 'Widget.Modified',
-                changed: message.widget,
                 widget: this,
                 modified: this.modified,
             });
@@ -205,6 +205,34 @@ register(class WObjectEditor extends WTable {
     }
 
     async revert() {
+        this.modified = false;
+
+        for (let property in this.unmodified) {
+            this.modifiable[property] = this.unmodified[property];
+        }
+
+        this.send({
+            messageName: 'Widget.Modified',
+            widget: this,
+            modified: false,
+        });
+
+        return this;
+    }
+
+    async update() {
+        this.modified = false;
+
+        for (let property in this.unmodified) {
+            this.unmodified[property] = this.modifiable[property];
+        }
+
+        this.send({
+            messageName: 'Widget.Modified',
+            widget: this,
+            modified: false,
+        });
+
         return this;
     }
 

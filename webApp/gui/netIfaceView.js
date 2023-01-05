@@ -28,6 +28,7 @@ register(class FWNetIfaceView extends WPanel {
     constructor(ifaceName) {
         super('form');
         this.append(mkWidget('h3').set(`${txx.fwNetInterface} "${ifaceName}"`));
+        this.editor = mkWObjectEditor();
 
         (async () => {
             let iface = await queryServer({
@@ -39,8 +40,7 @@ register(class FWNetIfaceView extends WPanel {
                 messageName: 'ConfigListAcmeProviders',
             })).map(ca => ({ value: ca.provider, text: ca.name }));
 
-            this.editor = mkWObjectEditor()
-            .addObj(iface, {
+            this.editor.addObj(iface, {
                 active: {
                     label: txx.fwMiscActive,
                     readonly: true,
@@ -92,13 +92,6 @@ register(class FWNetIfaceView extends WPanel {
             });
 
             this.append(this.editor);
-
-            let proxy = mkMessageProxy(this);
-            proxy.route(this.editor, 'Widget.Changed');
-            proxy.route(this.editor, 'Widget.Modified');
-            proxy.route(this.editor, 'Widget.Validity');
-            
-            this.getPanel().wire(this);
         })();
     }
 
@@ -107,6 +100,7 @@ register(class FWNetIfaceView extends WPanel {
     }
 
     isValid() {
+        console.log(this.editor);
         return this.editor.isValid();
     }
 
@@ -115,7 +109,8 @@ register(class FWNetIfaceView extends WPanel {
         return this;
     }
 
-    async save() {
-        console.log('Saving NetIFace...');
+    async update() {
+        this.editor.update();
+        return this;
     }
 });

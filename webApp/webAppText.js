@@ -72,6 +72,9 @@ register(class WebAppText extends MultilingualText {
             // ****************************************************************
             // Nav
             // ****************************************************************
+            fwNavCancel: {
+                en: `Cancel`,
+            },
             fwNavDone: {
                 en: `Done`,
             },
