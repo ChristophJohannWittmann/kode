@@ -23,6 +23,10 @@
 
 
 /*****
+ * This function loads, creates, and manages a class used for managing the main
+ * server configuration file.  It's name must be builtin.json, which means it's
+ * the configuration file for the "builtin" namespace.  This class is used by
+ * system administrators when managing the server configuration.
 *****/
 register(async function loadConfigFile(name) {
     let exists = true;
@@ -49,6 +53,7 @@ register(async function loadConfigFile(name) {
         }
 
         async save() {
+            await FILES.writeFile(filePath, toJson(this, true));
         }
     }
 

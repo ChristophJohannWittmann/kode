@@ -56,15 +56,11 @@ register(class WView extends WPanel {
     }
 
     async onCancel(message) {
-        let widget = this.stack.top();
-        await widget.revert();
+        this.revert();
+        this.invalid = 0;
+        this.modified = 0;
         this.cancel.remove();
-
-        if (!this.valid) {
-            this.valid = true;
-            this.done.enable();
-        }
-
+        this.done.enable();
         return this;
     }
 

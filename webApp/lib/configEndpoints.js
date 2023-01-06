@@ -29,30 +29,57 @@ register(class ConfigEndpoints extends EndpointContainer {
         super(webapp);
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('ConfigCreateAcmeProvider', 'system') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('ConfigCreateCertificate', 'system') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('ConfigCreateKeyPair', 'system') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('ConfigCreateNetIface', 'system') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('ConfigDeleteAcmeProvider', 'system') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('ConfigDeleteCertificate', 'system') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('ConfigDeleteKeyPair', 'system') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('ConfigDeleteNetIface', 'system') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('ConfigGetNetIface', 'system') ](trx) {
         let config = await loadConfigFile('builtin');
         let iface = config.network[trx.ifaceName];
@@ -82,6 +109,10 @@ register(class ConfigEndpoints extends EndpointContainer {
         return iface;
     }
 
+
+    /*****
+     * List configured ACME providers
+    *****/
     async [ mkEndpoint('ConfigListAcmeProviders', 'system') ](trx) {
         let config = await loadConfigFile('builtin');
         
@@ -93,11 +124,19 @@ register(class ConfigEndpoints extends EndpointContainer {
         }));
     }
 
+
+    /*****
+     * List Network Interfaces
+    *****/
     async [ mkEndpoint('ConfigListNetIfaces', 'system') ](trx) {
         let config = await loadConfigFile('builtin');
         return Object.keys(config.network);
     }
 
+
+    /*****
+     * Update non-crypto network information
+    *****/
     async [ mkEndpoint('UpdateNetIface', 'system') ](trx) {
         let config = await loadConfigFile('builtin');
 
@@ -109,11 +148,11 @@ register(class ConfigEndpoints extends EndpointContainer {
             }
 
             if (trx.acme != config.network[trx.ifaceName].acme) {
-                config.network[trx.ifaceName].acme = trx.acme;
+                config.network[trx.ifaceName].tls.acme = trx.acme;
             }
         }
 
-        console.log(config.network);
-        return 'hello';
+        await config.save();
+        return true;
     }
 });

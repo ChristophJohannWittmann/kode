@@ -23,6 +23,12 @@
 
 
 /*****
+ * A panel that's used for editing a network interface.  This panel is able to
+ * edit all aspects of a single network interface, whose data is stored in the
+ * server configuration file, builtin.json.  All aspects of the network interface
+ * may modified with this panel.  System admin beware, if you deactivate the
+ * network interface you're currently using, the server will reboot without it
+ * being available.
 *****/
 register(class FWNetIfaceView extends WPanel {
     constructor(ifaceName) {
@@ -42,11 +48,6 @@ register(class FWNetIfaceView extends WPanel {
             })).map(ca => ({ value: ca.provider, text: ca.name }));
 
             this.editor.addObj(this.iface, {
-                active: {
-                    label: txx.fwMiscActive,
-                    readonly: true,
-                    type: ScalarBool,
-                },
                 address: {
                     label: txx.fwNetAddress,
                     readonly: false,
@@ -115,8 +116,7 @@ register(class FWNetIfaceView extends WPanel {
             }
         }
 
-        let result = await queryServer(message);
-        console.log(result);
+        await queryServer(message);
     }
 
     async update() {

@@ -24,8 +24,13 @@
 
 /*****
 *****/
-register(class WRecordViewer extends Widget {
-    constructor() {
+register(class WRecordViewer extends WTable {
+    constructor(readonly) {
         super();
+        this.invalid = 0;
+        this.modified = false;
+        this.unmodified = [];
+        this.modifiable = mkActiveData([]);
+        this.readonly = readonly ? readonly : false;
     }
 });

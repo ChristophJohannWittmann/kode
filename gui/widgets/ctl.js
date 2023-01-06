@@ -34,30 +34,37 @@ register(class WCtl extends Widget {
     constructor() {
         super('div');
         this.menu = null;
+        this.enabled = true;
 
         this.on('html.click', message => {
-            this.send({
-                messageName: 'Widget.Click',
-                widget: this,
-                event: message.event,
-            });
+            if (this.enabled) {
+                this.send({
+                    messageName: 'Widget.Click',
+                    widget: this,
+                    event: message.event,
+                });
+            }
         });
 
         this.on('html.dblclick', message => {
-            this.send({
-                messageName: 'Widget.DoubleClick',
-                widget: this,
-                event: message.event,
-            });
+            if (this.enabled) {
+                this.send({
+                    messageName: 'Widget.DoubleClick',
+                    widget: this,
+                    event: message.event,
+                });
+            }
         });
 
         doc.on('contextmenu', message => {
-            if (Widget.widgetKey in message.event.target) {
-                let widget = message.event.target[Widget.widgetKey];
+            if (this.enabled) {
+                if (Widget.widgetKey in message.event.target) {
+                    let widget = message.event.target[Widget.widgetKey];
 
-                if (widget.selector == this.selector) {
-                    message.event.preventDefault();
-                    this.openMenu();
+                    if (widget.selector == this.selector) {
+                        message.event.preventDefault();
+                        this.openMenu();
+                    }
                 }
             }
         });
@@ -71,13 +78,14 @@ register(class WCtl extends Widget {
     }
 
     disable() {
-        console.log('ctl.js: disable()');
+        this.enabled = false;
+        this.setWidgetStyle(`${this.getWidgetStyle()}-disabled`);
         return this;
     }
 
     enable() {
-        console.log('ctl.js: enable()');
-        return this;
+        this.enabled = true;
+        this.setWidgetStyle(this.getWidgetStyle().replace('-disabled', ''));
     }
 
     openMenu() {
@@ -208,10 +216,6 @@ register(class WCtls extends Widget {
         }
 
         return this;
-    }
-
-    [Symbol.iterator]() {
-        return this.children()[Symbol.iterator]();
     }
 
     unshift(ctl) {

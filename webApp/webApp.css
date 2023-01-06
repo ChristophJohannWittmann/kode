@@ -1242,6 +1242,20 @@ body {
     color: var(--hover-color);
     background-color: var(--hover-background);
 }
+[widget-style=ctls-horz-ctl-disabled] {
+    color: var(--disabled-color-1);
+    margin-left: 6px;
+    margin-right: 6px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+[widget-style=ctls-vert-ctl-disabled] {
+    color: var(--disabled-color-1);
+    margin-left: 6px;
+    margin-right: 6px;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
 
 
 /***********************************************

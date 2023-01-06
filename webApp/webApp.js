@@ -34,6 +34,7 @@ const builtinCssVariables = {
         error_outline_color: 'crimson',
 
         color_1: '#696969',
+        disabled_color_1: 'lightgray',
         background_color_1: '#FFFFFF',
         background_button_1: '#F5F5F5',
         border_color_1: '#4682B4',
@@ -43,6 +44,7 @@ const builtinCssVariables = {
         hover_background_1: 'darkorange',
 
         color_2: '#5C5D5E',
+        disabled_color_1: 'lightgray',
         background_color_2: '#EEF3F9',
         background_button_2: '#F5F5F5',
         border_color_2: '#7EB9E4',
@@ -51,6 +53,7 @@ const builtinCssVariables = {
         hover_background_2: 'darkorange',
 
         color_3: '#696969',
+        disabled_color_1: 'lightgray',
         background_color_3: '#FFFFFF',
         background_button_3: '#F5F5F5',
         border_color_3: '#4682B4',
@@ -60,6 +63,7 @@ const builtinCssVariables = {
         hover_background_3: 'darkorange',
 
         color_4: '#696969',
+        disabled_color_1: 'lightgray',
         background_color_4: '#FFFFFF',
         background_button_4: '#F5F5F5',
         border_color_4: '#4682B4',
@@ -74,6 +78,7 @@ const builtinCssVariables = {
         error_outline_color: 'crimson',
 
         color_1: '#696969',
+        disabled_color_1: 'lightgray',
         background_olor_1: '#FFFFFF',
         background_button_1: '#F5F5F5',
         border_color_1: '#4682B4',
@@ -83,6 +88,7 @@ const builtinCssVariables = {
         hover_background_1: 'darkorange',
 
         color_2: '#5C5D5E',
+        disabled_color_1: 'lightgray',
         background_color_2: '#EEF3F9',
         background_button_2: '#F5F5F5',
         border_color_2: '#7EB9E4',
@@ -91,6 +97,7 @@ const builtinCssVariables = {
         hover_background_2: 'darkorange',
 
         color_3: '#696969',
+        disabled_color_1: 'lightgray',
         background_color_3: '#FFFFFF',
         background_button_3: '#F5F5F5',
         border_color_3: '#4682B4',
@@ -100,6 +107,7 @@ const builtinCssVariables = {
         hover_background_3: 'darkorange',
 
         color_4: '#696969',
+        disabled_color_1: 'lightgray',
         background_color_4: '#FFFFFF',
         background_button_4: '#F5F5F5',
         border_color_4: '#4682B4',
@@ -324,13 +332,12 @@ register(class WebApp extends Webx {
             if (response === EndpointContainer.internalError) {
                 if ('#Trap' in message) {
                     return {
-                        messageName: '#InternalServerError',
+                        messageName: message.messageName,
+                        response: '#InternalServerError',
                         '#Trap': message['#Trap'],
-                        '#Code': EndpointContainer.internalError,
+                        '#Pending': [],
+                        '#Code': 'ok',
                     };
-                }
-                else {
-                    return false;
                 }
             }
             else if (response === EndpointContainer.unauthorized) {
@@ -341,12 +348,12 @@ register(class WebApp extends Webx {
 
                 if ('#Trap' in message) {
                     return {
-                        messageName: '#CloseApp',
-                        '#Code': EndpointContainer.unauthorized
+                        messageName: message.messageName,
+                        response: '#NoSession',
+                        '#Trap': message['#Trap'],
+                        '#Pending': [],
+                        '#Code': 'ok',
                     };
-                }
-                else {
-                    return false;
                 }
             }
             else {
@@ -359,25 +366,21 @@ register(class WebApp extends Webx {
                         '#Code': 'ok',
                     };
                 }
-                else {
-                    return false;
-                }
             }
         }
         else {
             if ('#Trap' in message) {
                 return {
                     messageName: '#Ignored',
-                    response: '',
+                    response: '#Ignored',
                     '#Trap': message['#Trap'],
                     '#Pending': await Ipc.queryPrimary({ messageName: '#SessionManagerSweep', session: message['#Session'] }),
-                    '#Code': EndpointContainer.ignored,
+                    '#Code': 'ok',
                 };
             }
-            else {
-                return false;
-            }
         }
+
+        return false;
     }
 
     async handlePOST(req, rsp) {

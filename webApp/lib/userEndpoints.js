@@ -29,48 +29,93 @@ register(class UserEndpoints extends EndpointContainer {
         super(webapp);
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserActivate', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserAddAddress', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserAddUEmail', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserAddPhone', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserDeactivate', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserModify', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserModifyAddress', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserModifyEmail', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserModifyPhone', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserRemove', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserRemoveAddress', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserRemoveEmail', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserRemovePhone', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserResetPassword', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserSelectByEmail', 'user') ](trx) {
         return await Users.selectByEmail(
             await trx.connect(),
@@ -78,6 +123,9 @@ register(class UserEndpoints extends EndpointContainer {
         );
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserSelectByName', 'user') ](trx) {
         return await Users.selectByName(
             await trx.connect(),
@@ -86,9 +134,15 @@ register(class UserEndpoints extends EndpointContainer {
         );
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserSignOut', 'user') ](trx) {
     }
 
+
+    /*****
+    *****/
     async [ mkEndpoint('UserVerify', 'user') ](trx) {
     }
 });

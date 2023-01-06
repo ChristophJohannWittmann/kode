@@ -60,6 +60,10 @@
      * view stack and replacing that entire stack with the sign-in view.
     *****/
     on('#CloseApp', message => {
+        if (message.notify) {
+            doKludgeAlert(message.notify);
+        }
+
         signOut();
     });
 
@@ -69,13 +73,27 @@
      * communication functions because the source code needs to be written to
      * work with either an HTTP-request only mode or with a websocket.
     *****/
-    register(async function queryServer(message) {
-        if (webSocket) {
-            return await webSocket.queryServer(message);
-        }
-        else {
-            return await mkHttp().queryServer(message);
-        }
+    register(function queryServer(message) {
+        return new Promise(async (ok, fail) => {
+            if (webSocket) {
+                var response = await webSocket.queryServer(message);
+            }
+            else {
+                var response = await mkHttp().queryServer(message);
+            }
+
+            if (response === '#CloseApp') {
+                send({ messageName: '#CloseApp', notify: false });
+            }
+            else if (response === '#NoSession') {
+                send({ messageName: '#CloseApp', notify: txx.fwMiscSessionClosed });
+            }
+            else if (response === '#InternalServerError') {
+            }
+            else {
+                ok(response);
+            }
+        });
     });
 
     register(async function sendServer(message) {

@@ -68,6 +68,9 @@ register(class WebAppText extends MultilingualText {
             fwMiscActive: {
                 en: `Active`,
             },
+            fwMiscSessionClosed: {
+                en: `Your session has been closed.  Please sign in again.`,
+            },
 
             // ****************************************************************
             // Nav
