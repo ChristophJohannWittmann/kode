@@ -102,6 +102,7 @@ register(class FWNetIfaceView extends WPanel {
     }
 
     async save() {
+        console.log('...saving...');
         let message = {
             messageName: 'UpdateNetIface',
             ifaceName: this.ifaceName,

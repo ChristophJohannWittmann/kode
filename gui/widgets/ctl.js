@@ -33,65 +33,21 @@
 register(class WCtl extends Widget {
     constructor() {
         super('div');
-        this.menu = null;
-        this.enabled = true;
 
-        this.on('html.click', message => {
-            if (this.enabled) {
-                this.send({
-                    messageName: 'Widget.Click',
-                    widget: this,
-                    event: message.event,
-                });
-            }
-        });
-
-        this.on('html.dblclick', message => {
-            if (this.enabled) {
-                this.send({
-                    messageName: 'Widget.DoubleClick',
-                    widget: this,
-                    event: message.event,
-                });
-            }
-        });
-
-        doc.on('contextmenu', message => {
-            if (this.enabled) {
-                if (Widget.widgetKey in message.event.target) {
-                    let widget = message.event.target[Widget.widgetKey];
-
-                    if (widget.selector == this.selector) {
-                        message.event.preventDefault();
-                        this.openMenu();
-                    }
-                }
-            }
-        });
-    }
-
-    closeMenu() {
-        if (this.menu) {
-        }
-
-        return this;
+        this.setMenu(
+            mkWPopupMenu()
+        );
     }
 
     disable() {
-        this.enabled = false;
+        super.disable();
         this.setWidgetStyle(`${this.getWidgetStyle()}-disabled`);
         return this;
     }
 
     enable() {
-        this.enabled = true;
+        super.enable();
         this.setWidgetStyle(this.getWidgetStyle().replace('-disabled', ''));
-    }
-
-    openMenu() {
-        if (this.menu) {
-        }
-
         return this;
     }
 });

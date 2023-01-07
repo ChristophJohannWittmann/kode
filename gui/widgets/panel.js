@@ -119,6 +119,9 @@ register(class WPanel extends Widget {
     }
 
     async revert() {
+        this.invalid = 0;
+        this.modified = 0;
+
         for (let widget of this) {
             if (typeof widget.revert == 'function') {
                 await widget.revert();
@@ -142,6 +145,9 @@ register(class WPanel extends Widget {
     }
 
     async update() {
+        this.invalid = 0;
+        this.modified = 0;
+
         for (let widget of this) {
             if (typeof widget.update == 'function') {
                 await widget.update();

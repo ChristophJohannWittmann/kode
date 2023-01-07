@@ -80,7 +80,7 @@ register(class Doc extends Emitter {
             'transitionstart',
         ].forEach(eventName => this.doc.addEventListener(eventName, event => {
             this.send({
-                messageName: eventName,
+                messageName: `html.${eventName}`,
                 event: mkHtmlEvent(event)
             });
         }));
@@ -145,6 +145,40 @@ register(class Doc extends Emitter {
 
     location() {
         return this.doc.location;
+    }
+
+    onWidget(messageName, widget, handler) {
+        const filter = message => {
+            if (Widget.widgetKey in message.event.target) {
+                let eventWidget = message.event.target[Widget.widgetKey];
+
+                if (eventWidget.selector == widget.selector) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        this.on(messageName, handler, filter);
+        return this;
+    }
+
+    onceWidget(messageName, widget, handler) {
+        const filter = message => {
+            if (Widget.widgetKey in message.event.target) {
+                let eventWidget = message.event.target[Widget.widgetKey];
+
+                if (eventWidget.selector == widget.selector) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        this.once(messageName, handler, filter);
+        return this;
     }
 
     readyState() {

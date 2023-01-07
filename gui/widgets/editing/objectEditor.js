@@ -210,6 +210,7 @@ register(class WObjectEditor extends WTable {
     }
 
     async revert() {
+        this.invalid = 0;
         this.modified = false;
 
         for (let property in this.unmodified) {
@@ -222,10 +223,17 @@ register(class WObjectEditor extends WTable {
             modified: false,
         });
 
+        this.send({
+            messageName: 'Widget.Validity',
+            valid: true,
+            widget: this,
+        });
+
         return this;
     }
 
     async update() {
+        this.invalid = 0;
         this.modified = false;
 
         for (let property in this.unmodified) {
@@ -236,6 +244,12 @@ register(class WObjectEditor extends WTable {
             messageName: 'Widget.Modified',
             widget: this,
             modified: false,
+        });
+
+        this.send({
+            messageName: 'Widget.Validity',
+            valid: true,
+            widget: this,
         });
 
         return this;

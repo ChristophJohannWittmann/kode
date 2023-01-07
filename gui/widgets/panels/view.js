@@ -35,7 +35,6 @@ register(class WView extends WPanel {
 
         this.nav = mkWNavBar();
         this.stack = mkWStack();
-
         this.append(this.nav);
         this.append(this.stack);
 
@@ -44,12 +43,12 @@ register(class WView extends WPanel {
         this.done =
         mkWCtl()
         .set(txx.fwNavDone)
-        .on('Widget.Click', async message => this.onDone(message));
+        .on('html.click', async message => this.onDone(message));
 
         this.cancel =
         mkWCtl()
         .set(txx.fwNavCancel)
-        .on('Widget.Click', async message => this.onCancel(message));
+        .on('html.click', async message => this.onCancel(message));
 
         this.on('Widget.Cancel', async message => await this.onCancel(message));
         this.on('Widget.Done', async message => await this.onDone(message));
@@ -147,6 +146,7 @@ register(class WView extends WPanel {
     }
 
     async revert() {
+        super.revert();
         let top = this.top();
 
         if (top && typeof top.revert == 'function') {
@@ -167,6 +167,7 @@ register(class WView extends WPanel {
     }
 
     async update() {
+        super.update();
         let top = this.top();
 
         if (top && typeof top.update == 'function') {

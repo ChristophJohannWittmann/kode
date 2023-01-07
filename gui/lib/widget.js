@@ -43,10 +43,16 @@ register(class Widget extends Emitter {
 
     constructor(arg) {
         super();
+        this.enabled = true;
         this[Widget.handlerKey] = {};
         this.id = Widget.nextId++;
         this.selector = `widget${this.id}`;
         this[Widget.bindingKey] = 'innerHtml';
+
+        this.tip = null;
+        this.menu = null;
+        this.docHandler = message => this.onDoc(message);
+        this.menuHandler = message => this.onMenu(message);
 
         if (arg instanceof HtmlElement) {
             this.htmlElement = arg;
@@ -169,6 +175,16 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    clearMenu() {
+        if (this.menu) {
+            this.menu.off('Menu.Activity', this.menuHandler);
+            doc.off('html.contextmenu', this.docHandler);
+            this. menu = null;
+        }
+
+        return this;
+    }
+
     clearStyle() {
         for (let i = 0; i < this.htmlElement.node.style.length; i++) {
             let styleProperty = this.htmlElement.node.style.item(i);
@@ -183,8 +199,18 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    disable() {
+        this.enabled = false;
+        return this;
+    }
+
     disablePropagation(eventName) {
         this.htmlElement.disablePropagation(eventName);
+    }
+
+    enable() {
+        this.enabled = true;
+        return this;
     }
 
     enablePropagation(eventName) {
@@ -291,6 +317,19 @@ register(class Widget extends Emitter {
         }
 
         return this;
+    }
+
+    onDoc(message) {
+        console.log('widget.js: onDoc()');
+        console.log(message);
+        message.event.preventDefault();
+    }
+
+    onMenu(message) {
+        if (this.enabled) {
+            console.log('widget.js: onMenu()');
+            console.log(message);
+        }
     }
 
     parent() {
@@ -426,6 +465,19 @@ register(class Widget extends Emitter {
             value: className,
         });
 
+        return this;
+    }
+
+    setMenu(menu) {
+        if (this.menu) {
+            this.menu.off('Menu.Activity', this.menuHandler);
+        }
+        else {
+            doc.onWidget('html.contextmenu', this, this.docHandler);
+        }
+
+        this.menu = menu;
+        this.menu.on('Menu.Activity', this.menuHandler);
         return this;
     }
 

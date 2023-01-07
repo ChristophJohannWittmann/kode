@@ -26,6 +26,16 @@
 *****/
 register(class WMenu extends Widget {
     constructor() {
-        super();
+        super('menu');
+        this.handler = null;
+    }
+});
+
+
+/*****
+*****/
+register(class WMenuItem extends Widget {
+    constructor() {
+        super('div');
     }
 });

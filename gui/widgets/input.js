@@ -74,6 +74,7 @@ register(class WInput extends InputBaseWidget {
 
     setValue(value) {
         this.htmlElement.node.value = value;
+        this.valid = this.isValid();
         return this;
     }
 });
