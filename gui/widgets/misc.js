@@ -29,9 +29,9 @@
  * As needed, specialized features will be added to each of these classes to
  * help manage, encapsulate, and minimize the code throughtout the framework.
 *****/
-register(class WBody extends WStack {
+register(class WHtml extends Widget {
     constructor(doc) {
-        super(doc.getBody());
+        super(doc.getHtml());
     }
 });
 
@@ -46,6 +46,20 @@ register(class WBody extends WStack {
 register(class WHead extends Widget {
     constructor(doc) {
         super(doc.getHead());
+    }
+});
+
+
+/*****
+ * WHtml, WHead, and WBody are widget wrappers for the entire HTML document, the
+ * HEAD, and the BODY elements respectively.  These are classes for specific
+ * HTML elements because of their overall significance for the doc structure.
+ * As needed, specialized features will be added to each of these classes to
+ * help manage, encapsulate, and minimize the code throughtout the framework.
+*****/
+register(class WBody extends WStack {
+    constructor(doc) {
+        super(doc.getBody());
     }
 });
 
@@ -66,14 +80,15 @@ register(class WHotSpot extends Widget {
 
 
 /*****
- * WHtml, WHead, and WBody are widget wrappers for the entire HTML document, the
- * HEAD, and the BODY elements respectively.  These are classes for specific
- * HTML elements because of their overall significance for the doc structure.
- * As needed, specialized features will be added to each of these classes to
- * help manage, encapsulate, and minimize the code throughtout the framework.
+ * A hot spot is implemented as a DIV and provides an alternative to using an A
+ * element for interactive / responsive elements for clicking to invoke GUI
+ * actions.  The framework approach is to encourage the use of the WLink for
+ * anchors to external URLs and the use of WHotSpot for an item to invoked an
+ * action on the GUI.
 *****/
-register(class WHtml extends Widget {
-    constructor(doc) {
-        super(doc.getHtml());
+register(class WHotPoint extends Widget {
+    constructor() {
+        super('div');
+        this.setWidgetStyle('hotpoint');
     }
 });

@@ -24,10 +24,31 @@
 
 /*****
 *****/
-register(class WMenu extends Widget {
+register(class WPopupMenu extends Widget {
     constructor() {
-        super('menu');
-        this.handler = null;
+        super('div');
+        this.showing = false;
+        this.setWidgetStyle('popup-menu');
+    }
+
+    attach(widget, opts) {
+    }
+
+    close() {
+        if (this.parent() && this.showing) {
+        }
+
+        return this;
+    }
+
+    detach() {
+    }
+
+    open() {
+        if (this.parent() && !this.showing) {
+        }
+
+        return this;
     }
 });
 
@@ -35,7 +56,18 @@ register(class WMenu extends Widget {
 /*****
 *****/
 register(class WMenuItem extends Widget {
-    constructor() {
-        super('div');
+    constructor(text, image, shortcut) {
+        super('span');
+        this.setWidgetStyle('popup-menu-item');
+        this.append(text);
+
+        if (image) {
+        }
+
+        this.on('html.click', message => this.onClick(message));
+    }
+
+    onClick(message) {
+        console.log(message);
     }
 });

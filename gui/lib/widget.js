@@ -43,7 +43,6 @@ register(class Widget extends Emitter {
 
     constructor(arg) {
         super();
-        this.enabled = true;
         this[Widget.handlerKey] = {};
         this.id = Widget.nextId++;
         this.selector = `widget${this.id}`;
@@ -177,6 +176,7 @@ register(class Widget extends Emitter {
 
     clearMenu() {
         if (this.menu) {
+            this.menu.close();
             this.menu.off('Menu.Activity', this.menuHandler);
             doc.off('html.contextmenu', this.docHandler);
             this. menu = null;
@@ -200,7 +200,7 @@ register(class Widget extends Emitter {
     }
 
     disable() {
-        this.enabled = false;
+        this.setAttribute('disabled');
         return this;
     }
 
@@ -209,7 +209,7 @@ register(class Widget extends Emitter {
     }
 
     enable() {
-        this.enabled = true;
+        this.clearAttribute('disabled');
         return this;
     }
 
@@ -223,6 +223,10 @@ register(class Widget extends Emitter {
 
     getAttribute(name) {
         return this.htmlElement.getAttribute(name);
+    }
+
+    getMenu() {
+        return this.menu;
     }
 
     getPanel() {
@@ -273,6 +277,14 @@ register(class Widget extends Emitter {
 
     insertBefore(...args) {
         this.htmlElement.insertBefore(...args);
+    }
+
+    isDisabled() {
+        return this.hasAttribute('disabled');
+    }
+
+    isEnabled() {
+        return !this.hasAttribute('disabled');
     }
 
     length() {
@@ -326,7 +338,7 @@ register(class Widget extends Emitter {
     }
 
     onMenu(message) {
-        if (this.enabled) {
+        if (this.isEnabled()) {
             console.log('widget.js: onMenu()');
             console.log(message);
         }

@@ -36,6 +36,7 @@ register(class WObjectEditor extends WTable {
     constructor(readonly) {
         super();
         this.invalid = 0;
+        this.scalars = {};
         this.modified = false;
         this.unmodified = {};
         this.modifiable = mkActiveData();
@@ -51,7 +52,7 @@ register(class WObjectEditor extends WTable {
                     let readonly = this.readonly;
 
                     if (options && options[property]) {
-                        let opts = clone(options[property]);
+                        let opts = options[property];
 
                         if (!opts.hidden) {
                             this.unmodified[property] = value;
@@ -61,33 +62,30 @@ register(class WObjectEditor extends WTable {
                                 readonly = readonly || opts.readonly;
                             }
 
-                            if (!('type' in opts)) {
-                                opts.type = WScalar.selectType(this.modifiable[property]);
-                            }
+                            let maker = opts.type ? opts.type : scalarSelectType(this.modifiable[property]);
+                            this.scalars[property] = maker(this.modifiable, property, opts)
+                            .on('Widget.Changed', message => this.onValueChanged(message))
+                            .on('Widget.Validity', message => this.onValidityChanged(message));
 
                             this.getBody().mkRowAppend()
                             .mkCellAppend(opts.label ? opts.label : property)
-                            .mkCellAppend(
-                                mkWScalar(this.modifiable, property, opts)
-                                .on('Widget.Changed', message => this.onValueChanged(message))
-                                .on('Widget.Validity', message => this.onValidityChanged(message))
-                            );
+                            .mkCellAppend(this.scalars[property]);
                         }
                     }
                     else {
                         this.unmodified[property] = value;
                         this.modifiable[property] = value;
-                        let readonly = this.readonly || WScalar.dboReadonlyByDefault(property);
-                        let type = WScalar.selectType(this.modifiable[property]);
+                        let readonly = this.readonly || scalarDboDefaultsToReadOnly(property);
+                        let maker = scalarSelectType(this.modifiable[property]);
                         let opts = { readonly: readonly, type: type };
+
+                        this.scalars[property] = maker(this.modifiable, property, opts)
+                        .on('Widget.Changed', message => this.onValueChanged(message))
+                        .on('Widget.Validity', message => this.onValidityChanged(message));
 
                         this.getBody().mkRowAppend()
                         .mkCellAppend(property)
-                        .mkCellAppend(
-                            mkWScalar(this.modifiable, property, opts)
-                            .on('Widget.Changed', message => this.onValueChanged(message))
-                            .on('Widget.Validity', message => this.onValidityChanged(message))
-                        );
+                        .mkCellAppend(this.scalars[property]);
                     }
                 }
             }
@@ -105,7 +103,7 @@ register(class WObjectEditor extends WTable {
                     let readonly = this.readonly;
 
                     if (options && options[property]) {
-                        let opts = clone(options[property]);
+                        let opts = options[property];
 
                         if (!opts.hidden) {
                             this.unmodified[property] = value;
@@ -115,32 +113,29 @@ register(class WObjectEditor extends WTable {
                                 readonly = readonly || opts.readonly;
                             }
 
-                            if (!('type' in opts)) {
-                                opts.type = WScalar.selectType(this.modifiable[property]);
-                            }
+                            let maker = opts.type ? opts.type : scalarSelectType(this.modifiable[property]);
+                            this.scalars[property] = maker(this.modifiable, property, opts)
+                            .on('Widget.Changed', message => this.onValueChanged(message))
+                            .on('Widget.Validity', message => this.onValidityChanged(message));
 
                             this.getBody().mkRowAppend()
                             .mkCellAppend(opts.label ? opts.label : property)
-                            .mkCellAppend(
-                                mkWScalar(this.modifiable, property, opts)
-                                .on('Widget.Changed', message => this.onValueChanged(message))
-                                .on('Widget.Validity', message => this.onValidityChanged(message))
-                            );
+                            .mkCellAppend(this.scalars[property]);
                         }
                     }
                     else {
                         this.unmodified[property] = value;
                         this.modifiable[property] = value;
-                        let type = WScalar.selectType(this.modifiable[property]);
-                        let opts = { readonly: this.readonly, type: type };
+                        let maker = scalarSelectType(this.modifiable[property]);
+                        let opts = { readonly: this.readonly };
+
+                        this.scalars[property] = maker(this.modifiable, property, opts)
+                        .on('Widget.Changed', message => this.onValueChanged(message))
+                        .on('Widget.Validity', message => this.onValidityChanged(message));
 
                         this.getBody().mkRowAppend()
                         .mkCellAppend(property)
-                        .mkCellAppend(
-                            mkWScalar(this.modifiable, property, opts)
-                            .on('Widget.Changed', message => this.onValueChanged(message))
-                            .on('Widget.Validity', message => this.onValidityChanged(message))
-                        );
+                        .mkCellAppend(this.scalars[property]);
                     }
                 }
             }
@@ -149,9 +144,17 @@ register(class WObjectEditor extends WTable {
         return this;
     }
 
-    fields() {
+    getFields() {
         const values = ActiveData.value(this.modifiable);
         return Object.entries(values).map(entry => ({ name: entry[0], value: entry[1] }));
+    }
+
+    getScalar(name) {
+        return this.scalars[name];
+    }
+
+    getScalars() {
+        return this.scalars;
     }
 
     isModified() {

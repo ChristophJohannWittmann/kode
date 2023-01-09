@@ -74,7 +74,8 @@ register(class FWNetIfaceView extends WPanel {
                 privateKey: {
                     label: txx.fwNetPrivateKey,
                     readonly: true,
-                    type: ScalarText,
+                    type: ScalarHotSpot,
+                    menu: mkWPopupMenu()
                 },
                 publicKey: {
                     label: txx.fwNetPublicKey,
@@ -102,7 +103,6 @@ register(class FWNetIfaceView extends WPanel {
     }
 
     async save() {
-        console.log('...saving...');
         let message = {
             messageName: 'UpdateNetIface',
             ifaceName: this.ifaceName,

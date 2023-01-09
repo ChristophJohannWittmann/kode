@@ -31,16 +31,7 @@ register(function doKludgeAlert(text) {
 
 /*****
 *****/
-register(class WFloater extends Widget {
-    constructor() {
-        super('div');
-    }
-});
-
-
-/*****
-*****/
-register(class WDialog extends WFloater {
+register(class WDialog extends Widget {
     constructor() {
         super();
     }

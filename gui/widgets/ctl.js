@@ -33,10 +33,6 @@
 register(class WCtl extends Widget {
     constructor() {
         super('div');
-
-        this.setMenu(
-            mkWPopupMenu()
-        );
     }
 
     disable() {
