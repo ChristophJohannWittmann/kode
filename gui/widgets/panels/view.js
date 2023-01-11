@@ -80,7 +80,7 @@ register(class WView extends WPanel {
             this.nav.push(this.cancel);
         }
         else {
-            this.nav.pop();
+            this.cancel.remove();
         }
     }
 

@@ -47,6 +47,27 @@ register(class FWNetIfaceView extends WPanel {
                 messageName: 'ConfigListAcmeProviders',
             })).map(ca => ({ value: ca.provider, text: ca.name }));
 
+            let cryptoMenu = mkWPopupMenu()
+            .append(
+                mkWMenuItem(txx.fwNetCreateKeyPair)
+                .setAction(() => alert('key pair!'))
+            )
+            .append(
+                mkWMenuItem(txx.fwNetCertify)
+                .setAction(() => alert('certify'))
+                .disable()
+            );
+
+            let testMenu = mkWPopupMenu()
+            .append(
+                mkWMenuItem('Action A')
+                .setAction(() => alert('Action A'))
+            )
+            .append(
+                mkWMenuItem('Action B')
+                .setAction(() => alert('Action B'))
+            );
+
             this.editor.addObj(this.iface, {
                 address: {
                     label: txx.fwNetAddress,
@@ -74,13 +95,14 @@ register(class FWNetIfaceView extends WPanel {
                 privateKey: {
                     label: txx.fwNetPrivateKey,
                     readonly: true,
-                    type: ScalarHotSpot,
-                    menu: mkWPopupMenu()
+                    type: ScalarText,
+                    menu: cryptoMenu,
                 },
                 publicKey: {
                     label: txx.fwNetPublicKey,
                     readonly: true,
                     type: ScalarText,
+                    menu: testMenu,
                 },
                 cert: {
                     label: txx.fwNetCert,
@@ -108,7 +130,7 @@ register(class FWNetIfaceView extends WPanel {
             ifaceName: this.ifaceName,
         };
 
-        for (let field of this.editor.fields()) {
+        for (let field of this.editor.getFields()) {
             if (field.name in this.iface) {
                 message[field.name] = field.value;
             }

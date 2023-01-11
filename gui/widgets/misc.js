@@ -69,7 +69,7 @@ register(class WBody extends WStack {
  * element for interactive / responsive elements for clicking to invoke GUI
  * actions.  The framework approach is to encourage the use of the WLink for
  * anchors to external URLs and the use of WHotSpot for an item to invoked an
- * action on the GUI.
+ * action on the GUI.  Warm spot and cold spot are analogs.
 *****/
 register(class WHotSpot extends Widget {
     constructor() {
@@ -78,17 +78,16 @@ register(class WHotSpot extends Widget {
     }
 });
 
-
-/*****
- * A hot spot is implemented as a DIV and provides an alternative to using an A
- * element for interactive / responsive elements for clicking to invoke GUI
- * actions.  The framework approach is to encourage the use of the WLink for
- * anchors to external URLs and the use of WHotSpot for an item to invoked an
- * action on the GUI.
-*****/
-register(class WHotPoint extends Widget {
+register(class WWarmSpot extends Widget {
     constructor() {
         super('div');
-        this.setWidgetStyle('hotpoint');
+        this.setWidgetStyle('warmspot');
+    }
+});
+
+register(class WColdSpot extends Widget {
+    constructor() {
+        super('div');
+        this.setWidgetStyle('coldspot');
     }
 });

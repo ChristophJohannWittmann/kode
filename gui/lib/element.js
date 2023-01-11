@@ -59,6 +59,10 @@
             return this[eventKey].preventDefault(...args);
         }
 
+        rawEvent() {
+            return this[eventKey];
+        }
+
         stopImmediatePropagation(...args) {
             return this[eventKey].stopImmediatePropagation(...args);
         }
@@ -416,6 +420,35 @@ register(class HtmlElement extends HtmlNode {
 
     getInnerHtml() {
         return this.node.innerHTML;
+    }
+
+    getOffset() {
+        let x = 0;
+        let y = 0;
+        let dx = 0;
+        let dy = 0;
+        let node = this.node;
+
+        if (node) {
+            dx = node.offsetWidth;
+            dy = node.offsetHeight;
+
+            while (node) {
+                if (node.tagName.toLowerCase() in { body:0, head:0, html:0 }) {
+                    break;
+                }
+
+                x += node.offsetLeft;
+                
+                if (!(node.tagName.toLowerCase() in { td:0, tr:0 })) {
+                    y += node.offsetTop;
+                }
+
+                node = node.parentNode;
+            }
+        }
+
+        return { x:x, y:y, dx:dx, dy:dy };
     }
 
     getStyle(propertyName, value) {

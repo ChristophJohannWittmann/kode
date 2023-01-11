@@ -33,6 +33,14 @@ const builtinCssVariables = {
         error_border_color: 'crimson',
         error_outline_color: 'crimson',
 
+        menu_color: '#696969',
+        menu_color_disabled: 'lightgray',
+        menu_background_color: 'whitesmoke',
+
+        input_color: '#696969',
+        input_color_disabled: 'lightgray',
+        input_background_color: 'whitesmoke',
+
         color_1: '#696969',
         disabled_color_1: 'lightgray',
         background_color_1: '#FFFFFF',
@@ -41,7 +49,7 @@ const builtinCssVariables = {
         outline_color_1: '#4682B4',
         link_color_1: '#6B8E23',
         hover_color_1: '#C0C0C0',
-        hover_background_1: 'darkorange',
+        hover_background_1: '#E8E8E8',
 
         color_2: '#5C5D5E',
         disabled_color_1: 'lightgray',
@@ -50,7 +58,7 @@ const builtinCssVariables = {
         border_color_2: '#7EB9E4',
         outline_color_2: '#7EB9E4',
         hover_color_2: '#C0C0C0',
-        hover_background_2: 'darkorange',
+        hover_background_2: '#E8E8E8',
 
         color_3: '#696969',
         disabled_color_1: 'lightgray',
@@ -60,7 +68,7 @@ const builtinCssVariables = {
         outline_color_3: '#4682B4',
         link_color_3: '#6B8E23',
         hover_color_3: '#FF8C00',
-        hover_background_3: 'darkorange',
+        hover_background_3: '#E8E8E8',
 
         color_4: '#696969',
         disabled_color_1: 'lightgray',
@@ -70,12 +78,20 @@ const builtinCssVariables = {
         outline_color_4: '#4682B4',
         link_color_4: '#6B8E23',
         hover_color_4: '#FF8C00',
-        hover_background_4: 'darkorange',
+        hover_background_4: '#E8E8E8',
     },
     dark: {
         error_color: 'crimson',
         error_border_color: 'crimson',
         error_outline_color: 'crimson',
+
+        menu_color: '#696969',
+        menu_color_disabled: 'lightgray',
+        menu_background_color: 'whitesmoke',
+
+        input_color: '#696969',
+        input_color_disabled: 'lightgray',
+        input_background_color: 'whitesmoke',
 
         color_1: '#696969',
         disabled_color_1: 'lightgray',
@@ -85,7 +101,7 @@ const builtinCssVariables = {
         outline_color_1: '#4682B4',
         link_color_1: '#6B8E23',
         hover_color_1: '#C0C0C0',
-        hover_background_1: 'darkorange',
+        hover_background_1: '#E8E8E8',
 
         color_2: '#5C5D5E',
         disabled_color_1: 'lightgray',
@@ -94,7 +110,7 @@ const builtinCssVariables = {
         border_color_2: '#7EB9E4',
         outline_color_2: '#7EB9E4',
         hover_color_2: '#C0C0C0',
-        hover_background_2: 'darkorange',
+        hover_background_2: '#E8E8E8',
 
         color_3: '#696969',
         disabled_color_1: 'lightgray',
@@ -104,7 +120,7 @@ const builtinCssVariables = {
         outline_color_3: '#4682B4',
         link_color_3: '#6B8E23',
         hover_color_3: '#FF8C00',
-        hover_background_3: 'darkorange',
+        hover_background_3: '#E8E8E8',
 
         color_4: '#696969',
         disabled_color_1: 'lightgray',
@@ -114,7 +130,7 @@ const builtinCssVariables = {
         outline_color_4: '#4682B4',
         link_color_4: '#6B8E23',
         hover_color_4: '#FF8C00',
-        hover_background_4: 'darkorange',
+        hover_background_4: '#E8E8E8',
     }
 };
 

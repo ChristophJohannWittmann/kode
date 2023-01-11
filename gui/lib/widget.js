@@ -48,11 +48,6 @@ register(class Widget extends Emitter {
         this.selector = `widget${this.id}`;
         this[Widget.bindingKey] = 'innerHtml';
 
-        this.tip = null;
-        this.menu = null;
-        this.docHandler = message => this.onDoc(message);
-        this.menuHandler = message => this.onMenu(message);
-
         if (arg instanceof HtmlElement) {
             this.htmlElement = arg;
         }
@@ -63,6 +58,11 @@ register(class Widget extends Emitter {
         this.htmlElement.setAttribute('id', this.selector);
         this.brand(this.htmlElement);
         this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
+        this.setAttribute('widget-border', 'none');
+
+        this.on('html.click', message => {
+            doc.send(message)
+        });
     }
 
     append(...args) {
@@ -174,17 +174,6 @@ register(class Widget extends Emitter {
         return this;
     }
 
-    clearMenu() {
-        if (this.menu) {
-            this.menu.close();
-            this.menu.off('Menu.Activity', this.menuHandler);
-            doc.off('html.contextmenu', this.docHandler);
-            this. menu = null;
-        }
-
-        return this;
-    }
-
     clearStyle() {
         for (let i = 0; i < this.htmlElement.node.style.length; i++) {
             let styleProperty = this.htmlElement.node.style.item(i);
@@ -225,8 +214,8 @@ register(class Widget extends Emitter {
         return this.htmlElement.getAttribute(name);
     }
 
-    getMenu() {
-        return this.menu;
+    getOffset() {
+        return this.htmlElement.getOffset();
     }
 
     getPanel() {
@@ -331,19 +320,6 @@ register(class Widget extends Emitter {
         return this;
     }
 
-    onDoc(message) {
-        console.log('widget.js: onDoc()');
-        console.log(message);
-        message.event.preventDefault();
-    }
-
-    onMenu(message) {
-        if (this.isEnabled()) {
-            console.log('widget.js: onMenu()');
-            console.log(message);
-        }
-    }
-
     parent() {
         let parent = this.htmlElement.parent();
 
@@ -362,6 +338,20 @@ register(class Widget extends Emitter {
         });
 
         return this;
+    }
+
+    queryAll(selector) {
+        return this.htmlElement.queryAll(selector).map(htmlElement => htmlElement.widget());
+    }
+
+    queryOne(selector) {
+        let selected = this.htmlElement.queryOne(selector);
+
+        if (selected) {
+            selected = selected.widget();
+        }
+
+        return selected;
     }
 
     registerHandler(messageName, once) {
@@ -478,20 +468,7 @@ register(class Widget extends Emitter {
         });
 
         return this;
-    }
-
-    setMenu(menu) {
-        if (this.menu) {
-            this.menu.off('Menu.Activity', this.menuHandler);
-        }
-        else {
-            doc.onWidget('html.contextmenu', this, this.docHandler);
-        }
-
-        this.menu = menu;
-        this.menu.on('Menu.Activity', this.menuHandler);
-        return this;
-    }
+     }
 
     setStyle(arg, value) {
         if (typeof arg == 'object') {

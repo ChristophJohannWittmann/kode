@@ -100,6 +100,12 @@ register(class WebAppText extends MultilingualText {
             fwNetCert: {
                 en: `Certificate`,
             },
+            fwNetCertify: {
+                en: `Request TLS Certificate`,
+            },
+            fwNetCreateKeyPair: {
+                en: `Create Cryptographic Key Pair`,
+            },
             fwNetDomain: {
                 en: `Domain`,
             },
