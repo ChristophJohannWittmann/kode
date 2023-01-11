@@ -439,12 +439,8 @@ register(class HtmlElement extends HtmlNode {
                 }
 
                 x += node.offsetLeft;
-                
-                if (!(node.tagName.toLowerCase() in { td:0, tr:0 })) {
-                    y += node.offsetTop;
-                }
-
-                node = node.parentNode;
+                y += node.offsetTop;f
+                node = node.offsetParent;
             }
         }
 

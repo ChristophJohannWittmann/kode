@@ -51,21 +51,11 @@ register(class FWNetIfaceView extends WPanel {
             .append(
                 mkWMenuItem(txx.fwNetCreateKeyPair)
                 .setAction(() => alert('key pair!'))
+                //.bind(this.iface, privateKey)
             )
             .append(
                 mkWMenuItem(txx.fwNetCertify)
                 .setAction(() => alert('certify'))
-                .disable()
-            );
-
-            let testMenu = mkWPopupMenu()
-            .append(
-                mkWMenuItem('Action A')
-                .setAction(() => alert('Action A'))
-            )
-            .append(
-                mkWMenuItem('Action B')
-                .setAction(() => alert('Action B'))
             );
 
             this.editor.addObj(this.iface, {
@@ -102,17 +92,19 @@ register(class FWNetIfaceView extends WPanel {
                     label: txx.fwNetPublicKey,
                     readonly: true,
                     type: ScalarText,
-                    menu: testMenu,
+                    menu: cryptoMenu,
                 },
                 cert: {
                     label: txx.fwNetCert,
                     readonly: true,
                     type: ScalarText,
+                    menu: cryptoMenu,
                 },
                 caCert: {
                     label: txx.fwNetCaCert,
                     readonly: true,
                     type: ScalarText,
+                    menu: cryptoMenu,
                 },
             });
 

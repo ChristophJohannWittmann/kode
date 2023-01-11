@@ -84,8 +84,7 @@ register(class ConfigEndpoints extends EndpointContainer {
         let config = await loadConfigFile('builtin');
         let iface = config.network[trx.ifaceName];
 
-
-        if (iface.tls) {
+        if ('tls' in iface) {
             if (!iface.tls.privateKey) {
                 iface.tls.privateKey = '[NONE]';
             }
@@ -104,6 +103,14 @@ register(class ConfigEndpoints extends EndpointContainer {
             if (!iface.tls.caCert) {
                 iface.tls.caCert = '[NONE]';
             }
+        }
+        else {
+            iface.tls = {
+                privateKey: '[NONE]',
+                publicKey: '[NONE]',
+                cert: '[NONE]',
+                caCert: '[NONE]',
+            };
         }
 
         return iface;

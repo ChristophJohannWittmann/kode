@@ -301,6 +301,29 @@ register(class MapBinding extends Binding {
 
 
 /*****
+ * A MethodBinding is the most generic and provides the highest variety of uses.
+ * This type of binding simply calls a function when the ActiveData's value
+ * changes.  The method is invoked with a single parameter, which is the new
+ * value for the specified key.  NOTE THAT THIS BINDING TYPE IS UNIDIRECTIONAL!
+ * Messages flow from the the ActiveData object to the widget only.  The widget
+ * never sends data back to the ActiveData object.
+*****/
+register(class MethodBinding extends Binding {
+    constructor(widget, activeData, key, method) {
+        super(widget, activeData, key);
+        this.method = method;
+    }
+
+    onActiveDataChanged() {
+        Reflect.apply(this.method, this.widget, [this.activeData, this.key]);
+    }
+
+    onWidgetChanged(value) {
+    }
+});
+
+
+/*****
  * A value binding is a direct binding between the value attribute of a widget
  * and a key of an active data object.  Value bindings are bidirectional.
  * A change to the widget updates the active Data object, and a change in the

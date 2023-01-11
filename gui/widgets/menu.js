@@ -34,10 +34,37 @@
 register(class WPopupMenu extends Widget {
     static showing = null;
 
+    static init = (() => {
+        doc.on('html.click', message => {
+            if (WPopupMenu.showing) {
+                let id = mkHtmlElement(message.event.rawEvent().target).getAttribute('id');
+
+                if (id != WPopupMenu.showing.getAttribute('id')) {
+                    for (let child of WPopupMenu.showing) {
+                        if (child.getAttribute('id') == id) {
+                            return;
+                        }
+                    }
+
+                    WPopupMenu.showing.close();
+                }
+            }
+        });
+
+        doc.on('html.keyup', message => {
+            if (WPopupMenu.showing) {
+                if (message.event.rawEvent().code == 'Escape') {
+                    WPopupMenu.showing.close();
+                }
+            }
+        });
+
+        return null;
+    });
+
     constructor() {
         super('div');
         this.widgets = {};
-        this.showing = null;
         this.setWidgetStyle('popup-menu');
 
         this.setStyle({
@@ -46,29 +73,10 @@ register(class WPopupMenu extends Widget {
             zIndex: '99',
         });
 
-        doc.on('html.click', message => {
-            if (this.showing) {
-                let id = mkHtmlElement(message.event.rawEvent().target).getAttribute('id');
-
-                if (id != this.getAttribute('id')) {
-                    for (let child of this) {
-                        if (child.getAttribute('id') == id) {
-                            return;
-                        }
-                    }
-
-                    this.close();
-                }
-            }
-        });
-
-        doc.on('html.keyup', message => {
-            if (this.showing) {
-                if (message.event.rawEvent().code == 'Escape') {
-                    this.close();
-                }
-            }
-        });
+        if (typeof WPopupMenu.init == 'function') {
+            WPopupMenu.init();
+            WPopupMenu.init = false;
+        }
     }
 
     attach(widget, ...messageNames) {
@@ -93,9 +101,10 @@ register(class WPopupMenu extends Widget {
     }
 
     close() {
-        if (this.parent() && this.showing) {
+        if (WPopupMenu.showing.id == this.id) {
             this.setStyle('display', 'none')
-            this.showing = null;
+            delete this.anchor;
+            WPopupMenu.showing = null;
         }
 
         return this;
@@ -103,9 +112,15 @@ register(class WPopupMenu extends Widget {
 
     detach(widget) {
         if (widget.id in this.widgets) {
-            if (this.parent()) {
-                if (this.showing) {
-                }
+            if (WPopupMenu.showing && WPopupMenu.showing.id == this.id) {
+                this.close();
+            }
+
+            let widgetEntry = this.widgets[widget.id];
+            delete this.widgets[widget.id];
+
+            for (let messageName of widgetEntry.messages) {
+                widget.off(messageName, widgetEntry.handler);
             }
         }
 
@@ -116,24 +131,35 @@ register(class WPopupMenu extends Widget {
         if (widget instanceof WMenuItem) {
         }
         else {
-            if (this.showing) {
+            if (WPopupMenu.showing) {
                 this.close();
             }
 
-            this.showing = widget;
-            body.append(this);
+            this.anchor = widget;
+            WPopupMenu.showing = this;
 
             this.setStyle('display', '');
+            body.append(this);
+            [x, y] = this.position(x, y);
             this.setStyle('top', `${y}px`);
             this.setStyle('left', `${x}px`);
         }
 
         return this;
     }
+
+    position(x, y) {
+        // TODO -- determine where to position the popup menu.
+        //console.log('WPopupMenu.js: position()');
+        return [x, y];
+    }
 });
 
 
 /*****
+ * A menu item represents a choice on a popup menu.  A menu item has values to
+ * display and an action item.  The action item can be either a function, which
+ * is called with a single argument, the message, or 
 *****/
 register(class WMenuItem extends Widget {
     constructor(text) {
@@ -142,7 +168,9 @@ register(class WMenuItem extends Widget {
         this.clearAction();
         this.enable()
 
-        this.on('html.click', message => this.select(message));
+        this.on('html.click', message => this.onSelect(message));
+        this.on('html.mouseenter', message => this.onEnter(message));
+        this.on('html.mouseleave', message => this.onLeave(message));
     }
 
     clearAction() {
@@ -162,15 +190,30 @@ register(class WMenuItem extends Widget {
         return this;
     }
 
-    select(message) {
+    onBinding(activeData, key) {
+        console.log(key);
+    }
+
+    onEnter(message) {
+        if (this.action instanceof WPopupMenu) {
+            let ev = message.event.rawEvent();
+            this.action.open(this, ev.x, ev.y);
+        }
+    }
+
+    onLeave(message) {
+        if (this.action instanceof WPopupMenu) {
+            // TODO -- 
+            //console.log('TBD...  CLOSE sub popup');
+        }
+    }
+
+    onSelect(message) {
         if (!this.hasAttribute('disabled')) {
             this.parent().close();
 
             if (typeof this.action == 'function') {
                 setTimeout(() => this.action(message), 10);
-            }
-            else if (this.action instanceof WPopupMenu) {
-                console.log('TBD...  open sub-popup-menu.');
             }
         }
     }
