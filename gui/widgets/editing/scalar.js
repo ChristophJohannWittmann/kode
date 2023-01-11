@@ -22,84 +22,125 @@
 *****/
 
 
-/*****
- * This is a global mapping that relates supported scalar types with the
- * widgets used for viewing and editing a scalar value.
-*****/
-define('ScalarBool', {
-    mkViewer: opts => mkICheckbox().setWidgetStyle('scalarcheckbox').setAttribute('disabled', true),
-    mkEditor: opts => mkICheckbox().setWidgetStyle('scalarcheckbox'),
-});
+(() => {
+    /*****
+    *****/
+    const dateStr = value => {
+        if (value instanceof Time) {
+            return value.localeDateStr()
+        }
+        else if (value instanceof Date) {
+            return value.toLocaleDateString();
+        }
+        else {
+            return value.toString();
+        }
+    };
 
-define('ScalarColor', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkIColor().setWidgetStyle('scalar'),
-});
+    const dateTimeStr = value => {
+        if (value instanceof Time) {
+            return value.localeDateTimeStr()
+        }
+        else if (value instanceof Date) {
+            return value.toLocaleString();
+        }
+        else {
+            return value.toString();
+        }
+    };
 
-define('ScalarDate', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkIDate().setWidgetStyle('scalar'),
-});
+    const timeStr = value => {
+        if (value instanceof Time) {
+            return value.localeTimeStr()
+        }
+        else if (value instanceof Date) {
+            return value.toLocaleTimeString();
+        }
+        else {
+            return value.toString();
+        }
+    };
 
-define('ScalarDateTime', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkIDateTime().setWidgetStyle('scalar'),
-});
 
-define('ScalarEmail', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkIEmail().setWidgetStyle('scalar'),
-});
+    /*****
+     * This is a global mapping that relates supported scalar types with the
+     * widgets used for viewing and editing a scalar value.
+    *****/
+    define('ScalarBool', {
+        mkViewer: opts => mkICheckbox().setWidgetStyle('scalarcheckbox').setAttribute('disabled', true),
+        mkEditor: opts => mkICheckbox().setWidgetStyle('scalarcheckbox'),
+    });
 
-define('ScalarEnum', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkWSelect().setWidgetStyle('scalarselect').setOptions(opts.choices),
-});
+    define('ScalarColor', {
+        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkIColor().setWidgetStyle('scalar'),
+    });
 
-define('ScalarHost', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkIHost().setWidgetStyle('scalar'),
-});
+    define('ScalarDate', {
+        mkViewer: opts => opts.menu ? mkWHotSpot(dateStr) : mkWColdSpot(dateStr),
+        mkEditor: opts => mkIDate().setWidgetStyle('scalar'),
+    });
 
-define('ScalarIp', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkIIp().setWidgetStyle('scalar'),
-});
+    define('ScalarDateTime', {
+        mkViewer: opts => opts.menu ? mkWHotSpot(dateTimeStr) : mkWColdSpot(dateTimeStr),
+        mkEditor: opts => mkIDateTime().setWidgetStyle('scalar'),
+    });
 
-define('ScalarMonth', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkIMonth().setWidgetStyle('scalar'),
-});
+    define('ScalarEmail', {
+        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkIEmail().setWidgetStyle('scalar'),
+    });
 
-define('ScalarNumber', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkINumber().setWidgetStyle('scalar'),
-});
+    define('ScalarEnum', {
+        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkWSelect().setWidgetStyle('scalarselect').setOptions(opts.choices),
+    });
 
-define('ScalarTel', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkITel().setWidgetStyle('scalar'),
-});
+    define('ScalarHost', {
+        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkIHost().setWidgetStyle('scalar'),
+    });
 
-define('ScalarText', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkIText().setWidgetStyle('scalar'),
-});
+    define('ScalarIp', {
+        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkIIp().setWidgetStyle('scalar'),
+    });
 
-define('ScalarTime', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkITime().setWidgetStyle('scalar'),
-});
+    define('ScalarMonth', {
+        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkIMonth().setWidgetStyle('scalar'),
+    });
 
-define('ScalarUrl', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkIUrl().setWidgetStyle('scalar'),
-});
+    define('ScalarNumber', {
+        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkINumber().setWidgetStyle('scalar'),
+    });
 
-define('ScalarWeek', {
-    mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
-    mkEditor: opts => mkIWeek().setWidgetStyle('scalar'),
-});
+    define('ScalarTel', {
+        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkITel().setWidgetStyle('scalar'),
+    });
+
+    define('ScalarText', {
+        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkIText().setWidgetStyle('scalar'),
+    });
+
+    define('ScalarTime', {
+        mkViewer: opts => opts.menu ? mkWHotSpot(timeStr) : mkWColdSpot(timeStr),
+        mkEditor: opts => mkITime().setWidgetStyle('scalar'),
+    });
+
+    define('ScalarUrl', {
+        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkIUrl().setWidgetStyle('scalar'),
+    });
+
+    define('ScalarWeek', {
+        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkIWeek().setWidgetStyle('scalar'),
+    });
+})();
 
 
 /*****

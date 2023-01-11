@@ -31,6 +31,33 @@ register(class ConfigEndpoints extends EndpointContainer {
 
 
     /*****
+     * Clear the current TLS/Crypto Data from the configuration.
+    *****/
+    async [ mkEndpoint('ConfigClearCrypto', 'system') ](trx) {
+        let config = await loadConfigFile('builtin');
+        let iface = config.network[trx.ifaceName];
+
+        iface.tls.keyCreated = mkTime();
+        iface.tls.publicKey = null;
+        iface.tls.privateKey = null;
+        iface.tls.cert = null;
+        iface.tls.caCert = null;
+
+        await config.save();
+        return true;
+    }
+
+
+    /*****
+    *****/
+    async [ mkEndpoint('ConfigCopyPublicKey', 'system') ](trx) {
+        let config = await loadConfigFile('builtin');
+        let iface = config.network[trx.ifaceName];
+        return iface.tls.publicKey;        
+    }
+
+
+    /*****
     *****/
     async [ mkEndpoint('ConfigCreateAcmeProvider', 'system') ](trx) {
     }
@@ -43,8 +70,21 @@ register(class ConfigEndpoints extends EndpointContainer {
 
 
     /*****
+     * Create a new TLS/Crypto key pair.
     *****/
     async [ mkEndpoint('ConfigCreateKeyPair', 'system') ](trx) {
+        let config = await loadConfigFile('builtin');
+        let iface = config.network[trx.ifaceName];
+        let keyPair = await Crypto.generateKeyPair();
+
+        iface.tls.keyCreated = mkTime();
+        iface.tls.publicKey = keyPair.publicKey;
+        iface.tls.privateKey = keyPair.privateKey;
+        iface.tls.cert = null;
+        iface.tls.caCert = null;
+
+        await config.save();
+        return true;
     }
 
 
@@ -95,13 +135,22 @@ register(class ConfigEndpoints extends EndpointContainer {
             if (!iface.tls.publicKey) {
                 iface.tls.publicKey = '[NONE]';
             }
+            else {
+                iface.tls.publicKey = '[Public Key]';
+            }
 
             if (!iface.tls.cert) {
                 iface.tls.cert = '[NONE]';
             }
+            else {
+                iface.tls.cert = 'expires on';
+            }
 
             if (!iface.tls.caCert) {
                 iface.tls.caCert = '[NONE]';
+            }
+            else {
+                iface.tls.caCert = 'expires on';
             }
         }
         else {

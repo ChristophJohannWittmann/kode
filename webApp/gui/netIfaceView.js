@@ -47,15 +47,28 @@ register(class FWNetIfaceView extends WPanel {
                 messageName: 'ConfigListAcmeProviders',
             })).map(ca => ({ value: ca.provider, text: ca.name }));
 
-            let cryptoMenu = mkWPopupMenu()
+            let keyMenu = mkWPopupMenu()
             .append(
-                mkWMenuItem(txx.fwNetCreateKeyPair)
-                .setAction(() => alert('key pair!'))
-                //.bind(this.iface, privateKey)
+                mkWMenuItem('CreateKeys', txx.fwNetCreateKeyPair)
+                .setAction(() => this.createKeyPair())
+            );
+
+            let publicKeyMenu = mkWPopupMenu()
+            .append(
+                mkWMenuItem('Certify', txx.fwNetCopyKeyPem)
+                .setAction(() => this.copyPublicKey('pem'))
+                .bind(this.editor.modifiable, 'publicKey', (mi, value) => value == '[NONE]' ? mi.disable() : mi.enable())
             )
             .append(
-                mkWMenuItem(txx.fwNetCertify)
-                .setAction(() => alert('certify'))
+                mkWMenuItem('CreateKeys', txx.fwNetCreateKeyPair)
+                .setAction(() => this.createKeyPair())
+            );
+
+            let certMenu = mkWPopupMenu()
+            .append(
+                mkWMenuItem('Certify', txx.fwNetCertify)
+                .setAction(() => this.certify())
+                .bind(this.editor.modifiable, 'privateKey', (mi, value) => value == '[NONE]' ? mi.disable() : mi.enable())
             );
 
             this.editor.addObj(this.iface, {
@@ -86,30 +99,57 @@ register(class FWNetIfaceView extends WPanel {
                     label: txx.fwNetPrivateKey,
                     readonly: true,
                     type: ScalarText,
-                    menu: cryptoMenu,
+                    menu: keyMenu,
                 },
                 publicKey: {
                     label: txx.fwNetPublicKey,
                     readonly: true,
                     type: ScalarText,
-                    menu: cryptoMenu,
+                    menu: publicKeyMenu,
+                },
+                keyCreated: {
+                    label: txx.fwNetKeyCreatedDate,
+                    readonly: true,
+                    type: ScalarDateTime,
+                    menu: keyMenu,
                 },
                 cert: {
                     label: txx.fwNetCert,
                     readonly: true,
                     type: ScalarText,
-                    menu: cryptoMenu,
+                    menu: certMenu,
                 },
                 caCert: {
                     label: txx.fwNetCaCert,
                     readonly: true,
                     type: ScalarText,
-                    menu: cryptoMenu,
+                    menu: certMenu,
                 },
             });
 
             this.append(this.editor);
         })();
+    }
+
+    async certify() {
+        console.log('certify');
+    }
+
+    async copyPublicKey(format) {
+        let key = await queryServer({
+            messageName: 'ConfigCopyPublicKey',
+            ifaceName: this.ifaceName,
+            format: format,
+        });
+
+        console.log(key);
+    }
+
+    async createKeyPair() {
+        await queryServer({
+            messageName: 'ConfigCreateKeyPair',
+            ifaceName: this.ifaceName,
+        });
     }
 
     async revert() {

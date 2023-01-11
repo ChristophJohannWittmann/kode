@@ -24,6 +24,37 @@
 
 register(class Crypto {
     /*****
+     * Generates an RSA public key pair with a legth of 4096 bits.  The returned
+     * value is an object containing both the public and private keys in PEM
+     * format.  This is exactly what's used by the framework for TSL crypto and
+     * for TLS certificates.
+    *****/
+    static generateKeyPair() {
+        return new Promise((ok, fail) => {
+            CRYPTO.generateKeyPair(
+                'rsa', {
+                    modulusLength: 4096,
+                    publicKeyEncoding: {
+                        type: 'spki',
+                        format: 'pem',
+                    },
+                    privateKeyEncoding: {
+                        type: 'pkcs8',
+                        format: 'pem',
+                    },
+                },
+                (error, publicKey, privateKey) => {
+                    ok({
+                        publicKey: publicKey,
+                        privateKey: privateKey,
+                    });
+                }
+            );
+        });
+    }
+
+
+    /*****
      * There are two crypto utilities for generating message digests: (1) saled
      * and (2) unsalted.  Both utility functions accept an algorithm name as
      * a string and will generate a hash for the specified value.  Note that the

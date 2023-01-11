@@ -71,23 +71,40 @@ register(class WBody extends WStack {
  * anchors to external URLs and the use of WHotSpot for an item to invoked an
  * action on the GUI.  Warm spot and cold spot are analogs.
 *****/
-register(class WHotSpot extends Widget {
-    constructor() {
+register(class WSpot extends Widget {
+    constructor(display) {
         super('div');
+        this.display = display ? display : value => value.toString();
+    }
+
+    getValue() {
+        return this.value;
+    }
+
+    setValue(value) {
+        this.value = value;
+        this.set(this.display(value));
+        return this;
+    }
+});
+
+register(class WHotSpot extends WSpot {
+    constructor(display) {
+        super(display);
         this.setWidgetStyle('hotspot');
     }
 });
 
-register(class WWarmSpot extends Widget {
-    constructor() {
-        super('div');
+register(class WWarmSpot extends WSpot {
+    constructor(display) {
+        super(display);
         this.setWidgetStyle('warmspot');
     }
 });
 
-register(class WColdSpot extends Widget {
-    constructor() {
-        super('div');
+register(class WColdSpot extends WSpot {
+    constructor(display) {
+        super(display);
         this.setWidgetStyle('coldspot');
     }
 });

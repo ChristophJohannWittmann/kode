@@ -32,7 +32,6 @@
 register(class WButton extends InputBaseWidget {
     constructor() {
         super('button', 'buttontag');
-        this[Widget.bindingKey] = 'innerHtml';
         this.setButtonType();
     }
 

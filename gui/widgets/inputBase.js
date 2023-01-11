@@ -34,12 +34,6 @@ register(class InputBaseWidget extends Widget {
     constructor(tagName, widgetStyle) {
         super(tagName);
         this.setWidgetStyle(widgetStyle);
-        this[Widget.bindingKey] = 'value';
-    }
-
-    blur() {
-        this.htmlElement.node.blur();
-        return this;
     }
 
     disable() {
@@ -54,21 +48,8 @@ register(class InputBaseWidget extends Widget {
         return this;
     }
 
-    focus() {
-        this.htmlElement.node.focus();
-        return this;
-    }
-
-    getValue() {
-        return null;
-    }
-
     isDisabled() {
         return this.hasAttribute('disabled');
-    }
-
-    setValue(value) {
-        return this;
     }
 
     valueChanged(value) {

@@ -38,7 +38,6 @@ register(class Widget extends Emitter {
     static nextId = 1;
     static initialized = {};
     static widgetKey = Symbol('widget');
-    static bindingKey = Symbol('binding');
     static handlerKey = Symbol('handler');
 
     constructor(arg) {
@@ -46,7 +45,6 @@ register(class Widget extends Emitter {
         this[Widget.handlerKey] = {};
         this.id = Widget.nextId++;
         this.selector = `widget${this.id}`;
-        this[Widget.bindingKey] = 'innerHtml';
 
         if (arg instanceof HtmlElement) {
             this.htmlElement = arg;
@@ -85,14 +83,19 @@ register(class Widget extends Emitter {
             else if (typeof arg == 'object') {
                 mkMapBinding(this, activeData, key, arg);
             }
+            else if (typeof arg == 'function') {
+                mkFunctionBinding(this, activeData, key, arg);
+            }
         }
-        else if (this[Widget.bindingKey] == 'innerHtml') {
-            mkInnerHtmlBinding(this, activeData, key);
-        }
-        else if (this[Widget.bindingKey] == 'value') {
-            mkValueBinding(this, activeData, key);
+        else {
+            mkValueBinding(this, activeData, key);            
         }
 
+        return this;
+    }
+
+    blur() {
+        this.htmlElement.node.blur();
         return this;
     }
 
@@ -206,6 +209,11 @@ register(class Widget extends Emitter {
         this.htmlElement.enablePropagation(eventName);
     }
 
+    focus() {
+        this.htmlElement.node.focus();
+        return this;
+    }
+
     get() {
         return this.htmlElement.getInnerHtml();
     }
@@ -246,6 +254,10 @@ register(class Widget extends Emitter {
 
             return style;
         }
+    }
+
+    getValue() {
+        return this.get();
     }
 
     getWidgetStyle() {
@@ -478,9 +490,15 @@ register(class Widget extends Emitter {
             }
         }
         else {
+            arg == 'width' ? console.log(this) : false;
             this.htmlElement.node.style[arg] = value;
         }
 
+        return this;
+    }
+
+    setValue(value) {
+        this.set(value);
         return this;
     }
 

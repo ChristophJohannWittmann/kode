@@ -93,11 +93,6 @@ class Binding {
                     binding.onWidgetChanged(message.value);
                 }
             }
-            else if (binding instanceof InnerHtmlBinding) {
-                if (message.type == 'innerHTML') {
-                    binding.onWidgetChanged(message.widget.get());
-                }
-            }
             else if (binding instanceof ValueBinding) {
                 if (message.type == 'value') {
                     binding.onWidgetChanged(message.value);
@@ -239,36 +234,6 @@ register(class AttributeBinding extends Binding {
 
 
 /*****
- * An InnerHtml binding is a direct binding between the inner HTML of a widget
- * and a key of an active data object.  Inner HTML bindings are bidirectional.
- * A change to the widget updates the active Data object, and a change in the
- * activeData will update it's widgets.  This is primarily usee to display
- * active data values on a view and for building virtual user-input types not
- * based on standard HTML date-entry elements such as input and select.
-*****/
-register(class InnerHtmlBinding extends Binding {
-    constructor(widget, activeData, key) {
-        super(widget, activeData, key);
-        this.widget.silence();
-        this.widget.set(this.activeData[key]);
-        this.widget.resume();
-    }
-
-    onActiveDataChanged() {
-        Binding.silentWidget = this.widget;
-        this.widget.set(this.activeData[this.key]);
-        Binding.silentWidget = null;
-    }
-
-    onWidgetChanged(value) {
-        Binding.silentWidget = this.widget;
-        this.activeData[this.key] = value;
-        Binding.silentWidget = this.null;
-    }
-});
-
-
-/*****
  * A map binding is a very useful type of binding.  The active data key is used
  * as a lookup into a javascript object, whose values must be a preconstructed
  * widgets.  So the active data key value is used to find the appropriate widget
@@ -301,21 +266,21 @@ register(class MapBinding extends Binding {
 
 
 /*****
- * A MethodBinding is the most generic and provides the highest variety of uses.
+ * A FunctionBinding is the most generic and provides the highest variety of uses.
  * This type of binding simply calls a function when the ActiveData's value
  * changes.  The method is invoked with a single parameter, which is the new
  * value for the specified key.  NOTE THAT THIS BINDING TYPE IS UNIDIRECTIONAL!
  * Messages flow from the the ActiveData object to the widget only.  The widget
  * never sends data back to the ActiveData object.
 *****/
-register(class MethodBinding extends Binding {
+register(class FunctionBinding extends Binding {
     constructor(widget, activeData, key, method) {
         super(widget, activeData, key);
         this.method = method;
     }
 
     onActiveDataChanged() {
-        Reflect.apply(this.method, this.widget, [this.activeData, this.key]);
+        Reflect.apply(this.method, this.widget, [this.widget, this.activeData[this.key]]);
     }
 
     onWidgetChanged(value) {

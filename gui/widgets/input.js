@@ -49,14 +49,14 @@ register(class WInput extends InputBaseWidget {
                 var value = node.value;
             }
 
-            let prevValid = this.valid;
             this.valueChanged(value);
-            let nextValid = this.isValid();
 
-            if (nextValid != prevValid) {
+            if (this.isValid() != this.valid) {
+                this.valid = !this.valid;
+
                 this.send({
                     messageName: 'Widget.Validity',
-                    valid: nextValid,
+                    valid: this.valid,
                     widget: this,
                 });
             }

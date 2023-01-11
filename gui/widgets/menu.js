@@ -127,6 +127,10 @@ register(class WPopupMenu extends Widget {
         return this;
     }
 
+    getItem(tag) {
+        return this.query(`[menu-item-tag=${tag}]`);
+    }
+
     open(widget, x, y) {
         if (widget instanceof WMenuItem) {
         }
@@ -162,11 +166,12 @@ register(class WPopupMenu extends Widget {
  * is called with a single argument, the message, or 
 *****/
 register(class WMenuItem extends Widget {
-    constructor(text) {
+    constructor(tag, text) {
         super('div');
+        this.setAttribute('menu-item-tag', tag);
         this.append(text);
         this.clearAction();
-        this.enable()
+        this.enable();
 
         this.on('html.click', message => this.onSelect(message));
         this.on('html.mouseenter', message => this.onEnter(message));
@@ -188,10 +193,6 @@ register(class WMenuItem extends Widget {
         super.enable();
         this.setWidgetStyle('popup-menu-item');
         return this;
-    }
-
-    onBinding(activeData, key) {
-        console.log(key);
     }
 
     onEnter(message) {

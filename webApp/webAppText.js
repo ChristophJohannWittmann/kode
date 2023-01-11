@@ -101,7 +101,10 @@ register(class WebAppText extends MultilingualText {
                 en: `Certificate`,
             },
             fwNetCertify: {
-                en: `Request TLS Certificate`,
+                en: `Request/Renew TLS Certificate`,
+            },
+            fwNetCopyKeyPem: {
+                en: `Copy Public Key (PEM)`,
             },
             fwNetCreateKeyPair: {
                 en: `Create Cryptographic Key Pair`,
@@ -111,6 +114,9 @@ register(class WebAppText extends MultilingualText {
             },
             fwNetHost: {
                 en: `Host`,
+            },
+            fwNetKeyCreatedDate: {
+                en: `Key Created Date`,
             },
             fwNetInterface: {
                 en: `Network Interface`,

@@ -281,6 +281,18 @@ register(class Time {
     jsTimeStr() {
         return this.jsDate.toISOString().substr(11, 5);
     }
+
+    localeDateStr() {
+        return this.jsDate.toLocaleDateString();
+    }
+
+    localeDateTimeStr() {
+        return this.jsDate.toLocaleString();
+    }
+
+    localeTimeStr() {
+        return this.jsDate.toLocalTimeString();
+    }
       
     millisecond(millisecond) {
         if (millisecond === undefined) {
