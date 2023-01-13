@@ -31,13 +31,23 @@ register(class ConfigEndpoints extends EndpointContainer {
 
 
     /*****
+    *****/
+    async [ mkEndpoint('ConfigCertifyIface', 'system') ](trx) {
+        let acme = await mkAcmeProvider(trx.ifaceName);
+        await acme.establishSession();
+        await acme.checkAccount();
+
+        return true;
+    }
+
+
+    /*****
      * Clear the current TLS/Crypto Data from the configuration.
     *****/
     async [ mkEndpoint('ConfigClearCrypto', 'system') ](trx) {
         let config = await loadConfigFile('builtin');
         let iface = config.network[trx.ifaceName];
 
-        iface.tls.keyCreated = mkTime();
         iface.tls.publicKey = null;
         iface.tls.privateKey = null;
         iface.tls.cert = null;
@@ -77,7 +87,6 @@ register(class ConfigEndpoints extends EndpointContainer {
         let iface = config.network[trx.ifaceName];
         let keyPair = await Crypto.generateKeyPair();
 
-        iface.tls.keyCreated = mkTime();
         iface.tls.publicKey = keyPair.publicKey;
         iface.tls.privateKey = keyPair.privateKey;
         iface.tls.cert = null;
@@ -167,7 +176,7 @@ register(class ConfigEndpoints extends EndpointContainer {
 
 
     /*****
-     * List configured ACME providers
+     * List configured ACME providers.
     *****/
     async [ mkEndpoint('ConfigListAcmeProviders', 'system') ](trx) {
         let config = await loadConfigFile('builtin');
@@ -182,7 +191,7 @@ register(class ConfigEndpoints extends EndpointContainer {
 
 
     /*****
-     * List Network Interfaces
+     * List Network Interfaces.
     *****/
     async [ mkEndpoint('ConfigListNetIfaces', 'system') ](trx) {
         let config = await loadConfigFile('builtin');
@@ -191,7 +200,7 @@ register(class ConfigEndpoints extends EndpointContainer {
 
 
     /*****
-     * Update non-crypto network information
+     * Update non-crypto network information.
     *****/
     async [ mkEndpoint('UpdateNetIface', 'system') ](trx) {
         let config = await loadConfigFile('builtin');

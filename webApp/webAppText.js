@@ -115,9 +115,6 @@ register(class WebAppText extends MultilingualText {
             fwNetHost: {
                 en: `Host`,
             },
-            fwNetKeyCreatedDate: {
-                en: `Key Created Date`,
-            },
             fwNetInterface: {
                 en: `Network Interface`,
             },

@@ -25,17 +25,55 @@
 /*****
 *****/
 register(class AcmeProvider {
-    constructor(details) {
-        this.details = details;
+    constructor(ifaceName) {
+        return new Promise(async (ok, fail) => {
+            this.config = await loadConfigFile('builtin');
+            this.iface = this.config.network[ifaceName];
+            this.acme = this.config.acme[this.iface.tls.acme];
+            this.alg = 'RS256';
+            ok(this);
+        });
     }
 
     async certify() {
     }
 
-    async createAccount() {
+    async checkAccount() {
+        if (!this.acme.account) {
+            let keyPair = await Crypto.generateKeyPair();
+
+            this.config.acme[this.iface.tls.acme].publicKey = keyPair.publicKey;
+            this.config.acme[this.iface.tls.acme].privateKey = keyPair.privateKey;
+
+            let reply = await this.post(this.newAccount, {
+                termsOfServiceAgreed: true,
+                contact: this.config.administrators.map(email => `mailto:${email}`),
+            });
+
+            this.config.acme[this.iface.tls.acme].account = reply.content;
+            this.config.acme[this.iface.tls.acme].account.kid = reply.headers.location;
+
+            await this.config.save();
+            this.acme = this.config.acme[this.iface.tls.acme];
+        }
+
+        return this.acme.account;
     }
 
     async establishSession() {
+        let reply = await mkHttpClient().get(this.acme.url);
+
+        if (reply.status == 200 && reply.mime == 'application/json') {
+            for (let property in reply.content) {
+                this[property] = reply.content[property];
+            }
+
+            reply = await mkHttpClient().head(this.newNonce);
+            this.nonce = reply.headers['replay-nonce'];
+            return true;
+        }
+
+        return false;
     }
 
     async pollChallenge() {
@@ -44,7 +82,44 @@ register(class AcmeProvider {
     async pollOrder() {
     }
 
-    async postAcme() {
+    async post(url, payload, headers) {
+        headers = headers ? headers : {};
+        headers['Connection'] = 'keep-alive';
+        headers['User-Agent'] = 'Kode_ACME_User_Agent_v001';
+        headers['Accept-Language'] = 'en-US';
+
+        let jwsHeader = {
+            alg: this.alg,
+            nonce: this.nonce,
+            url: url,
+        };
+
+        if (url == this.newAccount) {
+            jwsHeader.jwk = npmPemJwk.pem2jwk(this.acme.publicKey.pem);
+        }
+        else {
+            jwsHeader.kid = this.acme.account.kid;
+        }
+
+        let jwsHeaderB64 = Crypto.encodeBase64Url(JSON.stringify(jwsHeader));
+        let jwsPayloadB64 = payload == 'PostAsGet' ? '' : Crypto.encodeBase64Url(JSON.stringify(payload));
+
+        let jwsSignature = Crypto.sign(
+            'sha256',
+            this.acme.privateKey.pem,
+            `${jwsHeaderB64}.${jwsPayloadB64}`,
+            'base64url'
+        );
+
+        let body = JSON.stringify({
+            protected: jwsHeaderB64,
+            payload: jwsPayloadB64,
+            signature: jwsSignature,
+        });
+
+        let reply = await mkHttpClient().post(url, 'application/jose+json', body, headers);
+        this.nonce = reply.headers['replay-nonce'];
+        return reply;
     }
 
     async revoke() {

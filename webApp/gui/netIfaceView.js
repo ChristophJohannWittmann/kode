@@ -107,12 +107,6 @@ register(class FWNetIfaceView extends WPanel {
                     type: ScalarText,
                     menu: publicKeyMenu,
                 },
-                keyCreated: {
-                    label: txx.fwNetKeyCreatedDate,
-                    readonly: true,
-                    type: ScalarDateTime,
-                    menu: keyMenu,
-                },
                 cert: {
                     label: txx.fwNetCert,
                     readonly: true,
@@ -132,7 +126,10 @@ register(class FWNetIfaceView extends WPanel {
     }
 
     async certify() {
-        console.log('certify');
+        await queryServer({
+            messageName: 'ConfigCertifyIface',
+            ifaceName: this.ifaceName,
+        });
     }
 
     async copyPublicKey(format) {

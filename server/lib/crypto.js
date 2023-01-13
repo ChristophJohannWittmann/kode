@@ -29,30 +29,9 @@ register(class Crypto {
      * format.  This is exactly what's used by the framework for TSL crypto and
      * for TLS certificates.
     *****/
-    static generateKeyPair() {
-        return new Promise((ok, fail) => {
-            CRYPTO.generateKeyPair(
-                'rsa', {
-                    modulusLength: 4096,
-                    publicKeyEncoding: {
-                        type: 'spki',
-                        format: 'pem',
-                    },
-                    privateKeyEncoding: {
-                        type: 'pkcs8',
-                        format: 'pem',
-                    },
-                },
-                (error, publicKey, privateKey) => {
-                    ok({
-                        publicKey: publicKey,
-                        privateKey: privateKey,
-                    });
-                }
-            );
-        });
+    static decodeBase64Url(base64url) {
+        return npmBase64Url.decode(base64url);
     }
-
 
     /*****
      * There are two crypto utilities for generating message digests: (1) saled
@@ -81,7 +60,6 @@ register(class Crypto {
         });
     }
     
-    
     /*****
      * There are two crypto utilities for generating message digests: (1) saled
      * and (2) unsalted.  Both utility functions accept an algorithm name as
@@ -107,6 +85,57 @@ register(class Crypto {
         });
     }
     
+    /*****
+     * Base64 URL encoding is required in various algorithms and is like base64
+     * but without the = + or /.  This crypto library has static methods that
+     * support encoding to and decoding from base64 URL formatted text.
+    *****/
+    static encodeBase64Url(value) {
+        return npmBase64Url.encode(value.toString());
+    }
+
+    /*****
+     * Generates an RSA public key pair with a legth of 4096 bits.  The returned
+     * value is an object containing both the public and private keys in PEM
+     * format.  This is exactly what's used by the framework for TSL crypto and
+     * for TLS certificates.
+    *****/
+    static generateKeyPair(bits) {
+        return new Promise((ok, fail) => {
+            CRYPTO.generateKeyPair(
+                'rsa', {
+                    modulusLength: bits ? bits : 4096,
+                    publicKeyEncoding: {
+                        type: 'spki',
+                        format: 'pem',
+                    },
+                    privateKeyEncoding: {
+                        type: 'pkcs8',
+                        format: 'pem',
+                    },
+                },
+                (error, publicPem, privatePem) => {
+                    ok({
+                        publicKey: {
+                            alg: 'rsa',
+                            bits: 4096,
+                            type: 'public',
+                            created: mkTime(),
+                            pem: publicPem,
+                        },
+
+                        privateKey: {
+                            alg: 'rsa',
+                            bits: 4096,
+                            type: 'private',
+                            created: mkTime(),
+                            pem: privatePem,
+                        },
+                    });
+                }
+            );
+        });
+    }
     
     /*****
      * An easy-to-use random number generator.  Use this internally or for
@@ -114,5 +143,33 @@ register(class Crypto {
     *****/
     static random(min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+    
+    /*****
+     * A simplified wrapper for the builtin nodeJS crypto.Sign() class.  Note
+     * that unless otherwise specified, there are two assumptions in the code:
+     * (a) the provided value is either a string or a Buffer and (b) that the
+     * encoding for the return value is base64.  Other encoding names are also
+     * allowed including a special purpose one called 'buffer';
+    *****/
+    static sign(alg, pem, value, encoding) {
+        let signer = CRYPTO.createSign(alg);
+        signer.write(value);
+        signer.end();
+        
+        switch (encoding) {
+            case 'base64':
+                return signer.sign(pem, 'base64');
+                
+            case 'base64url':
+                return signer.sign(pem, 'base64').split('=')[0]
+                        .replace(/[+]/g, '-').replace(/[\/]/g, '_');
+                
+            case 'hex':
+                return signer.sign(pem, 'hex');
+
+            default:
+                return signer.sign(pem);
+        }
     }
 });

@@ -71,10 +71,12 @@ if (CLUSTER.isPrimary) console.log(`[ Loading NPM Modules ]`);
  * Imported NPM Modules, which are enumerated in the package.json directory
  * for the framework.
 *****/
+global.npmBase64Url    = require('base64url');
 global.npmPG           = require('pg');
 global.npmCssMinifier  = require('clean-css');
 global.npmHtmlMinifier = require('html-minifier');
 global.npmJsMinifier   = require('terser');
+global.npmPemJwk       = require('pem-jwk');
 global.npmGZIP         = require('node-gzip');
 
 
@@ -254,6 +256,7 @@ async function seedUser(dbc) {
     /********************************************
      * Load Addons
      *******************************************/
+    /*
     logPrimary('[ Loading Addons ]');
     Config.addonMap = {};
     Config.addonArray = [];
@@ -268,6 +271,7 @@ async function seedUser(dbc) {
     }
 
     await onSingletons();
+    */
 
     /********************************************
      * Load Objects
