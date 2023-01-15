@@ -305,7 +305,7 @@ register(class Time extends Date {
     }
       
     weekBegins(weekStart) {
-        return new GregorianUtc(
+        return mkTime(
             this.getUTCFullYear(),
             this.getUTCMonth(),
             this.getUTCDate() - this.dayOfWeek().index,
@@ -334,7 +334,7 @@ register(class Time extends Date {
     }
 
     yearBegins() {
-        return new GregorianUtc(
+        return mkTime(
             this.getUTCFullYear(),
             0,
             1,
@@ -342,7 +342,7 @@ register(class Time extends Date {
     }
 
     yearEnds() {
-        return new GregorianUtc(
+        return mkTime(
             this.getUTCFullYear() + 1,
             0,
             1,

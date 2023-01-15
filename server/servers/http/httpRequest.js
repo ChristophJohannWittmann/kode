@@ -177,7 +177,7 @@ register(class HttpRequest {
                     if (mime.type == 'binary') {
                         this.requestBody = {
                             mime: mime,
-                            value: mkBinary(Buffer.concat(chunks))
+                            value: mkBuffer(Buffer.concat(chunks)),
                         };
                     }
                     else {

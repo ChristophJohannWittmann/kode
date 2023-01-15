@@ -49,7 +49,7 @@ register(class Context {
 
     fromBase64(b64) {
         this.clear();
-        let stack = fromJson(mkBinary(b64, 'base64').toString()).reverse().map(el => {
+        let stack = fromJson(mkBuffer(b64, 'base64').toString()).reverse().map(el => {
             return {
                 obj: this,
                 data: el
@@ -111,6 +111,6 @@ register(class Context {
             }
         }
 
-        return mkBinary(toJson(sorted)).toString('base64');
+        return mkBuffer(toJson(sorted)).toString('base64');
     }
 });

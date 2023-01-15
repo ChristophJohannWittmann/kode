@@ -34,7 +34,6 @@ if (CLUSTER.isPrimary) console.log(`\n[ Booting Server at ${(new Date()).toISOSt
 if (CLUSTER.isPrimary) console.log(`[ Loading Framework ]`);
 require('./framework/core.js');
 require('./framework/activeData.js');
-require('./framework/binaryServer.js');
 require('./framework/context.js');
 require('./framework/languages.js');
 require('./framework/message.js');

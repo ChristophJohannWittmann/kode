@@ -62,7 +62,7 @@ const pgTypes = {
         type: () => 'bytea',
         fmwk: () => global.dbBin,
         encode: value => `E'\\x${value.toString('hex')}'`,
-        decode: value => mkBinary(value),
+        decode: value => mkBuffer(value),
     },
 
     dbBool: {
@@ -139,7 +139,7 @@ const pgTypes = {
         type: () => '_bytea',
         fmwk: () => global.dbBinArray,
         encode: array => `ARRAY[E:'\\x${array.map(el => el.toString("hex")).join("',E:'\\x")}']::bytea[]`,
-        decode: array => array.map(el => mkBinary(el)),
+        decode: array => array.map(el => mkBuffer(el)),
     },
   
     dbBoolArray: {

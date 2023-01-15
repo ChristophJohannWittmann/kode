@@ -41,7 +41,7 @@ global.dbUnsupportedType = {
 *****/
 global.dbBin = {
     name: () => 'dbBin',
-    init: () => mkBinary(),
+    init: () => mkBuffer(),
     check: value => {
         if (typeof value == 'object' && value instanceof Binary) {
             return value;
