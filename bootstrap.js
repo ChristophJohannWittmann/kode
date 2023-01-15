@@ -99,8 +99,7 @@ global.env = {
     memory:         ({ free: OS.freemem(), total: OS.totalmem() }),
     pid:            PROC.pid,
     kodePath:       PATH.join(__dirname, '.'),
-    addonPath:      PATH.join(__dirname, './server/addons'),
-    nodeModulePath: PATH.join(__dirname, './node_modules'),
+    //addonPath:      PATH.join(__dirname, './server/addons'),
     modulePath:     PATH.join(__dirname, './modules'),
     daemonPath:     PATH.join(__dirname, './server/daemons'),
     serverPath:     PATH.join(__dirname, './server/servers'),
@@ -315,14 +314,6 @@ async function seedUser(dbc) {
 
         return module;
     }
- 
-    for (let entry of await FILES.readdir(env.modulePath)) {
-        if (!entry.startsWith('.')) {
-            await loadModule(PATH.join(env.modulePath, entry));
-        }
-    }
-
-    await onSingletons();
 
     for (let modulePath of Config.modules) {
         await loadModule(absolutePath(env.configPath, modulePath));

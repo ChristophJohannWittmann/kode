@@ -27,7 +27,7 @@
 register(class AcmeProvider {
     constructor(ifaceName) {
         return new Promise(async (ok, fail) => {
-            this.config = await loadConfigFile('builtin');
+            this.config = await loadConfigFile();
             this.iface = this.config.network[ifaceName];
             this.acme = this.config.acme[this.iface.tls.acme];
             this.alg = 'RS256';

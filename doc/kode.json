@@ -1,0 +1,118 @@
+{
+    "cache": false,
+    "cacheMB": 10,
+    "logging": "console",
+    "administrators": [
+        "chris.wittmann@icloud.com",
+        "hypermetabolik@gmail.com"
+    ],
+    "acme": {
+        "letsEncrypt": {
+            "name": "Let's Encrypt",
+            "url": "https://acme-v02.api.letsencrypt.org/directory",
+            "account": {
+                "#NULL": 0
+            },
+            "publicKey": {
+                "#NULL": 0
+            },
+            "privateKey": {
+                "#NULL": 0
+            }
+        },
+        "letsEncryptStaging": {
+            "name": "Let's Encrypt Staging",
+            "url": "https://acme-staging-v02.api.letsencrypt.org/directory",
+            "account": {
+                "key": {
+                    "kty": "RSA",
+                    "n": "1jk6I33H4N0Fa6Z76qHPPChZqE8KuQzJmY3mM-fDQgOInKP9eZWShwYUAAVt_M58ho6ZaMTa56uoIMhtBt_SVkABRt-__xEYwtY483c7X_tbSK3_y3xgtvxzFjl5eSlc_5zUA7x1mlp-OnsLVCuE9K-ONxI9n_tPi4U073Xf80bfc2c8sIffdLzaO1pA5G_ea380eE1M9QUvY3_OCxTawMkZWFNCXONL6lQkxg1qkD57tWWiqUN5Uj4tbMEebCLDq1743kqbm6ovtJAQLSSX1a8T3cM5xiIUw5Rq4vQ7RgaqvcIyxhZUsegfRatJhkWr-60_yFDBssJCetNFvjeMrLdiUmGJRoNXLVllooDc30ZwXI2XjD7mzsSTSNfvtmYBkv12rnzTv4hDo6T_LlkOdRZ_fVlcisPN1ovjuDnzxK8zIi_tzFe27nqE5YO2h9qZDSne3D9ukuIQ7RUUGBTHaefNsVo93duH1yUOLj_vjno6zfHBkBGlewbkelytwko8nysAOC3xJ2mnHnVJ-qkRQdk0c-JgW_tjKj7xragtYZVi7q9lfN8NCEbXsNIOp7BBh09lkNhpoH7PIIhJAbTJa6uAaboSzg1it_ARUklXDKXUzYou8vBVX8RSpaTbO4VXZJAYW9UTLM1j-97n1n06nUlNnTg4M8hvf3RB3aX2y2E",
+                    "e": "AQAB"
+                },
+                "contact": [
+                    "mailto:chris.wittmann@icloud.com",
+                    "mailto:hypermetabolik@gmail.com"
+                ],
+                "initialIp": "24.205.200.218",
+                "createdAt": "2023-01-15T02:39:20.348352842Z",
+                "status": "valid",
+                "kid": "https://acme-staging-v02.api.letsencrypt.org/acme/acct/83087283"
+            },
+            "publicKey": {
+                "alg": "rsa",
+                "bits": 4096,
+                "type": "public",
+                "created": {
+                    "#DATE": 1673750360176
+                },
+                "pem": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA1jk6I33H4N0Fa6Z76qHP\nPChZqE8KuQzJmY3mM+fDQgOInKP9eZWShwYUAAVt/M58ho6ZaMTa56uoIMhtBt/S\nVkABRt+//xEYwtY483c7X/tbSK3/y3xgtvxzFjl5eSlc/5zUA7x1mlp+OnsLVCuE\n9K+ONxI9n/tPi4U073Xf80bfc2c8sIffdLzaO1pA5G/ea380eE1M9QUvY3/OCxTa\nwMkZWFNCXONL6lQkxg1qkD57tWWiqUN5Uj4tbMEebCLDq1743kqbm6ovtJAQLSSX\n1a8T3cM5xiIUw5Rq4vQ7RgaqvcIyxhZUsegfRatJhkWr+60/yFDBssJCetNFvjeM\nrLdiUmGJRoNXLVllooDc30ZwXI2XjD7mzsSTSNfvtmYBkv12rnzTv4hDo6T/LlkO\ndRZ/fVlcisPN1ovjuDnzxK8zIi/tzFe27nqE5YO2h9qZDSne3D9ukuIQ7RUUGBTH\naefNsVo93duH1yUOLj/vjno6zfHBkBGlewbkelytwko8nysAOC3xJ2mnHnVJ+qkR\nQdk0c+JgW/tjKj7xragtYZVi7q9lfN8NCEbXsNIOp7BBh09lkNhpoH7PIIhJAbTJ\na6uAaboSzg1it/ARUklXDKXUzYou8vBVX8RSpaTbO4VXZJAYW9UTLM1j+97n1n06\nnUlNnTg4M8hvf3RB3aX2y2ECAwEAAQ==\n-----END PUBLIC KEY-----\n"
+            },
+            "privateKey": {
+                "alg": "rsa",
+                "bits": 4096,
+                "type": "private",
+                "created": {
+                    "#DATE": 1673750360176
+                },
+                "pem": "-----BEGIN PRIVATE KEY-----\n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\nA4l6gRrLoorI/N0Z/3wRVnROWG0TfA==\n-----END PRIVATE KEY-----\n"
+            }
+        }
+    },
+    "network": {
+        "public": {
+            "address": "0.0.0.0",
+            "domain": "somedomain.com",
+            "host": "host.somedomain.com",
+            "tls": {
+                "acme": "letsEncryptStaging",
+                "privateKey": {
+                    "alg": "rsa",
+                    "bits": 4096,
+                    "type": "private",
+                    "created": {
+                        "#DATE": 1673564743680
+                    },
+                    "pem": "-----BEGIN PRIVATE KEY-----\n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\nak9u1ccyZoyI/Pkcqy45lF/cDsF9UFri\n-----END PRIVATE KEY-----\n"
+                },
+                "publicKey": {
+                    "alg": "rsa",
+                    "bits": 4096,
+                    "type": "public",
+                    "created": {
+                        "#DATE": 1673564743680
+                    },
+                    "pem": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA3gmTPe/0gM5Wlwuwr8B0\n/jq6/xNqXT0CEgjFgN59ZSze3wu9oy35DSmyweTp+8xAU4WHXuvGxR0zahs7nr0p\nm/R0SIyzalxHi8QcnFhTH1rP9iYUPDg+hmmf7wcQnXUoxf4dGuazwQRwP/Fy0JEf\nH7YEJzQuEjcoUjJRJD0n/woBE0LWEyyczKaue+5RH5YvHy/CtEng6laAc5B9ICpQ\n/Hfs/HbwS7EQ6IBN8wDAdYhY5qedOHlzqdbc99FanpZwoUVAY2H6UnIhAa8plIB3\nbR758nDAaVam2oKBCReWwAZXo9PUGY6YeBRQV0BfDKCuw7NiMHVx5lj6i4RPB/GP\nkNlAzIWwIbu+s6y9gfUSFWWuYihlqDRvIMj3GcrULQqw9rfc/MoyEhAR5mvvrr+J\n025ZEe2De6d3aTqY+jbmv3WW6XrVU1YRM328RFD4CtWR6MBZHjSsiSnfYGI2AieT\nwAkexFGdLh+72Wzfmr+rtbAbPOTifIQmvJSwkuAhjf75ydfA2OQCHbm8mxeK866a\n54osqyRRnbEHnGKEl/azEeU8BVLTrDFWi+ajQ14d7Gvr89hr6qlksAP+0vabqBqt\nlbzCo0WWDXmVhL4oyvFbT/lJh8RZMTkiWC2KzCRd4x/tBHxxub7M6W5Q4m1mu9Oy\n0iQHN4cjCjO4zuWWNMFhqnsCAwEAAQ==\n-----END PUBLIC KEY-----\n"
+                },
+                "cert": {
+                    "#NULL": 0
+                },
+                "caCert": {
+                    "#NULL": 0
+                }
+            }
+        }
+    },
+    "databases": {
+        "@": {
+            "dbms": "postgres",
+            "host": "localhost",
+            "user": "postgres",
+            "password": "postgres",
+            "database": "testapp"
+        }
+    },
+    "servers": {
+        "http": {
+            "type": "HttpServer",
+            "network": "public",
+            "active": true,
+            "options": {
+                "keepAlive": true
+            },
+            "workers": 1
+        }
+    },
+    "modules": [
+        "../testApp"
+    ]
+}

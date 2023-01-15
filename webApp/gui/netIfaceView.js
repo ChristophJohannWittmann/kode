@@ -25,7 +25,7 @@
 /*****
  * A panel that's used for editing a network interface.  This panel is able to
  * edit all aspects of a single network interface, whose data is stored in the
- * server configuration file, builtin.json.  All aspects of the network interface
+ * server configuration file, kode.json.  All aspects of the network interface
  * may modified with this panel.  System admin beware, if you deactivate the
  * network interface you're currently using, the server will reboot without it
  * being available.

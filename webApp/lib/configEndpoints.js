@@ -46,7 +46,7 @@ register(class ConfigEndpoints extends EndpointContainer {
      * Clear the current TLS/Crypto Data from the configuration.
     *****/
     async [ mkEndpoint('ConfigClearCrypto', 'system') ](trx) {
-        let config = await loadConfigFile('builtin');
+        let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
 
         iface.tls.publicKey = null;
@@ -62,7 +62,7 @@ register(class ConfigEndpoints extends EndpointContainer {
     /*****
     *****/
     async [ mkEndpoint('ConfigCopyPublicKey', 'system') ](trx) {
-        let config = await loadConfigFile('builtin');
+        let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
         return iface.tls.publicKey;        
     }
@@ -84,7 +84,7 @@ register(class ConfigEndpoints extends EndpointContainer {
      * Create a new TLS/Crypto key pair.
     *****/
     async [ mkEndpoint('ConfigCreateKeyPair', 'system') ](trx) {
-        let config = await loadConfigFile('builtin');
+        let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
         let keyPair = await Crypto.generateKeyPair();
 
@@ -131,7 +131,7 @@ register(class ConfigEndpoints extends EndpointContainer {
     /*****
     *****/
     async [ mkEndpoint('ConfigGetNetIface', 'system') ](trx) {
-        let config = await loadConfigFile('builtin');
+        let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
 
         if ('tls' in iface) {
@@ -180,7 +180,7 @@ register(class ConfigEndpoints extends EndpointContainer {
      * List configured ACME providers.
     *****/
     async [ mkEndpoint('ConfigListAcmeProviders', 'system') ](trx) {
-        let config = await loadConfigFile('builtin');
+        let config = await loadConfigFile();
         
         return Object.entries(config.acme).map(entry => ({
             provider: entry[0],
@@ -195,7 +195,7 @@ register(class ConfigEndpoints extends EndpointContainer {
      * List Network Interfaces.
     *****/
     async [ mkEndpoint('ConfigListNetIfaces', 'system') ](trx) {
-        let config = await loadConfigFile('builtin');
+        let config = await loadConfigFile();
         return Object.keys(config.network);
     }
 
@@ -204,7 +204,7 @@ register(class ConfigEndpoints extends EndpointContainer {
      * Update non-crypto network information.
     *****/
     async [ mkEndpoint('UpdateNetIface', 'system') ](trx) {
-        let config = await loadConfigFile('builtin');
+        let config = await loadConfigFile();
 
         if (trx.ifaceName in config.network) {
             for (let property in config.network[trx.ifaceName]) {

@@ -48,7 +48,7 @@ singleton(class Config {
             FILES.chmod(path, 0o600);
         }
 
-        let serverConfigPath = PATH.join(env.configPath, 'builtin.json');
+        let serverConfigPath = PATH.join(env.configPath, 'kode.json');
 
         if (!await pathExists(serverConfigPath)) {
             return `Server configuration path not found: "${serverConfigPath}"`;

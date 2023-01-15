@@ -24,13 +24,13 @@
 
 /*****
  * This function loads, creates, and manages a class used for managing the main
- * server configuration file.  It's name must be builtin.json, which means it's
- * the configuration file for the "builtin" namespace.  This class is used by
- * system administrators when managing the server configuration.
+ * server configuration file.  It's name must be kode.json, which means it's
+ * the configuration file for the kode server.  This class is used by system
+ * administrators when managing the server configuration.
 *****/
 register(async function loadConfigFile(name) {
     let exists = true;
-    const filePath = PATH.join(env.configPath, `${name}.json`);
+    const filePath = name ? PATH.join(env.configPath, `${name}.json`) : PATH.join(env.configPath, 'kode.json');
 
     class ServerSettings {
         constructor() {
