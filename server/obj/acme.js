@@ -76,6 +76,10 @@ register(class AcmeProvider {
         return false;
     }
 
+    getAccount() {
+        return this.acme.account;
+    }
+
     async pollChallenge() {
     }
 
@@ -101,8 +105,8 @@ register(class AcmeProvider {
             jwsHeader.kid = this.acme.account.kid;
         }
 
-        let jwsHeaderB64 = Crypto.encodeBase64Url(JSON.stringify(jwsHeader));
-        let jwsPayloadB64 = payload == 'PostAsGet' ? '' : Crypto.encodeBase64Url(JSON.stringify(payload));
+        let jwsHeaderB64 = Crypto.encodeBase64Url(toStdJson(jwsHeader));
+        let jwsPayloadB64 = payload == 'PostAsGet' ? '' : Crypto.encodeBase64Url(toStdJson(payload));
 
         let jwsSignature = Crypto.sign(
             'sha256',
@@ -111,7 +115,7 @@ register(class AcmeProvider {
             'base64url'
         );
 
-        let body = JSON.stringify({
+        let body = toStdJson({
             protected: jwsHeaderB64,
             payload: jwsPayloadB64,
             signature: jwsSignature,

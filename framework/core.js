@@ -258,6 +258,50 @@
 
 
     /*****
+     * JSON conversion for dates is somewhat problematic.  Dates are converted to
+     * a string when strifified, but there's not good way to identify that a date
+     * should be parsed back into a Date without already knowing which specific
+     * properties or values should be restored as a date.  Hence, the extended
+     * version for JSON conversion uses the Kode extended JSON format to be able
+     * to automatically identify and restore the orignal values.  This new toJSON
+     * function for the Date prototype takes care of this for dates.
+    *****/
+    let extension = true;
+    const stringifyDate = Date.prototype.toJSON;
+
+    Date.prototype.toJSON = function() {
+        if (extension) {
+            return { '#DATE': this.valueOf() };
+        }
+        else {
+            return Reflect.apply(stringifyDate, this, []);
+        }
+    };
+
+
+    /*****
+     * As specified above, these functions provide backward compatibility with
+     * Javascript's builtin JSON features.  Within the Kode framework, develoeprs
+     * need to use these global functions in place of JSON.stirngify() and
+     * JSON.parse().
+    *****/
+    register(function toStdJson(value, humanReadable) {
+        extension = false;
+
+        if (humanReadable) {
+            return JSON.stringify(value, null, 4);
+        }
+        else {
+            return JSON.stringify(value);
+        }
+    });
+
+    register(function fromStdJson(value, humanReadable) {
+        return JSON.parse(value);
+    });
+
+
+    /*****
      * The framework's toJson() and fromJson() functions are required in many
      * instances with regards to messaging.  The type and instance information is
      * retained for the core framework objects as well as objects of registered
@@ -266,13 +310,11 @@
      * to recreate and exact copy of the original.  Theese functions DO NOT WORK
      * where objects have circular references such a self-referencing trees. Notice
      * the user of the Data prototype modifier.  That's because Dates are converted
-     * to strings before they even reach the strinigier function.
+     * to strings before they even reach the strinigifier function.
     *****/
-    Date.prototype.toJSON = function() {
-        return { '#DATE': this.valueOf() };
-    };
-
     register(function toJson(value, humanReadable) {
+        extension = true;
+
         return JSON.stringify(value, (key, value) => {
             if (value === null) {
                 return { '#NULL': 0 };
@@ -284,7 +326,7 @@
                 return undefined;
             }
             else if (value instanceof Date) {
-                return { '#DATE': value.valueOf() };
+                return { '#TIME': value.valueOf() };
             }
             else if (value instanceof Time) {
                 return { '#TIME': value.time() };
@@ -299,7 +341,7 @@
                 return { '#BIG': value.toString() };
             }
             else if (value instanceof Buffer) {
-                return { '#BUFFER': value.toString()('base64') };
+                return { '#BINARY': value.toString()('base64') };
             }
             else if (value instanceof Binary) {
                 return { '#BINARY': value.toString('base64') };
@@ -351,9 +393,6 @@
                 else if ('#NAN' in value) {
                     return NaN;
                 }
-                else if ('#DATE' in value) {
-                    return new Date(value['#DATE']);
-                }
                 else if ('#TIME' in value) {
                     return mkTime(value['#TIME']);
                 }
@@ -363,7 +402,7 @@
                 else if ('#FUNC' in value) {
                     return mkBinary(value['#FUNC'], 'base64').toString();
                 }
-                else if ('#BUFFER' in value) {
+                else if ('#BINARY' in value) {
                     return mkBinary(value['#BUFFER'], 'base64');
                 }
                 else if ('#BIG' in value) {

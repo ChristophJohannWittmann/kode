@@ -131,7 +131,7 @@ const pgTypes = {
     dbTime: {
         type: () => 'timestamp',
         fmwk: () => global.dbTime,
-        encode: value => `'${value.jsDate.toISOString()}'`,
+        encode: value => `'${value.toISOString()}'`,
         decode: value => mkTime(value),
     },
   
@@ -201,7 +201,7 @@ const pgTypes = {
     dbTimeArray: {
         type: () => '_timestamp',
         fmwk: () => global.dbTimeArray,
-        encode: array => `ARRAY['${array.map(el => el.jsDate.toISOString()).join("','")}']::timestamp[]`,
+        encode: array => `ARRAY['${array.map(el => el.toISOString()).join("','")}']::timestamp[]`,
         decode: array => array.map(el => mkTime(el)),
     },
 };
