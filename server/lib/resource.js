@@ -106,6 +106,20 @@ singleton(class ResourceLibrary {
     constructor() {
         this.urls = {};
         this.builtin = false;
+
+        if (CLUSTER.isPrimary) {
+            this.on('#RESOURCE.SET', message => {});
+
+            this.on('#RESOURCE.CLEAR', message => {});
+        }
+
+        if (CLUSTER.isWorker) {
+            this.on('#RESOURCE.SET', message => {
+            });
+
+            this.on('#RESOURCE.CLEAR', message => {
+            });
+        }
     }
 
     deregister(url) {
@@ -186,5 +200,8 @@ singleton(class ResourceLibrary {
                 this.urls[resource.url] = resource;
             }
         }
+    }
+
+    async registerTemp() {
     }
 });

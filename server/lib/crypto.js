@@ -138,6 +138,24 @@ register(class Crypto {
     }
     
     /*****
+     * Very simply a kode framwework wrapper for the NodeJS hasing feature. This
+     * provides all of the underlying features packaged into a simple single-
+     * line asynchronous/promise-base API interface.
+    *****/
+    static hash(algorithmName, value) {
+        return new Promise((ok, fail) => {
+            const hasher = CRYPTO.createHash(algorithmName);
+            
+            hasher.on('readable', () => {
+                ok(hasher.read());
+            });
+            
+            hasher.write(value);
+            hasher.end();
+        });
+    }
+    
+    /*****
      * An easy-to-use random number generator.  Use this internally or for
      * other framework code.
     *****/

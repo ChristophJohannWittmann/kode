@@ -36,6 +36,42 @@ register(class AcmeProvider {
     }
 
     async certify() {
+        let challengeType = 'http-01';
+
+        let reply = await this.post(
+            this.newOrder,
+            {
+                identifiers: [{
+                    type: 'dns',
+                    value: this.iface.host,
+                }]
+            }
+        );
+
+        if (reply.status == 201) {
+            this.challenge = null;
+            this.finalizeUrl = reply.content.finalizeUrl;
+            this.authorizationUrl = reply.content.authorizations[0];
+            reply = await this.post(this.authorizationUrl, 'PostAsGet');
+
+            if (reply.status == 200) {
+                for (let challenge of reply.content.challenges) {
+                    if (challenge.type = challengeType) {
+                        this.challenge = challenge;
+                        break;
+                    }
+                }
+
+                if (this.challenge) {
+                    let hash = await Crypto.hash('sha256', `{"e":"${this.jwk.e}","kty":"${this.jwk.kty}","n":"${this.jwk.n}"}`);
+                    let thumbprint = Crypto.encodeBase64Url(hash);
+                    this.keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
+                    this.keyAuthorization = `${this.challenge.token}.${thumbprint}`;
+                }
+            }
+        }
+
+        return false;
     }
 
     async checkAccount() {
@@ -45,10 +81,12 @@ register(class AcmeProvider {
             this.config.acme[this.iface.tls.acme].publicKey = keyPair.publicKey;
             this.config.acme[this.iface.tls.acme].privateKey = keyPair.privateKey;
 
-            let reply = await this.post(this.newAccount, {
-                termsOfServiceAgreed: true,
-                contact: this.config.administrators.map(email => `mailto:${email}`),
-            });
+            let reply = await this.post(
+                this.newAccount,
+                {
+                    termsOfServiceAgreed: true,
+                    contact: this.config.administrators.map(email => `mailto:${email}`),
+                });
 
             this.config.acme[this.iface.tls.acme].account = reply.content;
             this.config.acme[this.iface.tls.acme].account.kid = reply.headers.location;
@@ -57,6 +95,7 @@ register(class AcmeProvider {
             this.acme = this.config.acme[this.iface.tls.acme];
         }
 
+        this.jwk = npmPemJwk.pem2jwk(this.acme.publicKey.pem);
         return this.acme.account;
     }
 
@@ -98,13 +137,7 @@ register(class AcmeProvider {
             url: url,
         };
 
-        if (url == this.newAccount) {
-            jwsHeader.jwk = npmPemJwk.pem2jwk(this.acme.publicKey.pem);
-        }
-        else {
-            jwsHeader.kid = this.acme.account.kid;
-        }
-
+        url == this.newAccount ? jwsHeader.jwk = this.jwk : jwsHeader.kid = this.acme.account.kid;
         let jwsHeaderB64 = Crypto.encodeBase64Url(toStdJson(jwsHeader));
         let jwsPayloadB64 = payload == 'PostAsGet' ? '' : Crypto.encodeBase64Url(toStdJson(payload));
 
