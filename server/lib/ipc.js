@@ -121,6 +121,18 @@ if (CLUSTER.isPrimary) {
             delete message['#IpcQuery'];
             Ipc.sendWorker(message['#Worker'], message);
         }
+        else if (message['#Broadcast']) {
+            for (const id in CLUSTER.workers) {
+                if (id != message['#Worker']) {
+                    let worker = CLUSTER.workers[id];
+                    worker.send(toJson(message));
+                }
+            }            
+        }
+        else if (message['#Relay']) {
+            let worker = CLUSTER.workers[message['#Worker']];
+            worker.send(toJson(message));
+        }
         else {
             Ipc.send(message);
         }
@@ -148,6 +160,18 @@ else {
         }
 
         sendPrimary(message) {
+            message['#Worker'] = CLUSTER.worker.id;
+            return PROC.send(toJson(message));
+        }
+
+        sendWorker(workerId, message) {
+            message['#Relay'] = true;
+            message['#Worker'] = workerId;
+            return PROC.send(toJson(message));
+        }
+
+        sendWorkers(message) {
+            message['#Broadcast'] = true;
             message['#Worker'] = CLUSTER.worker.id;
             return PROC.send(toJson(message));
         }

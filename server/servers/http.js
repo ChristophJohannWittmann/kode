@@ -100,6 +100,10 @@ if (CLUSTER.isWorker) {
                         if (resource.category == 'webx') {
                             await resource.value.handleRequest(req, rsp);
                         }
+                        else if (resource.category == 'hook') {
+                            resource.reference.hook.accept(req.body());
+                            rsp.endStatus(200);
+                        }
                         else if (req.method() == 'GET') {
                             let content = await resource.get(rsp.encoding);
 

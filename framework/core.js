@@ -268,6 +268,7 @@
     *****/
     let extension = true;
     const stringifyDate = Date.prototype.toJSON;
+    const stringifyBuffer = Buffer.prototype.toJSON;
 
     Date.prototype.toJSON = function() {
         if (extension) {
@@ -275,6 +276,15 @@
         }
         else {
             return Reflect.apply(stringifyDate, this, []);
+        }
+    };
+
+    Buffer.prototype.toJSON = function() {
+        if (extension) {
+            return { '#BUFFER': this.toString('base64') };
+        }
+        else {
+            return Reflect.apply(stringifyBuffer, this, []);
         }
     };
 
@@ -339,9 +349,6 @@
             }
             else if (typeof value == 'bigint') {
                 return { '#BIG': value.toString() };
-            }
-            else if (value instanceof Buffer) {
-                return { '#BUFFER': value.toString()('base64') };
             }
             else if (typeof value == 'object') {
                 if (ActiveData.isActiveData(value)) {

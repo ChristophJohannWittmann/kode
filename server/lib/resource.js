@@ -37,7 +37,6 @@ class Resource {
     constructor(reference, module) {
         return new Promise(async (ok, fail) => {
             this.module = module;
-            this.expires = null;
             this.oneTime = false;
             this.url = reference.expandedUrl;
             this.value = null;
@@ -51,6 +50,9 @@ class Resource {
             else if ('webx' in reference) {
                 this.category = 'webx';
                 this.value = await module.mkWebx(reference);
+            }
+            else if ('hook' in reference) {
+                this.category = 'hook';
             }
             else {
                 logPrimary(`    WARNING: "Unable to process reference:\n.   reference: "${toJson(reference, true)}"`);
@@ -106,20 +108,6 @@ singleton(class ResourceLibrary {
     constructor() {
         this.urls = {};
         this.builtin = false;
-
-        if (CLUSTER.isPrimary) {
-            this.on('#RESOURCE.SET', message => {});
-
-            this.on('#RESOURCE.CLEAR', message => {});
-        }
-
-        if (CLUSTER.isWorker) {
-            this.on('#RESOURCE.SET', message => {
-            });
-
-            this.on('#RESOURCE.CLEAR', message => {
-            });
-        }
     }
 
     deregister(url) {
@@ -201,7 +189,149 @@ singleton(class ResourceLibrary {
             }
         }
     }
+});
 
-    async registerTemp() {
+
+/*****
+ * A hook is a one-use pseudo resource generally used for special purposes. For
+ * instance, we need a HookResource when performing ACME certification.  It can
+ * also be used with designated single purpose dynamic links.  For instance, if
+ * a user is provided an application URL, that URL can be a hook with a special
+ * one-time purpose.  Keep in mind that hooks disappear after their one-time use
+ * or after they expire.
+*****/
+register(class HookResource extends Jsonable {
+    static nextHookId = 1;
+
+    static init = (() => {
+        Ipc.on('#HookResource.Accept', message => {
+            if (message.hookId && message.url in ResourceLibrary.urls) {
+                let hook = ResourceLibrary.urls[message.url].reference.hook;
+
+                if (!hook.isStub) {
+                    hook.accept(message.value);
+                }
+            }
+        });
+
+        Ipc.on('#HookResource.Clear', message => {
+            if (message.hookId && message.url in ResourceLibrary.urls) {
+                let hook = ResourceLibrary.urls[message.url].reference.hook;
+
+                if (hook.stub) {
+                    ResourceLibrary.deregister(message.url);
+                }
+            }
+        });
+
+        Ipc.on('#HookResource.Set', message => {
+            if (message.hook.hookId  && !(message.url in ResourceLibrary.urls)) {
+                mkHookResource(message.hook.url, message.hook);
+            }
+        });
+    })();
+
+    constructor(url, hook) {
+        super();
+        this.url = url;
+        this.trigger = null;
+        this.timeout = null;
+        this.milliseconds = 0;
+
+        if (hook) {
+            this.stub = true;
+            this.procId = hook.procId;
+            this.hookId = hook.hookId;
+            this.workerId = hook.workerId;
+        }
+        else {
+            this.stub = false;
+            this.procId = PROC.pid;
+            this.hookId = `${PROC.pid}.${HookResource.nextHookId++}`;
+            this.workerId = CLUSTER.worker.id;
+        }
+
+        if (!(this.url in ResourceLibrary.urls)) {
+            ResourceLibrary.register({
+                url: url,
+                hook: this,
+            });
+
+            if (!(this.stub)) {
+                Ipc.sendWorkers({
+                    messageName: '#HookResource.Set',
+                    hook: this,
+                });
+            }
+        }
+    }
+
+    accept(value) {
+        if (this.stub) {
+            Ipc.sendWorker(this.workerId, {
+                messageName: '#HookResource.Accept',
+                url: this.url,
+                procId: this.procId,
+                hookId: this.hookId,
+                value: value,
+            });
+        }
+        else {
+            this.clearTimeout();
+
+            if (this.trigger) {
+                this.trigger(value);
+                this.trigger = null;
+            }
+
+            this.clear();
+        }
+    }
+
+    clear() {
+        if (!this.stub) {
+            this.clearTimeout();
+
+            Ipc.sendWorkers({
+                messageName: '#HookResource.Clear',
+                url: this.url,
+                procId: this.procId,
+                hookId: this.hookId,
+            });
+
+            ResourceLibrary.deregister(this.url);
+
+            if (this.trigger) {
+                this.trigger();
+                this.trigger = null;
+            }
+        }
+    }
+
+    clearTimeout() {
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+            this.timeout = null;
+        }
+
+        return this;
+    }
+
+    get() {
+        return new Promise((ok, fail) => {
+            this.trigger = value => ok(value);
+        });
+    }
+
+    setTimeout(milliseconds) {
+        if (this.timeout) {
+            this.clearTimeout();
+        }
+
+        this.timeout = setTimeout(() => {
+            this.clear();
+        }, milliseconds);
+
+        return this;
     }
 });
