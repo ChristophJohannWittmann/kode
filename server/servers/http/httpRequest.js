@@ -30,10 +30,11 @@
  * content when making a new HTTP request instance.
 *****/
 register(class HttpRequest {
-    constructor(httpServer, httpReq) {
+    constructor(httpServer, httpReq, isTls) {
         return new Promise(async (ok, fail) => {
             this.httpServer = httpServer;
             this.httpReq = httpReq;
+            this.isTls = isTls;
             this.method() == 'POST' ? await this.loadBody() : false;
 
             this.params = {};
@@ -102,6 +103,10 @@ register(class HttpRequest {
         if ('content-encoding' in this.headers()) {
             return this.header('content-encoding');
         }
+    }
+
+    fullRequest() {
+        return `${this.scheme()}://${this.httpReq.headers.host}${this.httpReq.url}`;
     }
 
     hash() {
@@ -264,6 +269,14 @@ register(class HttpRequest {
 
     search() {
         return this.parsedUrl.search !== null ? this.parsedUrl.search : '';
+    }
+
+    scheme() {
+        return this.isTls ? 'https' : 'http';
+    }
+
+    tls() {
+        return this.httpServer.tls();
     }
 
     url() {

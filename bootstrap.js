@@ -99,7 +99,6 @@ global.env = {
     memory:         ({ free: OS.freemem(), total: OS.totalmem() }),
     pid:            PROC.pid,
     kodePath:       PATH.join(__dirname, '.'),
-    //addonPath:      PATH.join(__dirname, './server/addons'),
     modulePath:     PATH.join(__dirname, './modules'),
     daemonPath:     PATH.join(__dirname, './server/daemons'),
     serverPath:     PATH.join(__dirname, './server/servers'),
@@ -161,12 +160,11 @@ async function seedUser(dbc) {
  * by responding to HTTP, websocker requests, and other server-bases requests.
  * 
  * Here's what happens in order:
- *     (1)  Load and import addons, build if necessary
- *     (2)  Load and import builtin modules
- *     (3)  Load and import user modules
- *     (4)  Start workers (primary only)
- *     (5)  Start daemons (primary only)
- *     (6)  Start servers (primary only)
+ *     (1)  Load and import builtin modules
+ *     (2)  Load and import user modules
+ *     (3)  Start workers (primary only)
+ *     (4)  Start daemons (primary only)
+ *     (5)  Start servers (primary only)
  * 
  * Once this function is exited, the application will continue to execute until
  * instructed to stop with a system-wide #Stop message.
@@ -200,7 +198,6 @@ async function seedUser(dbc) {
      * Infrastructure Code
      *******************************************/
     if (CLUSTER.isPrimary) (`[ Loading Server Infrastructure ]`);
-    require('./server/lib/addon.js');
     require('./server/lib/clientBuilder.js');
     require('./server/lib/cluster.js');
     require('./server/lib/compression.js');
@@ -250,26 +247,6 @@ async function seedUser(dbc) {
 
     require('./server/servers/http.js');
     await onSingletons();
-
-    /********************************************
-     * Load Addons
-     *******************************************/
-    /*
-    logPrimary('[ Loading Addons ]');
-    Config.addonMap = {};
-    Config.addonArray = [];
-
-    for (let entry of await FILES.readdir(env.addonPath)) {
-        if (!entry.startsWith('.') && !entry.startsWith('apiV')) {
-            let addonPath = PATH.join(env.addonPath, entry);
-            let addon = mkAddon(addonPath);
-            await addon.load();
-            logPrimary(`    ${addon.info()}`);
-        }
-    }
-
-    await onSingletons();
-    */
 
     /********************************************
      * Load Objects

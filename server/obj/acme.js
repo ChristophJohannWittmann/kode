@@ -67,6 +67,8 @@ register(class AcmeProvider {
                     let thumbprint = Crypto.encodeBase64Url(hash);
                     this.keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
                     this.keyAuthorization = `${this.challenge.token}.${thumbprint}`;
+                    console.log(this.keyChallenge);
+                    console.log(this.keyAuthorization);
                 }
             }
         }

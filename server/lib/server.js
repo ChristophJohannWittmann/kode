@@ -39,7 +39,7 @@ register(class ServerBase extends Emitter {
     }
 
     active() {
-        return this.config.active && this.network.active ? true : false;
+        return this.config.active ? true : false;
     }
 
     addr() {
@@ -57,8 +57,23 @@ register(class ServerBase extends Emitter {
     caUrl() {
         return this.network.caUrl ? this.network.caUrl : '';
     }
-
+  
     crypto() {
+        const tls = this.config.network.tls;
+
+        if (tls) {
+            if (tls.publicKey) {
+                if (tls.privateKey) {
+                    if (tls.cert) {
+                        if (tls.ca) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     domain() {
@@ -78,25 +93,7 @@ register(class ServerBase extends Emitter {
     }
 
     port() {
-        return 0;
-    }
-  
-    tls() {
-        const tls = this.config.network.tls;
-
-        if (tls) {
-            if (tls.publicKey) {
-                if (tls.privateKey) {
-                    if (tls.cert) {
-                        if (tls.ca) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
+        return this.config.port;
     }
 
     type() {

@@ -57,39 +57,30 @@ if (CLUSTER.isWorker) {
     register(class HttpServer extends Server {
         constructor(config, serverName) {
             super(config, serverName);
+            this.http = null;
+            this.https = null;
 
-            if (this.tls()) {
-                const crypto = this.crypto();
+            if (this.config.http) {
+                this.http = HTTP.createServer((httpReq, httpRsp) => this.handle(httpReq, httpRsp, false));
+                this.http.listen(this.config.http, this.addr());
+                this.http.on('upgrade', (...args) => this.upgrade(...args));
+            }
 
-                this.nodeHttpServer = HTTPS.createServer({
+            const crypto = this.crypto();
+
+            if (this.config.https && crypto) {
+                this.https = HTTPS.createServer({
                     key: crypto.key,
                     cert: crypto.cert,
                     ca: crypto.CA,
-                }, (...args) => this.handle(...args));
+                }, (httpReq, httpRsp) => this.handle(httpReq, httpRsp, true));
+                this.https.listen(this.config.http, this.addr());
+                this.https.on('upgrade', (...args) => this.upgrade(...args));
             }
-            else {
-                this.nodeHttpServer = HTTP.createServer((...args) => this.handle(...args));
-            }
-
-            this.nodeHttpServer.on('upgrade', async (httpReq, socket, headPacket) => {
-                let req = await mkHttpRequest(this, httpReq);
-                let resource = await ResourceLibrary.get(req.pathname());
-
-                if (resource && resource.category == 'webx') {
-                    try {
-                        await resource.value.upgrade(req, socket, headPacket);
-                    }
-                    catch (e) {
-                        log(`Web Socket Upgrade Request Error: ${req.url()}`, e);
-                    }
-                }
-            });
-      
-            this.nodeHttpServer.listen(this.port(), this.addr());
         }
 
-        async handle(httpReq, httpRsp) {
-            let req = await mkHttpRequest(this, httpReq);
+        async handle(httpReq, httpRsp, tls) {
+            let req = await mkHttpRequest(this, httpReq, tls);
             let rsp = await mkHttpResponse(this, httpRsp, req);
 
             try {
@@ -97,29 +88,7 @@ if (CLUSTER.isWorker) {
                     let resource = await ResourceLibrary.get(req.pathname());
 
                     if (resource) {
-                        if (resource.category == 'webx') {
-                            await resource.value.handleRequest(req, rsp);
-                        }
-                        else if (resource.category == 'hook') {
-                            resource.reference.hook.accept(req.body());
-                            rsp.endStatus(200);
-                        }
-                        else if (req.method() == 'GET') {
-                            let content = await resource.get(rsp.encoding);
-
-                            if (content.error) {
-                                rsp.mime = mkMime('text/plain');
-                                rsp.end(`Error while fetching ${req.url()}`);
-                            }
-                            else {
-                                rsp.preEncoded = true;
-                                rsp.mime = content.mime;
-                                rsp.end(content.value);
-                            }
-                        }
-                        else {
-                            rsp.endStatus(405);
-                        }
+                        await this.handleResource(req, rsp, tls, resource);
                     }
                     else {
                         rsp.endStatus(404);
@@ -149,8 +118,95 @@ if (CLUSTER.isWorker) {
             await dbc.free();
         }
 
-        port() {
-            return this.tls() ? 443 : 80;
+        async handleResource(req, rsp, tls, resource) {
+            if (!(resource.tlsMode in { best:0, must:0, none:0 })) {
+                rsp.endStatus(404);
+                return;                
+            }
+
+            if (tls) {
+                if (resource.tlsMode == 'none') {
+                    if (this.http) {
+                        rsp.setHeader('Location', `${this.req.fullRequest().replace('https', 'http')}`);
+                        rsp.endStatus(301);
+                        return;
+                    }
+                    else {
+                        rsp.endStatus(404);
+                        return;
+                    }
+                }
+            }
+            else {
+                if (resource.tlsMode == 'must') {
+                    if (this.https) {
+                        rsp.setHeader('Location', `${this.req.fullRequest().replace('http', 'https')}`);
+                        rsp.endStatus(301);
+                        return;
+                    }
+                    else {
+                        rsp.endStatus(404);
+                        return;
+                    }
+                }
+                else if (resource.tlsMode == 'best') {
+                    if (this.https) {
+                        rsp.setHeader('Location', `${this.req.fullRequest().replace('http', 'https')}`);
+                        rsp.endStatus(301);
+                        return;
+                    }
+                }
+            }
+
+            if (resource.category == 'webx') {
+                await resource.value.handleRequest(req, rsp);
+            }
+            else if (resource.category == 'hook') {
+                resource.reference.hook.accept(req.body());
+                rsp.endStatus(200);
+            }
+            else if (req.method() == 'GET') {
+                let content = await resource.get(rsp.encoding);
+
+                if (content.error) {
+                    rsp.mime = mkMime('text/plain');
+                    rsp.end(`Error while fetching ${req.url()}`);
+                }
+                else {
+                    rsp.preEncoded = true;
+                    rsp.mime = content.mime;
+                    rsp.end(content.value);
+                }
+            }
+            else {
+                rsp.endStatus(405);
+            }
+        }
+
+        isHttp() {
+            return this.http != null;
+        }
+
+        isHttps() {
+            return this.https != null;
+        }
+
+        isIntegrative() {
+            return this.http != null && this.https != null;
+        }
+
+        async upgrade(httpReq, socket, headPacket) {
+            let req = await mkHttpRequest(this, httpReq);
+            let resource = await ResourceLibrary.get(req.pathname());
+
+            if (resource && resource.category == 'webx') {
+                try {
+                    await resource.value.upgrade(req, socket, headPacket);
+                }
+                catch (e) {
+                    log(`Web Socket Upgrade Request Error: ${req.url()}`, e);
+                }
+            }
         }
     });
 }
