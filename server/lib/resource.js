@@ -107,21 +107,22 @@ class Resource {
  * one-time purpose.  Keep in mind that hooks disappear after their one-time use
  * or after they expire.
 *****/
-register(class HookResource extends Jsonable {
+register(class HookResource {
     static nextHookId = 1;
 
     static init = (() => {
-        Ipc.on('#HookResource.Accept', message => {
+        Ipc.on('#HookResource.Accept', async message => {
             if (message.hookId && message.url in ResourceLibrary.urls) {
                 let hook = ResourceLibrary.urls[message.url].reference.hook;
 
                 if (!hook.isStub) {
-                    hook.accept(message.value);
+                    let response = await hook.accept(message.requestInfo);
+                    Message.reply(message, response);
                 }
             }
         });
 
-        Ipc.on('#HookResource.Clear', message => {
+        Ipc.on('#HookResource.Clear', async message => {
             if (message.hookId && message.url in ResourceLibrary.urls) {
                 let hook = ResourceLibrary.urls[message.url].reference.hook;
 
@@ -131,32 +132,49 @@ register(class HookResource extends Jsonable {
             }
         });
 
-        Ipc.on('#HookResource.Set', message => {
-            if (message.hook.hookId  && !(message.url in ResourceLibrary.urls)) {
-                mkHookResource(message.hook.url, message.hook);
+        Ipc.on('#HookResource.Set', async message => {
+            if (message.hook.hookId && !(message.url in ResourceLibrary.urls)) {
+                if (message.hook.procId != PROC.pid) {
+                    mkHookResource(message.hook.url, message.hook);
+                }
             }
         });
     })();
 
     constructor(url, hook) {
-        super();
         this.url = url;
         this.trigger = null;
         this.timeout = null;
         this.tlsMode = 'best';
+        this.autoClear = true;
         this.milliseconds = 0;
 
-        if (hook) {
+        if (typeof hook == 'object') {
             this.stub = true;
             this.procId = hook.procId;
             this.hookId = hook.hookId;
             this.workerId = hook.workerId;
+            this.responder = async () => ({ status: 200, mime: 'text/plain', headers: {}, content: '' });
         }
         else {
             this.stub = false;
             this.procId = PROC.pid;
             this.hookId = `${PROC.pid}.${HookResource.nextHookId++}`;
             this.workerId = CLUSTER.worker.id;
+
+            if (typeof hook == 'function') {
+                var responder = hook;
+            }
+            else {
+                var responder = async () => ({ status: 200, mime: 'text/plain', headers: {}, content: '' });
+            }
+
+            Ipc.sendWorkers({
+                messageName: '#HookResource.Set',
+                hook: this,
+            });
+
+            this.responder = responder;
         }
 
         if (!(this.url in ResourceLibrary.urls)) {
@@ -164,35 +182,35 @@ register(class HookResource extends Jsonable {
                 url: url,
                 hook: this,
             });
-
-            if (!(this.stub)) {
-                Ipc.sendWorkers({
-                    messageName: '#HookResource.Set',
-                    hook: this,
-                });
-            }
         }
     }
 
-    accept(value) {
+    async accept(requestInfo) {
         if (this.stub) {
-            Ipc.sendWorker(this.workerId, {
+            let response = await Ipc.queryWorker(this.workerId, {
                 messageName: '#HookResource.Accept',
                 url: this.url,
                 procId: this.procId,
                 hookId: this.hookId,
-                value: value,
+                requestInfo: requestInfo,
             });
+
+            return response;
         }
         else {
             this.clearTimeout();
+            let response = await this.responder(requestInfo);
 
             if (this.trigger) {
-                this.trigger(value);
+                this.trigger();
                 this.trigger = null;
             }
 
-            this.clear();
+            if (this.autoClear) {
+                this.clear();
+            }
+            
+            return response;
         }
     }
 
@@ -216,6 +234,11 @@ register(class HookResource extends Jsonable {
         }
     }
 
+    clearAutoClear() {
+        this.autoClear = false;
+        return this;
+    }
+
     clearTimeout() {
         if (this.timeout) {
             clearTimeout(this.timeout);
@@ -225,10 +248,15 @@ register(class HookResource extends Jsonable {
         return this;
     }
 
-    get() {
+    end() {
         return new Promise((ok, fail) => {
             this.trigger = value => ok(value);
         });
+    }
+
+    setAutoClear() {
+        this.autoClear = true;
+        return this;
     }
 
     setTlsMode(mode) {

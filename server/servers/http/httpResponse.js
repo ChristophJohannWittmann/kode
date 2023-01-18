@@ -124,7 +124,7 @@ register(class HttpResponse {
             content = args[2];
         }
         else if (args.length == 2) {
-            this.mime = mkMime(args[1]);
+            this.mime = mkMime(args[0]);
             content = args[1];
         }
         else if (args.length == 1) {

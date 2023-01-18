@@ -116,10 +116,19 @@ if (CLUSTER.isPrimary) {
             Trap.pushReply(message['#Trap'], message.reply);
         }
         else if ('#IpcQuery' in message) {
-            message.reply = await Ipc.query(message);
-            message['#IpcReply'] = true;
-            delete message['#IpcQuery'];
-            Ipc.sendWorker(message['#Worker'], message);
+            if (message['#Relay']) {
+                let requestingWorker = message['#Worker'];
+                message.reply = await Ipc.queryWorker(message['#Relay'], message);
+                message['#IpcReply'] = true;
+                delete message['#IpcQuery'];
+                Ipc.sendWorker(requestingWorker, message);
+            }
+            else {
+                message.reply = await Ipc.query(message);
+                message['#IpcReply'] = true;
+                delete message['#IpcQuery'];
+                Ipc.sendWorker(message['#Worker'], message);
+            }
         }
         else if (message['#Broadcast']) {
             for (const id in CLUSTER.workers) {
@@ -130,7 +139,7 @@ if (CLUSTER.isPrimary) {
             }            
         }
         else if (message['#Relay']) {
-            let worker = CLUSTER.workers[message['#Worker']];
+            let worker = CLUSTER.workers[message['#Relay']];
             worker.send(toJson(message));
         }
         else {
@@ -159,14 +168,25 @@ else {
             return trap.promise;
         }
 
+        async queryWorker(workerId, message) {
+            let trap = mkTrap();
+            Trap.setExpected(trap.id, 1);
+            message['#Worker'] = CLUSTER.worker.id;
+            message['#Trap'] = trap.id;
+            message['#IpcQuery'] = true;
+            message['#Relay'] = workerId;
+            PROC.send(toJson(message));
+            return trap.promise;
+        }
+
         sendPrimary(message) {
             message['#Worker'] = CLUSTER.worker.id;
             return PROC.send(toJson(message));
         }
 
         sendWorker(workerId, message) {
-            message['#Relay'] = true;
-            message['#Worker'] = workerId;
+            message['#Relay'] = workerId;
+            message['#Worker'] = Cluster.worker.id;
             return PROC.send(toJson(message));
         }
 

@@ -61,14 +61,17 @@ register(class AcmeProvider {
                         break;
                     }
                 }
+                console.log(this.challenge);
 
                 if (this.challenge) {
                     let hash = await Crypto.hash('sha256', `{"e":"${this.jwk.e}","kty":"${this.jwk.kty}","n":"${this.jwk.n}"}`);
                     let thumbprint = Crypto.encodeBase64Url(hash);
                     this.keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
                     this.keyAuthorization = `${this.challenge.token}.${thumbprint}`;
-                    console.log(this.keyChallenge);
-                    console.log(this.keyAuthorization);
+
+                    //this.hook = mkHookResource();
+
+                    reply = await this.post(this.challenge.url, {});
                 }
             }
         }
@@ -122,6 +125,35 @@ register(class AcmeProvider {
     }
 
     async pollChallenge() {
+        return new Promise((ok, fail) => {
+            var attempts = 0;
+        
+            var interval = TIMERS.setInterval(() => {
+                post(session, session.authorizationUrl, 'PostAsGet').then(response => {
+                    attempts++;
+                    
+                    try {
+                        for (var i = 0; i < response.content.challenges.length; i++) {
+                            var challenge = response.content.challenges[i];
+
+                            if (challenge.type == 'http-01') {
+                                if (challenge.status == 'valid') {
+                                    TIMERS.clearInterval(interval);
+                                    ok(true);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    catch (e) {}
+                    
+                    if (attempts > 60) {
+                        TIMERS.clearInterval(interval);
+                        ok(false);
+                    }
+                });
+            }, 1000);
+        });
     }
 
     async pollOrder() {
