@@ -215,27 +215,4 @@ if (CLUSTER.isWorker) {
             }
         }
     });
-    // **********************************************************************
-    // **********************************************************************
-    if (CLUSTER.worker.id == 1) {
-        setTimeout(async () => {
-            let hook = mkHookResource('/dog', async (requestInfo) => {
-                return {
-                    status: 200,
-                    mime: 'text/plain',
-                    headers: {},
-                    content: 'Sigmund Benz was here.',
-                };
-            }).clearAutoClear();
-
-            for (let i = 0; i < 3; i++) {
-                await hook.end();
-            }
-
-            hook.clear();
-            console.log('hook Removed');
-        }, 1000);
-    }
-    // **********************************************************************
-    // **********************************************************************
 }

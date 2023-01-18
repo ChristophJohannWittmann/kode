@@ -143,11 +143,11 @@ register(class HookResource {
 
     constructor(url, hook) {
         this.url = url;
-        this.trigger = null;
         this.timeout = null;
         this.tlsMode = 'best';
         this.autoClear = true;
         this.milliseconds = 0;
+        this.makePromise();
 
         if (typeof hook == 'object') {
             this.stub = true;
@@ -200,11 +200,7 @@ register(class HookResource {
         else {
             this.clearTimeout();
             let response = await this.responder(requestInfo);
-
-            if (this.trigger) {
-                this.trigger();
-                this.trigger = null;
-            }
+            this.trigger(response);
 
             if (this.autoClear) {
                 this.clear();
@@ -226,11 +222,6 @@ register(class HookResource {
             });
 
             ResourceLibrary.deregister(this.url);
-
-            if (this.trigger) {
-                this.trigger();
-                this.trigger = null;
-            }
         }
     }
 
@@ -248,9 +239,16 @@ register(class HookResource {
         return this;
     }
 
-    end() {
-        return new Promise((ok, fail) => {
-            this.trigger = value => ok(value);
+    keepPromise() {
+        return this.promise;
+    }
+
+    makePromise() {
+        this.promise = new Promise((ok, fail) => {
+            this.trigger = value => {
+                ok(value);
+                this.makePromise();
+            }
         });
     }
 

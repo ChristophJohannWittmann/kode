@@ -117,10 +117,12 @@ if (CLUSTER.isPrimary) {
         }
         else if ('#IpcQuery' in message) {
             if (message['#Relay']) {
+                let requestingTrap = message['#Trap'];
                 let requestingWorker = message['#Worker'];
                 message.reply = await Ipc.queryWorker(message['#Relay'], message);
                 message['#IpcReply'] = true;
                 delete message['#IpcQuery'];
+                message['#Trap'] = requestingTrap;
                 Ipc.sendWorker(requestingWorker, message);
             }
             else {

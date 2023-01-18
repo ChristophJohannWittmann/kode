@@ -36,7 +36,7 @@ register(class AcmeProvider {
     }
 
     async certify() {
-        let challengeType = 'http-01';
+        this.challengeType = 'http-01';
 
         let reply = await this.post(
             this.newOrder,
@@ -55,23 +55,37 @@ register(class AcmeProvider {
             reply = await this.post(this.authorizationUrl, 'PostAsGet');
 
             if (reply.status == 200) {
-                for (let challenge of reply.content.challenges) {
-                    if (challenge.type = challengeType) {
-                        this.challenge = challenge;
-                        break;
+                this.challenge = reply.content.challenges.filter(challenge => {
+                    return challenge.type == this.challengeType;
+                })[0];
+
+                let hash = await Crypto.hash('sha256', `{"e":"${this.jwk.e}","kty":"${this.jwk.kty}","n":"${this.jwk.n}"}`);
+                let thumbprint = Crypto.encodeBase64Url(hash);
+                let keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
+                let keyAuthorization = `${this.challenge.token}.${thumbprint}`;
+
+                let hook = mkHookResource(/*keyChallenge*/'/dog', async (...args) => {
+                    return {
+                        status: 200,
+                        mime: 'text/plain',
+                        headers: {},
+                        content: keyAuthorization,
+                    };
+                })
+                .setTlsMode('none')
+                .setTimeout(60000);
+
+                reply = await this.post(this.challenge.url, {});
+
+                if (reply.status == 200) {
+                    console.log(`\n localhost${keyChallenge}`);
+                    reply = await hook.keepPromise();
+
+                    if (reply) {
+                        if (await this.confirmChallenge(2)) {
+                            console.log('time to create the CSR');
+                        }
                     }
-                }
-                console.log(this.challenge);
-
-                if (this.challenge) {
-                    let hash = await Crypto.hash('sha256', `{"e":"${this.jwk.e}","kty":"${this.jwk.kty}","n":"${this.jwk.n}"}`);
-                    let thumbprint = Crypto.encodeBase64Url(hash);
-                    this.keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
-                    this.keyAuthorization = `${this.challenge.token}.${thumbprint}`;
-
-                    //this.hook = mkHookResource();
-
-                    reply = await this.post(this.challenge.url, {});
                 }
             }
         }
@@ -104,6 +118,31 @@ register(class AcmeProvider {
         return this.acme.account;
     }
 
+    async confirmChallenge(maxAttempts) {
+        return new Promise((ok, fail) => {
+            let attempts = 0;
+        
+            let interval = setInterval(async () => {
+                attempts++;
+                let response = await this.post(this.authorizationUrl, 'PostAsGet');
+
+                let challenge = response.content.challenges.filter(challenge => {
+                    return challenge.type == this.challenge.type
+                })[0];
+
+                console.log(challenge);
+                if (challenge.status == 'valid') {
+                    clearInterval(interval);
+                    ok(true);
+                }
+                else if (attempts > maxAttempts) {
+                    clearInterval(interval);
+                    ok(false);
+                }
+            }, 1000);
+        });
+    }
+
     async establishSession() {
         let reply = await mkHttpClient().get(this.acme.url);
 
@@ -122,38 +161,6 @@ register(class AcmeProvider {
 
     getAccount() {
         return this.acme.account;
-    }
-
-    async pollChallenge() {
-        return new Promise((ok, fail) => {
-            var attempts = 0;
-        
-            var interval = TIMERS.setInterval(() => {
-                post(session, session.authorizationUrl, 'PostAsGet').then(response => {
-                    attempts++;
-                    
-                    try {
-                        for (var i = 0; i < response.content.challenges.length; i++) {
-                            var challenge = response.content.challenges[i];
-
-                            if (challenge.type == 'http-01') {
-                                if (challenge.status == 'valid') {
-                                    TIMERS.clearInterval(interval);
-                                    ok(true);
-                                }
-                                break;
-                            }
-                        }
-                    }
-                    catch (e) {}
-                    
-                    if (attempts > 60) {
-                        TIMERS.clearInterval(interval);
-                        ok(false);
-                    }
-                });
-            }, 1000);
-        });
     }
 
     async pollOrder() {
