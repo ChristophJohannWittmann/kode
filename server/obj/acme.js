@@ -104,7 +104,7 @@ register(class AcmeProvider {
                 this.newAccount,
                 {
                     termsOfServiceAgreed: true,
-                    contact: this.config.administrators.map(email => `mailto:${email}`),
+                    contact: this.config.administrators.map(admin => `mailto:${admin.email}`),
                 });
 
             this.config.acme[this.iface.tls.acme].account = reply.content;
