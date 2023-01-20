@@ -99,6 +99,7 @@ register(class AcmeProvider {
 
             this.config.acme[this.iface.tls.acme].publicKey = keyPair.publicKey;
             this.config.acme[this.iface.tls.acme].privateKey = keyPair.privateKey;
+            this.jwk = npmPemJwk.pem2jwk(keyPair.publicKey.pem);
 
             let reply = await this.post(
                 this.newAccount,
@@ -113,8 +114,10 @@ register(class AcmeProvider {
             await this.config.save();
             this.acme = this.config.acme[this.iface.tls.acme];
         }
+        else {
+            this.jwk = npmPemJwk.pem2jwk(this.acme.publicKey.pem);
+        }
 
-        this.jwk = npmPemJwk.pem2jwk(this.acme.publicKey.pem);
         return this.acme.account;
     }
 
