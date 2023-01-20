@@ -30,7 +30,20 @@ register(class Crypto {
      * for TLS certificates.
     *****/
     static decodeBase64Url(base64url) {
-        return npmBase64Url.decode(base64url);
+        /*
+        var json = text;
+        json = json.replace(/[-]/g, '+');
+        json = json.replace(/_/g, '/');
+
+        switch (json.Length % 4)
+        {
+            case 0: break;
+            case 2: json += "=="; break;
+            case 3: json += "="; break;
+        }
+        
+        return JSON.parse(Buffer.from(json, 'base64').toString());
+        */
     }
 
     /*****
@@ -90,8 +103,27 @@ register(class Crypto {
      * but without the = + or /.  This crypto library has static methods that
      * support encoding to and decoding from base64 URL formatted text.
     *****/
-    static encodeBase64Url(value) {
-        return npmBase64Url.encode(value.toString());
+    static encodeBase64Url(value) {        
+        if (value instanceof Buffer) {
+            return value.toString('base64')
+                .split('=')[0]
+                .replaceAll('+', '-')
+                .replaceAll('/', '_');
+        }
+        else if (typeof value == 'object') {
+            return mkBuffer(toStdJson(value))
+                .toString('base64')
+                .split('=')[0]
+                .replaceAll('+', '-')
+                .replaceAll('/', '_');
+        }
+        else {
+            return mkBuffer(value)
+                .toString('base64')
+                .split('=')[0]
+                .replaceAll('+', '-')
+                .replaceAll('/', '_');
+        }
     }
 
     /*****

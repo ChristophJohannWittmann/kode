@@ -60,7 +60,6 @@ register(class AcmeProvider {
                 })[0];
 
                 let hash = await Crypto.hash('sha256', `{"e":"${this.jwk.e}","kty":"${this.jwk.kty}","n":"${this.jwk.n}"}`);
-                let thumbprint = Crypto.encodeBase64Url(hash);
                 let keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
                 let keyAuthorization = `${this.challenge.token}.${thumbprint}`;
 
@@ -78,8 +77,8 @@ register(class AcmeProvider {
                 reply = await this.post(this.challenge.url, {});
 
                 if (reply.status == 200) {
-                    console.log(`\n localhost${keyChallenge}`);
                     reply = await hook.keepPromise();
+                    console.log(reply);
 
                     if (reply) {
                         if (await this.confirmChallenge(2)) {
