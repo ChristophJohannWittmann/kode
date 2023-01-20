@@ -64,7 +64,7 @@ register(class AcmeProvider {
                 let keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
                 let keyAuthorization = `${this.challenge.token}.${thumbprint}`;
 
-                let hook = mkHookResource(/*keyChallenge*/'/dog', async (...args) => {
+                let hook = mkHookResource(keyChallenge, async (...args) => {
                     return {
                         status: 200,
                         mime: 'text/plain',

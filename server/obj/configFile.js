@@ -53,9 +53,7 @@ register(async function loadConfigFile(name) {
         }
 
         async save() {
-            await FILES.chmod(filepath, 0o666);
             await FILES.writeFile(filePath, toJson(this, true));
-            await FILES.chmod(filepath, 0o600);
         }
     }
 
