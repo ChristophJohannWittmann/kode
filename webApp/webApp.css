@@ -703,6 +703,7 @@ body {
  * Input
  ***********************************************/
 [widget-style=input] {
+    color: var(--color-1);
     font-family: inherit;
     font-size: inherit;
     padding-top: 12px;
@@ -1370,6 +1371,7 @@ body {
  * Menu
  ***********************************************/
 [widget-style=popup-menu] {
+    color: var(--color-1);
     position: absolute;
     border-style: solid;
     border-width: 1px;

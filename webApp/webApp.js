@@ -93,7 +93,7 @@ const builtinCssVariables = {
         input_color_disabled: 'lightgray',
         input_background_color: 'whitesmoke',
 
-        color_1: '#696969',
+        color_1: '#8988989',
         disabled_color_1: 'lightgray',
         background_olor_1: '#FFFFFF',
         background_button_1: '#F5F5F5',
