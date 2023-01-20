@@ -42,10 +42,10 @@ singleton(class Config {
             return `Configuration directory is not a standard directory" "${env.configPath}"`;
         }
 
-        FILES.chmod(env.configPath, 0o700);
+        await FILES.chmod(env.configPath, 0o700);
 
         for (let path of await recurseFiles(env.configPath)) {
-            FILES.chmod(path, 0o600);
+            await FILES.chmod(path, 0o600);
         }
 
         let serverConfigPath = PATH.join(env.configPath, 'kode.json');
