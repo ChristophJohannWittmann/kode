@@ -60,6 +60,7 @@ register(class AcmeProvider {
                 })[0];
 
                 let hash = await Crypto.hash('sha256', `{"e":"${this.jwk.e}","kty":"${this.jwk.kty}","n":"${this.jwk.n}"}`);
+                let thumbprint = Crypto.encodeBase64Url(hash);
                 let keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
                 let keyAuthorization = `${this.challenge.token}.${thumbprint}`;
 
@@ -81,7 +82,7 @@ register(class AcmeProvider {
                     console.log(reply);
 
                     if (reply) {
-                        if (await this.confirmChallenge(2)) {
+                        if (await this.confirmChallenge(1)) {
                             console.log('time to create the CSR');
                         }
                     }
@@ -137,7 +138,7 @@ register(class AcmeProvider {
                     clearInterval(interval);
                     ok(true);
                 }
-                else if (attempts > maxAttempts) {
+                else if (attempts >= maxAttempts) {
                     clearInterval(interval);
                     ok(false);
                 }
