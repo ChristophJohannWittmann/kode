@@ -31,11 +31,65 @@ register(class AcmeProvider {
             this.iface = this.config.network[ifaceName];
             this.acme = this.config.acme[this.iface.tls.acme];
             this.alg = 'RS256';
+            this.failure = {};
             ok(this);
         });
     }
 
+    async authorize() {
+        let reply = await this.post(this.authorizationUrl, 'PostAsGet');
+
+        if (reply.status == 200) {
+            this.challenge = reply.content.challenges.filter(challenge => {
+                return challenge.type == this.challengeType;
+            })[0];
+
+            if (this.challenge.status == 'pending') {
+                let hash = await Crypto.hash('sha256', `{"e":"${this.jwk.e}","kty":"${this.jwk.kty}","n":"${this.jwk.n}"}`);
+                let thumbprint = Crypto.encodeBase64Url(hash);
+                let keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
+                let keyAuthorization = `${this.challenge.token}.${thumbprint}`;
+
+                let hook = mkHookResource(keyChallenge, async (...args) => {
+                    return {
+                        status: 200,
+                        mime: 'text/plain',
+                        headers: {},
+                        content: keyAuthorization,
+                    };
+                }).setTlsMode('none').setTimeout(2000);
+                reply = await this.post(this.challenge.url, {});
+
+                if (reply.status == 200) {
+                    reply = await hook.keepPromise();
+
+                    if (reply) {
+                        if (await this.confirmChallenge(10)) {
+                            //hook.clear();
+                            console.log('...NEW AUTHORIZATION');
+                            return true;
+                        }
+                        else {
+                            this.failure = reply;
+                            console.log(this.failure);
+                        }
+                    }
+                }
+                else {
+                    this.failure = reply;
+                }
+            }
+            else if (this.challenge.status == 'valid') {
+                console.log('...EXISTING');
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     async certify() {
+        this.challenge = null;
         this.challengeType = 'http-01';
 
         let reply = await this.post(
@@ -49,9 +103,14 @@ register(class AcmeProvider {
         );
 
         if (reply.status == 201) {
-            this.challenge = null;
-            this.finalizeUrl = reply.content.finalizeUrl;
+            this.finalizeUrl = reply.content.finalize;
             this.authorizationUrl = reply.content.authorizations[0];
+
+            if (await this.authorize()) {
+                console.log('** GENERATE A CSR **');
+                console.log(this.challenge);
+            }
+            /*
             reply = await this.post(this.authorizationUrl, 'PostAsGet');
 
             if (reply.status == 200) {
@@ -88,6 +147,7 @@ register(class AcmeProvider {
                     }
                 }
             }
+            */
         }
 
         return false;
@@ -142,7 +202,7 @@ register(class AcmeProvider {
                     clearInterval(interval);
                     ok(false);
                 }
-            }, 1000);
+            }, 5000);
         });
     }
 

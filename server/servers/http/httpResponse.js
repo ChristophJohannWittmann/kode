@@ -117,6 +117,7 @@ register(class HttpResponse {
 
     async end(...args) {
         let content;
+        let headerMap = {};
 
         if (args.length > 2) {
             this.status = args[0];
@@ -145,8 +146,12 @@ register(class HttpResponse {
             this.setHeader('Content-Encoding', this.encoding);
         }
 
-        let headerMap = {};
         Object.values(this.httpHeaders).forEach(header => headerMap[header.name] = header.value);
+
+        if (content) {
+            headerMap['Content-Length'] = content.length;
+        }
+        
         this.httpRsp.writeHead(this.status, headerMap);
         this.httpRsp.end(content);
     }

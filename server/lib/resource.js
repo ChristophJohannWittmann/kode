@@ -145,7 +145,6 @@ register(class HookResource {
         this.url = url;
         this.timeout = null;
         this.tlsMode = 'best';
-        this.autoClear = true;
         this.milliseconds = 0;
         this.makePromise();
 
@@ -200,12 +199,7 @@ register(class HookResource {
         else {
             this.clearTimeout();
             let response = await this.responder(requestInfo);
-            this.trigger(response);
-
-            if (this.autoClear) {
-                this.clear();
-            }
-            
+            this.trigger(response);            
             return response;
         }
     }
@@ -222,12 +216,8 @@ register(class HookResource {
             });
 
             ResourceLibrary.deregister(this.url);
+            this.trigger();
         }
-    }
-
-    clearAutoClear() {
-        this.autoClear = false;
-        return this;
     }
 
     clearTimeout() {
@@ -250,11 +240,6 @@ register(class HookResource {
                 this.makePromise();
             }
         });
-    }
-
-    setAutoClear() {
-        this.autoClear = true;
-        return this;
     }
 
     setTlsMode(mode) {
