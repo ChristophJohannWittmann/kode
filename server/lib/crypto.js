@@ -23,27 +23,71 @@
 
 
 register(class Crypto {
+    /**
+     * Creates a new CSR and converts it from PEM to DER format.  DER format is
+     * what's needed by ACME / letsencrypt.  This particular implementation uses
+     * openssl and the node child-process module.  We write files and then use
+     * openssl command-line features in a shell to perform our crypto functions.
+     * The result of this function is the returned promises's resolution.
+     */
+    static async createCSR(opts) {
+        let csrTemp;
+        let derTemp;
+        let pkeyTemp;
+
+        try {
+            csrTemp = await writeTemp('');
+            derTemp = await writeTemp('');
+            pkeyTemp = await writeTemp(opts.privateKey.pem);
+
+            let subj = `/C=${opts.country}/ST=${opts.state}/L=${opts.locale}/O=${opts.org}/CN=${opts.hostname}`;
+            console.log(subj);
+            let cmmd = `openssl req -new -key ${pkeyTemp.path} -out ${csrTemp.path} -days ${opts.days} -subj ${subj}`;
+            console.log(cmmd);
+            await execShell(cmmd);
+
+            if (opts.der) {
+                cmmd = `openssl req -in ${csrTemp.path} -out ${derTemp.path} -outform DER`;
+                console.log(cmmd);
+                await execShell(cmmd2);
+                return await derTemp.read();
+            }
+            else {
+                return await csrTemp.read();
+            }
+        }
+        finally {
+            csrPem ? await csrPem.rm() : false;
+            derPem ? await derPem.rm() : false;
+            pkeyPem ? await pkeyPem.rm() : false;
+        }
+    };
+
     /*****
      * Generates an RSA public key pair with a legth of 4096 bits.  The returned
      * value is an object containing both the public and private keys in PEM
      * format.  This is exactly what's used by the framework for TSL crypto and
      * for TLS certificates.
     *****/
-    static decodeBase64Url(base64url) {
-        /*
-        var json = text;
-        json = json.replace(/[-]/g, '+');
-        json = json.replace(/_/g, '/');
+    static decodeBase64Url(base64url, type) {
+        let base64 = base64url.replaceAll('-', '+').replaceAll('_', '/');
 
-        switch (json.Length % 4)
+        switch (base64.Length % 4)
         {
             case 0: break;
-            case 2: json += "=="; break;
-            case 3: json += "="; break;
+            case 2: base64 += "=="; break;
+            case 3: base64 += "="; break;
         }
-        
-        return JSON.parse(Buffer.from(json, 'base64').toString());
-        */
+
+        if (type == 'object') {
+            return fromStdJson(mkBuffer(base64, 'base64').toString());
+        }
+        else if (type == 'base64') {
+            return base64;
+        }
+        else {
+            return mkBuffer(base64, 'base64').toString();
+        }
     }
 
     /*****

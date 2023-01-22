@@ -57,7 +57,7 @@ register(class AcmeProvider {
                         headers: {},
                         content: keyAuthorization,
                     };
-                }).setTlsMode('none').setTimeout(2000);
+                }).setTlsMode('none').setTimeout(30000);
                 reply = await this.post(this.challenge.url, {});
 
                 if (reply.status == 200) {
@@ -65,13 +65,11 @@ register(class AcmeProvider {
 
                     if (reply) {
                         if (await this.confirmChallenge(10)) {
-                            //hook.clear();
-                            console.log('...NEW AUTHORIZATION');
+                            hook.clear();
                             return true;
                         }
                         else {
                             this.failure = reply;
-                            console.log(this.failure);
                         }
                     }
                 }
@@ -80,7 +78,6 @@ register(class AcmeProvider {
                 }
             }
             else if (this.challenge.status == 'valid') {
-                console.log('...EXISTING');
                 return true;
             }
         }
@@ -107,47 +104,16 @@ register(class AcmeProvider {
             this.authorizationUrl = reply.content.authorizations[0];
 
             if (await this.authorize()) {
-                console.log('** GENERATE A CSR **');
-                console.log(this.challenge);
+                let csr = await Crypto.createCsr({
+                    der: false,
+                    country: Config.operator.country,
+                    state: Config.operator.state,
+                    locale: Config.operator.locale,
+                    org: Config.operator.org,
+                    hostname: this.iface.host,
+                });
+                console.log(csr);
             }
-            /*
-            reply = await this.post(this.authorizationUrl, 'PostAsGet');
-
-            if (reply.status == 200) {
-                this.challenge = reply.content.challenges.filter(challenge => {
-                    return challenge.type == this.challengeType;
-                })[0];
-
-                let hash = await Crypto.hash('sha256', `{"e":"${this.jwk.e}","kty":"${this.jwk.kty}","n":"${this.jwk.n}"}`);
-                let thumbprint = Crypto.encodeBase64Url(hash);
-                let keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
-                let keyAuthorization = `${this.challenge.token}.${thumbprint}`;
-
-                let hook = mkHookResource(keyChallenge, async (...args) => {
-                    return {
-                        status: 200,
-                        mime: 'text/plain',
-                        headers: {},
-                        content: keyAuthorization,
-                    };
-                })
-                .setTlsMode('none')
-                .setTimeout(60000);
-
-                reply = await this.post(this.challenge.url, {});
-
-                if (reply.status == 200) {
-                    reply = await hook.keepPromise();
-                    console.log(reply);
-
-                    if (reply) {
-                        if (await this.confirmChallenge(1)) {
-                            console.log('time to create the CSR');
-                        }
-                    }
-                }
-            }
-            */
         }
 
         return false;
