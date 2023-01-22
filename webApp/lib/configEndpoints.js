@@ -36,7 +36,7 @@ register(class ConfigEndpoints extends EndpointContainer {
         let acme = await mkAcmeProvider(trx.ifaceName);
         await acme.establishSession();
         await acme.checkAccount();
-        await acme.certify();
+        await acme.certify(90);
 
         return true;
     }

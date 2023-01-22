@@ -85,7 +85,7 @@ register(class AcmeProvider {
         return false;
     }
 
-    async certify() {
+    async certify(days) {
         this.challenge = null;
         this.challengeType = 'http-01';
 
@@ -105,14 +105,21 @@ register(class AcmeProvider {
 
             if (await this.authorize()) {
                 let csr = await Crypto.createCsr({
-                    der: false,
+                    der: true,
+                    privateKey: this.iface.tls.privateKey.pem,
                     country: Config.operator.country,
                     state: Config.operator.state,
                     locale: Config.operator.locale,
                     org: Config.operator.org,
                     hostname: this.iface.host,
+                    days: days,
                 });
-                console.log(csr);
+
+                reply = await this.post(this.finalizeUrl, {
+                    csr: Crypto.encodeBase64Url(csr),
+                });
+
+                console.log(reply);
             }
         }
 

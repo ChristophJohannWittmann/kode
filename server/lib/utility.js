@@ -255,7 +255,7 @@ register(async function writeTemp(content) {
     return {
         tempId: tempId,
         path: path,
-        read: async () => await FILES.read(path),
+        read: async () => await FILES.readFile(path),
         rm: async () => await FILES.rm(path),
     };
 });

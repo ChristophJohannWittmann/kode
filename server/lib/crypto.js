@@ -30,36 +30,31 @@ register(class Crypto {
      * openssl command-line features in a shell to perform our crypto functions.
      * The result of this function is the returned promises's resolution.
      */
-    static async createCSR(opts) {
+    static async createCsr(opts) {
         let csrTemp;
         let derTemp;
         let pkeyTemp;
 
         try {
             csrTemp = await writeTemp('');
-            derTemp = await writeTemp('');
-            pkeyTemp = await writeTemp(opts.privateKey.pem);
+            pkeyTemp = await writeTemp(opts.privateKey);
 
             let subj = `/C=${opts.country}/ST=${opts.state}/L=${opts.locale}/O=${opts.org}/CN=${opts.hostname}`;
-            console.log(subj);
-            let cmmd = `openssl req -new -key ${pkeyTemp.path} -out ${csrTemp.path} -days ${opts.days} -subj ${subj}`;
-            console.log(cmmd);
-            await execShell(cmmd);
+            await execShell(`openssl req -new -key ${pkeyTemp.path} -out ${csrTemp.path} -days ${opts.days} -subj "${subj}"`);
 
             if (opts.der) {
-                cmmd = `openssl req -in ${csrTemp.path} -out ${derTemp.path} -outform DER`;
-                console.log(cmmd);
-                await execShell(cmmd2);
+                derTemp = await writeTemp('');
+                await execShell(`openssl req -in ${csrTemp.path} -out ${derTemp.path} -outform DER`);
                 return await derTemp.read();
             }
             else {
-                return await csrTemp.read();
+                return (await csrTemp.read()).toString();
             }
         }
         finally {
-            csrPem ? await csrPem.rm() : false;
-            derPem ? await derPem.rm() : false;
-            pkeyPem ? await pkeyPem.rm() : false;
+            csrTemp ? await csrTemp.rm() : false;
+            derTemp ? await derTemp.rm() : false;
+            pkeyTemp ? await pkeyTemp.rm() : false;
         }
     };
 
