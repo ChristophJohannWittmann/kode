@@ -71,6 +71,12 @@
  * request content, and a crypto signature.  Note that the "protected" and
  * "payload" properties of the POST's JSON object are encoded using Base 64
  * URL encoding.
+ * 
+ * revoke()
+ * Provides the ability to revoke a TLS certificate.  Due to data management
+ * archtiecture, revoke() must be called for the current interface.  It's best
+ * if the calling code makes a duplicate of the interface code before revoke()
+ * is called.
 *****/
 register(class AcmeProvider {
     constructor(ifaceName) {

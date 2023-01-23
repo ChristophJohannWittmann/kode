@@ -38,6 +38,7 @@ register(class ConfigEndpoints extends EndpointContainer {
         await acme.checkAccount();
         let certificate = await acme.certify(90);
 
+        console.log('\n\n..... certificate');
         console.log(certificate);
         return true;
     }
