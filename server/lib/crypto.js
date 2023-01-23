@@ -234,12 +234,25 @@ register(class Crypto {
      * in this module.
      */
     static async packageCertificateChain(certificateChain) {
-        let certificates = certificateChain.split('\n\n');
-        let certificateTemp = writeTemp(certificates[0]);
-
         console.log(certificateChain);
-        console.log(certificates);
+        let pemChain = certificateChain.split('\n\n');
+        let pemChainTemp = writeTemp(pemChain[0]);
 
+        let result = await execShell(`openssl x509 -in ${pemChainTemp.path} -enddate -noout`);
+        console.log(result);
+        let expires = mkTime(result.stdout.split('=')[1]);
+        console.log(expires);
+
+        result = await execShell(`openssl x509 -in ${pemChainTemp.path} -subject -noout`);
+        let subject = result.stdout;
+        console.log(result);
+
+        return {
+            expires: expires,
+            subject: subject,
+            created: mkTime(),
+            certificate: pemChain,
+        };
         /*
         return new Promise((ok, fail) => {
             var pemChain = chain.split('\n\n');

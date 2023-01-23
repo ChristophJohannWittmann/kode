@@ -172,7 +172,6 @@ register(class AcmeProvider {
                     csr: Crypto.encodeBase64Url(csr),
                 });
 
-                console.log(reply);
                 if (reply.content.status == 'valid') {
                     this.certificateUrl = reply.content.certificate;
                 }
@@ -180,13 +179,11 @@ register(class AcmeProvider {
                     return false;
                 }
 
-                console.log(this.certificateUrl);
                 reply = await this.post(this.certificateUrl, 'PostAsGet', {
                     Accept: 'application/pem-certificate-chain',
                 });
 
-                console.log(reply);
-                return await Crypto.packageCertificateChain(reply.content.certChain);
+                return await Crypto.packageCertificateChain(reply.content);
             }
         }
 
