@@ -225,6 +225,48 @@ register(class Crypto {
             hasher.end();
         });
     }
+
+    /**
+     * When a certificate is ussued from letsencrypt, we need to package it up the
+     * certificate chain some other values that can be display.  The expiration date
+     * and the certificate subject are primary values amongst those.  This is where
+     * we take care of that since all of the certificate and crypto stuff belong
+     * in this module.
+     */
+    static async packageCertificateChain(certificateChain) {
+        let certificates = certificateChain.split('\n\n');
+        let certificateTemp = writeTemp(certificates[0]);
+
+        console.log(certificateChain);
+        console.log(certificates);
+
+        /*
+        return new Promise((ok, fail) => {
+            var pemChain = chain.split('\n\n');
+            var certpath = config.tmppath + '/cert.pem';
+            
+            FS.writeFile(certpath, pemChain[0], error => {
+                CHILDPROC.exec('openssl x509 -in ' + certpath + ' -enddate -noout', (error, stdout, stderr) => {
+                    var expires = new Date(stdout.substring(stdout.indexOf('=') + 1));
+                    
+                    CHILDPROC.exec('openssl x509 -in ' + certpath + ' -subject -noout', (error, stdout, stderr) => {
+                        var subject = stdout;
+                    
+                        FS.unlink(certpath, error => {
+                            ok({
+                                type: 'letsencrypt',
+                                expires: expires,
+                                subject: subject,
+                                created: new Date(),
+                                pem: pemChain,
+                            });
+                        });
+                    });
+                });
+            });
+        });
+        */
+    }
     
     /*****
      * An easy-to-use random number generator.  Use this internally or for

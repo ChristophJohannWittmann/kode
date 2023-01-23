@@ -23,6 +23,54 @@
 
 
 /*****
+ * Integrated implementation of the ACME protocol!  The network interface is from
+ * the primary kode.json configuration file.  Here's a description of the primary
+ * methods in this class.  Please keep in min that the AcmeProvider can only be
+ * used for a single requested opertion at a time.  Once that request/order has
+ * been completed or rejected, the AcmeProvider object can no longer be used.
+ * 
+ * authorize()
+ * After a session has been established, with establishSession(), before much can
+ * happen, we need to get authorization from the ACME provider that we have the
+ * authorization to control the specified DNS host.
+ * 
+ * certify()
+ * Certifiy the specified network interface and get a certificate chain to be
+ * installed into the kode.json configuration file.  Before certify() is called,
+ * establishSession() and checkAccount() must be called to ensure we proper
+ * preparation to certify: (a) submit a new order, (b) obtain authorization for
+ * the certificate, (c) create and submit the CSR, (d) finialize and return the
+ * certificate chain.
+ * 
+ * checkAccount()
+ * Ensures that we have a configured Acme provider account.  If there are no
+ * account settings in the configuration, we'll create a new account.  If there
+ * is an existing acccount, just load it.
+ * 
+ * confirmChallenge()
+ * When obtaining authorization for a new serive order, we need to perform an
+ * asynchrnous step, which is used to provide that we have control of the host
+ * specified in the service order.  Confirming the authorization challenge posed
+ * by the remote ACME server is the final step in obtaining authorization/.
+ * 
+ * confirmOrder()
+ * When a servie order for a certificate has been accepted, it may be either
+ * immediately processed or it may return with a status of "processing".  If
+ * the latter, we need to poll the ACME server until the status has changed
+ * from "processing" to "valid".
+ * 
+ * establishSession()
+ * The first step performing any actions using ACME is to establish a session
+ * with the remote server.  We'll initialize our session with a set or returned
+ * links and we'll receive our first nonce string, which is required for our
+ * first post.
+ * 
+ * post()
+ * The post method provides the engine for dynamically building JWS HTTP POST
+ * requests for the ACME server.  Each JWS post requires a protected header,
+ * request content, and a crypto signature.  Note that the "protected" and
+ * "payload" properties of the POST's JSON object are encoded using Base 64
+ * URL encoding.
 *****/
 register(class AcmeProvider {
     constructor(ifaceName) {
@@ -37,6 +85,8 @@ register(class AcmeProvider {
     }
 
     async authorize() {
+        this.challenge = null;
+        this.challengeType = 'http-01';
         let reply = await this.post(this.authorizationUrl, 'PostAsGet');
 
         if (reply.status == 200) {
@@ -86,9 +136,6 @@ register(class AcmeProvider {
     }
 
     async certify(days) {
-        this.challenge = null;
-        this.challengeType = 'http-01';
-
         let reply = await this.post(
             this.newOrder,
             {
@@ -120,6 +167,20 @@ register(class AcmeProvider {
                 });
 
                 console.log(reply);
+                if (reply.content.status == 'valid') {
+                    this.certificateUrl = reply.content.certificate;
+                }
+                else if (!this.confirmOrder(10)) {
+                    return false;
+                }
+
+                console.log(this.certificateUrl);
+                reply = await this.post(this.certificateUrl, 'PostAsGet', {
+                    Accept: 'application/pem-certificate-chain',
+                });
+
+                console.log(reply);
+                return await Crypto.packageCertificateChain(reply.content.certChain);
             }
         }
 
@@ -158,7 +219,7 @@ register(class AcmeProvider {
         return new Promise((ok, fail) => {
             let attempts = 0;
         
-            let interval = setInterval(async () => {
+            const poll = async () => {
                 attempts++;
                 let response = await this.post(this.authorizationUrl, 'PostAsGet');
 
@@ -166,16 +227,54 @@ register(class AcmeProvider {
                     return challenge.type == this.challenge.type
                 })[0];
 
-                console.log(challenge);
                 if (challenge.status == 'valid') {
-                    clearInterval(interval);
                     ok(true);
                 }
+                else if (challenge.status == 'invalid') {
+                    ok(false);                    
+                }
                 else if (attempts >= maxAttempts) {
-                    clearInterval(interval);
                     ok(false);
                 }
-            }, 5000);
+                else {
+                    setTimeout(poll, 2000);
+                }
+            };
+
+            poll();
+        });
+    }
+
+    async confirmOrder(maxAttempts) {
+        return new Promise((ok, fail) => {
+            let attempts = 0;
+
+            const poll = async () => {
+                attempts++;
+                let response = await this.post(this.finalizeUrl, 'PostAsGet');
+
+                if (response.content.status == 'valid') {
+                    this.certificateUrl = response.content.certificate;
+                    ok(true);
+                }
+                else if (response.content.status in { pending:0, invalid:0 }) {
+                    ok(false);                    
+                }
+                else if (response.content.status == 'processing') {
+                    if ('retry-after' in response.headers) {
+                        var millis = parseInt(response.headers['retry-after']) * 1000;
+                        setTimeout(poll, millis);
+                    }
+                    else {
+                        setTimeout(poll, 5000);
+                    }                    
+                }
+                else if (attempts >= maxAttempts) {
+                    ok(false);
+                }
+            };
+
+            poll();
         });
     }
 
@@ -197,9 +296,6 @@ register(class AcmeProvider {
 
     getAccount() {
         return this.acme.account;
-    }
-
-    async pollOrder() {
     }
 
     async post(url, payload, headers) {
