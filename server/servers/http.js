@@ -70,11 +70,11 @@ if (CLUSTER.isWorker) {
 
             if (this.config.https && crypto) {
                 this.https = HTTPS.createServer({
-                    key: crypto.key,
+                    key: crypto.privateKey.pem,
                     cert: crypto.cert.certificate[0],
                     ca: crypto.cert.certificate[1],
                 }, (httpReq, httpRsp) => this.handle(httpReq, httpRsp, true));
-                this.https.listen(this.config.http, this.addr());
+                this.https.listen(this.config.https, this.addr());
                 this.https.on('upgrade', (...args) => this.upgrade(...args));
             }
         }
@@ -127,7 +127,7 @@ if (CLUSTER.isWorker) {
             if (tls) {
                 if (resource.tlsMode == 'none') {
                     if (this.http) {
-                        rsp.setHeader('Location', `${this.req.fullRequest().replace('https', 'http')}`);
+                        rsp.setHeader('Location', `${req.fullRequest().replace('https', 'http')}`);
                         rsp.endStatus(301);
                         return;
                     }
@@ -140,7 +140,7 @@ if (CLUSTER.isWorker) {
             else {
                 if (resource.tlsMode == 'must') {
                     if (this.https) {
-                        rsp.setHeader('Location', `${this.req.fullRequest().replace('http', 'https')}`);
+                        rsp.setHeader('Location', `${req.fullRequest().replace('http', 'https')}`);
                         rsp.endStatus(301);
                         return;
                     }
@@ -151,7 +151,7 @@ if (CLUSTER.isWorker) {
                 }
                 else if (resource.tlsMode == 'best') {
                     if (this.https) {
-                        rsp.setHeader('Location', `${this.req.fullRequest().replace('http', 'https')}`);
+                        rsp.setHeader('Location', `${req.fullRequest().replace('http', 'https')}`);
                         rsp.endStatus(301);
                         return;
                     }

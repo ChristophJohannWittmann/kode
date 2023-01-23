@@ -59,13 +59,13 @@ register(class ServerBase extends Emitter {
     }
   
     crypto() {
-        const tls = this.config.network.tls;
+        const tls = this.network.tls;
 
         if (tls) {
             if (tls.publicKey) {
                 if (tls.privateKey) {
                     if (tls.cert) {
-                        return true;
+                        return tls;
                     }
                 }
             }
