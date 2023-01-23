@@ -31,15 +31,16 @@ register(class ConfigEndpoints extends EndpointContainer {
 
 
     /*****
+     * Get a certificate via ACME prototcol from the specified ACME provider.
     *****/
     async [ mkEndpoint('ConfigCertifyIface', 'system') ](trx) {
         let acme = await mkAcmeProvider(trx.ifaceName);
         await acme.establishSession();
         await acme.checkAccount();
         let certificate = await acme.certify(90);
-
-        console.log('\n\n..... certificate');
-        console.log(certificate);
+        let config = await loadConfigFile();
+        config.network[trx.ifaceName].tls.cert = certificate;
+        await config.save();
         return true;
     }
 
@@ -50,12 +51,9 @@ register(class ConfigEndpoints extends EndpointContainer {
     async [ mkEndpoint('ConfigClearCrypto', 'system') ](trx) {
         let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
-
         iface.tls.publicKey = null;
         iface.tls.privateKey = null;
         iface.tls.cert = null;
-        iface.tls.caCert = null;
-
         await config.save();
         return true;
     }
@@ -66,7 +64,7 @@ register(class ConfigEndpoints extends EndpointContainer {
     async [ mkEndpoint('ConfigCopyPublicKey', 'system') ](trx) {
         let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
-        return iface.tls.publicKey;        
+        return iface.tls.publicKey;
     }
 
 

@@ -236,16 +236,14 @@ register(class Crypto {
     static async packageCertificateChain(certificateChain) {
         console.log(certificateChain);
         let pemChain = certificateChain.split('\n\n');
-        let pemChainTemp = writeTemp(pemChain[0]);
+        let pemChainTemp = await writeTemp(pemChain[0]);
 
         let result = await execShell(`openssl x509 -in ${pemChainTemp.path} -enddate -noout`);
-        console.log(result);
         let expires = mkTime(result.stdout.split('=')[1]);
-        console.log(expires);
-
         result = await execShell(`openssl x509 -in ${pemChainTemp.path} -subject -noout`);
         let subject = result.stdout;
-        console.log(result);
+        
+        await pemChainTemp.rm();
 
         return {
             expires: expires,
@@ -253,32 +251,6 @@ register(class Crypto {
             created: mkTime(),
             certificate: pemChain,
         };
-        /*
-        return new Promise((ok, fail) => {
-            var pemChain = chain.split('\n\n');
-            var certpath = config.tmppath + '/cert.pem';
-            
-            FS.writeFile(certpath, pemChain[0], error => {
-                CHILDPROC.exec('openssl x509 -in ' + certpath + ' -enddate -noout', (error, stdout, stderr) => {
-                    var expires = new Date(stdout.substring(stdout.indexOf('=') + 1));
-                    
-                    CHILDPROC.exec('openssl x509 -in ' + certpath + ' -subject -noout', (error, stdout, stderr) => {
-                        var subject = stdout;
-                    
-                        FS.unlink(certpath, error => {
-                            ok({
-                                type: 'letsencrypt',
-                                expires: expires,
-                                subject: subject,
-                                created: new Date(),
-                                pem: pemChain,
-                            });
-                        });
-                    });
-                });
-            });
-        });
-        */
     }
     
     /*****
