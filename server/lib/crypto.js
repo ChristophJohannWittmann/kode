@@ -24,6 +24,32 @@
 
 register(class Crypto {
     /**
+     * When a certificate is ussued from letsencrypt, we need to package it up the
+     * certificate chain some other values that can be display.  The expiration date
+     * and the certificate subject are primary values amongst those.  This is where
+     * we take care of that since all of the certificate and crypto stuff belong
+     * in this module.
+     */
+    static async analyzeCertificateChain(certificateChain) {
+        let pemChain = certificateChain.split('\n\n');
+        let pemChainTemp = await writeTemp(pemChain[0]);
+
+        let result = await execShell(`openssl x509 -in ${pemChainTemp.path} -enddate -noout`);
+        let expires = mkTime(result.stdout.split('=')[1]);
+        result = await execShell(`openssl x509 -in ${pemChainTemp.path} -subject -noout`);
+        let subject = result.stdout;
+
+        await pemChainTemp.rm();
+
+        return {
+            expires: expires,
+            subject: subject,
+            created: mkTime(),
+            certificate: pemChain,
+        };
+    }
+
+    /**
      * Creates a new CSR and converts it from PEM to DER format.  DER format is
      * what's needed by ACME / letsencrypt.  This particular implementation uses
      * openssl and the node child-process module.  We write files and then use
@@ -224,33 +250,6 @@ register(class Crypto {
             hasher.write(value);
             hasher.end();
         });
-    }
-
-    /**
-     * When a certificate is ussued from letsencrypt, we need to package it up the
-     * certificate chain some other values that can be display.  The expiration date
-     * and the certificate subject are primary values amongst those.  This is where
-     * we take care of that since all of the certificate and crypto stuff belong
-     * in this module.
-     */
-    static async packageCertificateChain(certificateChain) {
-        console.log(certificateChain);
-        let pemChain = certificateChain.split('\n\n');
-        let pemChainTemp = await writeTemp(pemChain[0]);
-
-        let result = await execShell(`openssl x509 -in ${pemChainTemp.path} -enddate -noout`);
-        let expires = mkTime(result.stdout.split('=')[1]);
-        result = await execShell(`openssl x509 -in ${pemChainTemp.path} -subject -noout`);
-        let subject = result.stdout;
-        
-        await pemChainTemp.rm();
-
-        return {
-            expires: expires,
-            subject: subject,
-            created: mkTime(),
-            certificate: pemChain,
-        };
     }
     
     /*****

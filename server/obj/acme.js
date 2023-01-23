@@ -183,7 +183,7 @@ register(class AcmeProvider {
                     Accept: 'application/pem-certificate-chain',
                 });
 
-                return await Crypto.packageCertificateChain(reply.content);
+                return await Crypto.analyzeCertificateChain(reply.content);
             }
         }
 
