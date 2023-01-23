@@ -71,8 +71,8 @@ if (CLUSTER.isWorker) {
             if (this.config.https && crypto) {
                 this.https = HTTPS.createServer({
                     key: crypto.key,
-                    cert: crypto.cert,
-                    ca: crypto.CA,
+                    cert: crypto.cert.certificate[0],
+                    ca: crypto.cert.certificate[1],
                 }, (httpReq, httpRsp) => this.handle(httpReq, httpRsp, true));
                 this.https.listen(this.config.http, this.addr());
                 this.https.on('upgrade', (...args) => this.upgrade(...args));

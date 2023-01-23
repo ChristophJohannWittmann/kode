@@ -65,9 +65,7 @@ register(class ServerBase extends Emitter {
             if (tls.publicKey) {
                 if (tls.privateKey) {
                     if (tls.cert) {
-                        if (tls.ca) {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
