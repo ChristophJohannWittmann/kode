@@ -62,7 +62,7 @@ if (CLUSTER.isWorker) {
 
             if (this.config.http) {
                 this.http = HTTP.createServer((httpReq, httpRsp) => this.handle(httpReq, httpRsp, false));
-                this.http.listen(this.config.http, this.addr());
+                this.http.listen(this.config.http, this.getAddress());
                 this.http.on('upgrade', (...args) => this.upgrade(...args));
             }
 
@@ -74,7 +74,7 @@ if (CLUSTER.isWorker) {
                     cert: crypto.cert.certificate[0],
                     ca: crypto.cert.certificate[1],
                 }, (httpReq, httpRsp) => this.handle(httpReq, httpRsp, true));
-                this.https.listen(this.config.https, this.addr());
+                this.https.listen(this.config.https, this.getAddress());
                 this.https.on('upgrade', (...args) => this.upgrade(...args));
             }
         }

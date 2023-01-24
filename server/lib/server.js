@@ -37,26 +37,6 @@ register(class ServerBase extends Emitter {
         this.serverName = serverName;
         this.network = Config.network[this.config.network];
     }
-
-    active() {
-        return this.config.active ? true : false;
-    }
-
-    addr() {
-        return this.network.address ? this.network.address : '0.0.0.0';
-    }
-
-    caAccount() {
-        return this.network.caAccount ? this.network.caAccount : '';
-    }
-
-    caName() {
-        return this.network.caName ? this.network.caName : '';
-    }
-
-    caUrl() {
-        return this.network.caUrl ? this.network.caUrl : '';
-    }
   
     crypto() {
         const tls = this.network.tls;
@@ -74,27 +54,27 @@ register(class ServerBase extends Emitter {
         return false;
     }
 
-    domain() {
+    getAddress() {
+        return this.network.address ? this.network.address : '0.0.0.0';
+    }
+
+    getDomain() {
         return this.network.domain ? this.network.domain : '';
     }
 
-    host() {
+    getHost() {
         return this.network.host ? this.network.host : '';
     }
 
-    name() {
+    getName() {
         return this.config.name ? this.config.name : '';
     }
 
-    networkName() {
+    getNetworkName() {
         return this.config.network ? this.config.network : '';
     }
 
-    port() {
-        return this.config.port;
-    }
-
-    type() {
+    getType() {
         return this.config.type ? this.config.type : '';
     }
 });

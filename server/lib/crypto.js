@@ -38,7 +38,7 @@ register(class Crypto {
         let expires = mkTime(result.stdout.split('=')[1]);
         result = await execShell(`openssl x509 -in ${pemChainTemp.path} -subject -noout`);
         let subject = result.stdout;
-
+        
         await pemChainTemp.rm();
 
         return {
