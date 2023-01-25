@@ -152,6 +152,7 @@ register(class WebApp extends Webx {
     constructor(module, reference) {
         super(module, reference);
         this.webSockets = {};
+        Ipc.on('#Notification', message => this.onNotification(message));
     }
 
     async buildCSS(path, variables) {
@@ -373,6 +374,12 @@ register(class WebApp extends Webx {
                 }
             }
             else {
+                Ipc.sendPrimary({
+                    messageName: '#SessionManagerNotify',
+                    endpoint: trx.endpoint,
+                    context: trx.context,
+                });
+
                 if ('#Trap' in message) {
                     return {
                         messageName: message.messageName,
@@ -428,7 +435,13 @@ register(class WebApp extends Webx {
                 let message = fromJson(webSocketMessage.payload.toString());
 
                 if (message.messageName == '#SocketSession') {
-                    this.webSockets['#Session'] = webSocket;
+                    let sessionKey = message['#Session'];
+                    this.webSockets[sessionKey] = webSocket;
+
+                    Ipc.sendPrimary({
+                        messageName: '#SessionManagerSetSocket',
+                        session: sessionKey,
+                    });
                 }
                 else if (message.messageName == '#Ping') {
                     webSocket.sendMessage({ messageName: '#Pong' });
@@ -543,6 +556,14 @@ register(class WebApp extends Webx {
         }
 
         this.multilingualText.finalize();
+    }
+
+    onNotification(message) {
+        let webSocket = this.webSockets[message.session];
+
+        if (webSocket) {
+            webSocket.sendMessage(message);
+        }
     }
 
     async onWebSocket(req, webSocket) {

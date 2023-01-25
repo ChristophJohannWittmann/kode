@@ -48,6 +48,14 @@ singleton(class SessionManager extends Daemon {
         Message.reply(message, { granted: false, user: { oid: 0n } });
     }
 
+    onClearSocket(message) {
+        let session = this.sessions[message.session];
+
+        if (session) {
+            session.clearSocket();
+        }
+    }
+
     async onCloseAllSession(message) {
         // ********************************************************
         // -- TODO --
@@ -73,7 +81,7 @@ singleton(class SessionManager extends Daemon {
     }
 
     async onCreateSession(message) {
-        let session = await mkSession(message.user, message.idleMinutes);
+        let session = await mkSession(message.user, message['#Worker'], message.idleMinutes);
         this.byKey[session.key] = session;
 
         if (session.user.oid in this.byUser) {
@@ -105,10 +113,34 @@ singleton(class SessionManager extends Daemon {
         Message.reply(message, false);
     }
 
-    async onNotifySessions(message) {
-        // ********************************************************
-        // -- TODO --
-        // ********************************************************
+    async onNotify(message) {
+        const notification = {
+            messageName: '#Notification',
+            endpoint: message.endpoint.name,
+            flags: message.endpoint.flags,
+            permission: message.endpoint.permission ? message.endpoint.permission : '',
+        };
+
+        for (let session of Object.values(this.byKey)) {
+            if (session.filterNotification(notification)) {
+                notification.session = session.key;
+
+                if (session.hasSocket()) {
+                    Ipc.sendWorker(session.workerId, notification);
+                }
+                else {
+                    session.queue(notification);
+                }
+            }
+        }
+    }
+
+    onSetSocket(message) {
+        let session = this.byKey[message.session];
+
+        if (session) {
+            session.setSocket();
+        }
     }
 
     async onSweep(message) {

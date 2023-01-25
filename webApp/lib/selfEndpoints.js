@@ -34,82 +34,43 @@ register(class SelfEndpoints extends EndpointContainer {
     constructor(webApp) {
         super(webApp);
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfAddAddress') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfAddEmail') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfAddPhone') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfModify') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfModifyAddress') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfModifyEmail') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfModifyPhone') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfRemoveAddress') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfRemoveEmail') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfRemovePhone') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfResetPassword', undefined, { password: true }) ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfSetPassword', undefined, { password: true }) ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfSignOut', undefined, { password: true, verify: true }) ](trx) {
         await Ipc.queryPrimary({
             messageName: '#SessionManagerCloseSession',
@@ -118,10 +79,7 @@ register(class SelfEndpoints extends EndpointContainer {
 
         return true;
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SelfVerifyEmail', undefined, { verify: true }) ](trx) {
     }
 });

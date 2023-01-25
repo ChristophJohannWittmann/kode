@@ -47,6 +47,10 @@ register(class WObjectEditor extends WTable {
             if (!property.startsWith('#')) {
                 let value = dbo[property];
 
+                this[`set${property[0].toUpperCase()}${property.substr(1)}`] = function(value) {
+                    this.modifiable[property] = value;
+                };
+
                 if (typeof value != 'object' || value instanceof Time || value instanceof Date) {
                     let readonly = this.readonly;
 
@@ -97,6 +101,10 @@ register(class WObjectEditor extends WTable {
         for (let property in obj) {
             if (!property.startsWith('#')) {
                 let value = obj[property];
+
+                this[`set${property[0].toUpperCase()}${property.substr(1)}`] = function(value) {
+                    this.modifiable[property] = value;
+                };
 
                 if (typeof value != 'object' || value instanceof Time || value instanceof Date) {
                     let readonly = this.readonly;

@@ -53,6 +53,7 @@ register(class WebAppTransaction extends Message {
             trx[key] = message[key];
         }
         
+        trx.endpoint = EndpointContainer.endpoints[message.messageName];
         return true;
     }
 

@@ -50,11 +50,13 @@ register(class EndpointContainer {
     static internalError = Symbol('internalError');
     static ignored = Symbol('ignored');
     static nonOrgPermissions = mkStringSet('system');
+    static endpoints = {};
 
     constructor(webapp) {
         for (let propertyName of Object.getOwnPropertyNames(Reflect.getPrototypeOf(this))) {
             if (propertyName.startsWith('#ENDPOINT#')) {
                 let endpoint = fromJson(propertyName.substr(10));
+                EndpointContainer.endpoints[endpoint.name] = endpoint;
 
                 webapp.on(endpoint.name, async trx => {
                     let session = trx['#Session'] ? trx['#Session'] : '';

@@ -34,16 +34,10 @@ register(class PublicEndpoints extends EndpointContainer {
     constructor(webApp) {
         super(webApp);
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('PublicResetPassword', undefined, { unprotected: true }) ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('PublicSignIn', undefined, { unprotected: true }) ](trx) {
         let dbc = await trx.connect();
         let user = await Users.authenticate(dbc, trx.username, trx.password);

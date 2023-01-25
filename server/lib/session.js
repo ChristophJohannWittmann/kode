@@ -30,10 +30,12 @@
  * that's a host that's not on a client application.
 *****/
 register(class Session {
-    constructor(user, idleMinutes) {
+    constructor(user, workerId, idleMinutes) {
         return new Promise(async (ok, fail) => {
             this.timeout = null;
+            this.socket = false;
             this.user = mkUserObject(user);
+            this.workerId = workerId;
             this.idleMinutes = idleMinutes;
             this.pendingMessages = [];
             let dbc = await dbConnect();
@@ -76,6 +78,11 @@ register(class Session {
         return { granted: true, user: this.user };
     }
 
+    clearSocket() {
+        this.socket = false;
+        return this;
+    }
+
     async close() {
         if (this.timeout) {
             clearInterval(this.timeout);
@@ -84,12 +91,28 @@ register(class Session {
         SessionManager.removeSession(this);
     }
 
+    filterNotification(message) {
+        // ********************************************************
+        // -- TODO --
+        // ********************************************************
+        return true;
+    }
+
+    hasSocket() {
+        return this.socket;
+    }
+
     queue(message) {
         this.pendingMessages.push(message);
     }
 
     setSecurityContext(contextName, value) {
         this.contexts[contextName] = value;
+        return this;
+    }
+
+    setSocket() {
+        this.socket = true;
         return this;
     }
 

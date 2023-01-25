@@ -34,16 +34,24 @@ register(class FWNetIfaceView extends WPanel {
     constructor(ifaceName) {
         super('form');
         this.ifaceName = ifaceName;
-        this.append(mkWidget('h3').set(`${txx.fwNetInterface} "${ifaceName}"`));
-        this.editor = mkWObjectEditor();
+
+        this.setRefreshers(
+            'ConfigCertifyIface',
+            'ConfigClearCrypto',
+            'ConfigCreateKeyPair',
+            'ConfigUpdateNetIface',
+        );
 
         (async () => {
+            this.append(mkWidget('h3').set(`${txx.fwNetInterface} "${this.ifaceName}"`));
+            this.editor = mkWObjectEditor();
+
             this.iface = await queryServer({
                 messageName: 'ConfigGetNetIface',
-                ifaceName: ifaceName
+                ifaceName: this.ifaceName
             });
 
-            let acme = (await queryServer({
+            this.acme = (await queryServer({
                 messageName: 'ConfigListAcmeProviders',
             })).map(ca => ({ value: ca.provider, text: ca.name }));
 
@@ -93,7 +101,7 @@ register(class FWNetIfaceView extends WPanel {
                     label: txx.fwNetAcme,
                     readonly: false,
                     type: ScalarEnum,
-                    choices: acme,
+                    choices: this.acme,
                 },
                 privateKey: {
                     label: txx.fwNetPrivateKey,
@@ -113,8 +121,8 @@ register(class FWNetIfaceView extends WPanel {
                     type: ScalarText,
                     menu: certMenu,
                 },
-                caCert: {
-                    label: txx.fwNetCaCert,
+                certExpires: {
+                    label: txx.fwNetCertExpires,
                     readonly: true,
                     type: ScalarText,
                     menu: certMenu,
@@ -149,13 +157,29 @@ register(class FWNetIfaceView extends WPanel {
         });
     }
 
+    async refresh() {
+        let iface = await queryServer({
+            messageName: 'ConfigGetNetIface',
+            ifaceName: this.ifaceName
+        });
+
+        this.editor.setAddress(iface.address);
+        this.editor.setDomain(iface.domain);
+        this.editor.setHost(iface.host);
+        this.editor.setAcme(iface.tls.acme);
+        this.editor.setPrivateKey(iface.tls.privateKey);
+        this.editor.setPublicKey(iface.tls.publicKey);
+        this.editor.setCert(iface.tls.cert);
+        this.editor.setCertExpires(iface.tls.certExpires);
+    }
+
     async revert() {
         await this.editor.revert();
     }
 
     async save() {
         let message = {
-            messageName: 'UpdateNetIface',
+            messageName: 'ConfigUpdateNetIface',
             ifaceName: this.ifaceName,
         };
 

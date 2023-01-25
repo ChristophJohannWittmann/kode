@@ -28,76 +28,40 @@ register(class SystemEndpoints extends EndpointContainer {
     constructor(webapp) {
         super(webapp);
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('DiscardTlsCertificate', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('GetAcmeCertificate', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('GetServerConfig', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('GetSystemInformation', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('GetTlsSettings', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ResolveDnsName', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('RestartServer', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SetServerConfig', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SetTlsSettings', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('StartNetwowrkInterface', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('StoptNetwowrkInterface', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ShutdownServer', 'system') ](trx) {
     }
 });

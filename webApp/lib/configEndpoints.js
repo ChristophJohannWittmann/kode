@@ -28,11 +28,7 @@ register(class ConfigEndpoints extends EndpointContainer {
     constructor(webapp) {
         super(webapp);
     }
-
-
-    /*****
-     * Get a certificate via ACME prototcol from the specified ACME provider.
-    *****/
+    
     async [ mkEndpoint('ConfigCertifyIface', 'system') ](trx) {
         let acme = await mkAcmeProvider(trx.ifaceName);
         await acme.establishSession();
@@ -43,11 +39,7 @@ register(class ConfigEndpoints extends EndpointContainer {
         await config.save();
         return true;
     }
-
-
-    /*****
-     * Clear the current TLS/Crypto Data from the configuration.
-    *****/
+    
     async [ mkEndpoint('ConfigClearCrypto', 'system') ](trx) {
         let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
@@ -57,32 +49,19 @@ register(class ConfigEndpoints extends EndpointContainer {
         await config.save();
         return true;
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ConfigCopyPublicKey', 'system') ](trx) {
         let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
         return iface.tls.publicKey;
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ConfigCreateAcmeProvider', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ConfigCreateCertificate', 'system') ](trx) {
     }
-
-
-    /*****
-     * Create a new TLS/Crypto key pair.
-    *****/
+    
     async [ mkEndpoint('ConfigCreateKeyPair', 'system') ](trx) {
         let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
@@ -96,40 +75,22 @@ register(class ConfigEndpoints extends EndpointContainer {
         await config.save();
         return true;
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ConfigCreateNetIface', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ConfigDeleteAcmeProvider', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ConfigDeleteCertificate', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ConfigDeleteKeyPair', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ConfigDeleteNetIface', 'system') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ConfigGetNetIface', 'system') ](trx) {
         let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
@@ -151,16 +112,11 @@ register(class ConfigEndpoints extends EndpointContainer {
 
             if (!iface.tls.cert) {
                 iface.tls.cert = '[NONE]';
+                iface.tls.certExpires = '[NONE]';
             }
             else {
-                iface.tls.cert = 'expires on';
-            }
-
-            if (!iface.tls.caCert) {
-                iface.tls.caCert = '[NONE]';
-            }
-            else {
-                iface.tls.caCert = 'expires on';
+                iface.tls.cert = '[Certificate]';
+                iface.tls.certExpires = iface.tls.cert.expires.toISOString();
             }
         }
         else {
@@ -168,17 +124,13 @@ register(class ConfigEndpoints extends EndpointContainer {
                 privateKey: '[NONE]',
                 publicKey: '[NONE]',
                 cert: '[NONE]',
-                caCert: '[NONE]',
+                certExpires: '[NONE]',
             };
         }
 
         return iface;
     }
-
-
-    /*****
-     * List configured ACME providers.
-    *****/
+    
     async [ mkEndpoint('ConfigListAcmeProviders', 'system') ](trx) {
         let config = await loadConfigFile();
         
@@ -189,21 +141,13 @@ register(class ConfigEndpoints extends EndpointContainer {
             account: entry[1].account,
         }));
     }
-
-
-    /*****
-     * List Network Interfaces.
-    *****/
+    
     async [ mkEndpoint('ConfigListNetIfaces', 'system') ](trx) {
         let config = await loadConfigFile();
         return Object.keys(config.network);
     }
-
-
-    /*****
-     * Update non-crypto network information.
-    *****/
-    async [ mkEndpoint('UpdateNetIface', 'system') ](trx) {
+    
+    async [ mkEndpoint('ConfigUpdateNetIface', 'system') ](trx) {
         let config = await loadConfigFile();
 
         if (trx.ifaceName in config.network) {

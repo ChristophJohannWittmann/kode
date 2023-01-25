@@ -28,10 +28,7 @@ register(class TicketEndpoints extends EndpointContainer {
     constructor(webapp) {
         super(webapp);
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('AnEndpoint', 'ticket') ](req) {
     }
 });

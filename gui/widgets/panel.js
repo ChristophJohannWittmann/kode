@@ -48,6 +48,9 @@ register(class WPanel extends Widget {
         this.on('Widget.Changed', async message => await this.onChanged(message));
         this.on('Widget.Modified', async message => await this.onModified(message));
         this.on('Widget.Validity', async message => await this.onValidity(message));
+
+        this.refreshers = mkStringSet();
+        global.on('#Notification', message => this.onNotification(message));
     }
 
     append(...args) {
@@ -66,6 +69,11 @@ register(class WPanel extends Widget {
         }
 
         super.clear();
+        return this;
+    }
+
+    clearRefreshers(...endpointNames) {
+        this.refreshers.clear(...endpointNames);
         return this;
     }
 
@@ -104,6 +112,12 @@ register(class WPanel extends Widget {
         message.modified ? this.modified++ : this.modified--;
     }
 
+    onNotification(message) {
+        if (this.refreshers.has(message.endpoint)) {
+            this.refresh();
+        }
+    }
+
     async onValidity(message) {
         message.valid ? this.invalid-- : this.invalid++;
     }
@@ -118,6 +132,9 @@ register(class WPanel extends Widget {
         return this;
     }
 
+    async refresh() {
+    }
+
     async revert() {
         this.invalid = 0;
         this.modified = 0;
@@ -130,6 +147,11 @@ register(class WPanel extends Widget {
     }
 
     async save() {
+    }
+
+    setRefreshers(...endpointNames) {
+        this.refreshers.set(...endpointNames);
+        return this;
     }
 
     wire(widget) {

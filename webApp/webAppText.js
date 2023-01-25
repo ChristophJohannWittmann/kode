@@ -94,11 +94,11 @@ register(class WebAppText extends MultilingualText {
             fwNetAddress: {
                 en: `IP Address`,
             },
-            fwNetCaCert: {
-                en: `Certificate Authority`,
-            },
             fwNetCert: {
                 en: `Certificate`,
+            },
+            fwNetCertExpires: {
+                en: `Expiration`,
             },
             fwNetCertify: {
                 en: `Request/Renew TLS Certificate`,

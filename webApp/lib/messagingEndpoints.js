@@ -28,46 +28,25 @@ register(class SmtpEndpoints extends EndpointContainer {
     constructor(webapp) {
         super(webapp);
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('GetSmtpAddressStats', 'messaging') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('GetSmtpDomainStats', 'messaging') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('GetSmtpSettings', 'messaging') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('SetSmtpSettings', 'messaging') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ViewSmtpIncomingActivity', 'messaging') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ViewSmtpOutgoingActivity', 'messaging') ](trx) {
     }
-
-
-    /*****
-    *****/
+    
     async [ mkEndpoint('ViewSmtpStats', 'messaging') ](trx) {
     }
 });
