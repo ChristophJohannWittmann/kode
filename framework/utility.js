@@ -275,6 +275,52 @@ register(function fillWithChar(count, char) {
 
 
 /*****
+ * This utility function flattens a complex object into a single object containing
+ * all of the properties of the original object.  There can be cases where sub-
+ * object property names may clash with other sub-object property names.  That's
+ * where the "override" parameter comes in play.  If override is true, sub-object
+ * values will overwrite previously written property values on the flat object.
+*****/
+register(function flattenObject(object, override) {
+    const flat = {};
+    const stack = [object];
+
+    const useAsValue = value => {
+        if (typeof value == 'object') {
+            for (let ctor of [ Date ]) {
+                if (value instanceof ctor) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
+    };
+
+    while (stack.length) {
+        let obj = stack.pop();
+
+        for (let property in obj) {
+            let value = obj[property];
+
+            if (useAsValue(value)) {
+                if (override || !(property in flat)) {
+                    flat[property] = obj[property];
+                }
+            }
+            else {
+                stack.push(value);
+            }
+        }   
+    }
+
+    return flat;
+});
+
+
+/*****
  * In general, it's useful to be able to convert characters between camelCase,
  * PascalCase, and snake_case.  In our world, PascalCase is just a special case
  * of camelCase.  This function takes a programming word and splits it apart

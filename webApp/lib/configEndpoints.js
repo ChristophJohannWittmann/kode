@@ -53,7 +53,7 @@ register(class ConfigEndpoints extends EndpointContainer {
     async [ mkEndpoint('ConfigCopyPublicKey', 'system') ](trx) {
         let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
-        return iface.tls.publicKey;
+        return iface.tls.publicKey.pem;
     }
     
     async [ mkEndpoint('ConfigCreateAcmeProvider', 'system') ](trx) {
@@ -92,43 +92,30 @@ register(class ConfigEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('ConfigGetNetIface', 'system') ](trx) {
-        let config = await loadConfigFile();
+        let config = await loadConfigFile();        
         let iface = config.network[trx.ifaceName];
 
+        let data = {
+            address: iface.address,
+            domain: iface.domain,
+            host: iface.host,
+            acme: iface.acme,
+        };
+
         if ('tls' in iface) {
-            if (!iface.tls.privateKey) {
-                iface.tls.privateKey = '[NONE]';
-            }
-            else {
-                iface.tls.privateKey = '[Private Key]';
-            }
-
-            if (!iface.tls.publicKey) {
-                iface.tls.publicKey = '[NONE]';
-            }
-            else {
-                iface.tls.publicKey = '[Public Key]';
-            }
-
-            if (!iface.tls.cert) {
-                iface.tls.cert = '[NONE]';
-                iface.tls.certExpires = '[NONE]';
-            }
-            else {
-                iface.tls.cert = '[Certificate]';
-                iface.tls.certExpires = iface.tls.cert.expires.toISOString();
-            }
+            data.privateKey = iface.tls.privateKey ? '[Private Key]' : '[NONE]';
+            data.publicKey = iface.tls.publicKey ? '[Public Key]' : '[NONE]';
+            data.cert = iface.tls.cert ? '[Certificate]' : '[NONE]';
+            data.certExpires = iface.tls.certExpires ? iface.tls.cert.expires.toISOString() : '[NA]';
         }
         else {
-            iface.tls = {
-                privateKey: '[NONE]',
-                publicKey: '[NONE]',
-                cert: '[NONE]',
-                certExpires: '[NONE]',
-            };
+            data.privateKey = '[NONE]';
+            data.publicKey = '[NONE]';
+            data.cert = '[NONE]';
+            data.certExpires = '[NONE]';
         }
 
-        return iface;
+        return data;
     }
     
     async [ mkEndpoint('ConfigListAcmeProviders', 'system') ](trx) {
@@ -151,18 +138,12 @@ register(class ConfigEndpoints extends EndpointContainer {
         let config = await loadConfigFile();
 
         if (trx.ifaceName in config.network) {
-            for (let property in config.network[trx.ifaceName]) {
-                if (property in trx) {
-                    config.network[trx.ifaceName][property] = trx[property];
-                }
-            }
-
-            if (trx.acme != config.network[trx.ifaceName].acme) {
-                config.network[trx.ifaceName].tls.acme = trx.acme;
-            }
+            config.network[trx.ifaceName].address = trx.address;
+            config.network[trx.ifaceName].domain = trx.domain;
+            config.network[trx.ifaceName].host = trx.host;
+            config.network[trx.ifaceName].acme = trx.acme;
         }
 
         await config.save();
-        return true;
     }
 });

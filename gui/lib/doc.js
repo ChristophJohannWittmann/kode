@@ -98,6 +98,14 @@ register(class Doc extends Emitter {
         return [];
     }
 
+    async copy(value) {
+        if ((await navigator.permissions.query({name: "clipboard-write"})).state == 'granted') {
+            navigator.clipboard.writeText(value);
+        }
+
+        return this;
+    }
+
     direction() {
         return this.doc.dir;
     }

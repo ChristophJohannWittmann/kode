@@ -95,8 +95,6 @@ register(class FWNetIfaceView extends WPanel {
                     readonly: false,
                     type: ScalarHost,
                 },
-            })
-            .addObj(this.iface.tls, {
                 acme: {
                     label: txx.fwNetAcme,
                     readonly: false,
@@ -138,6 +136,8 @@ register(class FWNetIfaceView extends WPanel {
             messageName: 'ConfigCertifyIface',
             ifaceName: this.ifaceName,
         });
+        
+        return this;
     }
 
     async copyPublicKey(format) {
@@ -147,7 +147,8 @@ register(class FWNetIfaceView extends WPanel {
             format: format,
         });
 
-        console.log(key);
+        doc.copy(key);
+        return this;
     }
 
     async createKeyPair() {
@@ -155,26 +156,22 @@ register(class FWNetIfaceView extends WPanel {
             messageName: 'ConfigCreateKeyPair',
             ifaceName: this.ifaceName,
         });
+
+        return this;
     }
 
     async refresh() {
-        let iface = await queryServer({
-            messageName: 'ConfigGetNetIface',
-            ifaceName: this.ifaceName
-        });
-
-        this.editor.setAddress(iface.address);
-        this.editor.setDomain(iface.domain);
-        this.editor.setHost(iface.host);
-        this.editor.setAcme(iface.tls.acme);
-        this.editor.setPrivateKey(iface.tls.privateKey);
-        this.editor.setPublicKey(iface.tls.publicKey);
-        this.editor.setCert(iface.tls.cert);
-        this.editor.setCertExpires(iface.tls.certExpires);
+        this.editor.setValues(
+            await queryServer({
+                messageName: 'ConfigGetNetIface',
+                ifaceName: this.ifaceName
+            })
+        );
     }
 
     async revert() {
         await this.editor.revert();
+        return this;
     }
 
     async save() {
@@ -183,19 +180,13 @@ register(class FWNetIfaceView extends WPanel {
             ifaceName: this.ifaceName,
         };
 
-        for (let field of this.editor.getFields()) {
-            if (field.name in this.iface) {
-                message[field.name] = field.value;
-            }
-            else if (field.name == 'acme') {
-                message.acme = field.value;
-            }
-        }
-
+        Object.assign(message, this.editor.getValues());
         await queryServer(message);
+        return this;
     }
 
     async update() {
         await this.editor.update();
+        return this;
     }
 });
