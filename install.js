@@ -24,7 +24,7 @@
 
 
 /*****
-*****/
+*****
 require('./framework/core.js');
 require('./framework/activeData.js');
 require('./framework/context.js');
@@ -36,6 +36,7 @@ require('./framework/textTemplate.js');
 require('./framework/time.js');
 require('./framework/utility.js');
 require('./server/lib/utility.js');
+*/
 
 
 /*****
@@ -46,7 +47,8 @@ require('./server/lib/utility.js');
 *****/
 const CHILDPROC = require('child_process');
 const PATH      = require('path');
-const FS        = require('fs').promises;
+const FILES     = require('fs').promises;
+const FS        = require('fs');
 const PROC      = require('process');
 
 
@@ -81,8 +83,10 @@ if (PROC.argv.length != 3) {
 
 /*****
 *****/
+const systemd = 'etc/systemd/system';
+
 (async () => {
-    if (await pathExists('/etc/systemd/system')) {
+    if (FS.existsSync(systemd)) {
         console.log('Installing/replacing Linux systemd service.');
 
         const sudoPath = `/usr/bin/sudo`;
@@ -90,11 +94,11 @@ if (PROC.argv.length != 3) {
         const kodePath = PATH.join(__dirname, 'bootstrap.js');
         const confPath = PROC.argv[2];
 
-        const servicePath = `/etc/systemd/system`;
-        const serviceFile = `/etc/systemd/system/kode.service`;
+        const servicePath = systemd;
+        const serviceFile = PATH.join(servicePath, 'kode.service');
         const serviceCode = createSystemdServiceCode(sudoPath, nodePath, kodePath, confPath);
 
-        await FS.writeFile(serviceFile, serviceCode);
+        await FILES.writeFile(serviceFile, serviceCode);
         await execShell(`${sudoPath} systemctl daemon-reload`);
     }
 })();
