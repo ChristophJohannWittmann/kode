@@ -99,7 +99,7 @@ register(class ConfigEndpoints extends EndpointContainer {
             address: iface.address,
             domain: iface.domain,
             host: iface.host,
-            acme: iface.acme,
+            acme: iface.tls.acme
         };
 
         if ('tls' in iface) {
@@ -141,7 +141,7 @@ register(class ConfigEndpoints extends EndpointContainer {
             config.network[trx.ifaceName].address = trx.address;
             config.network[trx.ifaceName].domain = trx.domain;
             config.network[trx.ifaceName].host = trx.host;
-            config.network[trx.ifaceName].acme = trx.acme;
+            config.network[trx.ifaceName].tls.acme = trx.acme;
         }
 
         await config.save();

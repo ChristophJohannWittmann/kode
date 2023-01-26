@@ -87,6 +87,10 @@ if (PROC.argv.length != 3) {
 
 
 /*****
+ * This is where installation takes place.  The first step is to detect
+ * the application platform, which then specifies how we're going to install
+ * the kode application on that platform as an autostart / authrestart server
+ * app.
 *****/
 const systemd = '/etc/systemd/system';
 

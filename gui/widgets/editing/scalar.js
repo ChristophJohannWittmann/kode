@@ -164,7 +164,7 @@ define('WScalar', class WScalar extends Widget {
     ];
 
     constructor(activeData, key, opts) {
-        super('span');
+        super('div');
         this.viewer = opts.type.mkViewer(opts).bind(activeData, key);
         this.editor = opts.type.mkEditor(opts).bind(activeData, key);
         opts.readonly ? this.setReadOnly() : this.setReadWrite();

@@ -82,7 +82,7 @@ class AuthenticateForm extends WGrid {
         });
 
         this.data = data;
-        this.setClasses('flex-h-cc colors-2 border-style-solid border-width-1 border-radius-2');
+        this.setClasses('flex-h-cc alt-colors border-style-solid border-width-2 border-radius-2');
 
         this.setAt(1, 0, mkWidget('div').set(txx.fwSignInUsername).setClasses('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(3, 0, mkIEmail()
@@ -121,7 +121,7 @@ class ForgotCredentialsForm extends WGrid {
         });
 
         this.data = data;
-        this.setClasses('flex-h-cc colors-2 border-style-solid border-width-1 border-radius-2');
+        this.setClasses('flex-h-cc alt-colors border-style-solid border-width-1 border-radius-2');
 
         this.setAt(1, 0, mkWidget('div').set(txx.fwForgotInstructions));
 
