@@ -24,7 +24,7 @@
 
 
 /*****
-*****
+*****/
 require('./framework/core.js');
 require('./framework/activeData.js');
 require('./framework/context.js');
@@ -36,7 +36,6 @@ require('./framework/textTemplate.js');
 require('./framework/time.js');
 require('./framework/utility.js');
 require('./server/lib/utility.js');
-*/
 
 
 /*****
@@ -45,14 +44,17 @@ require('./server/lib/utility.js');
  * required modules using all caps to signify that the required modules is a
  * NodeJS builtin module.
 *****/
-const CHILDPROC = require('child_process');
-const PATH      = require('path');
-const FILES     = require('fs').promises;
-const FS        = require('fs');
-const PROC      = require('process');
+global.CHILDPROC = require('child_process');
+global.PATH      = require('path');
+global.FILES     = require('fs').promises;
+global.FS        = require('fs');
+global.PROC      = require('process');
 
 
 /*****
+ * This generates the code for the kode.service file Linux based on systemd
+ * services.  Kode is configured to start automatically with the system and
+ * will restart after 5 seconds of crashing.
 *****/
 function createSystemdServiceCode(sudoPath, nodePath, kodePath, confPath) {
 return `
@@ -73,6 +75,9 @@ WantedBy=multi-user.target
 
 
 /*****
+ * We need three arguments to insstall the kode service or daemon, what
+ * ever the target sysstem is.  Please note that /path/to/sudo is not
+ * part of this since that's an outer or containing command.
 *****/
 if (PROC.argv.length != 3) {
     console.log('ERROR: Incorrect number of switches provided');
@@ -83,7 +88,7 @@ if (PROC.argv.length != 3) {
 
 /*****
 *****/
-const systemd = 'etc/systemd/system';
+const systemd = '/etc/systemd/system';
 
 (async () => {
     if (FS.existsSync(systemd)) {
