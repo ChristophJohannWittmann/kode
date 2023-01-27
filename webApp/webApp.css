@@ -627,6 +627,7 @@ body {
     border-style: none;
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-color);
     background-color: var(--widget-background-color);
 }
@@ -657,6 +658,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-color);
     background-color: var(--widget-background-color);
     border-color: var(--widget-border-color);
@@ -689,6 +691,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
     border-color: var(--widget-disabled-border-color);
@@ -710,6 +713,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-color);
     background-color: var(--widget-background-color);
     border-color: var(--widget-border-color);
@@ -722,6 +726,7 @@ body {
 [widget-style=button]:focus {
     color: var(--widget-focus-color);
     background-color: var(--widget-focus-background-color);
+    border-color: transparent;
     outline-style: solid;
     outline-color: var(--outline-color);
     outline-width: var(--widget-outline-width);
@@ -738,6 +743,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
     border-color: var(--widget-disabled-border-color);
@@ -761,6 +767,7 @@ body {
     border-width: 1px;
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-color);
     background-color: var(--widget-background-color);
     outline-color: var(--widget-outline-color);
@@ -773,6 +780,7 @@ body {
 [widget-style=checkbox]:focus {
     color: var(--widget-focus-color);
     background-color: var(--widget-focus-background-color);
+    border-color: transparent;
     outline-style: solid;
     outline-color: var(--outline-color);
     outline-width: var(--widget-outline-width);
@@ -786,6 +794,7 @@ body {
     font-size: var(--font-size);
     font-family: var(--font-family);
     text-decoration: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
 }
@@ -808,6 +817,7 @@ body {
     border-width: 1px;
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-color);
     background-color: var(--widget-background-color);
     outline-color: var(--widget-outline-color);
@@ -820,6 +830,7 @@ body {
 [widget-style=radio]:focus {
     color: var(--widget-focus-color);
     background-color: var(--widget-focus-background-color);
+    border-color: transparent;
     outline-style: solid;
     outline-color: var(--outline-color);
     outline-width: var(--widget-outline-width);
@@ -853,6 +864,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     outline-width: var(--widget-outline-width);
     color: var(--widget-color);
     background-color: var(--widget-background-color);
@@ -879,6 +891,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     outline-width: var(--widget-outline-width);
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
@@ -901,6 +914,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-color);
     background-color: var(--widget-background-color);
     border-color: var(--widget-border-color);
@@ -913,6 +927,7 @@ body {
 [widget-style=buttontag]:focus {
     color: var(--widget-focus-color);
     background-color: var(--widget-focus-background-color);
+    border-color: transparent;
     outline-style: solid;
     outline-color: var(--outline-color);
     outline-width: var(--widget-outline-width);
@@ -929,6 +944,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
     border-color: var(--widget-disabled-border-color);
@@ -950,6 +966,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-color);
     background-color: var(--widget-background-color);
 }
@@ -976,6 +993,7 @@ body {
     border-width: var(--widget-disabled-border-width);
     border-radius: var(--widget-disabled-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
 }
@@ -999,6 +1017,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-color);
     background-color: var(--widget-background-color);
     border-color: var(--widget-border-color);
@@ -1030,6 +1049,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
     border-color: var(--widget-disabled-border-color);
@@ -1055,6 +1075,7 @@ body {
     border-width: 1px;
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-color);
     background-color: var(--widget-background-color);
     outline-color: var(--widget-outline-color);
@@ -1080,6 +1101,7 @@ body {
     font-size: var(--font-size);
     font-family: var(--font-family);
     text-decoration: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
 }
@@ -1103,6 +1125,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-color);
     background-color: var(--widget-background-color);
     border-color: var(--widget-border-color);
@@ -1129,6 +1152,7 @@ body {
     border-width: var(--widget-border-width);
     border-radius: var(--widget-border-radius);
     outline-style: none;
+    outline-radius: var(--widget-outline-radius);
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
     border-color: var(--widget-disabledborder-color);
@@ -1397,6 +1421,7 @@ body {
     border-style: solid;
     border-width: 1px;
     border-radius: var(--widget-border-radius);
+    border-color:  var(--widget-border-color);
     padding: 10px;
     color: var(--menu-color);
     background-color: var(--menu-background-color);
@@ -1404,19 +1429,19 @@ body {
 [widget-style=popup-menu-item] {
     position: static;
     text-align: left;
-    border-radius: var(--widget-border-radius);
     margin:  6px;
     width: 100%;
     height: 100%;
-    font-weight: bold;
     cursor: pointer;
+    color: var(--menu-color);
+    background-color: var(--menu-background-color);
 }
 [widget-style=popup-menu-item]:hover {
     color: var(--menu-hover-color);
     background-color: var(--menu-hover-background-color);
 }
 [widget-style=popup-menu-item-disabled] {
-    color: var(--menu-color-disabled);
+    color: var(--menu-disabled-color);
     position: static;
     text-align: left;
     border-radius: var(--widget-border-radius);
