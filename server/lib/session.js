@@ -91,13 +91,6 @@ register(class Session {
         SessionManager.removeSession(this);
     }
 
-    filterNotification(message) {
-        // ********************************************************
-        // -- TODO --
-        // ********************************************************
-        return true;
-    }
-
     hasSocket() {
         return this.socket;
     }

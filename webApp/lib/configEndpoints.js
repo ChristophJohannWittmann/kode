@@ -134,7 +134,7 @@ register(class ConfigEndpoints extends EndpointContainer {
         return Object.keys(config.network);
     }
     
-    async [ mkEndpoint('ConfigUpdateNetIface', 'system') ](trx) {
+    async [ mkEndpoint('ConfigUpdateNetIface', 'system', { notify: true }) ](trx) {
         let config = await loadConfigFile();
 
         if (trx.ifaceName in config.network) {

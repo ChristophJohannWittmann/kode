@@ -272,6 +272,10 @@ register(class Widget extends Emitter {
         return this.htmlElement.hasClassName(className);
     }
 
+    height() {
+        return this.htmlElement.node.offsetHeight;
+    }
+
     insertAfter(...args) {
         this.htmlElement.insertAfter(...args);
     }
@@ -507,6 +511,13 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    size() {
+        return {
+            width: this.htmlElement.node.offsetWidth,
+            height: this.htmlElement.node.offsetHeight,
+        };
+    }
+
     [Symbol.iterator]() {
         return this.children()[Symbol.iterator]();
     }
@@ -536,5 +547,9 @@ register(class Widget extends Emitter {
         else {
             Binding.unbindWidget(this);
         }
+    }
+
+    width() {
+        return this.htmlElement.node.offsetWidth;
     }
 });

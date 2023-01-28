@@ -29,21 +29,21 @@ register(class OrgEndpoints extends EndpointContainer {
         super(webapp);
     }
     
-    async [ mkEndpoint('ActivateOrg', 'org') ](trx) {
+    async [ mkEndpoint('ActivateOrg', 'org', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('DeactivateOrg', 'org') ](trx) {
+    async [ mkEndpoint('DeactivateOrg', 'org', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('GetOrgs', 'org') ](trx) {
+    async [ mkEndpoint('GetOrgs', 'org', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('ModifyOrg', 'org') ](trx) {
+    async [ mkEndpoint('ModifyOrg', 'org', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('RecoverOrg', 'org') ](trx) {
+    async [ mkEndpoint('RecoverOrg', 'org', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('RemoveOrg', 'org') ](trx) {
+    async [ mkEndpoint('RemoveOrg', 'org', { notify: true }) ](trx) {
     }
 });

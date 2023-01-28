@@ -29,6 +29,6 @@ register(class TicketEndpoints extends EndpointContainer {
         super(webapp);
     }
     
-    async [ mkEndpoint('AnEndpoint', 'ticket') ](req) {
+    async [ mkEndpoint('AnEndpoint', 'ticket', { notify: true }) ](req) {
     }
 });

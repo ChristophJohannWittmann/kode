@@ -366,11 +366,13 @@ register(class WebApp extends Webx {
                 }
             }
             else {
-                Ipc.sendPrimary({
-                    messageName: '#SessionManagerNotify',
-                    endpoint: trx.endpoint,
-                    context: trx.context,
-                });
+                if (trx.endpoint.flags.notify) {
+                    Ipc.sendPrimary({
+                        messageName: '#SessionManagerNotify',
+                        endpoint: trx.endpoint,
+                        context: trx.context,
+                    });
+                }
 
                 if ('#Trap' in message) {
                     return {

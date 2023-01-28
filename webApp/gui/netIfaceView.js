@@ -43,7 +43,12 @@ register(class FWNetIfaceView extends WPanel {
         );
 
         (async () => {
-            this.append(mkWidget('h3').set(`${txx.fwNetInterface} "${this.ifaceName}"`));
+            this.append(
+                mkWidget('h3')
+                .set(`${txx.fwNetInterface} "${this.ifaceName}"`)
+                .setClassName('margin-left-6')
+            );
+
             this.editor = mkWObjectEditor();
 
             this.iface = await queryServer({

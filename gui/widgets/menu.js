@@ -153,9 +153,25 @@ register(class WPopupMenu extends Widget {
     }
 
     position(x, y) {
-        // TODO -- determine where to position the popup menu.
-        //console.log('WPopupMenu.js: position()');
-        return [x, y];
+        let finalX = x;
+        let finalY = y;
+        let size = this.size();
+
+        if (size.width > win.innerWidth()) {
+            finalX = 0;
+        }
+        else if (x + size.width > win.innerWidth()) {
+            finalX -= (x + size.width - win.innerWidth());
+        }
+
+        if (size.height > win.innerHeight()) {
+            finalY = 0;
+        }
+        else if (y + size.height > win.innerHeight()) {
+            finalY -= (y + size.height - win.innerHeight());
+        }
+
+        return [ finalX, finalY ];
     }
 });
 

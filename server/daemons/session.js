@@ -122,9 +122,9 @@ singleton(class SessionManager extends Daemon {
         };
 
         for (let session of Object.values(this.byKey)) {
-            if (session.filterNotification(notification)) {
-                notification.session = session.key;
+            let authorization = await session.authorize(message.endpoint.permission, message.context);
 
+            if (authorization.granted) {
                 if (session.hasSocket()) {
                     Ipc.sendWorker(session.workerId, notification);
                 }

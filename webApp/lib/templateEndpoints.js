@@ -29,15 +29,15 @@ register(class TemplateEndpoints extends EndpointContainer {
         super(webapp);
     }
     
-    async [ mkEndpoint('CreateTemplate', 'template') ](trx) {
+    async [ mkEndpoint('CreateTemplate', 'template', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('EraseTemplate', 'template') ](trx) {
+    async [ mkEndpoint('EraseTemplate', 'template', { notify: true }) ](trx) {
     }
     
     async [ mkEndpoint('GetTemplate', 'template') ](trx) {
     }
     
-    async [ mkEndpoint('SaveTemplate', 'template') ](trx) {
+    async [ mkEndpoint('SaveTemplate', 'template', { notify: true }) ](trx) {
     }
 });
