@@ -33,7 +33,7 @@ register(class Session {
     constructor(user, workerId, idleMinutes) {
         return new Promise(async (ok, fail) => {
             this.timeout = null;
-            this.socket = false;
+            this.socketId = false;
             this.user = mkUserObject(user);
             this.workerId = workerId;
             this.idleMinutes = idleMinutes;
@@ -79,7 +79,7 @@ register(class Session {
     }
 
     clearSocket() {
-        this.socket = false;
+        this.socketId = false;
         return this;
     }
 
@@ -92,7 +92,7 @@ register(class Session {
     }
 
     hasSocket() {
-        return this.socket;
+        return this.socketId !== false;
     }
 
     queue(message) {
@@ -104,8 +104,8 @@ register(class Session {
         return this;
     }
 
-    setSocket() {
-        this.socket = true;
+    setSocket(webSocketId) {
+        this.socketId = webSocketId;
         return this;
     }
 
@@ -125,5 +125,9 @@ register(class Session {
         }
 
         this.timeout = setTimeout(() => this.close(), this.idleMinutes*60*1000);
+    }
+
+    webSocketId() {
+        return this.webSocketId;
     }
 });

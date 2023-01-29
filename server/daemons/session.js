@@ -113,9 +113,9 @@ singleton(class SessionManager extends Daemon {
         Message.reply(message, false);
     }
 
-    async onNotify(message) {
+    async onNotifyClient(message) {
         const notification = {
-            messageName: '#Notification',
+            messageName: '#NotifyClient',
             endpoint: message.endpoint.name,
             flags: message.endpoint.flags,
             permission: message.endpoint.permission ? message.endpoint.permission : '',
@@ -125,6 +125,8 @@ singleton(class SessionManager extends Daemon {
             let authorization = await session.authorize(message.endpoint.permission, message.context);
 
             if (authorization.granted) {
+                notification.socketId = session.socketId;
+
                 if (session.hasSocket()) {
                     Ipc.sendWorker(session.workerId, notification);
                 }
@@ -139,7 +141,7 @@ singleton(class SessionManager extends Daemon {
         let session = this.byKey[message.session];
 
         if (session) {
-            session.setSocket();
+            session.setSocket(message.socketId);
         }
     }
 

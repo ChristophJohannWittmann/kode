@@ -58,7 +58,7 @@ register(class Websocket extends Emitter {
     }
 
     close() {
-        if (this.ws && this.ws.readystate == 1) {
+        if (this.ws && this.ws.readyState == 1) {
             this.ws.close();
         }
     }

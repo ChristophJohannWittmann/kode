@@ -33,18 +33,37 @@
  * when a complete message has been received.
 *****/
 register(class WebSocket extends Emitter {
+    static nextSocketNumber = 1;
+    static webSockets = {};
+
+    static onNotify = (() => {
+        let handler = message => {
+            let webSocket = WebSocket.webSockets[message.socketId];
+
+            if (webSocket) {
+                webSocket.sendMessage(message);
+            }
+        };
+
+        Ipc.on('#NotifyClient', message => handler(message));
+        return handler;
+    })();
+
     constructor(socket, extensions, headData) {
         super();
         this.socket = socket;
+        this.workerId = CLUSTER.isWorker ? CLUSTER.worker.id : '';
+        this.socketId = `${PROC.pid}/${this.workerId}/${WebSocket.nextSocketNumber++}`;
+        WebSocket.webSockets[this.socketId] = this;
         this.socket.setTimeout(0);
         this.socket.setNoDelay();
         this.analyzeExtensions(extensions);
         this.frameParser = new FrameParser(this, headData);
         this.frameBuilder = new FrameBuilder(this.extensions);
-  
         this.type = '';
         this.payload = [];
         this.state = 'Ready';
+        this.socket.on('close', (...args) => this.onClose(...args));
     }
   
     analyzeExtensions(extensions) {
@@ -81,13 +100,20 @@ register(class WebSocket extends Emitter {
     }
 
     destroy() {
-        this.state = 'Closed';
-        this.socket.destroy();
+        if (this.socket) {
+            this.state = 'Closed';
+            this.socket.destroy();
+            this.socket = null;
+            delete WebSocket.webSockets[this.socketId];
+        }
+    }
+
+    onClose(hasError) {
+        this.destroy();
     }
 
     onError(error) {
-        this.socket.destroy(error);
-        this.socket = null;
+        this.destroy();
     }
 
     onFrame(frame) {

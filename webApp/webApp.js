@@ -144,7 +144,6 @@ register(class WebApp extends Webx {
     constructor(module, reference) {
         super(module, reference);
         this.webSockets = {};
-        Ipc.on('#Notification', message => this.onNotification(message));
     }
 
     async buildCSS(path, variables) {
@@ -368,7 +367,7 @@ register(class WebApp extends Webx {
             else {
                 if (trx.endpoint.flags.notify) {
                     Ipc.sendPrimary({
-                        messageName: '#SessionManagerNotify',
+                        messageName: '#SessionManagerNotifyClient',
                         endpoint: trx.endpoint,
                         context: trx.context,
                     });
@@ -435,6 +434,7 @@ register(class WebApp extends Webx {
                     Ipc.sendPrimary({
                         messageName: '#SessionManagerSetSocket',
                         session: sessionKey,
+                        socketId: webSocket.socketId,
                     });
                 }
                 else if (message.messageName == '#Ping') {
@@ -550,14 +550,6 @@ register(class WebApp extends Webx {
         }
 
         this.multilingualText.finalize();
-    }
-
-    onNotification(message) {
-        let webSocket = this.webSockets[message.session];
-
-        if (webSocket) {
-            webSocket.sendMessage(message);
-        }
     }
 
     async onWebSocket(req, webSocket) {

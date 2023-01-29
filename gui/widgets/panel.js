@@ -50,7 +50,7 @@ register(class WPanel extends Widget {
         this.on('Widget.Validity', async message => await this.onValidity(message));
 
         this.refreshers = mkStringSet();
-        global.on('#Notification', message => this.onNotification(message));
+        global.on('#NotifyClient', message => this.onNotify(message));
     }
 
     append(...args) {
@@ -112,7 +112,7 @@ register(class WPanel extends Widget {
         message.modified ? this.modified++ : this.modified--;
     }
 
-    onNotification(message) {
+    onNotify(message) {
         if (this.refreshers.has(message.endpoint)) {
             this.refresh();
         }
