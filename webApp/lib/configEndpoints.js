@@ -106,7 +106,7 @@ register(class ConfigEndpoints extends EndpointContainer {
             data.privateKey = iface.tls.privateKey ? '[Private Key]' : '[NONE]';
             data.publicKey = iface.tls.publicKey ? '[Public Key]' : '[NONE]';
             data.cert = iface.tls.cert ? '[Certificate]' : '[NONE]';
-            data.certExpires = iface.tls.certExpires ? iface.tls.cert.expires.toISOString() : '[NA]';
+            data.certExpires = iface.tls.cert.expires ? iface.tls.cert.expires.toISOString() : '[NA]';
         }
         else {
             data.privateKey = '[NONE]';
