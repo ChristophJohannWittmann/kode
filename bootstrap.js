@@ -248,6 +248,11 @@ async function seedUser(dbc) {
     await onSingletons();
 
     /********************************************
+     * Initialize Server Boot Hash
+     *******************************************/
+    env.booted = (await Crypto.hash('sha256', Date.now().toString())).toString('base64');
+
+    /********************************************
      * Load Objects
      *******************************************/
     logPrimary('[ Loading Framework Object API ]');

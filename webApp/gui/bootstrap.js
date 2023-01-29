@@ -50,6 +50,12 @@
         window.body = mkWBody(doc);
         window.home = null;
         body.push(mkFWSignInView());
+
+        win.on('focus', async message => {
+            if (booted != await queryServer({ messageName: 'PublicGetBootHash' })) {
+                doc.location().reload();
+            }
+        });
     });
 
 
@@ -115,7 +121,12 @@
      * been enabled for websocket use, the websocket is also created and connected
      * to the server.
     *****/
-    register(function signIn(sessionState) {
+    register(async function signIn(sessionState) {
+        if (booted != await queryServer({ messageName: 'PublicGetBootHash' })) {
+            doc.location().reload();
+            return;
+        }
+
         body.pop();
         window.home = webAppSettings.homeView()
         body.push(window.home);

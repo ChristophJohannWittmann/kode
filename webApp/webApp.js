@@ -279,6 +279,7 @@ register(class WebApp extends Webx {
                 apptext: apptext,
                 homeView: this.settings.homeView,
                 container: this.module.settings.container,
+                bootedAt: env.booted.toString(),
             });
 
             rsp.end(200, 'text/html', await doc.toString());

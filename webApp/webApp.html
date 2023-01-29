@@ -7,7 +7,10 @@
         <meta name="color-scheme" content="dark light">${links}
         <title>${title}</title>${styleSheets}
         <script src="?CLIENTFRAMEWORK"></script>
-        <script>setContainer('${container}');</script>
+        <script>
+            const booted = '${bootedAt}';
+            setContainer('${container}');
+        </script>
         <script src="?CLIENTAPPLICATION"></script>
         <script>${webAppJs}</script>
     </head>

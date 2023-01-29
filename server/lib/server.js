@@ -74,6 +74,10 @@ register(class ServerBase extends Emitter {
         return this.config.network ? this.config.network : '';
     }
 
+    getPort() {
+        return this.config.port ? this.config.port : 0;
+    }
+
     getType() {
         return this.config.type ? this.config.type : '';
     }
@@ -81,11 +85,12 @@ register(class ServerBase extends Emitter {
 
 
 /*****
- * **********************************************************************
- * **********************************************************************
- * **********************************************************************
- * **********************************************************************
- * **********************************************************************
+ * The standard server model is employed.  There's a listener on the specified
+ * port awaiting an incoming connection.  The incoming socket is then passed
+ * off to a free worker.  That worker performs its task and then notifies the
+ * server that it's ready to start working on another incoming connection.  Note
+ * that the HTTP server doesn't really use any of this code.  It uses the builtin
+ * HTTP module, to implement the server in a different way.
 *****/
 if (CLUSTER.isPrimary) {
     register(class Server extends ServerBase {
@@ -140,11 +145,35 @@ if (CLUSTER.isPrimary) {
         }
 
         async onWorkerFree(worker) {
-            console.log('worker Free');
+            delete this.used[worker.id];
+            this.free.push(worker);
         }
 
         async onWorkerGone(worker) {
-            console.log('worker Gone');
+            if (CLUSTER.workers[worker.id]) {
+                if (worker.id in this.used) {
+                    delete this.used[worker.id];
+                }
+                else {
+                    for (let i = 0; i < this.free.length; i++) {
+                        if (this.free[i].id == worker.id) {
+                            this.free.splice(i, 0);
+                            break;
+                        }
+                    }
+                }
+            }
+            else {
+                let platformEnv = { KODE_SERVER_NAME: this.serverName };
+                let replacementWorker = CLUSTER.fork(platformEnv);
+                replacementWorker.on('online', worker => this.onWorkerOnline(worker));
+                replacementWorker.on('disconnect', () => this.onWorkerGone(replacementWorker));
+                replacementWorker.on('exit', () => this.onWorkerGone(replacementWorker));
+            }
+        }
+
+        async onWorkerOnline(worker) {
+            this.free.push(worker);
         }
 
         async start() {
@@ -155,19 +184,10 @@ if (CLUSTER.isPrimary) {
 
                 let i;
                 let count = this.config.workers - this.free.length - Object.keys(this.used).length;
-                let env = { KODE_SERVER_NAME: this.serverName };
-
-                const workerOnline = worker => {
-                    this.free.push(worker);
-
-                    if (i >= count) {
-                        ok();
-                    }
-                };
-
+                let platformEnv = { KODE_SERVER_NAME: this.serverName };
                 for (i = 0; i < count; i++) {
-                    let worker = CLUSTER.fork(env);
-                    worker.on('online', () => workerOnline(worker));
+                    let worker = CLUSTER.fork(platformEnv);
+                    worker.on('online', worker => this.onWorkerOnline(worker));
                     worker.on('disconnect', () => this.onWorkerGone(worker));
                     worker.on('exit', () => this.onWorkerGone(worker));
                 }
@@ -181,11 +201,12 @@ if (CLUSTER.isPrimary) {
 
 
 /*****
- * **********************************************************************
- * **********************************************************************
- * **********************************************************************
- * **********************************************************************
- * **********************************************************************
+ * The standard worker algorthm is to accept a socket from the primary process
+ * and take over from there.  The work is responsible for managing all of the
+ * server-side protocol, interpretation of incoming requests, and for repsond to
+ * those requests according to the specified protocol.  Most servers will be
+ * implemented using a protocol class, whose purpose is to interpret and manage
+ * incoming data.
 *****/
 if (CLUSTER.isWorker) {
     register(class Server extends ServerBase {
@@ -210,7 +231,6 @@ if (CLUSTER.isWorker) {
         }
 
         async onSocketClose() {
-            console.log('socket close');
             if (!this.socket.destroyed) {
                 this.socket.destroy();
             }

@@ -35,6 +35,10 @@ register(class PublicEndpoints extends EndpointContainer {
         super(webApp);
     }
     
+    async [ mkEndpoint('PublicGetBootHash', undefined, { unprotected: true }) ](trx) {
+        return env.booted;
+    }
+    
     async [ mkEndpoint('PublicResetPassword', undefined, { unprotected: true }) ](trx) {
     }
     
