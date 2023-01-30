@@ -287,7 +287,7 @@ register(class WebApp extends Webx {
     }
 
     async handleGetCLIENTAPPLICATION(req, rsp) {
-        if (!(rsp.encoding in this.framework)) {
+        if (!(rsp.encoding in this.clientApplication)) {
             this.clientApplication[rsp.encoding] = await compress(rsp.encoding, this.clientApplication['']);
         }
 

@@ -477,6 +477,9 @@
                 else if ('#TIME' in value) {
                     return mkTime(value['#TIME']);
                 }
+                else if ('#DATE' in value) {
+                    return mkTime(value['#DATE']);
+                }
                 else if ('#REGEX' in value) {
                     return new RegExp(value['#REGEX']);
                 }
