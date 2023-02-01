@@ -23,17 +23,38 @@
 
 
 /*****
+ * A developer-helper object that provides streamlined utilities for managing
+ * internet domain database objects.  Some of these helper functions replace
+ * single DboObject calls, while other replace multiple function calls.
 *****/
 singleton(class Domains {
     constructor() {
     }
-});
 
+    async ensureFromName(dbc, name) {
+        let normal = name.toLowerCase().trim();
+        let domain = await selectOneDboDomain(dbc, `_name='${normal}'`);
 
-/*****
-*****/
-register(class DomainObject extends DboDomain {
-    constructor(properties) {
-        super(properties);
+        if (!domain) {
+            let segments = normal.split('.');
+
+            domain = mkDboDomain({
+                name: name,
+                tld: segments[segments.length - 1],
+            });
+
+            await domain.save(dbc);
+        }
+
+        return domain;
+    }
+
+    async getFromName(dbc, name) {
+        let normal = name.toLowerCase().trim();
+        return await selectOneDboDomain(dbc, `_name='${normal}'`);
+    }
+
+    async getFromOid(dbc, oid) {
+        return await getDboDomain(dbc, oid);
     }
 });

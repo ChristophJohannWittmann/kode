@@ -135,8 +135,8 @@ async function seedUser(dbc) {
         error: '',
     }).save(dbc);
 
-    let email = await mkDboEmail({
-        ownerType: 'user',
+    let email = await mkDboEmailAddress({
+        ownerType: 'DboUser',
         ownerOid: user.oid,
         domainOid: domain.oid,
         user: 'charlie',
@@ -239,6 +239,7 @@ async function seedUser(dbc) {
         require('./server/lib/session.js');
         require('./server/daemons/events.js');
         require('./server/daemons/session.js');
+        require('./server/daemons/spooler.js');
     }
     else {
         require('./server/lib/resource.js');
@@ -259,7 +260,9 @@ async function seedUser(dbc) {
     require('./server/lib/schema.js');
 
     for (let filePath of await recurseFiles(PATH.join(env.kodePath, 'server/obj'))) {
-        require(filePath);
+        if (filePath.endsWith('.js')) {
+            require(filePath);
+        }
     }
 
     await onSingletons();
@@ -364,6 +367,42 @@ async function seedUser(dbc) {
                 eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
             }
         }
+        // **********************************************************************************
+        // **********************************************************************************
+        /*
+        let dbc = await dbConnect();
+
+        let msg = await mkEmailMessage(dbc, 1n);
+
+        let msg = await mkEmailMessage(dbc, {
+            category: 'smtpsend',
+            bulk: false,
+            reason: '/ResetPassword/DboUser/4743',
+            from: 'charlie@kodeprogramming.org',
+            subject: 'Welcome back my friends.',
+            to: [
+                'chris.wittmann@icloud.com',
+                'chris.wittmann@infosearch.online',
+            ],
+            text: 'hello email message',
+            html: `<!DOCTYPE html>
+            <html>
+                <head>
+                </head>
+                <body>
+                    <h1>My Email Message</h1>
+                </body>
+            </html>
+            `
+        });
+
+        console.log(msg);
+
+        await dbc.rollback();
+        await dbc.free();
+        */
+        // **********************************************************************************
+        // **********************************************************************************
     }
 
     await onSingletons();

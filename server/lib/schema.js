@@ -91,7 +91,7 @@ mkDbSchema(
         ]
     },
     {
-        name: 'email',
+        name: 'emailAddress',
         columns: [
             { name: 'ownerType',    type: dbText, size:   20 },
             { name: 'ownerOid',     type: dbInt64            },
@@ -136,6 +136,53 @@ mkDbSchema(
             'method:asc',
             'url:asc',
             'status:asc',
+        ]
+    },
+    {
+        name: 'msg',
+        columns: [
+            { name: 'category',     type: dbText, size:   20 },
+            { name: 'bulk',         type: dbBool             },
+            { name: 'type',         type: dbText, size:   20 },
+            { name: 'status',       type: dbText, size:   20 },
+            { name: 'reason',       type: dbText, size:  200 },
+        ],
+        indexes: [
+            'category:asc',
+            'bulk:asc',
+            'status:asc',
+            'reason:asc',
+        ]
+    },
+    {
+        name: 'msgAttr',
+        columns: [
+            { name: 'msgOid',       type: dbInt64            },
+            { name: 'mime',         type: dbText, size:  100 },
+            { name: 'name',         type: dbText, size:   50 },
+            { name: 'data',         type: dbText, size:   -1 },
+        ],
+        indexes: [
+            'msgOid:asc',
+        ]
+    },
+    {
+        name: 'msgEndpoint',
+        columns: [
+            { name: 'msgOid',        type: dbInt64           },
+            { name: 'category',      type: dbText, size:  30 },
+            { name: 'userOid',       type: dbInt64           },
+            { name: 'endpointType',  type: dbText, size:  20 },
+            { name: 'endpointOid',   type: dbInt64           },
+            { name: 'index',         type: dbInt32           },
+            { name: 'status',        type: dbText, size:  20 },
+            { name: 'diagnostic',    type: dbText, size:  -1 },
+        ],
+        indexes: [
+            'msgOid:asc',
+            'userOid:asc',
+            'endpointType:asc',
+            'endpointOid:asc',
         ]
     },
     {

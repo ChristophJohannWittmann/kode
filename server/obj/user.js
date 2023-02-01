@@ -34,9 +34,9 @@ singleton(class Users {
     }
 
     async authenticate(dbc, userName, password) {
-        let email = await selectOneDboEmail(dbc, `_addr='${userName}'`);
+        let email = await selectOneDboEmailAddress(dbc, `_addr='${userName}'`);
 
-        if (email && email.ownerType == 'user') {
+        if (email && email.ownerType == 'DboUser') {
             let user = await getDboUser(dbc, email.ownerOid);
 
             if (user && user.status == 'active') {
@@ -66,11 +66,15 @@ singleton(class Users {
         return mkUserObject(await getDboUser(dbc, oid));
     }
 
-    async selectByEmail(dbc, email) {
-        let dboEmail = await selectOneDboEmail(dbc, `_addr='${email}'`);
+    async getEmail(dbc, oid) {
+        return await selectOneDboEmailAddress(dbc, `_owner_type='DboUser' AND _owner_oid='${oid}'`);
+    }
 
-        if (dboEmail && dboEmail.ownerType == 'user') {
-            let user = await getDboUser(dbc, dboEmail.ownerOid);
+    async selectByEmail(dbc, email) {
+        let dboEmailAddress = await selectOneDboEmailAddress(dbc, `_addr='${email}'`);
+
+        if (dboEmailAddress && dboEmailAddress.ownerType == 'DboUser') {
+            let user = await getDboUser(dbc, dboEmailAddress.ownerOid);
 
             if (user && user.status == 'active') {
                 return mkUserObject(user);
@@ -140,7 +144,7 @@ register(class UserObject extends DboUser {
     }
 
     async getEmails(dbc) {
-        return await selectDboEmail(dbc, `_owner_type='user' AND _owner_oid=${this.oid}`);
+        return await selectDboEmail(dbc, `_owner_type='DboUser' AND _owner_oid=${this.oid}`);
     }
 
     async getGrants(dbc) {
@@ -157,11 +161,11 @@ register(class UserObject extends DboUser {
     }
 
     async getPhones(dbc) {
-        return await selectDboPhone(dbc, `_owner_type='user' AND _owner_oid=${this.oid}`);
+        return await selectDboPhone(dbc, `_owner_type='DboUser' AND _owner_oid=${this.oid}`);
     }
 
     async getPrimaryEmail(dbc) {
-        return await selectOneDboUser(dbc, `_owner_type='user' AND _owner_oid=${this.oid}`);
+        return await selectOneDboUser(dbc, `_owner_type='DboUser' AND _owner_oid=${this.oid}`);
     }
 
     async sendEmail(dbc, email) {
