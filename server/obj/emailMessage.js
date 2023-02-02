@@ -47,12 +47,15 @@ register(class EmailMessage extends DboMsg {
             if (typeof arg == 'bigint') {
                 await this.load(arg);
             }
+            else if (typeof arg == 'string') {
+                await this.importRfc2822(arg);
+            }
+            else if (arg instanceof DboMsg) {
+                await this.load(arg);
+            }
             else if (typeof arg == 'object') {
                 await this.buildEnvelope(arg);
                 await this.buildContent(arg);
-            }
-            else if (typeof arg == 'string') {
-                console.log('importing raw incoming email...');
             }
 
             await this.save(this.dbc);
@@ -62,7 +65,7 @@ register(class EmailMessage extends DboMsg {
     }
 
     async buildContent(data) {
-        if (this.status != 'envelopeok') {
+        if (this.status != 'creating') {
             return;
         }
 
@@ -143,7 +146,7 @@ register(class EmailMessage extends DboMsg {
             this.pinned.content[sectionName] = bodySection;
         }
 
-        this.status = 'pending';
+        this.status = 'spooled';
     }
 
     async buildEnvelope(data) {
@@ -160,7 +163,7 @@ register(class EmailMessage extends DboMsg {
             this.pinned.from = mkDboMsgEndpoint({
                 msgOid: this.oid,
                 category: 'from',
-                status: 'added',
+                status: 'spooled',
                 userOid: emailAddress.ownerType == 'DboUser' ? emailAddress.ownerOid : 0n,
                 endpointType: 'DboEmailAddress',
                 endpointOid: emailAddress.oid,
@@ -170,7 +173,7 @@ register(class EmailMessage extends DboMsg {
             await this.pinned.from.save(this.dbc);
         }
         else {
-            this.status = 'nosender';
+            this.status = 'failed';
             await this.save(this.dbc);
             return;
         }
@@ -186,13 +189,13 @@ register(class EmailMessage extends DboMsg {
             await this.pinned.subject.save(this.dbc);
         }
         else {
-            this.status = 'nosubject';
+            this.status = 'failed';
             await this.save(this.dbc);
             return;
         }
 
         for (let category of ['to', 'cc', 'bcc']) {
-            if (data[category]) {
+            if (data[category] !== undefined) {
                 let recipients = data[category];
 
                 for (let recipient of (Array.isArray(recipients) ? recipients : [recipients])) {
@@ -202,7 +205,7 @@ register(class EmailMessage extends DboMsg {
                         this.pinned.recipients[emailAddress.oid] = mkDboMsgEndpoint({
                             msgOid: this.oid,
                             category: category,
-                            status: 'added',
+                            status: 'spooled',
                             userOid: emailAddress.ownerType == 'DboUser' ? emailAddress.ownerOid : 0n,
                             endpointType: 'DboEmailAddress',
                             endpointOid: emailAddress.oid,
@@ -217,10 +220,7 @@ register(class EmailMessage extends DboMsg {
         }
 
         if (Object.keys(this.pinned.recipients).length == 0) {
-            this.status = 'envelopebad';
-        }
-        else {
-            this.status = 'envelopeok';
+            this.status = 'failed';
         }
     }
 
@@ -232,8 +232,23 @@ register(class EmailMessage extends DboMsg {
         return Object.values(this.pinned.content);
     }
 
-    getRecipientCount() {
-        return Object.entries(this.pinned.recipients).length;
+    getDeliveredRecipients() {
+        return Object.values(this.pinned.recipients)
+        .filter(recipient => recipient.status == 'delivered');
+    }
+
+    getFailedRecipients() {
+        return Object.values(this.pinned.recipients)
+        .filter(recipient => recipient.status == 'failed');
+    }
+
+    getOtherRecipients() {
+        return Object.values(this.pinned.recipients)
+        .filter(recipient => !(recipient.status in { failed:0, delivered:0, spooled:0 }));
+    }
+
+    getRecipient(oid) {
+        return this.pinned.recipients[oid];
     }
 
     getRecipients() {
@@ -244,14 +259,28 @@ register(class EmailMessage extends DboMsg {
         return mkBuffer(this.pinned.from.data, 'base64').toString();
     }
 
+    getSpooledRecipients() {
+        return Object.values(this.pinned.recipients)
+        .filter(recipient => recipient.status == 'spooled');
+    }
+
     getSubject() {
         return mkBuffer(this.pinned.subject.data, 'base64').toString();
     }
 
-    async load(oid, minimize) {
-        Object.assign(this, await getDboMsg(this.dbc, oid));
+    async importRfc2822(emailText) {
+        console.log('importing raw incoming email RFC2822 ...');
+    }
 
-        for (let messageEndpoint of await selectDboMsgEndpoint(this.dbc, `_msg_oid=${oid}`, `_index ASC`)) {
+    async load(arg, minimize) {
+        if (arg instanceof DboMsg) {
+            Object.assign(this, arg);
+        }
+        else {
+            Object.assign(this, await getDboMsg(this.dbc, arg));
+        }
+
+        for (let messageEndpoint of await selectDboMsgEndpoint(this.dbc, `_msg_oid=${this.oid}`, `_index ASC`)) {
             messageEndpoint.pinned = await getDboEmailAddress(this.dbc, messageEndpoint.endpointOid);
 
             if (messageEndpoint.category == 'from') {
@@ -262,7 +291,7 @@ register(class EmailMessage extends DboMsg {
             }
         }
 
-        for (let messageAttr of await selectDboMsgAttr(this.dbc, `_msg_oid=${oid}`)) {
+        for (let messageAttr of await selectDboMsgAttr(this.dbc, `_msg_oid=${this.oid}`)) {
             if (messageAttr.name == 'subject') {
                 this.pinned.subject = messageAttr;
             }

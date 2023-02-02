@@ -54,6 +54,7 @@ if (CLUSTER.isPrimary) console.log(`[ Loading nodeJS Modules ]`);
 global.BUFFER    = require('buffer').Buffer;
 global.CHILDPROC = require('child_process');
 global.CRYPTO    = require('crypto');
+global.DNS       = require('dns');
 global.FILES     = require('fs').promises;
 global.FS        = require('fs');
 global.HTTP      = require('http');
@@ -237,9 +238,10 @@ async function seedUser(dbc) {
     if (CLUSTER.isPrimary) {
         require('./server/lib/daemon.js');
         require('./server/lib/session.js');
+        require('./server/daemons/dns.js');
         require('./server/daemons/events.js');
         require('./server/daemons/session.js');
-        require('./server/daemons/spooler.js');
+        require('./server/daemons/emailSpooler.js');
     }
     else {
         require('./server/lib/resource.js');
@@ -355,6 +357,77 @@ async function seedUser(dbc) {
 
         clearBootMode();
         logPrimary('[ Kode Application Server Ready ]');
+        Ipc.sendPrimary({ messageName: '#ServerReady' });
+        Ipc.sendWorkers({ messageName: '#ServerReady' });
+        // **********************************************************************************
+        // **********************************************************************************
+        if (false) {
+            let dbc = await dbConnect();
+
+            if (false) {
+                let msg = await mkEmailMessage(dbc, 1n);
+                console.log(msg.getOtherRecipients());
+                //console.log(msg);
+            }
+            else if (false) {
+                let msg = await mkEmailMessage(dbc, {
+                    category: 'smtpsend',
+                    bulk: false,
+                    reason: '/ResetPassword/DboUser/4743',
+                    from: 'charlie@kodeprogramming.org',
+                    subject: 'Welcome back my friends.',
+                    to: [
+                        'chris.wittmann@icloud.com',
+                        'chris.wittmann@infosearch.online',
+                    ],
+                    text: 'hello email message',
+                    html: `<!DOCTYPE html>
+                    <html>
+                        <head>
+                        </head>
+                        <body>
+                            <h1>My Email Message</h1>
+                        </body>
+                    </html>
+                    `
+                });
+
+                console.log(msg);
+            }
+            else if (true) {
+                let response = await Ipc.queryPrimary({
+                    messageName: '#EmailSpoolerSpool',
+                    bulk: false,
+                    reason: '/ResetPassword/DboUser/4743',
+                    from: 'charlie@kodeprogramming.org',
+                    subject: 'Welcome back my friends.',
+                    to: [
+                        'chris.wittmann@icloud.com',
+                        'chris.wittmann@infosearch.online',
+                    ],
+                    text: 'TEST MESSAGE!',                    
+                });
+
+                //console.log(response);
+            }
+
+            await dbc.rollback();
+            await dbc.free();
+        }
+        // **********************************************************************************
+        // **********************************************************************************
+        if (false) {
+            setTimeout(async () => {
+                let response = await Ipc.query({
+                    messageName: '#DnsResolveMx',
+                    domain: 'infosearchtest.com',
+                });
+
+                console.log(response);
+            }, 1000);
+        }
+        // **********************************************************************************
+        // **********************************************************************************
     }
     else {
         const serverName = PROC.env.KODE_SERVER_NAME;
@@ -367,42 +440,6 @@ async function seedUser(dbc) {
                 eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
             }
         }
-        // **********************************************************************************
-        // **********************************************************************************
-        /*
-        let dbc = await dbConnect();
-
-        let msg = await mkEmailMessage(dbc, 1n);
-
-        let msg = await mkEmailMessage(dbc, {
-            category: 'smtpsend',
-            bulk: false,
-            reason: '/ResetPassword/DboUser/4743',
-            from: 'charlie@kodeprogramming.org',
-            subject: 'Welcome back my friends.',
-            to: [
-                'chris.wittmann@icloud.com',
-                'chris.wittmann@infosearch.online',
-            ],
-            text: 'hello email message',
-            html: `<!DOCTYPE html>
-            <html>
-                <head>
-                </head>
-                <body>
-                    <h1>My Email Message</h1>
-                </body>
-            </html>
-            `
-        });
-
-        console.log(msg);
-
-        await dbc.rollback();
-        await dbc.free();
-        */
-        // **********************************************************************************
-        // **********************************************************************************
     }
 
     await onSingletons();

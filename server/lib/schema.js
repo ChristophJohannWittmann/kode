@@ -146,12 +146,15 @@ mkDbSchema(
             { name: 'type',         type: dbText, size:   20 },
             { name: 'status',       type: dbText, size:   20 },
             { name: 'reason',       type: dbText, size:  200 },
+            { name: 'agent',        type: dbText, size:   50 },
+            { name: 'msgid',        type: dbText, size:  100 },
         ],
         indexes: [
             'category:asc',
             'bulk:asc',
             'status:asc',
             'reason:asc',
+            'msgid:asc',
         ]
     },
     {

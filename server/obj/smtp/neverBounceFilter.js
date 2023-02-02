@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2022 Infosearch International, Reno NV
+ * Copyright (c) 2017-2022 Kode Programming
+ * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,22 +22,23 @@
  */
 
 
-/**
+/*****
  * The never bounce filter uses an external provide to validate and/or reject
  * the addresses of email recipients.  Nerver Bounce is accessable via HTTPS
  * rquests, which requies and account and a paid balance.  All authentication
  * data contained within the request search stirng, meaning it's a GET.  The
  * response handling is a little complicated because of multiple potential
  * failure points along the way.
- *
-new (class NeverBounceFilter extends SmtpFilter {
+*****/
+register(class SmtpNeverBounceFilter {
     constructor() {
-        super();
-        this.settings = false;
-        this.name = 'Never Bounce Filter';
+        return new Promise(async (ok, fail) => {
+            ok(this);
+        });
     }
     
-    async exec(outbound) {
+    async filter(outbound) {
+        /*
         if (!this.settings) {
             await this.init();
         }
@@ -65,9 +67,12 @@ new (class NeverBounceFilter extends SmtpFilter {
                 }
             }
         }
+        */
+        return true;
     }
     
     async init() {
+        /*
         let pg = await pgConnect();
         let settings = await selectPgoParameter(pg, `_name='smtp-nbfilter'`);
     
@@ -94,6 +99,8 @@ new (class NeverBounceFilter extends SmtpFilter {
         await pg.commit();
         await pg.free();
         this.settings = settings;
+        */
+        return this;
     }
     
     async pollNeverBounce(addr, recipient) {
@@ -176,5 +183,4 @@ new (class NeverBounceFilter extends SmtpFilter {
         
         return false;
     }
-})();
-*/
+});

@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2022 Infosearch International, Reno NV
+ * Copyright (c) 2017-2022 Kode Programming
+ * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,19 +22,21 @@
  */
 
 
-/**
+/*****
  * The domain filter is used for performing DNS checks and other future potential
  * network-based checks to filter-out domains that look unavailable or possibly
  * suspicous in nature.  Again, this filter on screens out suspicious domaons
  * that are NOT verified.
- *
-new (class DomainFilter extends SmtpFilter {
+*****/
+register(class SmtpDomainFilter {
     constructor() {
-        super();
-        this.name = 'Domain Filter';
+        return new Promise(async (ok, fail) => {
+            ok(this);
+        });
     }
     
-    async exec(outbound) {
+    async filter(msg) {
+        /*
         const domains = {};
     
         for (let recipient of outbound.recipients) {
@@ -70,6 +73,8 @@ new (class DomainFilter extends SmtpFilter {
                 }
             }
         }
+        */
+        return true;
     }
     
     async checkMX(domain) {
@@ -80,5 +85,4 @@ new (class DomainFilter extends SmtpFilter {
     async checkNextThing(domain) {
         return true;
     }
-})();
-*/
+});

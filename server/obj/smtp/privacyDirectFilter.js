@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2022 Infosearch International, Reno NV
+ * Copyright (c) 2017-2022 Kode Programming
+ * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +22,7 @@
  */
 
 
-/**
+/*****
  * The privacy direct filter is very important and prescreens against a single
  * known spam trap approach.  privachdirect.net "catches" senders and puts them
  * on SORBS by placing receiving spam-trap domains all over the place.  They are
@@ -31,17 +32,19 @@
  * domains against the IPs of both www.privacydirect.net and privacydirect.net.
  * If there's any overlap, the address and domain are snagged permanently
  * shut down.
- *
-new (class PrivacyDirectFilter extends SmtpFilter {
+*****/
+register(class SmtpPrivacyDirectFilter {
     static addrs = null;
     static cache = null;
     
     constructor() {
-        super();
-        this.name = 'Privacy Direct Filter';
+        return new Promise(async (ok, fail) => {
+            ok(this);
+        });
     }
     
-    async exec(outbound) {
+    async filter(msg) {
+        /*
         await this.init();
     
         for (let recipient of outbound.recipients) {
@@ -79,6 +82,8 @@ new (class PrivacyDirectFilter extends SmtpFilter {
                 }
             }
         }
+        */
+        return true;
     }
     
     async init() {
@@ -146,5 +151,4 @@ new (class PrivacyDirectFilter extends SmtpFilter {
         
         return addrs;
     }
-})();
-*/
+});

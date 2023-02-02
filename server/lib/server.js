@@ -185,12 +185,15 @@ if (CLUSTER.isPrimary) {
                 let i;
                 let count = this.config.workers - this.free.length - Object.keys(this.used).length;
                 let platformEnv = { KODE_SERVER_NAME: this.serverName };
+
                 for (i = 0; i < count; i++) {
                     let worker = CLUSTER.fork(platformEnv);
                     worker.on('online', worker => this.onWorkerOnline(worker));
                     worker.on('disconnect', () => this.onWorkerGone(worker));
                     worker.on('exit', () => this.onWorkerGone(worker));
                 }
+
+                ok();
             });
         }
 

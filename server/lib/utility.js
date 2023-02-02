@@ -179,6 +179,17 @@ register(async function pathExists(path) {
 
 
 /*****
+ * A simple utility that provides a clean convenient inline pause in program
+ * execution for the current "thread".
+*****/
+register(async function pause(milliseconds) {
+    return new Promise(async (ok, fail) => {
+        setTimeout(() => ok(), milliseconds);
+    });
+});
+
+
+/*****
  * For each of the passed relative or absolute paths, recurse each directory
  * to generate an array of the absolute paths to all files in the directory
  * and its subdirectory tree.  The directory and subdirectory are not included

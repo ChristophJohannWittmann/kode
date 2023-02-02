@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2022 Infosearch International, Reno NV
+ * Copyright (c) 2017-2022 Kode Programming
+ * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,20 +22,25 @@
  */
 
 
-/**
+/*****
  * The status filter is a preliminary filter that inspects the status of the
  * address and domain of each recipient.  If a recipient's domain is not sendable,
  * the recipient is rejected.  If the recipient's address is not sendable or the
  * recipient has opted out, the recipient is rejected.  If no recipients have been
  * accepted, the smptSend or record is marked as failed as well.
- *
-new (class StatusFilter extends SmtpFilter {
+*****/
+register(class SmtpStatusFilter {
     constructor() {
-        super();
-        this.name = 'Status Filter';
+        return new Promise(async (ok, fail) => {
+            ok(this);
+        });
     }
     
-    async exec(outbound) {
+    async filter(msg) {
+        for (let recipient of Object.values(msg.pinned.recipients)) {
+        }
+        return true;
+        /*
         for (let recipient of outbound.recipients) {
             let addr = outbound.addrMap[recipient.addr];
             let domain = outbound.domainMap[recipient.domain];
@@ -71,6 +77,6 @@ new (class StatusFilter extends SmtpFilter {
             
             recipient.verified = addr.verified;
         }
+        */
     }
-})();
-*/
+});
