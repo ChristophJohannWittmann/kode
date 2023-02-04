@@ -163,7 +163,7 @@ register(class EmailMessage extends DboMsg {
             this.pinned.from = mkDboMsgEndpoint({
                 msgOid: this.oid,
                 category: 'from',
-                status: 'spooled',
+                status: 'ok',
                 userOid: emailAddress.ownerType == 'DboUser' ? emailAddress.ownerOid : 0n,
                 endpointType: 'DboEmailAddress',
                 endpointOid: emailAddress.oid,

@@ -93,14 +93,15 @@ mkDbSchema(
     {
         name: 'emailAddress',
         columns: [
-            { name: 'ownerType',    type: dbText, size:   20 },
-            { name: 'ownerOid',     type: dbInt64            },
-            { name: 'domainOid',    type: dbInt64            },
-            { name: 'user',         type: dbText, size:  200 },
-            { name: 'addr',         type: dbText, size:  200 },
-            { name: 'verified',     type: dbBool             },
-            { name: 'lastVerified', type: dbTime             },
-            { name: 'error',        type: dbText, size: 1000 },
+            { name: 'ownerType',     type: dbText, size:   20 },
+            { name: 'ownerOid',      type: dbInt64            },
+            { name: 'domainOid',     type: dbInt64            },
+            { name: 'user',          type: dbText, size:  200 },
+            { name: 'addr',          type: dbText, size:  200 },
+            { name: 'verified',      type: dbBool             },
+            { name: 'lastVerified',  type: dbTime             },
+            { name: 'lastDelivered', type: dbTime             },
+            { name: 'error',         type: dbText, size: 1000 },
         ],
         indexes: [
             'ownerType:asc, ownerOid:asc',

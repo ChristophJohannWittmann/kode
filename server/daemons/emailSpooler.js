@@ -23,30 +23,6 @@
 
 
 /*****
- * Require all of the SMTP filters that are built into the framework for outgoing
- * SMTP messages.  Filters vary in a lot of aspects.  The main conformity with
- * regards to them is that they have an async maker and an async method called
- * filter().  Filter returns true if the message successfully passed filtering.
- * If it hasn't passed filtering, the filter is also responsible for updating
- * the status of the msg and msgEndpoint objects.
-*****/
-require('../obj/smtp/domainFilter.js');
-require('../obj/smtp/neverBounceFilter.js');
-require('../obj/smtp/privacyDirectFilter.js');
-require('../obj/smtp/statusFilter.js');
-
-
-/*****
- * These are the mail sending agents supported by the framework.  A mail sending
- * agent is responsible for delivering and receiving emails via the internet.
- * Only a single agent may be active at a time, whose value generally does NOT
- * change once a server has been started.
-*****/
-require('../obj/smtp/mailgunAgent.js');
-require('../obj/smtp/nullAgent.js');
-
-
-/*****
  * The email spooler is responsible for accepting and validating requests for
  * sending an email message, creating the DBMS records, and then contacting the
  * SMTP delivery agent to complete the request.  Note that the delivery agent
@@ -66,7 +42,66 @@ singleton(class EmailSpooler extends Daemon {
         Ipc.on('#ServerReady', message => this.initialize());
     }
 
+    async apiUpdateMsg(dbc, message) {
+        let emailMessage = await mkEmailMessage(dbc, message.msg.oid);
+
+        if (emailMessage) {
+            if (!emailMessage.msgid) {
+                emailMessage.msgid = message.msg.msgid;
+                await emailMessage.save(dbc);
+            }
+
+            if (Array.isArray(message.recipients)) {
+                for (let recipient of message.recipients) {
+                    let endpoint = await getDboMsgEndpoint(dbc, recipient.oid);
+                    let emailAddress = await getDboEmailAddress(dbc, endpoint.endpointOid);
+
+                    switch (recipient.status) {
+                        case 'delivered':
+                            emailAddress.lastDelivered = mkTime();
+                            emailAddress.error = '';
+                            break;
+
+                        case 'failed':
+                            emailAddress.verified = false;
+                            emailAddress.lastVerified = mkTime();
+                            recipient.error ? emailAddress.error = recipient.error : false;
+                            break;
+                    }
+
+                    endpoint.status = recipient.status;
+                    await endpoint.save(dbc);
+                    await emailAddress.save(dbc);
+                }
+            }
+
+            if (Array.isArray(message.domains)) {
+                for (let domain of message.domains) {
+                    let dboDomain = await getDboDomain(dbc, domain.oid)
+
+                    switch (domain.status) {
+                        case 'ok':
+                            dboDomain.verified = true;
+                            dboDomain.lastVerified = mkTime();
+                            dboDomain.error = '';
+                            await dboDomain.save(dbc);
+                            break;
+
+                        case 'refused':
+                        case 'unsendable':
+                            dboDomain.verified = false;
+                            dboDomain.lastVerified = mkTime();
+                            dboDomain.error = domain.error;
+                            await dboDomain.save(dbc);
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
     async initialize() {
+        return;
         this.filters = [
             await mkSmtpStatusFilter(),
             await mkSmtpDomainFilter(),
@@ -166,38 +201,13 @@ singleton(class EmailSpooler extends Daemon {
         this.filterRunning = false;
     }
 
-    async onAgentUpdate(message) {
+    async onApi(message) {
         let dbc = await dbConnect();
-        let emailMessage = await mkEmailMessage(dbc, message.msgOid);
 
-        if (emailMessage) {
-            emailMessage.msgid = message.msgid;
-            await emailMessage.save(dbc);
-
-            for (let recipientStatus of message.recipients) {
-                let emailRecipient = emailMessage.getRecipient(recipientStatus.oid);
-
-                if (emailRecipient) {
-                    emailRecipient.status = recipientStatus.status;
-                    let domain = await getDboDomain(dbc, emailRecipient.endpointOid);
-
-                    if (recipientStatus.status == 'delivered') {
-                        domain.verified = true;
-                        domain.lastVerified = mkTime();
-                    }
-                    else if (recipientStatus.status == 'failed') {
-                        if (recipientStatus.domainStatus != 'ok') {
-                            domain.error = `${recipientStatus.domainStatus}; ${recipientStatus.domainError}`;
-                        }
-
-                        domain.verified = false;
-                        domain.lastVerified = mkTime();
-                    }
-
-                    await domain.save(dbc);
-                    await emailRecipient.save(dbc);
-                }
-            }
+        switch (message.action) {
+            case 'MsgUpdate':
+                await this.apiUpdateMsg(dbc, message);
+                break;
         }
 
         await dbc.commit();

@@ -24,15 +24,39 @@
 
 /*****
 *****/
-register(class SmtpMailgunAgent {
-    constructor(config) {
-        this.config = config;
+if (CLUSTER.isPrimary) {
+    register(class SmtpAgentMailGun {
+        constructor(config) {
+            this.config = config;
+            
+            return new Promise(async (ok, fail) => {
+                ok(this);
+            });
+        }
         
-        return new Promise(async (ok, fail) => {
-            ok(this);
-        });
-    }
-    
-    async deliver(msg) {
-    }
-});
+        async deliver(msg) {
+        }
+    });
+}
+
+
+/*****
+*****/
+if (CLUSTER.isWorker) {
+    register(class SmtpApiMailGun extends Webx {
+        constructor(module, reference) {
+            super(module, reference);
+        }
+
+        async handleGET(req, rsp) {
+            console.log('hit it....');
+
+            rsp.endStatus(200);
+        }
+
+        async init() {
+            await super.init();
+            this.agentConf = Config.communications.smtp.agents[Config.communications.smtp.agent];
+        }
+    });
+}

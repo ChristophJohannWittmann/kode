@@ -29,54 +29,56 @@
  * recipient has opted out, the recipient is rejected.  If no recipients have been
  * accepted, the smptSend or record is marked as failed as well.
 *****/
-register(class SmtpStatusFilter {
-    constructor() {
-        return new Promise(async (ok, fail) => {
-            ok(this);
-        });
-    }
-    
-    async filter(msg) {
-        for (let recipient of Object.values(msg.pinned.recipients)) {
+if (CLUSTER.isPrimary) {
+    register(class SmtpStatusFilter {
+        constructor() {
+            return new Promise(async (ok, fail) => {
+                ok(this);
+            });
         }
-        return true;
-        /*
-        for (let recipient of outbound.recipients) {
-            let addr = outbound.addrMap[recipient.addr];
-            let domain = outbound.domainMap[recipient.domain];
-            
-            if (domain.verified && !domain.sendable) {
-                if (domain.issue == 'spamtrap') {
-                    recipient.status = 'spamtrap';
-                    outbound.record.status = 'failed';
-                    outbound.record.issue = 'spamtrap';
-                    continue;
-                }
-                else {
-                    recipient.status = 'failed';
-                    continue;
-                }
+        
+        async filter(msg) {
+            for (let recipient of Object.values(msg.pinned.recipients)) {
             }
-            
-            if (addr.verified && !addr.sendable) {
-                if (addr.issue == 'spamtrap') {
-                    recipient.status = 'spamtrap';
-                    outbound.record.status = 'failed';
-                    outbound.record.issue = 'spamtrap';
+            return true;
+            /*
+            for (let recipient of outbound.recipients) {
+                let addr = outbound.addrMap[recipient.addr];
+                let domain = outbound.domainMap[recipient.domain];
+                
+                if (domain.verified && !domain.sendable) {
+                    if (domain.issue == 'spamtrap') {
+                        recipient.status = 'spamtrap';
+                        outbound.record.status = 'failed';
+                        outbound.record.issue = 'spamtrap';
+                        continue;
+                    }
+                    else {
+                        recipient.status = 'failed';
+                        continue;
+                    }
+                }
+                
+                if (addr.verified && !addr.sendable) {
+                    if (addr.issue == 'spamtrap') {
+                        recipient.status = 'spamtrap';
+                        outbound.record.status = 'failed';
+                        outbound.record.issue = 'spamtrap';
+                        continue;
+                    }
+                    else {
+                        recipient.status = 'failed';
+                        continue;
+                    }
+                }
+                else if (addr.optout) {
+                    recipient.status = 'optout';
                     continue;
                 }
-                else {
-                    recipient.status = 'failed';
-                    continue;
-                }
+                
+                recipient.verified = addr.verified;
             }
-            else if (addr.optout) {
-                recipient.status = 'optout';
-                continue;
-            }
-            
-            recipient.verified = addr.verified;
+            */
         }
-        */
-    }
-});
+    });
+}

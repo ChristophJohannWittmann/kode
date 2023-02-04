@@ -107,6 +107,18 @@ global.env = {
 
 
 /*****
+*****/
+async function loadAgents() {
+}
+
+
+/*****
+*****/
+async function loadApis() {
+}
+
+
+/*****
  * This function is called only when first bootstrapping a new server with an
  * empty user database.  Create a new user named Charlie Root, which will be used
  * for signing in to get things going.
@@ -144,6 +156,7 @@ async function seedUser(dbc) {
         addr: 'charlie@kodeprogramming.org',
         verified: false,
         lastVerified: mkTime(0),
+        lastDelivered: mkTime(0),
         error: '',
     }).save(dbc);
 
@@ -355,7 +368,10 @@ async function seedUser(dbc) {
             }
         }
 
+        await loadAgents();
         clearBootMode();
+        await onSingletons();
+
         logPrimary('[ Kode Application Server Ready ]');
         Ipc.sendPrimary({ messageName: '#ServerReady' });
         Ipc.sendWorkers({ messageName: '#ServerReady' });
@@ -367,7 +383,6 @@ async function seedUser(dbc) {
             if (false) {
                 let msg = await mkEmailMessage(dbc, 1n);
                 console.log(msg.getOtherRecipients());
-                //console.log(msg);
             }
             else if (false) {
                 let msg = await mkEmailMessage(dbc, {
@@ -391,7 +406,6 @@ async function seedUser(dbc) {
                     </html>
                     `
                 });
-
                 console.log(msg);
             }
             else if (true) {
@@ -405,17 +419,14 @@ async function seedUser(dbc) {
                         'chris.wittmann@icloud.com',
                         'chris.wittmann@infosearch.online',
                     ],
-                    text: 'TEST MESSAGE!',                    
+                    text: 'TEST MESSAGE!',
                 });
-
-                //console.log(response);
+                console.log(response);
             }
 
             await dbc.rollback();
             await dbc.free();
         }
-        // **********************************************************************************
-        // **********************************************************************************
         if (false) {
             setTimeout(async () => {
                 let response = await Ipc.query({
@@ -440,7 +451,8 @@ async function seedUser(dbc) {
                 eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
             }
         }
-    }
 
-    await onSingletons();
+        await loadApis();
+        await onSingletons();
+    }
 })();

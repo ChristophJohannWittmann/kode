@@ -31,29 +31,42 @@
  * that are blocked internally.  By responding as blocked, none of the email
  * addres nor domain records are modified.
 *****/
-register(class SmtpNullAgent {
-    constructor(config) {
-        this.config = config;
+if (CLUSTER.isPrimary) {
+    register(class SmtpAgentNull {
+        constructor(config) {
+            this.config = config;
 
-        return new Promise(async (ok, fail) => {
-            ok(this);
-        });
-    }
-    
-    async deliver(msg) {
-        Ipc.sendPrimary({
-            messageName: '#EmailSpoolerAgentUpdate',
-            msgOid: msg.oid,
-            msgid: '[MSGID]',
-            recipients: Object.values(msg.pinned.recipients).map(recipient => {
-                return {
+            return new Promise(async (ok, fail) => {
+                ok(this);
+            });
+        }
+        
+        async deliver(msg) {
+            let message = {
+                messageName: '#EmailSpoolerApi',
+                action: 'MsgUpdate',
+                msg: {
+                    oid: msg.oid,
+                    msgid: `<msgid-${mkTime().toISOString()}-${msg.oid}>`,
+                },
+                domains: [],
+                recipients: [],
+            };
+
+            recipients: Object.values(msg.pinned.recipients).forEach(async recipient => {
+                message.domains.push({
+                    oid: recipient.pinned.domainOid,
+                    status: 'ok',
+                });
+
+                message.recipients.push({
                     oid: recipient.oid,
-                    status: 'null',
-                    diagnostic: '',
-                    domainStatus: 'ok',
-                    domainError: '',
-                }
-            }),
-        });
-    }
-});
+                    status: 'delivered',
+                    error: '',
+                });
+            });
+
+            Ipc.sendPrimary(message);
+        }
+    });
+}

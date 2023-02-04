@@ -28,61 +28,63 @@
  * suspicous in nature.  Again, this filter on screens out suspicious domaons
  * that are NOT verified.
 *****/
-register(class SmtpDomainFilter {
-    constructor() {
-        return new Promise(async (ok, fail) => {
-            ok(this);
-        });
-    }
-    
-    async filter(msg) {
-        /*
-        const domains = {};
-    
-        for (let recipient of outbound.recipients) {
-            let addr = outbound.addrMap[recipient.addr];
-            let domain = outbound.domainMap[recipient.domain];
-            
-            if (!domain.verified && domain.sendable) {
-                if (domain.id in domains) {
-                    if (!domains[domain.id].sendable) {
-                        recipient.status = 'failed'
+if (CLUSTER.isPrimary) {
+    register(class SmtpDomainFilter {
+        constructor() {
+            return new Promise(async (ok, fail) => {
+                ok(this);
+            });
+        }
+        
+        async filter(msg) {
+            /*
+            const domains = {};
+        
+            for (let recipient of outbound.recipients) {
+                let addr = outbound.addrMap[recipient.addr];
+                let domain = outbound.domainMap[recipient.domain];
+                
+                if (!domain.verified && domain.sendable) {
+                    if (domain.id in domains) {
+                        if (!domains[domain.id].sendable) {
+                            recipient.status = 'failed'
+                        }
                     }
-                }
-                else {
-                    domains[domain.id] = domain;
-                    
-                    if (!await this.checkMX(domain)) {
-                        domain.sendable = false;
-                        domain.verified = true;
-                        domain.issue = 'mxcheck';
-                        addr.sendable = false;
-                        addr.verified = true;
-                        addr.issue = 'mxcheck';
-                        recipient.status = 'failed';
-                    }
-                    else if (!await this.checkNextThing(domain)) {
-                        domain.sendable = false;
-                        domain.verified = true;
-                        domain.issue = '**REPLACE**';
-                        addr.sendable = false;
-                        addr.verified = true;
-                        addr.issue = '**REPLACE**';
-                        recipient.status = 'failed';
+                    else {
+                        domains[domain.id] = domain;
+                        
+                        if (!await this.checkMX(domain)) {
+                            domain.sendable = false;
+                            domain.verified = true;
+                            domain.issue = 'mxcheck';
+                            addr.sendable = false;
+                            addr.verified = true;
+                            addr.issue = 'mxcheck';
+                            recipient.status = 'failed';
+                        }
+                        else if (!await this.checkNextThing(domain)) {
+                            domain.sendable = false;
+                            domain.verified = true;
+                            domain.issue = '**REPLACE**';
+                            addr.sendable = false;
+                            addr.verified = true;
+                            addr.issue = '**REPLACE**';
+                            recipient.status = 'failed';
+                        }
                     }
                 }
             }
+            */
+            return true;
         }
-        */
-        return true;
-    }
-    
-    async checkMX(domain) {
-        let exchanges = await requestPrimary({ category: 'DnsMX', domain: domain.domain });
-        return exchanges.mx.length  > 0;
-    }
-    
-    async checkNextThing(domain) {
-        return true;
-    }
-});
+        
+        async checkMX(domain) {
+            let exchanges = await requestPrimary({ category: 'DnsMX', domain: domain.domain });
+            return exchanges.mx.length  > 0;
+        }
+        
+        async checkNextThing(domain) {
+            return true;
+        }
+    });
+}

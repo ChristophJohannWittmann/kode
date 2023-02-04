@@ -33,122 +33,124 @@
  * If there's any overlap, the address and domain are snagged permanently
  * shut down.
 *****/
-register(class SmtpPrivacyDirectFilter {
-    static addrs = null;
-    static cache = null;
-    
-    constructor() {
-        return new Promise(async (ok, fail) => {
-            ok(this);
-        });
-    }
-    
-    async filter(msg) {
-        /*
-        await this.init();
-    
-        for (let recipient of outbound.recipients) {
-            let smtpAddr = outbound.addrMap[recipient.addr];
-            let smtpDomain = outbound.domainMap[recipient.domain];
-            
-            if (!smtpDomain.verified && smtpDomain.sendable) {
-                for (let addr of await this.resolve(smtpDomain.domain, `www.${smtpDomain.domain}`)) {
-                    if (addr in PrivacyDirectFilter.ipAddrs) {                        
-                        outbound.record.status = 'failed';
-                        outbound.record.issue = 'spamtrap';
-                        
-                        recipient.status = 'spamtrap';
-                        
-                        smtpDomain.locked = true;
-                        smtpDomain.verified = true;
-                        smtpDomain.sendable = false;
-                        smtpDomain.issue = 'spamtrap';
-                        
-                        let history = outbound.createDomainHistory(smtpDomain);
-                        history.action = 'blacklisted'
-                        history.issue = 'spamtrap (privacydirect.net)';
-                        
-                        smtpAddr.locked = true;
-                        smtpAddr.verified = true;
-                        smtpAddr.sendable = false;
-                        smtpAddr.issue = 'spamtrap';
-                        
-                        history = outbound.createAddrHistory(smtpAddr);
-                        history.action = 'blacklisted'
-                        history.issue = 'spamtrap (privacydirect.net)';
-                        
-                        break;
+if (CLUSTER.isPrimary) {
+    register(class SmtpPrivacyDirectFilter {
+        static addrs = null;
+        static cache = null;
+        
+        constructor() {
+            return new Promise(async (ok, fail) => {
+                ok(this);
+            });
+        }
+        
+        async filter(msg) {
+            /*
+            await this.init();
+        
+            for (let recipient of outbound.recipients) {
+                let smtpAddr = outbound.addrMap[recipient.addr];
+                let smtpDomain = outbound.domainMap[recipient.domain];
+                
+                if (!smtpDomain.verified && smtpDomain.sendable) {
+                    for (let addr of await this.resolve(smtpDomain.domain, `www.${smtpDomain.domain}`)) {
+                        if (addr in PrivacyDirectFilter.ipAddrs) {                        
+                            outbound.record.status = 'failed';
+                            outbound.record.issue = 'spamtrap';
+                            
+                            recipient.status = 'spamtrap';
+                            
+                            smtpDomain.locked = true;
+                            smtpDomain.verified = true;
+                            smtpDomain.sendable = false;
+                            smtpDomain.issue = 'spamtrap';
+                            
+                            let history = outbound.createDomainHistory(smtpDomain);
+                            history.action = 'blacklisted'
+                            history.issue = 'spamtrap (privacydirect.net)';
+                            
+                            smtpAddr.locked = true;
+                            smtpAddr.verified = true;
+                            smtpAddr.sendable = false;
+                            smtpAddr.issue = 'spamtrap';
+                            
+                            history = outbound.createAddrHistory(smtpAddr);
+                            history.action = 'blacklisted'
+                            history.issue = 'spamtrap (privacydirect.net)';
+                            
+                            break;
+                        }
                     }
                 }
             }
+            */
+            return true;
         }
-        */
-        return true;
-    }
-    
-    async init() {
-        if (!PrivacyDirectFilter.ipAddrs) {
-            let pg = await pgConnect();
-            let params = await selectPgoParameter(pg, `_name='smtp-pdfilter'`);
-            
-            if (!params.length) {
-                let param = PgoParameter({
-                    name: 'smtp-pdfilter',
-                    value: [
-                        'privacydirect.net',
-                        'www.privacydirect.net'
-                    ]
-                });
+        
+        async init() {
+            if (!PrivacyDirectFilter.ipAddrs) {
+                let pg = await pgConnect();
+                let params = await selectPgoParameter(pg, `_name='smtp-pdfilter'`);
                 
-                await param.save(pg);
-                var hosts = param.value;
-            }
-            else {
-                var hosts = params[0].value;
-            }
-            
-            await pg.commit();
-            await pg.free();
-            
-            PrivacyDirectFilter.cache = {};
-            PrivacyDirectFilter.ipAddrs = {};
+                if (!params.length) {
+                    let param = PgoParameter({
+                        name: 'smtp-pdfilter',
+                        value: [
+                            'privacydirect.net',
+                            'www.privacydirect.net'
+                        ]
+                    });
+                    
+                    await param.save(pg);
+                    var hosts = param.value;
+                }
+                else {
+                    var hosts = params[0].value;
+                }
+                
+                await pg.commit();
+                await pg.free();
+                
+                PrivacyDirectFilter.cache = {};
+                PrivacyDirectFilter.ipAddrs = {};
 
-            for (let host of hosts) {
-                let response = await requestPrimary({ category: 'DnsResolve', hostname: host });
-                let allAddrs = response.host.ipv4.ipaddrs.concat(response.host.ipv6.ipaddrs);
+                for (let host of hosts) {
+                    let response = await requestPrimary({ category: 'DnsResolve', hostname: host });
+                    let allAddrs = response.host.ipv4.ipaddrs.concat(response.host.ipv6.ipaddrs);
+                    
+                    allAddrs.forEach(addr => {
+                        if (addr in PrivacyDirectFilter.ipAddrs) {
+                            PrivacyDirectFilter.ipAddrs[addr].push(host);
+                        }
+                        else {
+                            PrivacyDirectFilter.ipAddrs[addr] = [host];
+                        }
+                    });
+                }
                 
-                allAddrs.forEach(addr => {
-                    if (addr in PrivacyDirectFilter.ipAddrs) {
-                        PrivacyDirectFilter.ipAddrs[addr].push(host);
-                    }
-                    else {
-                        PrivacyDirectFilter.ipAddrs[addr] = [host];
-                    }
-                });
-            }
-            
-            setTimeout(() => PrivacyDirectFilter.ipAddrs = null, 24*60*60*1000);
-        }
-    }
-    
-    async resolve(...hostnames) {
-        let addrs = [];
-        
-        for (let hostname of hostnames) {
-            if (hostname in PrivacyDirectFilter.cache) {
-                var hostInfo = PrivacyDirectFilter.cache[hostname];
-            }
-            else {
-                var hostInfo = await requestPrimary({ category: 'DnsResolve', hostname: hostname });
-                PrivacyDirectFilter.cache[hostname] = hostInfo;
-            }
-            
-            if (hostInfo) {
-                addrs = addrs.concat(hostInfo.host.ipv4.ipaddrs);
-                addrs = addrs.concat(hostInfo.host.ipv6.ipaddrs);
+                setTimeout(() => PrivacyDirectFilter.ipAddrs = null, 24*60*60*1000);
             }
         }
         
-        return addrs;
-    }
-});
+        async resolve(...hostnames) {
+            let addrs = [];
+            
+            for (let hostname of hostnames) {
+                if (hostname in PrivacyDirectFilter.cache) {
+                    var hostInfo = PrivacyDirectFilter.cache[hostname];
+                }
+                else {
+                    var hostInfo = await requestPrimary({ category: 'DnsResolve', hostname: hostname });
+                    PrivacyDirectFilter.cache[hostname] = hostInfo;
+                }
+                
+                if (hostInfo) {
+                    addrs = addrs.concat(hostInfo.host.ipv4.ipaddrs);
+                    addrs = addrs.concat(hostInfo.host.ipv6.ipaddrs);
+                }
+            }
+            
+            return addrs;
+        }
+    });
+}
