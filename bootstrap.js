@@ -107,18 +107,6 @@ global.env = {
 
 
 /*****
-*****/
-async function loadAgents() {
-}
-
-
-/*****
-*****/
-async function loadApis() {
-}
-
-
-/*****
  * This function is called only when first bootstrapping a new server with an
  * empty user database.  Create a new user named Charlie Root, which will be used
  * for signing in to get things going.
@@ -365,10 +353,11 @@ async function seedUser(dbc) {
                 let server;
                 eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
                 await server.start();
+                Ipc.sendPrimary({ messageName: `#ServerReady:${serverName}` });
+                Ipc.sendWorkers({ messageName: `#ServerReady:${serverName}` });
             }
         }
 
-        await loadAgents();
         clearBootMode();
         await onSingletons();
 
@@ -377,6 +366,7 @@ async function seedUser(dbc) {
         Ipc.sendWorkers({ messageName: '#ServerReady' });
         // **********************************************************************************
         // **********************************************************************************
+        /*
         if (false) {
             let dbc = await dbConnect();
 
@@ -437,6 +427,7 @@ async function seedUser(dbc) {
                 console.log(response);
             }, 1000);
         }
+        */
         // **********************************************************************************
         // **********************************************************************************
     }
@@ -452,7 +443,6 @@ async function seedUser(dbc) {
             }
         }
 
-        await loadApis();
         await onSingletons();
     }
 })();

@@ -43,6 +43,15 @@ if (CLUSTER.isPrimary) {
 /*****
 *****/
 if (CLUSTER.isWorker) {
+    Ipc.on('#ServerReady:http', async message => {
+        //console.log(message);
+        /*
+        await mkSmtpApiMailGun(null, {
+            url: '/api/mg',
+        });
+        */
+    });
+
     register(class SmtpApiMailGun extends Webx {
         constructor(module, reference) {
             super(module, reference);

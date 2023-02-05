@@ -183,8 +183,15 @@ if (CLUSTER.isPrimary) {
                 }
 
                 let i;
+                let started = 0;
                 let count = this.config.workers - this.free.length - Object.keys(this.used).length;
                 let platformEnv = { KODE_SERVER_NAME: this.serverName };
+
+                Ipc.on(`#ServerWorkerStarted:${this.serverName}`, message => {
+                    if (++started >= count) {
+                        ok();
+                    }
+                });
 
                 for (i = 0; i < count; i++) {
                     let worker = CLUSTER.fork(platformEnv);
@@ -192,8 +199,6 @@ if (CLUSTER.isPrimary) {
                     worker.on('disconnect', () => this.onWorkerGone(worker));
                     worker.on('exit', () => this.onWorkerGone(worker));
                 }
-
-                ok();
             });
         }
 

@@ -77,6 +77,8 @@ if (CLUSTER.isWorker) {
                 this.https.listen(this.config.https, this.getAddress());
                 this.https.on('upgrade', (...args) => this.upgrade(...args));
             }
+            
+            Ipc.sendPrimary({ messageName: `#ServerWorkerStarted:${serverName}` });
         }
 
         async handle(httpReq, httpRsp, tls) {

@@ -48,6 +48,7 @@ if (CLUSTER.isPrimary) {
                 msg: {
                     oid: msg.oid,
                     msgid: `<msgid-${mkTime().toISOString()}-${msg.oid}>`,
+                    status: 'closed',
                 },
                 domains: [],
                 recipients: [],

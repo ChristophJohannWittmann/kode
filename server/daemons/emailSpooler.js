@@ -46,10 +46,9 @@ singleton(class EmailSpooler extends Daemon {
         let emailMessage = await mkEmailMessage(dbc, message.msg.oid);
 
         if (emailMessage) {
-            if (!emailMessage.msgid) {
-                emailMessage.msgid = message.msg.msgid;
-                await emailMessage.save(dbc);
-            }
+            emailMessage.msgid = message.msg.msgid;
+            emailMessage.status = message.msg.status;
+            await emailMessage.save(dbc);
 
             if (Array.isArray(message.recipients)) {
                 for (let recipient of message.recipients) {
@@ -101,7 +100,6 @@ singleton(class EmailSpooler extends Daemon {
     }
 
     async initialize() {
-        return;
         this.filters = [
             await mkSmtpStatusFilter(),
             await mkSmtpDomainFilter(),
@@ -109,8 +107,9 @@ singleton(class EmailSpooler extends Daemon {
             await mkSmtpNeverBounceFilter(),
         ];
 
-        let agentConfig = Config.communications.smtp.agents[Config.communications.smtp.agent];
-        await eval(`(async () => this.deliveryAgent = await mk${agentConfig.className}(agentConfig))()`);
+        this.smtpCode = Config.smtp.selected;
+        this.config = Config.smtp[this.smtpCode];
+        await eval(`(async () => this.agent = await mk${this.config.agent.className}(this.config))()`);
         let dbc = await dbConnect();
 
         for (let dboMsg of await selectDboMsg(
@@ -149,14 +148,14 @@ singleton(class EmailSpooler extends Daemon {
             }
 
             msg.status = 'sending';
-            msg.agent = `SMTP/${this.deliveryAgent.config.code}; ${this.deliveryAgent.config.name}`;
+            msg.agent = `SMTP/${this.smtpCode}; ${this.agent.config.name}`;
 
             let dbc = await dbConnect();
             await msg.save(dbc);
             await dbc.commit();
             await dbc.free();
 
-            this.deliveryAgent.deliver(msg);
+            this.agent.deliver(msg);
             this.delivering[msg.oid] = msg;
             await pause(20);
         }
