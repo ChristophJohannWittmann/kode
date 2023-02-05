@@ -177,7 +177,7 @@ register(class HookResource {
         }
 
         if (!(this.url in ResourceLibrary.urls)) {
-            ResourceLibrary.register({
+            ResourceLibrary.register(kodeModule, {
                 url: url,
                 hook: this,
             });
@@ -348,7 +348,7 @@ singleton(class ResourceLibrary {
         }
     }
     
-    async register(reference, module) {
+    async register(module, reference) {
         for (let ref of await this.expandReference(reference)) {
             if (ref.expandedUrl in this.urls) {
                 logPrimary(`    WARNING: "Duplicate URL ignored"  URL: "${ref.expandedUrl}"`);

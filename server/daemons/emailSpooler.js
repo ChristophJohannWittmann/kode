@@ -109,7 +109,7 @@ singleton(class EmailSpooler extends Daemon {
 
         this.smtpCode = Config.smtp.selected;
         this.config = Config.smtp[this.smtpCode];
-        await eval(`(async () => this.agent = await mk${this.config.agent.className}(this.config))()`);
+        await eval(`(async () => this.agent = await mk${this.config.agent}(this.config))()`);
         let dbc = await dbConnect();
 
         for (let dboMsg of await selectDboMsg(

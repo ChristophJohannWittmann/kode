@@ -82,10 +82,29 @@ register(class Module {
     }
     
     async load() {
-        await this.execute('validatePath');
-        await this.execute('loadModule');
-        await this.execute('loadFeatures');
-        await this.execute('loadDatabases');
+        if (this.path == '#BUILTIN') {
+            global.builtinModule = this;
+            this.container = global;
+
+            this.settings = {
+                title: 'Builtin',
+                description: 'Buildin Framework Module.',
+                container: 'builtin',
+                features: [],
+                databases: {},
+                webx : {
+                    MailGun: {
+                        'className': 'SmtpApiMailGun'
+                    }
+                }                
+            }
+        }
+        else {
+            await this.execute('validatePath');
+            await this.execute('loadModule');
+            await this.execute('loadFeatures');
+            await this.execute('loadDatabases');
+        }
     }
 
     async loadConfig() {
@@ -197,13 +216,13 @@ register(class Module {
             if (this.status == 'ok') {
                 if (Array.isArray(this.settings.references)) {
                     for (let reference of this.settings.references) {
-                        ResourceLibrary.register(reference, this);
+                        ResourceLibrary.register(this, reference);
                     }
                 }
 
                 if (Array.isArray(this.config.references)) {
                     for (let reference of this.config.references) {
-                        ResourceLibrary.register(reference, this);
+                        ResourceLibrary.register(this, reference);
                     }
                 }
             }

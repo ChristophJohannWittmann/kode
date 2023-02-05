@@ -44,12 +44,12 @@ if (CLUSTER.isPrimary) {
 *****/
 if (CLUSTER.isWorker) {
     Ipc.on('#ServerReady:http', async message => {
-        //console.log(message);
-        /*
-        await mkSmtpApiMailGun(null, {
-            url: '/api/mg',
-        });
-        */
+        if ('mailgun' in Config.smtp) {
+            ResourceLibrary.register(builtinModule, {
+                url: '/api/mg',
+                webx: 'MailGun',
+            });
+        }
     });
 
     register(class SmtpApiMailGun extends Webx {
@@ -58,14 +58,18 @@ if (CLUSTER.isWorker) {
         }
 
         async handleGET(req, rsp) {
-            console.log('hit it....');
+            console.log('method GET for testing....');
 
+            rsp.endStatus(200);
+        }
+
+        async handlePOST(req, rsp) {
             rsp.endStatus(200);
         }
 
         async init() {
             await super.init();
-            this.agentConf = Config.communications.smtp.agents[Config.communications.smtp.agent];
+            this.apiConfig = Config.smtp.mailgun;
         }
     });
 }

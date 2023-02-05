@@ -302,6 +302,8 @@ async function seedUser(dbc) {
         return module;
     }
 
+    await loadModule('#BUILTIN');
+
     for (let modulePath of Config.modules) {
         await loadModule(absolutePath(env.configPath, modulePath));
     }
@@ -366,7 +368,6 @@ async function seedUser(dbc) {
         Ipc.sendWorkers({ messageName: '#ServerReady' });
         // **********************************************************************************
         // **********************************************************************************
-        /*
         if (false) {
             let dbc = await dbConnect();
 
@@ -427,7 +428,6 @@ async function seedUser(dbc) {
                 console.log(response);
             }, 1000);
         }
-        */
         // **********************************************************************************
         // **********************************************************************************
     }
