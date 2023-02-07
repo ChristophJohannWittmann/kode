@@ -106,7 +106,7 @@ register(class Mime {
             {code: 'video/3gpp',                                                                            type: 'binary', exts: {'3gp':0}},
             {code: 'video/3gpp2',                                                                           type: 'binary', exts: {'3g2':0}},
             {code: 'application/x-7z-compressed',                                                           type: 'binary', exts: {'7z':0}},
-            {code: 'multipart/form-data',                                                                   type: 'binary', exts: {}},
+            {code: 'multipart/form-data',                                                                   type: 'string', exts: {}},
             {code: 'unknown/unknown',                                                                       type: 'binary', exts: {}},
         ].forEach(mimeType => {
             Mime.byMimeCode[mimeType.code] = mimeType;

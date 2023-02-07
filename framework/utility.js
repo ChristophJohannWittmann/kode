@@ -321,6 +321,21 @@ register(function flattenObject(object, override) {
 
 
 /*****
+*****/
+register(function parseMultipartFormData(text, boundary) {
+    let parts = [];
+
+    for (let part of text.split(boundary)) {
+        parts.push({
+            raw: part,
+        });
+    }
+
+    return parts;
+});
+
+
+/*****
  * In general, it's useful to be able to convert characters between camelCase,
  * PascalCase, and snake_case.  In our world, PascalCase is just a special case
  * of camelCase.  This function takes a programming word and splits it apart
