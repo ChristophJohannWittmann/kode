@@ -39,7 +39,7 @@
 
                 var opts = {
                     protocol: url.protocol == 'http:' ? url.protocol : 'https:',
-                    port: url.port ? url.port : (url.protocol == 'http' ? 80 : 443),
+                    port: url.port ? url.port : (url.protocol == 'http:' ? 80 : 443),
                     client: url.protocol == 'http:' ? HTTP : HTTPS,
                     host: url.host,
                     path: url.path,
@@ -49,7 +49,7 @@
             else {
                 var opts = {
                     protocol: arg.protocol ? arg.protocol : 'https:',
-                    port: arg.port ? arg.port : (arg.protocol == 'http' ? 80 : 443),
+                    port: arg.port ? arg.port : (arg.protocol == 'http:' ? 80 : 443),
                     client: arg.protocol == 'http:' ? HTTP : HTTPS,
                     host: arg.host ? arg.host : '',
                     path: arg.path ? arg.path : '',

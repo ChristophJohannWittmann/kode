@@ -23,6 +23,12 @@
 
 
 /*****
+ * The SmtpAgentMailGun class is an Smtp sending agent that's constructed during
+ * system initialization if Mail Gun is the selected SMTP sender in settings.
+ * The deliver function accepts an internal message and uses the Mail Gun API
+ * to deliver messages to recipients.  Note that we don't perform updates to
+ * any of the msg objects, we leave that to the webhook webx to receive and
+ * process updates and feedback from Mail Gun.
 *****/
 if (CLUSTER.isPrimary) {
     register(class SmtpAgentMailGun {
@@ -35,6 +41,50 @@ if (CLUSTER.isPrimary) {
         }
         
         async deliver(msg) {
+            return new Promise(async (ok, fail) => {
+                let dbc = await dbConnect();
+                const sender = msg.getSender();
+                const senderDomain = await getDboDomain(dbc, sender.pinned.domainOid);
+                const mg = npmMailGun({ apiKey: this.config.apiKey, domain: senderDomain.name });
+
+                const data = {
+                    from: msg.formatSender(),
+                    subject: msg.getSubject(),
+                };
+
+                for (let cat of ['to', 'cc', 'bcc']) {
+                    let array = msg.formatRecipients(cat);
+                    array.length ? data[cat] = array : false;
+                }
+
+                for (let section of ['text', 'html']) {
+                    let content = msg.getContent(section);
+                    content ? data[section] = content : false;
+                }
+
+                if (!data.text && !data.html) {
+                    data.text = '';
+                }
+
+                mg.messages().send(data, async (error, response) => {
+                    if (typeof response == 'object' && 'id' in response) {
+                        msg.msgid = response.id;
+                        await msg.save(dbc);
+                    }
+                    else {
+                        Ipc.sendPrimary({
+                            messageName: '#ServerError',
+                            agentName: 'MailGun',
+                            agentError: typeof response == 'object' ? response.error : '',
+                            emailOid: msg.oid,
+                        });
+                    }
+
+                    await dbc.rollback();
+                    await dbc.free();
+                    ok();
+                });
+            });
         }
     });
 }
@@ -57,13 +107,42 @@ if (CLUSTER.isWorker) {
             super(module, reference);
         }
 
-        async handleGET(req, rsp) {
-            console.log('method GET for testing....');
-
-            rsp.endStatus(200);
-        }
-
         async handlePOST(req, rsp) {
+            /*
+            //await mkHttpClient().post('http://localhost/api/mg', 'text/plain', msg.oid.toString());
+            let dbc = await dbConnect();
+            let msg = await await mkEmailMessage(dbc, BigInt(req.body()));
+
+            let message = {
+                messageName: '#EmailSpoolerApi',
+                action: 'MsgUpdate',
+                msg: {
+                    oid: msg.oid,
+                    msgid: `<msgid-${mkTime().toISOString()}-${msg.oid}>`,
+                    status: 'closed',
+                },
+                domains: [],
+                recipients: [],
+            };
+
+            recipients: Object.values(msg.pinned.recipients).forEach(async recipient => {
+                message.domains.push({
+                    oid: recipient.pinned.domainOid,
+                    status: 'ok',
+                });
+
+                message.recipients.push({
+                    oid: recipient.oid,
+                    status: 'delivered',
+                    error: '',
+                });
+            });
+
+            await dbc.commit();
+            await dbc.free();
+
+            Ipc.sendPrimary(message);
+            */
             rsp.endStatus(200);
         }
 

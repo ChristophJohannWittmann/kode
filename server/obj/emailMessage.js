@@ -158,7 +158,18 @@ register(class EmailMessage extends DboMsg {
         await this.save(this.dbc);
 
         if (data.from) {
-            let emailAddress = await this.resolveEmailAddress(data.from);
+            let name = '';
+            let addr = '';
+
+            if (typeof data.from == 'object') {
+                addr = data.from.addr;
+                name = data.from.name.trim();
+            }
+            else {
+                addr = data.from
+            }
+
+            let emailAddress = await this.resolveEmailAddress(addr);
 
             this.pinned.from = mkDboMsgEndpoint({
                 msgOid: this.oid,
@@ -167,6 +178,7 @@ register(class EmailMessage extends DboMsg {
                 userOid: emailAddress.ownerType == 'DboUser' ? emailAddress.ownerOid : 0n,
                 endpointType: 'DboEmailAddress',
                 endpointOid: emailAddress.oid,
+                name: name,
             });
 
             this.pinned.from.pinned = emailAddress;
@@ -199,7 +211,18 @@ register(class EmailMessage extends DboMsg {
                 let recipients = data[category];
 
                 for (let recipient of (Array.isArray(recipients) ? recipients : [recipients])) {
-                    let emailAddress = await this.resolveEmailAddress(recipient);
+                    let name = '';
+                    let addr = '';
+
+                    if (typeof recipient == 'object') {
+                        addr = recipient.addr;
+                        name = recipient.name.trim();
+                    }
+                    else {
+                        addr = recipient;
+                    }
+
+                    let emailAddress = await this.resolveEmailAddress(addr);
 
                     if (!(emailAddress in this.pinned.recipients)) {
                         this.pinned.recipients[emailAddress.oid] = mkDboMsgEndpoint({
@@ -209,6 +232,7 @@ register(class EmailMessage extends DboMsg {
                             userOid: emailAddress.ownerType == 'DboUser' ? emailAddress.ownerOid : 0n,
                             endpointType: 'DboEmailAddress',
                             endpointOid: emailAddress.oid,
+                            name: name,
                             index: Object.keys(this.pinned.recipients).length,
                         });
 
@@ -224,12 +248,43 @@ register(class EmailMessage extends DboMsg {
         }
     }
 
+    formatRecipients(which) {
+        const recipients = [];
+
+        for (let endpoint of Object.values(this.pinned.recipients)) {
+            if (endpoint.category == which) {
+                if (endpoint.name) {
+                    recipients.push(`${endpoint.name} <${endpoint.pinned.addr}>`);
+                }
+                else {
+                    recipients.push(endpoint.pinned.addr);
+                }
+            }
+        }
+
+        return recipients;
+    }
+
+    formatSender() {
+        if (this.pinned.from.name) {
+            return `${this.pinned.from.name} <${this.pinned.from.pinned.addr}>`;
+        }
+        else {
+            return this.pinned.from.pinned.addr;
+        }
+    }
+
     getAttachments() {
         return Object.values(this.pinned.attachments);
     }
 
-    getContent() {
-        return Object.values(this.pinned.content);
+    getContent(section) {
+        if (this.pinned.content && section in this.pinned.content) {
+            return mkBuffer(this.pinned.content[section].data, 'base64').toString();
+        }
+        else {
+            return '';
+        }
     }
 
     getDeliveredRecipients() {
@@ -256,7 +311,7 @@ register(class EmailMessage extends DboMsg {
     }
 
     getSender() {
-        return mkBuffer(this.pinned.from.data, 'base64').toString();
+        return this.pinned.from;
     }
 
     getSpooledRecipients() {
@@ -325,38 +380,17 @@ register(class EmailMessage extends DboMsg {
 
     async resolveEmailAddress(endpoint) {
         if (endpoint instanceof DboMsgEndpoint) {
-            return endpoint;
+            return await EmailAddresses.getFromOid(this.dbc, endpoint.endpointOid);
         }
         else if (endpoint instanceof DboUser) {
-            return mkDboMsgEndpoint({
-                msgOid: this.oid,
-                status: 'pending',
-                userOid: endpoint.oid,
-                endpointType: 'DboEmailAddress',
-                endpointOid: await Users.getEmail(this.dbc, endpoint.oid)
-            });
+            return await EmailAddresses.getFromUser(this.dbc, endpoint);
         }
         else if (typeof endpoint == 'bigint') {
-            return await getDboEmailAddress(this.dbc, endpoint);
+            return await EmailAddresses.getFromOid(this.dbc, endpoint);
         }
         else if (typeof endpoint == 'string') {
             let normalized = endpoint.toLowerCase().trim();
-            let emailAddress = await selectOneDboEmailAddress(this.dbc, `_addr='${normalized}'`);
-
-            if (!emailAddress) {
-                let [ userName, domainName ] = normalized.spllit('@');
-                let domain = await Domains.ensureFromName(this.dbc, domainName);
-
-                emailAddress = mkEmailAddress({
-                    domainOid: domain.oid,
-                    user: userName,
-                    addr: normalized,
-                });
-
-                await emailAddress.save(this.dbc);
-            }
-
-            return emailAddress;
+            return await EmailAddresses.ensureFromAddr(this.dbc, normalized);
         }
     }
 

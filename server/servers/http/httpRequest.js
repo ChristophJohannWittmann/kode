@@ -87,7 +87,7 @@ register(class HttpRequest {
     }
 
     body() {
-        return this.requestBody ? this.requestBody.data : null;
+        return this.requestBody ? this.requestBody.value : null;
     }
 
     cipher() {

@@ -178,6 +178,7 @@ mkDbSchema(
             { name: 'userOid',       type: dbInt64           },
             { name: 'endpointType',  type: dbText, size:  20 },
             { name: 'endpointOid',   type: dbInt64           },
+            { name: 'name',          type: dbText, size: 100 },
             { name: 'index',         type: dbInt32           },
             { name: 'status',        type: dbText, size:  20 },
             { name: 'diagnostic',    type: dbText, size:  -1 },

@@ -71,12 +71,13 @@ if (CLUSTER.isPrimary) console.log(`[ Loading NPM Modules ]`);
  * Imported NPM Modules, which are enumerated in the package.json directory
  * for the framework.
 *****/
-global.npmPG           = require('pg');
 global.npmCssMinifier  = require('clean-css');
+global.npmGZIP         = require('node-gzip');
+global.npmMailGun      = require('mailgun-js');
 global.npmHtmlMinifier = require('html-minifier');
 global.npmJsMinifier   = require('terser');
 global.npmPemJwk       = require('pem-jwk');
-global.npmGZIP         = require('node-gzip');
+global.npmPG           = require('pg');
 
 
 /*****
@@ -399,20 +400,19 @@ async function seedUser(dbc) {
                 });
                 console.log(msg);
             }
-            else if (true) {
+            else if (false) {
+                setTimeout(async () => {
                 let response = await Ipc.queryPrimary({
                     messageName: '#EmailSpoolerSpool',
                     bulk: false,
                     reason: '/ResetPassword/DboUser/4743',
-                    from: 'charlie@kodeprogramming.org',
+                    from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
                     subject: 'Welcome back my friends.',
-                    to: [
-                        'chris.wittmann@icloud.com',
-                        'chris.wittmann@infosearch.online',
-                    ],
+                    to: { addr: 'chris.wittmann@icloud.com', name: 'Zoolander Bono' },
                     text: 'TEST MESSAGE!',
                 });
                 console.log(response);
+                }, 1000);
             }
 
             await dbc.rollback();
