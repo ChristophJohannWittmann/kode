@@ -62,7 +62,7 @@ if (CLUSTER.isPrimary) {
                     content ? data[section] = content : false;
                 }
 
-                if (!data.text && !data.html) {
+                if (!('html' in data) && !('text' in data)) {
                     data.text = '';
                 }
 
@@ -80,7 +80,7 @@ if (CLUSTER.isPrimary) {
                         });
                     }
 
-                    await dbc.rollback();
+                    await dbc.commit();
                     await dbc.free();
                     ok();
                 });
