@@ -106,6 +106,8 @@ register(class Mime {
             {code: 'video/3gpp',                                                                            type: 'binary', exts: {'3gp':0}},
             {code: 'video/3gpp2',                                                                           type: 'binary', exts: {'3g2':0}},
             {code: 'application/x-7z-compressed',                                                           type: 'binary', exts: {'7z':0}},
+            {code: 'multipart/form-data',                                                                   type: 'binary', exts: {}},
+            {code: 'unknown/unknown',                                                                       type: 'binary', exts: {}},
         ].forEach(mimeType => {
             Mime.byMimeCode[mimeType.code] = mimeType;
             
@@ -118,6 +120,7 @@ register(class Mime {
 
     constructor(text) {
         let entry;
+        this.props = {};
 
         if (text in Mime.byMimeCode) {
             entry = Mime.byMimeCode[text];
@@ -129,7 +132,30 @@ register(class Mime {
             entry = Mime.byExtension[text];
         }
         else {
-            entry = Mime.byMimeCode['application/octet-stream'];
+            try {
+                if (text.indexOf(';') > 0) {
+                    let parts = text.split(';').map(part => part.trim());
+
+                    if (parts[0] in Mime.byMimeCode) {
+                        entry = Mime.byMimeCode[parts[0]];
+
+                        for (let i = 1; i < parts.length; i++) {
+                            let part = parts[i];
+
+                            if (part.indexOf('=') > 0) {
+                                let [ property, value ] = part.split('=');
+                                this.props[property.trim()] = value.trim();
+                            }
+                        }
+                    }
+                }
+                else {
+                    entry = Mime.byMimeCode['unknown/unknown'];
+                }
+            }
+            catch(e) {
+                entry = Mime.byMimeCode['unknown/unknown'];
+            }
         }
 
         this.code = entry.code;

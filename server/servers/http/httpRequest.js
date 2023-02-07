@@ -223,10 +223,6 @@ register(class HttpRequest {
         return this.httpReq.method;
     }
 
-    mime() {
-        return this.requestBody.mime;
-    }
-
     parameters() {
         return this.params;
     }

@@ -42,7 +42,13 @@ singleton(class EmailSpooler extends Daemon {
         Ipc.on('#ServerReady', message => this.initialize());
     }
 
-    async apiUpdateMsg(dbc, message) {
+    async apiClicked(dbc, message) {
+    }
+
+    async apiComplained(dbc, message) {
+    }
+
+    async apiDelivered(dbc, message) {
         let emailMessage = await mkEmailMessage(dbc, message.msg.oid);
 
         if (emailMessage) {
@@ -99,6 +105,18 @@ singleton(class EmailSpooler extends Daemon {
         }
     }
 
+    async apiFailedPerm(dbc, message) {
+    }
+
+    async apiFailedTemp(dbc, message) {
+    }
+
+    async apiOpened(dbc, message) {
+    }
+
+    async apiOptedOut(dbc, message) {
+    }
+
     async initialize() {
         this.filters = [
             await mkSmtpStatusFilter(),
@@ -147,15 +165,22 @@ singleton(class EmailSpooler extends Daemon {
                 msg = this.filteredBulk.shift();
             }
 
-            msg.status = 'sending';
-            msg.agent = `SMTP/${this.smtpCode}; ${this.agent.config.name}`;
-
+            let msgid = await this.agent.deliver(msg);
             let dbc = await dbConnect();
+
+            if (msgid) {
+                msg.status = 'sending';
+                msg.msgid = msgid;
+                msg.agent = `SMTP/${this.smtpCode}; ${this.agent.config.name}`;
+            }
+            else {
+                msg.status = 'stuck';
+            }
+
             await msg.save(dbc);
             await dbc.commit();
             await dbc.free();
 
-            this.agent.deliver(msg);
             this.delivering[msg.oid] = msg;
             await pause(20);
         }
@@ -204,8 +229,32 @@ singleton(class EmailSpooler extends Daemon {
         let dbc = await dbConnect();
 
         switch (message.action) {
-            case 'MsgUpdate':
-                await this.apiUpdateMsg(dbc, message);
+            case 'Clicked':
+                this.apiClicked(dbc, message);
+                break;
+
+            case 'Complained':
+                this.apiComplained(dbc, message);
+                break;
+
+            case 'Delivered':
+                await this.apiDelivered(dbc, message);
+                break;
+
+            case 'FailedPerm':
+                await this.apiFailedPerm(dbc, message);
+                break;
+
+            case 'FailedTemp':
+                await this.apiFailedTemp(dbc, message);
+                break;
+
+            case 'Opened':
+                await this.apiOpened(dbc, message);
+                break;
+
+            case 'OptedOut':
+                await this.apiOptedOut(dbc, message);
                 break;
         }
 

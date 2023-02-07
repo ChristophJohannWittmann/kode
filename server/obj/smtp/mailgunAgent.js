@@ -68,19 +68,13 @@ if (CLUSTER.isPrimary) {
 
                 mg.messages().send(data, async (error, response) => {
                     if (typeof response == 'object' && 'id' in response) {
-                        msg.msgid = response.id;
-                        await msg.save(dbc);
+                        return msgid;
                     }
                     else {
-                        Ipc.sendPrimary({
-                            messageName: '#ServerError',
-                            agentName: 'MailGun',
-                            agentError: typeof response == 'object' ? response.error : '',
-                            emailOid: msg.oid,
-                        });
+                        return null;
                     }
 
-                    await dbc.commit();
+                    await dbc.rollback();
                     await dbc.free();
                     ok();
                 });
@@ -108,6 +102,7 @@ if (CLUSTER.isWorker) {
         }
 
         async handlePOST(req, rsp) {
+            console.log(req.mime());
             /*
             //await mkHttpClient().post('http://localhost/api/mg', 'text/plain', msg.oid.toString());
             let dbc = await dbConnect();

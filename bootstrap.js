@@ -400,7 +400,7 @@ async function seedUser(dbc) {
                 });
                 console.log(msg);
             }
-            else if (false) {
+            else if (true) {
                 setTimeout(async () => {
                 let response = await Ipc.queryPrimary({
                     messageName: '#EmailSpoolerSpool',
@@ -408,7 +408,7 @@ async function seedUser(dbc) {
                     reason: '/ResetPassword/DboUser/4743',
                     from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
                     subject: 'Welcome back my friends.',
-                    to: { addr: 'chris.wittmann@icloud.com', name: 'Zoolander Bono' },
+                    to: { addr: 'chris.wittmann@icloud.com', name: 'Zoolander' },
                     text: 'TEST MESSAGE!',
                 });
                 console.log(response);
