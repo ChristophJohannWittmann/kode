@@ -102,7 +102,13 @@ if (CLUSTER.isWorker) {
         }
 
         async handlePOST(req, rsp) {
-            console.log(req.mime());
+            if (req.mime().code == 'multipart/form-data' && req.mime().props.boundary) {
+                let parts = npmParseMultipart.Parse(req.body(), req.mime.props.boundary);
+                console.log(parts);
+            }
+            else {
+                console.log(req.mime());
+            }
             /*
             //await mkHttpClient().post('http://localhost/api/mg', 'text/plain', msg.oid.toString());
             let dbc = await dbConnect();
