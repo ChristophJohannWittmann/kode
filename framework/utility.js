@@ -321,17 +321,57 @@ register(function flattenObject(object, override) {
 
 
 /*****
+ * What a hellacious function to code.  It just takes internet-based blobs of
+ * text that are formatted using the mime code multipart/form-data and generates
+ * an array of objects that represent that parse form of the entire blob.  Note
+ * that each blob has a content-disposition, possibly a content-type, and always
+ * some content, which could be empty content.
 *****/
 register(function parseMultipartFormData(text, boundary) {
-    let parts = [];
+    let formData = {};
 
-    for (let part of text.split(boundary)) {
-        parts.push({
-            raw: part,
-        });
+    for (let part of text.split(`--${boundary}`)) {
+        let data = new Object();
+
+        for (let line of part.trim().split('\r\n')) {
+            if (line.match(/content-disposition/i)) {
+                let properties = line.split(':')[1].split(';');
+                let dispoName = properties[0].trim();
+
+                if (dispoName == 'form-data') {
+                    for (let i = 1; i < properties.length; i++) {
+                        if (properties[i].indexOf('=') > 0) {
+                            let [ name, value ] = properties[i].split('=').map(item => item.trim());
+                            data[name] = value;
+                        }
+                    }
+                }
+            }
+            else if (line.match(/^content-type/i)) {
+                let properties = line.split(':')[1].split(';');
+                let contentType = properties[0].trim();
+                data.mime = contentType;
+
+                for (let i = 1; i < properties.length; i++) {
+                    if (properties[i].indexOf('=') > 0) {
+                        let [ name, value ] = properties[i].split('=').map(item => item.trim());
+                        data[name] = value;
+                    }
+                }
+            }
+            else if (line == '') {
+                break;
+            }
+        }
+
+        if (data.name) {
+            let index = part.indexOf('\r\n\r\n');
+            data.content = part.substr(index + 4).trim();
+            formData[data.name] = data;
+        }
     }
 
-    return parts;
+    return formData;
 });
 
 

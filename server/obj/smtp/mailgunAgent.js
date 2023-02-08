@@ -103,9 +103,8 @@ if (CLUSTER.isWorker) {
 
         async handlePOST(req, rsp) {
             if (req.mime().code == 'multipart/form-data' && req.mime().props.boundary) {
-                for (let part of parseMultipartFormData(req.body())) {
-                    console.log(part);
-                }
+                let formData = parseMultipartFormData(req.body(), `--${req.mime().props.boundary}`);
+                console.log(formData);
             }
             else {
                 console.log(req.mime());

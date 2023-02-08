@@ -400,7 +400,7 @@ async function seedUser(dbc) {
                 });
                 console.log(msg);
             }
-            else if (true) {
+            else if (false) {
                 setTimeout(async () => {
                 let response = await Ipc.queryPrimary({
                     messageName: '#EmailSpoolerSpool',
@@ -413,6 +413,27 @@ async function seedUser(dbc) {
                 });
                 console.log(response);
                 }, 1000);
+            }
+            else if (true) {
+                let content =
+`--abcd123\r
+Content-Disposition: form-data; name="hello world"\r
+\r
+Here I go awain on my own.
+--abcd123\r
+Content-Disposition: form-data; name="another one"\r
+Content-type: text/html; charset=utf-8\r
+\r
+Another time again.
+--abcd123\r
+Content-Disposition: form-data; name="diversionary"\r
+\r
+DIVERSIONARY!
+--abcd123\r
+`;
+
+                let formData = parseMultipartFormData(content, 'abcd123');
+                console.log(formData);
             }
 
             await dbc.rollback();
