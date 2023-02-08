@@ -341,7 +341,7 @@ register(function parseMultipartFormData(text, boundary) {
                 if (dispoName == 'form-data') {
                     for (let i = 1; i < properties.length; i++) {
                         if (properties[i].indexOf('=') > 0) {
-                            let [ name, value ] = properties[i].split('=').map(item => item.trim());
+                            let [ name, value ] = properties[i].split('=').map(item => item.trim().replaceAll('"', ''));
                             data[name] = value;
                         }
                     }

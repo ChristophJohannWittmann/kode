@@ -369,7 +369,7 @@ async function seedUser(dbc) {
         Ipc.sendWorkers({ messageName: '#ServerReady' });
         // **********************************************************************************
         // **********************************************************************************
-        if (false) {
+        if (true) {
             let dbc = await dbConnect();
 
             if (false) {
