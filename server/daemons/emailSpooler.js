@@ -125,14 +125,15 @@ singleton(class EmailSpooler extends Daemon {
             await mkSmtpNeverBounceFilter(),
         ];
 
-        this.smtpCode = Config.smtp.selected;
-        this.config = Config.smtp[this.smtpCode];
-        await eval(`(async () => this.agent = await mk${this.config.agent}(this.config))()`);
+        this.agentKey = Config.smtp.agentKey
+        this.agentConf = Config.smtp[this.agentKey];
+        await eval(`(async () => this.agentObj = await mk${this.agentConf.agent}())()`);
+
         let dbc = await dbConnect();
 
         for (let dboMsg of await selectDboMsg(
             dbc,
-            `_type='email' AND _status NOT IN ('failed', 'delivered', 'optout')`,
+            `_category='smtpsend' AND _status NOT IN ('failed', 'delivered', 'optout')`,
             `_oid ASC`))
         {
             let msg = await mkEmailMessage(dbc, dboMsg);
@@ -165,13 +166,13 @@ singleton(class EmailSpooler extends Daemon {
                 msg = this.filteredBulk.shift();
             }
 
-            let msgid = await this.agent.deliver(msg);
+            let msgid = await this.agentObj.deliver(msg);
             let dbc = await dbConnect();
 
             if (msgid) {
                 msg.status = 'sending';
                 msg.msgid = msgid;
-                msg.agent = `SMTP/${this.smtpCode}; ${this.agent.config.name}`;
+                msg.agent = `SMTP/${this.agentKey}; ${this.agentConf.name}`;
             }
             else {
                 msg.status = 'stuck';

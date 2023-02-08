@@ -144,7 +144,6 @@ mkDbSchema(
         columns: [
             { name: 'category',     type: dbText, size:   20 },
             { name: 'bulk',         type: dbBool             },
-            { name: 'type',         type: dbText, size:   20 },
             { name: 'status',       type: dbText, size:   20 },
             { name: 'reason',       type: dbText, size:  200 },
             { name: 'agent',        type: dbText, size:   50 },

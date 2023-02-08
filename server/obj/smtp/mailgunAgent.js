@@ -32,8 +32,8 @@
 *****/
 if (CLUSTER.isPrimary) {
     register(class SmtpAgentMailGun {
-        constructor(config) {
-            this.config = config;
+        constructor() {
+            this.config = Config.smtp.mailgun;
             
             return new Promise(async (ok, fail) => {
                 ok(this);
@@ -99,12 +99,17 @@ if (CLUSTER.isWorker) {
     register(class SmtpApiMailGun extends Webx {
         constructor(module, reference) {
             super(module, reference);
+            this.config = Config.smtp.mailgun;
+        }
+
+        buildEmailMessage(formData) {
+            console.log(formData);
         }
 
         async handlePOST(req, rsp) {
+            console.log(req.body());
             if (req.mime().code == 'multipart/form-data' && req.mime().props.boundary) {
-                let formData = parseMultipartFormData(req.body(), req.mime().props.boundary);
-                console.log(formData);
+                let emailMessageData = this.buildEmailMessage(parseMultipartFormData(req.body(), req.mime().props.boundary));
             }
             else {
                 console.log(req.mime());

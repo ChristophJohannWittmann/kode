@@ -369,7 +369,7 @@ async function seedUser(dbc) {
         Ipc.sendWorkers({ messageName: '#ServerReady' });
         // **********************************************************************************
         // **********************************************************************************
-        if (false) {
+        if (true) {
             let dbc = await dbConnect();
 
             if (false) {
@@ -400,7 +400,7 @@ async function seedUser(dbc) {
                 });
                 console.log(msg);
             }
-            else if (false) {
+            else if (true) {
                 setTimeout(async () => {
                 let response = await Ipc.queryPrimary({
                     messageName: '#EmailSpoolerSpool',
@@ -414,7 +414,7 @@ async function seedUser(dbc) {
                 console.log(response);
                 }, 1000);
             }
-            else if (true) {
+            else if (false) {
                 let content =
 `--abcd123\r
 Content-Disposition: form-data; name="hello world"\r

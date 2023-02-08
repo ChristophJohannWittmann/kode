@@ -33,8 +33,8 @@
 *****/
 if (CLUSTER.isPrimary) {
     register(class SmtpAgentNull {
-        constructor(config) {
-            this.config = config;
+        constructor() {
+            this.config = Config.smtp['null'];
 
             return new Promise(async (ok, fail) => {
                 ok(this);
