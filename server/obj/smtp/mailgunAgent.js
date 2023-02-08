@@ -68,10 +68,10 @@ if (CLUSTER.isPrimary) {
 
                 mg.messages().send(data, async (error, response) => {
                     if (typeof response == 'object' && 'id' in response) {
-                        return msgid;
+                        ok(response.id);
                     }
                     else {
-                        return null;
+                        return ok(null);
                     }
 
                     await dbc.rollback();
