@@ -88,7 +88,7 @@ if (CLUSTER.isPrimary) {
 *****/
 if (CLUSTER.isWorker) {
     Ipc.on('#ServerReady:http', async message => {
-        if ('mailgun' in Config.smtp) {
+        if ('mailgun' in Config.smtp && Config.smtp.agentKey == 'mailgun') {
             ResourceLibrary.register(builtinModule, {
                 url: '/api/mg',
                 webx: 'MailGun',
@@ -102,18 +102,35 @@ if (CLUSTER.isWorker) {
             this.config = Config.smtp.mailgun;
         }
 
-        buildEmailMessage(formData) {
-            console.log(formData);
+        buildRecvMessage(formData) {
         }
 
         async handlePOST(req, rsp) {
-            console.log(req.body());
-            if (req.mime().code == 'multipart/form-data' && req.mime().props.boundary) {
-                let emailMessageData = this.buildEmailMessage(parseMultipartFormData(req.body(), req.mime().props.boundary));
+            try {
+                if (req.mime().code == 'multipart/form-data' && req.mime().props.boundary) {
+                    let formData = parseMultipartFormData(req.body(), req.mime().props.boundary);
+                    let msg = this.buildRecvMessage(formData);
+                    await this.processRecvMessage(msg);
+                    rsp.endStatus(200);
+                }
+                else if (req.isMessage()) {
+                    let event = req.message();
+
+                    if (await this.verifyEvent(event)) {
+                        await this.processEvent(event);
+                        rsp.endStatus(200);
+                    }
+                    else {
+                        rsp.endStatus(406);
+                    }
+                }
             }
-            else {
-                console.log(req.mime());
+            catch (e) {
+                rsp.endStatus(500);
             }
+        }
+
+        async processEvent(evnet) {
             /*
             //await mkHttpClient().post('http://localhost/api/mg', 'text/plain', msg.oid.toString());
             let dbc = await dbConnect();
@@ -149,12 +166,14 @@ if (CLUSTER.isWorker) {
 
             Ipc.sendPrimary(message);
             */
-            rsp.endStatus(200);
         }
 
-        async init() {
-            await super.init();
-            this.apiConfig = Config.smtp.mailgun;
+        async processRecvMessage(msg) {
+        }
+
+        async verifyEvent(evnet) {
+            console.log(event);
+            return true;
         }
     });
 }
