@@ -287,4 +287,30 @@ register(class Crypto {
                 return signer.sign(pem);
         }
     }
+    
+    /*****
+     * Crypto function to generate a signature based on said content and crypto
+     * key.  This uses HMAC and can return varioues encodings depending on what
+     * the caller requests.
+    *****/
+    static signHmac(alg, key, content, encoding) {
+        let signer = CRYPTO.createHmac(alg, key);
+        signer.update(content);
+        let hmac = signer.digest();
+
+        switch (encoding) {
+            case 'base64':
+                return hmac.toString('base64');
+                
+            case 'base64url':
+                return hmac.toString('base64').split('=')[0]
+                        .replace(/[+]/g, '-').replace(/[\/]/g, '_');
+                
+            case 'hex':
+                return hmac.toString('hex');
+
+            default:
+                return hmac;
+        }
+    }
 });

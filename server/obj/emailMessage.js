@@ -47,9 +47,6 @@ register(class EmailMessage extends DboMsg {
             if (typeof arg == 'bigint') {
                 await this.load(arg);
             }
-            else if (typeof arg == 'string') {
-                await this.importRfc2822(arg);
-            }
             else if (arg instanceof DboMsg) {
                 await this.load(arg);
             }
@@ -185,7 +182,7 @@ register(class EmailMessage extends DboMsg {
             await this.pinned.from.save(this.dbc);
         }
         else {
-            this.status = 'failed';
+            this.status = 'rejected';
             await this.save(this.dbc);
             return;
         }
@@ -201,7 +198,7 @@ register(class EmailMessage extends DboMsg {
             await this.pinned.subject.save(this.dbc);
         }
         else {
-            this.status = 'failed';
+            this.status = 'rejected';
             await this.save(this.dbc);
             return;
         }
@@ -321,10 +318,6 @@ register(class EmailMessage extends DboMsg {
 
     getSubject() {
         return mkBuffer(this.pinned.subject.data, 'base64').toString();
-    }
-
-    async importRfc2822(emailText) {
-        console.log('importing raw incoming email RFC2822 ...');
     }
 
     async load(arg, minimize) {

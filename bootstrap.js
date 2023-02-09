@@ -116,7 +116,6 @@ async function seedUser(dbc) {
     logPrimary('[ Seeding Initial User: Charlie Root ]');
 
     let user = await mkUserObject({
-        userName: 'charlie@domain.org',
         firstName: 'Charlie',
         lastName: 'Root',
         status: 'active',
@@ -402,38 +401,25 @@ async function seedUser(dbc) {
             }
             else if (true) {
                 setTimeout(async () => {
-                let response = await Ipc.queryPrimary({
-                    messageName: '#EmailSpoolerSpool',
-                    bulk: false,
-                    reason: '/ResetPassword/DboUser/4743',
-                    from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
-                    subject: 'Welcome back my friends.',
-                    to: { addr: 'chris.wittmann@icloud.com', name: 'Zoolander' },
-                    text: 'TEST MESSAGE!',
-                });
-                console.log(response);
+                    let response = await Ipc.queryPrimary({
+                        messageName: '#EmailSpoolerSpool',
+                        bulk: false,
+                        reason: '/ResetPassword/DboUser/4743',
+                        from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
+                        subject: 'Welcome back my friends.',
+                        to: { addr: 'chris.wittmann@infosearch.online', name: 'Christoph Wittmann' },
+                        text: 'TEST MESSAGE!',
+                    });
+
+                    console.log(response);
                 }, 1000);
             }
             else if (false) {
-                let content =
-`--abcd123\r
-Content-Disposition: form-data; name="hello world"\r
-\r
-Here I go awain on my own.
---abcd123\r
-Content-Disposition: form-data; name="another one"\r
-Content-type: text/html; charset=utf-8\r
-\r
-Another time again.
---abcd123\r
-Content-Disposition: form-data; name="diversionary"\r
-\r
-DIVERSIONARY!
---abcd123\r
-`;
-
-                let formData = parseMultipartFormData(content, 'abcd123');
-                console.log(formData);
+                let mx = await Ipc.queryPrimary({
+                    messageName: '#DnsResolveMx',
+                    domain: 'infosearchtest.com',
+                })
+                console.log(mx);
             }
 
             await dbc.rollback();
@@ -448,6 +434,13 @@ DIVERSIONARY!
 
                 console.log(response);
             }, 1000);
+        }
+        if (false) {
+            let dbc = await dbConnect();
+            let addr = await EmailAddresses.ensureFromAddr(dbc, 'charlie@kodeprogramming.org');
+            console.log(addr);
+            await dbc.commit();
+            await dbc.free();
         }
         // **********************************************************************************
         // **********************************************************************************

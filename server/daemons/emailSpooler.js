@@ -37,84 +37,105 @@ singleton(class EmailSpooler extends Daemon {
         this.spooledFast = [];
         this.filteredBulk = [];
         this.filteredFast = [];
+        this.apiQueue = [];
+        this.apiRunning = false;
         this.filterRunning = false;
         this.senderRunning = false;
         Ipc.on('#ServerReady', message => this.initialize());
     }
 
-    async apiClicked(dbc, message) {
+    async apiClicked(dbc, data) {
+        data.recipient.status = 'clicked';
+        await data.recipient.save(dbc);
+
+        Ipc.sendWorkers({
+            messageName: '#EmailStatus',
+            event: 'Clicked',
+            msgid: data.msg.oid,
+            recipient: data.recipient.oid,
+        });
     }
 
-    async apiComplained(dbc, message) {
+    async apiComplained(dbc, data) {
+        data.recipient.pinned.complained = true;
+        await data.recipient.pinned.save(dbc);
+
+        Ipc.sendWorkers({
+            messageName: '#EmailStatus',
+            event: 'Complained',
+            msgid: data.msg.oid,
+            recipient: data.recipient.oid,
+        });
     }
 
-    async apiDelivered(dbc, message) {
-        let emailMessage = await mkEmailMessage(dbc, message.msg.oid);
+    async apiDelivered(dbc, data) {
+        data.recipient.status = 'delivered';
+        await data.recipient.save(dbc);
 
-        if (emailMessage) {
-            emailMessage.msgid = message.msg.msgid;
-            emailMessage.status = message.msg.status;
-            await emailMessage.save(dbc);
+        data.recipient.pinned.lastDelivered = mkTime();
+        await data.recipient.pinned.save(dbc);
 
-            if (Array.isArray(message.recipients)) {
-                for (let recipient of message.recipients) {
-                    let endpoint = await getDboMsgEndpoint(dbc, recipient.oid);
-                    let emailAddress = await getDboEmailAddress(dbc, endpoint.endpointOid);
+        data.domain.verified = true;
+        data.domain.lastVerified = mkTime();
+        await data.domain.save(dbc);
 
-                    switch (recipient.status) {
-                        case 'delivered':
-                            emailAddress.lastDelivered = mkTime();
-                            emailAddress.error = '';
-                            break;
-
-                        case 'failed':
-                            emailAddress.verified = false;
-                            emailAddress.lastVerified = mkTime();
-                            recipient.error ? emailAddress.error = recipient.error : false;
-                            break;
-                    }
-
-                    endpoint.status = recipient.status;
-                    await endpoint.save(dbc);
-                    await emailAddress.save(dbc);
-                }
-            }
-
-            if (Array.isArray(message.domains)) {
-                for (let domain of message.domains) {
-                    let dboDomain = await getDboDomain(dbc, domain.oid)
-
-                    switch (domain.status) {
-                        case 'ok':
-                            dboDomain.verified = true;
-                            dboDomain.lastVerified = mkTime();
-                            dboDomain.error = '';
-                            await dboDomain.save(dbc);
-                            break;
-
-                        case 'refused':
-                        case 'unsendable':
-                            dboDomain.verified = false;
-                            dboDomain.lastVerified = mkTime();
-                            dboDomain.error = domain.error;
-                            await dboDomain.save(dbc);
-                            break;
-                    }
-                }
-            }
-        }
+        Ipc.sendWorkers({
+            messageName: '#EmailStatus',
+            event: 'Delivered',
+            msgid: data.msg.oid,
+            recipient: data.recipient.oid,
+        });
     }
 
-    async apiFailedPerm(dbc, message) {
+    async apiFailedPerm(dbc, data) {
+        data.recipient.status = 'failed';
+        await data.recipient.save(dbc);
+
+        data.recipient.pinned.failed = true;
+        await data.recipient.pinned.save(dbc);
+
+        Ipc.sendWorkers({
+            messageName: '#EmailStatus',
+            event: 'Failed',
+            msgid: data.msg.oid,
+            recipient: data.recipient.oid,
+        });
     }
 
-    async apiFailedTemp(dbc, message) {
+    async apiFailedTemp(dbc, data) {
+        data.recipient.status = 'failed';
+        await data.recipient.save(dbc);
+
+        Ipc.sendWorkers({
+            messageName: '#EmailStatus',
+            event: 'Failed',
+            msgid: data.msg.oid,
+            recipient: data.recipient.oid,
+        });
     }
 
-    async apiOpened(dbc, message) {
+    async apiOpened(dbc, data) {
+        data.recipient.status = 'opened';
+        await data.recipient.save(dbc);
+
+        Ipc.sendWorkers({
+            messageName: '#EmailStatus',
+            event: 'Opened',
+            msgid: data.msg.oid,
+            recipient: data.recipient.oid,
+        });
     }
 
-    async apiOptedOut(dbc, message) {
+    async apiOptedOut(dbc, data) {
+        data.recipient.pinned.optedOut = true;
+        await data.recipient.pinned.save(dbc);
+
+        Ipc.sendWorkers({
+            messageName: '#EmailStatus',
+            event: 'OptedOut',
+            msgid: data.msg.oid,
+            recipient: data.recipient.oid,
+        });
     }
 
     async initialize() {
@@ -133,7 +154,7 @@ singleton(class EmailSpooler extends Daemon {
 
         for (let dboMsg of await selectDboMsg(
             dbc,
-            `_category='smtpsend' AND _status NOT IN ('failed', 'delivered', 'optout')`,
+            `_category='smtpsend' AND _status IN ('spooled', 'filtered')`,
             `_oid ASC`))
         {
             let msg = await mkEmailMessage(dbc, dboMsg);
@@ -227,40 +248,11 @@ singleton(class EmailSpooler extends Daemon {
     }
 
     async onApi(message) {
-        let dbc = await dbConnect();
+        this.apiQueue.push(message);
 
-        switch (message.action) {
-            case 'Clicked':
-                this.apiClicked(dbc, message);
-                break;
-
-            case 'Complained':
-                this.apiComplained(dbc, message);
-                break;
-
-            case 'Delivered':
-                await this.apiDelivered(dbc, message);
-                break;
-
-            case 'FailedPerm':
-                await this.apiFailedPerm(dbc, message);
-                break;
-
-            case 'FailedTemp':
-                await this.apiFailedTemp(dbc, message);
-                break;
-
-            case 'Opened':
-                await this.apiOpened(dbc, message);
-                break;
-
-            case 'OptedOut':
-                await this.apiOptedOut(dbc, message);
-                break;
+        if (!this.apiRunning) {
+            this.runApi();
         }
-
-        await dbc.commit();
-        await dbc.free();
     }
 
     async onSpool(message) {
@@ -306,6 +298,69 @@ singleton(class EmailSpooler extends Daemon {
             },
             delivering: Object.keys(this.delivering).length,
         });
+    }
+
+    async runApi() {
+        try {
+            this.apiRunning = true;
+
+            while (this.apiQueue.length) {
+                let message = this.apiQueue.shift();
+                let dbc = await dbConnect();
+                let dboMsg = await selectOneDboMsg(dbc, `_msgid='${message.msgid}'`);
+
+                if (dboMsg) {
+                    let emailMessage = await mkEmailMessage(dbc, dboMsg);
+
+                    let recipient = Object.values(emailMessage.pinned.recipients)
+                    .filter(recipient => recipient.pinned.addr == message.recipient.addr)[0];
+
+                    if (recipient) {
+                        let methodName = `api${message.recipient.status}`;
+
+                        if (methodName in this) {
+                            let domain = await getDboDomain(dbc, recipient.pinned.domainOid);
+
+                            await this[methodName](dbc, {
+                                msg: emailMessage,
+                                recipient: recipient,
+                                domain: domain,
+                                status: message.recipient.status,
+                            });
+
+                            const buckets = {
+                                creating: 0,
+                                rejected: 0,
+                                spooled: 0,
+                                blocked: 0,
+                                optedout: 0,
+                                filtered: 0,
+                                failed: 0,
+                                delivered: 0,
+                                opened: 0,
+                                clicked: 0,
+                            };
+
+                            for (let recipient of Object.values(emailMessage.pinned.recipients)) {
+                                buckets[recipient.status]++;
+                            }
+
+                            if (buckets.spooled == 0 && buckets.filtered == 0) {
+                                emailMessage.status = 'closed';
+                            }
+
+                            await emailMessage.save(dbc);
+                        }
+                    }
+                }
+
+                await dbc.commit();
+                await dbc.free();
+            }
+        }
+        finally {
+            this.apiRunning = false;
+        }
     }
 
     touchDelivery() {

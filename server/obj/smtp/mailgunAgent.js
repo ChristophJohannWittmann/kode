@@ -102,27 +102,60 @@ if (CLUSTER.isWorker) {
             this.config = Config.smtp.mailgun;
         }
 
-        buildRecvMessage(formData) {
+        async checkEventSignature(event) {
+            if (typeof event.signature == 'object') {
+                if (typeof event.signature.token == 'string' && typeof event.signature.timestamp == 'string') {
+                    if (typeof event.signature.signature == 'string') {
+                        let content = `${event.signature.timestamp}${event.signature.token}`;
+                        let verificationSignature = Crypto.signHmac('sha256', this.config.apiKey, content, 'hex');
+                        return verificationSignature == event.signature.signature;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        async checkMessageSignature(formData) {
+            if (typeof formData.token == 'object' && typeof formData.token.content == 'string') {
+                if (typeof formData.timestamp == 'object' && typeof formData.timestamp.content == 'string') {
+                    if (typeof formData.signature == 'object' && typeof formData.signature.content == 'string') {
+                        let content = `${formData.timestamp.content}${formData.token.content}`;
+                        let verificationSignature = Crypto.signHmac('sha256', this.config.apiKey, content, 'hex');
+                        return verificationSignature == formData.signature.content;
+                    }
+                }
+            }
+
+            return false
         }
 
         async handlePOST(req, rsp) {
             try {
                 if (req.mime().code == 'multipart/form-data' && req.mime().props.boundary) {
                     let formData = parseMultipartFormData(req.body(), req.mime().props.boundary);
-                    let msg = this.buildRecvMessage(formData);
-                    await this.processRecvMessage(msg);
-                    rsp.endStatus(200);
+
+                    if (this.checkMessageSignature(formData)) {
+                        await this.OnReceived(formData);
+                        rsp.endStatus(200);
+                    }
+                    else {
+                        rsp.endStatus(401);
+                    }
                 }
                 else if (req.isMessage()) {
                     let event = req.message();
 
-                    if (await this.verifyEvent(event)) {
-                        await this.processEvent(event);
+                    if (await this.checkEventSignature(event)) {
+                        await this.onEvent(event['event-data']);
                         rsp.endStatus(200);
                     }
                     else {
-                        rsp.endStatus(406);
+                        rsp.endStatus(401);
                     }
+                }
+                else {
+                    rsp.endStatus(404);
                 }
             }
             catch (e) {
@@ -130,50 +163,72 @@ if (CLUSTER.isWorker) {
             }
         }
 
-        async processEvent(evnet) {
-            /*
-            //await mkHttpClient().post('http://localhost/api/mg', 'text/plain', msg.oid.toString());
-            let dbc = await dbConnect();
-            let msg = await await mkEmailMessage(dbc, BigInt(req.body()));
+        async onEvent(event) {
+            const eventMap = {
+                'clicked': 'Clicked',
+                'complained': 'Complained',
+                'delivered': 'Delivered',
+                'failed-permanent': 'FailedPerm',
+                'failed-temporary': 'FailedTemp',
+                'opened': 'Opened',
+                'unsubscribed': 'OptedOut',
+            };
+
+            if (event.event == 'failed') {
+                var status = eventMap[`failed-${event.severity}`];
+            }
+            else {
+                var status = eventMap[event.event]; 
+            }
 
             let message = {
                 messageName: '#EmailSpoolerApi',
-                action: 'MsgUpdate',
-                msg: {
-                    oid: msg.oid,
-                    msgid: `<msgid-${mkTime().toISOString()}-${msg.oid}>`,
-                    status: 'closed',
-                },
-                domains: [],
-                recipients: [],
+                msgid: `${event.message.headers['message-id']}>`,
+                recipient: { addr: event.recipient, status: status },
             };
 
-            recipients: Object.values(msg.pinned.recipients).forEach(async recipient => {
-                message.domains.push({
-                    oid: recipient.pinned.domainOid,
-                    status: 'ok',
-                });
+            Ipc.sendPrimary(message);
+        }
 
-                message.recipients.push({
-                    oid: recipient.oid,
-                    status: 'delivered',
-                    error: '',
-                });
-            });
+        async OnReceived(formData) {
+            let data = {
+                category: 'smtprecv',
+                bulk: false,
+                reason: '#RECEIVED',
+                from: formData.Sender.content,
+                subject: formData.Subject.content,
+            };
 
+            for (let section of ['To', 'Cc', 'Bcc']) {
+                if (section in formData) {
+                    data[section.toLowerCase()] = formData[section].content;
+                }
+                else if (section.toLowerCase() in formData) {
+                    data[section] = formData[section.toLowerCase()].content;
+                }
+            }
+
+            for (let section of [{ src: 'body-html', dst: 'html' }, { src: 'body-plain', dst: 'text' }]) {
+                if (section.src in formData) {
+                    data[section.dst] = formData[section.src].content;
+                }
+            }
+
+            if (typeof formData['attachment-count'] == 'object') {
+                data.attachments = [];
+
+                for (let i = 1; i <= parseInt(formData['attachment-count'].content); i++) {
+                    data.attachments.push(formData[`attachment-${i}`]);
+                }
+            }
+
+            console.log(data);
+            /*
+            let dbc = await dbConnect();
+            let msg = await mkEmailMessage(dbc, data);
             await dbc.commit();
             await dbc.free();
-
-            Ipc.sendPrimary(message);
             */
-        }
-
-        async processRecvMessage(msg) {
-        }
-
-        async verifyEvent(evnet) {
-            console.log(event);
-            return true;
         }
     });
 }

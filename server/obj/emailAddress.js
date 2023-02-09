@@ -41,6 +41,8 @@ singleton(class EmailAddresses {
             [ emailAddress.user, domainName ] = normal.split('@');
             let domain = await Domains.ensureFromName(dbc, domainName);
             emailAddress.domainOid = domain.oid;
+            emailAddress.lastVerified = mkTime(0);
+            emailAddress.lastDelivered = mkTime(0);
             await emailAddress.save(dbc);
         }
 

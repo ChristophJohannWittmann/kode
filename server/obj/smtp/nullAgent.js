@@ -45,32 +45,15 @@ if (CLUSTER.isPrimary) {
             let msgid = `<msgid-${mkTime().toISOString()}-${msg.oid}>`;
 
             setTimeout(() => {
-                let message = {
-                    messageName: '#EmailSpoolerApi',
-                    action: 'Delivered',
-                    msg: {
-                        oid: msg.oid,
+                for (let recipient of Object.values(msg.pinned.recipients)) {
+                    let message = {
+                        messageName: '#EmailSpoolerApi',
                         msgid: msgid,
-                        status: 'closed',
-                    },
-                    domains: [],
-                    recipients: [],
-                };
+                        recipient: { addr: recipient.pinned.addr, status: 'Delivered' },
+                    };
 
-                recipients: Object.values(msg.pinned.recipients).forEach(async recipient => {
-                    message.domains.push({
-                        oid: recipient.pinned.domainOid,
-                        status: 'ok',
-                    });
-
-                    message.recipients.push({
-                        oid: recipient.oid,
-                        status: 'delivered',
-                        error: '',
-                    });
-                });
-
-                Ipc.sendPrimary(message);
+                    Ipc.sendPrimary(message);
+                }
             }, 2000);
 
             return msgid;

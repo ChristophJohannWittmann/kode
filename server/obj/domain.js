@@ -41,6 +41,7 @@ singleton(class Domains {
             domain = mkDboDomain({
                 name: name,
                 tld: segments[segments.length - 1],
+                lastVerified: mkTime(0),
             });
 
             await domain.save(dbc);

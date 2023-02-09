@@ -82,12 +82,10 @@ mkDbSchema(
             { name: 'tld',          type: dbText, size:   20 },
             { name: 'verified',     type: dbBool             },
             { name: 'lastVerified', type: dbTime             },
-            { name: 'error',        type: dbText, size: 1000 },
         ],
         indexes: [
             'name:asc',
             'tld:asc',
-            'error:asc',
         ]
     },
     {
@@ -98,17 +96,22 @@ mkDbSchema(
             { name: 'domainOid',     type: dbInt64            },
             { name: 'user',          type: dbText, size:  200 },
             { name: 'addr',          type: dbText, size:  200 },
+            { name: 'failed',        type: dbBool             },
+            { name: 'optedOut',      type: dbBool             },
+            { name: 'complained',    type: dbBool             },
             { name: 'verified',      type: dbBool             },
             { name: 'lastVerified',  type: dbTime             },
             { name: 'lastDelivered', type: dbTime             },
-            { name: 'error',         type: dbText, size: 1000 },
         ],
         indexes: [
             'ownerType:asc, ownerOid:asc',
             'domainOid:asc',
             'user:asc',
             'addr:asc',
-            'error:asc',
+            'failed:asc',
+            'optedOut:asc',
+            'complained:asc',
+            'verified:asc',
         ]
     },
     {
@@ -180,7 +183,6 @@ mkDbSchema(
             { name: 'name',          type: dbText, size: 100 },
             { name: 'index',         type: dbInt32           },
             { name: 'status',        type: dbText, size:  20 },
-            { name: 'diagnostic',    type: dbText, size:  -1 },
         ],
         indexes: [
             'msgOid:asc',
