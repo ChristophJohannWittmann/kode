@@ -51,13 +51,35 @@ register(class EmailMessage extends DboMsg {
                 await this.load(arg);
             }
             else if (typeof arg == 'object') {
-                await this.buildEnvelope(arg);
-                await this.buildContent(arg);
+                if (arg.category in { smtpsend:0, smtprecv:0 }) {
+                    await this.buildEnvelope(arg);
+                    await this.buildContent(arg);
+
+                    if (arg.category == 'smtprecv') {
+                        const agentKey = Config.smtp.agentKey
+                        const agentConf = Config.smtp[agentKey];
+                        this.status = 'closed';
+                        this.msgid = arg.msgId;
+                        this.agent = `SMTP/${agentKey}; ${agentConf.agentName}`;
+                    }
+                }
             }
 
             await this.save(this.dbc);
             delete this.dbc;
             ok(this);
+        });
+    }
+
+    announceReceived() {
+        Ipc.sendHost({
+            messageName: '#ReceivedEmail',
+            oid: this.oid,
+            reason: this.reason,
+            reasonType: this.reasonType,
+            reasonOid: this.reasonOid,
+            from: this.getSender().pinned,
+            recipients: this.getRecipients().map(recipient => recipient.pinned),
         });
     }
 
@@ -78,6 +100,7 @@ register(class EmailMessage extends DboMsg {
                         msgOid: this.oid,
                         mime: contentMimes[sectionName],
                         name: sectionName,
+                        props: {},
                         data: mkBuffer(data[sectionName]).toString('base64'),
                     });
 
@@ -85,22 +108,17 @@ register(class EmailMessage extends DboMsg {
                     this.pinned.content[sectionName] = bodySection;
                 }
                 else if (typeof data[sectionName] == 'object') {
-                    let personalizationData = data[sectionName];
+                    let bodySection = mkDboMsgAttr({
+                        msgOid: this.oid,
+                        mime: contentMimes[sectionName],
+                        name: sectionName,
+                        props: {},
+                        data: '',
+                    });
 
-                    if (typeof personalizationData.templateOid == 'bigint') {                        
-                        let bodySection = mkDboMsgAttr({
-                            msgOid: this.oid,
-                            mime: 'application/kode.template',
-                            name: sectonName,
-                            data: mkBuffer(toJson(personalizationData)).toString('base64'),
-                        });
-
-                        await bodySection.save(this.dbc);
-                        this.pinned.content[sectionName] = bodySection;
-                    }
-                    else {
-                        continue;
-                    }
+                    Object.assign(bodySection.props, data[sectionName]);
+                    await bodySection.save(this.dbc);
+                    this.pinned.content[sectionName] = bodySection;
                 }
                 else {
                     continue;
@@ -109,22 +127,20 @@ register(class EmailMessage extends DboMsg {
         }
 
         if (Array.isArray(data.attachments)) {
-            let count = 0;
-
             for (let attachment of data.attachments) {
-                count++;
-                let attachmentName = attachment.name;
-
-                if (attachment.name in this.pinned.attachments) {
-                    attachmentName = `${attachment.name}_${count}`;
-                }
-
                 let msgAttr = mkDboMsgAttr({
                     msgOid: this.oid,
-                    mime: attachment.mime,
-                    name: attachmentName,
-                    data: mkBuffer(attachment).toString('base64'),
+                    mime: attachment.mime ? attachment.mime : 'text/plain',
+                    name: attachment.name ? attachment.name : '',
+                    props: {},
+                    data: mkBuffer(attachment.content).toString('base64'),
                 });
+
+                for (let key in data.attachment) {
+                    if (!(key in { mime:0, name:0, content: 0 })) {
+                        msgAttr.props[key] = attachment[key];
+                    }
+                }
 
                 await msgAttr.save(this.dbc);
                 this.pinned.attachments[attachment.name] = attachment;
@@ -134,7 +150,7 @@ register(class EmailMessage extends DboMsg {
         if (Object.keys(this.pinned.recipients).length == 0) {
             let bodySection = mkDboMsgAttr({
                 msgOid: this.oid,
-                mime: 'text.plain',
+                mime: 'text/plain',
                 name: `body`,
                 data: '',
             });
@@ -147,25 +163,17 @@ register(class EmailMessage extends DboMsg {
     }
 
     async buildEnvelope(data) {
-        this.category = data.category ? data.category : 'none',
+        this.category = data.category;
         this.bulk = data.bulk === false ? false : true,
         this.type = 'email';
         this.status = 'creating';
         this.reason = data.reason ? data.reason : '';
+        this.reasonType = data.reasonType ? data.reasonType : '';
+        this.reasonOid = data.reasonOid ? data.reasonOid : 0n;
         await this.save(this.dbc);
 
         if (data.from) {
-            let name = '';
-            let addr = '';
-
-            if (typeof data.from == 'object') {
-                addr = data.from.addr;
-                name = data.from.name.trim();
-            }
-            else {
-                addr = data.from
-            }
-
+            let [ name, addr ] = this.parseRecipient(data.from);
             let emailAddress = await this.resolveEmailAddress(addr);
 
             this.pinned.from = mkDboMsgEndpoint({
@@ -208,17 +216,7 @@ register(class EmailMessage extends DboMsg {
                 let recipients = data[category];
 
                 for (let recipient of (Array.isArray(recipients) ? recipients : [recipients])) {
-                    let name = '';
-                    let addr = '';
-
-                    if (typeof recipient == 'object') {
-                        addr = recipient.addr;
-                        name = recipient.name.trim();
-                    }
-                    else {
-                        addr = recipient;
-                    }
-
+                    let [ name, addr ] = this.parseRecipient(recipient);
                     let emailAddress = await this.resolveEmailAddress(addr);
 
                     if (!(emailAddress in this.pinned.recipients)) {
@@ -350,6 +348,28 @@ register(class EmailMessage extends DboMsg {
                 this.pinned.attachments[messageAttr.name] = messageAttr;
             }
         }
+    }
+
+    parseRecipient(recipient) {
+        let name = '';
+        let addr = '';
+
+        if (typeof recipient == 'object') {
+            addr = recipient.addr;
+            name = recipient.name.trim();
+        }
+        else if (typeof recipient == 'string') {
+            if (recipient.indexOf('<') >= 0) {
+                let match = recipient.match(/([a-zA-Z0-9.-_'" ]+?) *< *([a-zA-Z0-9.-_%'"]+@[a-zA-Z0-9.-_%'"]+) *>/);
+                name = match[1];
+                addr = match[2];
+            }
+            else {
+                addr = recipient.trim();;
+            }
+        }
+
+        return [ name, addr ];
     }
 
     async remove() {

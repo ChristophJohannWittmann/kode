@@ -261,7 +261,9 @@ singleton(class EmailSpooler extends Daemon {
         let msg = await mkEmailMessage(dbc, {
             category: 'smtpsend',
             bulk: message.bulk === false ? false : true,
-            reason: message.reason ? message.reason : '',
+            reason: message.reason,
+            reasonType: message.reasonType,
+            reasonOid: message.reasonOid,
             from: message.from,
             subject: message.subject,
             to: message.to,

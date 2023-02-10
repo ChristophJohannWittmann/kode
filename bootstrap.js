@@ -368,6 +368,11 @@ async function seedUser(dbc) {
         Ipc.sendWorkers({ messageName: '#ServerReady' });
         // **********************************************************************************
         // **********************************************************************************
+        /*
+        let recipient = 'Alice <alice@infosearchtest.com>';
+        let match = recipient.match(/([a-zA-Z0-9.-_'" ]+?) *< *([a-zA-Z0-9.-_%'"]+@[a-zA-Z0-9.-_%'"]+) *>/);
+        console.log(match);
+        */
         if (false) {
             let dbc = await dbConnect();
 
@@ -399,15 +404,17 @@ async function seedUser(dbc) {
                 });
                 console.log(msg);
             }
-            else if (true) {
+            else if (false) {
                 setTimeout(async () => {
                     let response = await Ipc.queryPrimary({
                         messageName: '#EmailSpoolerSpool',
                         bulk: false,
-                        reason: '/ResetPassword/DboUser/4743',
+                        reason: 'ResetPassword',
+                        reasonType: 'DboUser',
+                        reasonOid: 4743n,
                         from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
                         subject: 'Welcome back my friends.',
-                        to: { addr: 'chris.wittmann@infosearch.online', name: 'Christoph Wittmann' },
+                        to: { addr: 'chris.wittmann@icloud.com', name: 'Christoph Wittmann' },
                         text: 'TEST MESSAGE!',
                     });
 

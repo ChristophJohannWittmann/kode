@@ -148,7 +148,9 @@ mkDbSchema(
             { name: 'category',     type: dbText, size:   20 },
             { name: 'bulk',         type: dbBool             },
             { name: 'status',       type: dbText, size:   20 },
-            { name: 'reason',       type: dbText, size:  200 },
+            { name: 'reason',       type: dbText, size:   50 },
+            { name: 'reasonType',   type: dbText, size:   50 },
+            { name: 'reasonOid',    type: dbInt64            },
             { name: 'agent',        type: dbText, size:   50 },
             { name: 'msgid',        type: dbText, size:  100 },
         ],
@@ -157,6 +159,8 @@ mkDbSchema(
             'bulk:asc',
             'status:asc',
             'reason:asc',
+            'reason:asc, reasonType:asc, reasonOid:asc',
+            'reasonType:asc, reasonOid:asc',
             'msgid:asc',
         ]
     },
@@ -166,6 +170,7 @@ mkDbSchema(
             { name: 'msgOid',       type: dbInt64            },
             { name: 'mime',         type: dbText, size:  100 },
             { name: 'name',         type: dbText, size:   50 },
+            { name: 'props',        type: dbJson, size:   -1 },
             { name: 'data',         type: dbText, size:   -1 },
         ],
         indexes: [
