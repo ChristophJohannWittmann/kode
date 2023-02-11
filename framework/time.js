@@ -38,6 +38,12 @@ register(class Time extends Date {
     static sat = {symbol: Symbol('sat'), index: 6, weekend: true };
     static sun = {symbol: Symbol('sun'), index: 0, weekend: true };
     static dowArray = [ Time.sun, Time.mon, Time.tue, Time.wed, Time.thu, Time.fri, Time.sat ];
+
+    static jsMax =  8640000000000000;
+    static jsMin = -8640000000000000;
+
+    static kodeMax =  4000*365*24*60*60*1000;
+    static kodeMin = -4000*365*24*60*60*1000;;
   
     static dowMap = (() => {
         let map = {};
@@ -48,10 +54,10 @@ register(class Time extends Date {
     constructor(...args) {
         if (args.length == 1) {
             if (args[0] === 'max') {
-                super(8640000000000000);
+                super(Time.kodeMax);
             }
             else if (args[0] === 'min') {
-                super(-8640000000000000);
+                super(Time.kodeMin);
             }
             else {
                 super(args[0]);

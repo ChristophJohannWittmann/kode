@@ -143,6 +143,30 @@ mkDbSchema(
         ]
     },
     {
+        name: 'link',
+        columns: [
+            { name: 'opens',         type: dbInt32            },
+            { name: 'limit',         type: dbInt32            },
+            { name: 'expires',       type: dbTime             },
+            { name: 'reason',        type: dbText, size:   50 },
+            { name: 'reasonType',    type: dbText, size:   50 },
+            { name: 'reasonOid',     type: dbInt64            },
+            { name: 'closed',        type: dbBool             },
+            { name: 'closedOn',      type: dbTime             },
+            { name: 'code',          type: dbText, size:  100 },
+            { name: 'func',          type: dbText, size:   -1 },
+            { name: 'args',          type: dbJson             },
+        ],
+        indexes: [
+            'code:asc',
+            'expires:asc',
+            'reason:asc',
+            'reasonType:asc, reasonOid:asc',
+            'reason:asc, reasonType:asc, reasonOid:asc',
+            'closed:asc',
+        ]
+    },
+    {
         name: 'msg',
         columns: [
             { name: 'category',     type: dbText, size:   20 },

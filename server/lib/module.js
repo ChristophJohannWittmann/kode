@@ -88,11 +88,14 @@ register(class Module {
 
             this.settings = {
                 title: 'Builtin',
-                description: 'Buildin Framework Module.',
+                description: 'Builtin Framework Module.',
                 container: 'builtin',
                 features: [],
                 databases: {},
                 webx : {
+                    Linkx: {
+                        'className': 'Linkx'
+                    },
                     MailGun: {
                         'className': 'SmtpApiMailGun'
                     }

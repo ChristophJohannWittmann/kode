@@ -368,14 +368,22 @@ async function seedUser(dbc) {
         Ipc.sendWorkers({ messageName: '#ServerReady' });
         // **********************************************************************************
         // **********************************************************************************
-        /*
-        let recipient = 'Alice <alice@infosearchtest.com>';
-        let match = recipient.match(/([a-zA-Z0-9.-_'" ]+?) *< *([a-zA-Z0-9.-_%'"]+@[a-zA-Z0-9.-_%'"]+) *>/);
-        console.log(match);
-        */
-        if (false) {
-            let dbc = await dbConnect();
+        let dbc = await dbConnect();
 
+        if (false) {
+            let link = await mkLink(dbc, {
+                func: async (dbc, args, reason) => {
+                    return {
+                        mime: 'text/plain',
+                        content: `OPENING LINK: ${this.code}`,
+                    };
+                },
+            });
+
+            console.log(link.code);
+        }
+
+        if (false) {
             if (false) {
                 let msg = await mkEmailMessage(dbc, 1n);
                 console.log(msg.getOtherRecipients());
@@ -428,9 +436,6 @@ async function seedUser(dbc) {
                 })
                 console.log(mx);
             }
-
-            await dbc.rollback();
-            await dbc.free();
         }
         if (false) {
             setTimeout(async () => {
@@ -442,13 +447,13 @@ async function seedUser(dbc) {
                 console.log(response);
             }, 1000);
         }
+
         if (false) {
-            let dbc = await dbConnect();
             let addr = await EmailAddresses.ensureFromAddr(dbc, 'charlie@kodeprogramming.org');
-            console.log(addr);
-            await dbc.commit();
-            await dbc.free();
         }
+
+        await dbc.commit();
+        await dbc.free();
         // **********************************************************************************
         // **********************************************************************************
     }

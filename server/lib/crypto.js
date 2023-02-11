@@ -239,15 +239,44 @@ register(class Crypto {
      * provides all of the underlying features packaged into a simple single-
      * line asynchronous/promise-base API interface.
     *****/
-    static hash(algorithmName, value) {
+    static hash(algorithmName, value, encoding) {
         return new Promise((ok, fail) => {
             const hasher = CRYPTO.createHash(algorithmName);
             
             hasher.on('readable', () => {
-                ok(hasher.read());
+                let buffer = hasher.read();
+
+                if (buffer) {
+                    switch (encoding) {
+                        case 'base64':
+                            ok(buffer.toString('base64'));
+                            break;
+                            
+                        case 'base64url':
+                            ok(
+                                buffer.toString('base64').split('=')[0]
+                                .replace(/[+]/g, '-').replace(/[\/]/g, '_')
+                            );
+                            break;
+                            
+                        case 'hex':
+                            ok(buffer.toString('hex'));
+                            break;
+
+                        default:
+                            ok(buffer);
+                            break;
+                    }
+                }
             });
-            
-            hasher.write(value);
+
+            if (value instanceof Buffer || value instanceof Uint8Array) {
+                hasher.write(value);
+            }
+            else {
+                hasher.write(mkBuffer(value));
+            }
+
             hasher.end();
         });
     }

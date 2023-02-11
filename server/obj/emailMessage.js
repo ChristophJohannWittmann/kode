@@ -372,23 +372,23 @@ register(class EmailMessage extends DboMsg {
         return [ name, addr ];
     }
 
-    async remove() {
-        await this.from.erase(this.dbc);
-        await this.subject.erase(this.dbc);
+    async remove(dbc) {
+        await this.from.erase(dbc);
+        await this.subject.erase(dbc);
 
         for (let recipient of Object.values(this.recipients)) {
-            await recipient.erase(this.dbc);
+            await recipient.erase(dbc);
         }
 
         for (let content of Object.values(this.content)) {
-            await content.erase(this.dbc);
+            await content.erase(dbc);
         }
 
         for (let attachment of Object.values(this.attachments)) {
-            await attachment.erase(this.dbc);
+            await attachment.erase(dbc);
         }
 
-        await this.erase(this.dbc);
+        await this.erase(dbc);
     }
 
     async resolveEmailAddress(endpoint) {

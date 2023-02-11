@@ -85,6 +85,14 @@ if (CLUSTER.isPrimary) {
 
 
 /*****
+ * The Mail Gun Webx is the webhook used for both delivery status updates and for
+ * incoming email messages.  If the POST content is formatted as multipart form
+ * data, we know it's an incoming message.  If the POST content is JSON, we know
+ * there's a status-update message.  For delivery updates, the incoming messages
+ * are used to generate a standardized framework message to inform the server of
+ * the update.  For incoming emails, we parse and interpret the POST form data,
+ * create a new smtprec msg, and then notify the host regarding the incoming email
+ * message.
 *****/
 if (CLUSTER.isWorker) {
     if ('mailgun' in Config.smtp && Config.smtp.agentKey == 'mailgun') {
