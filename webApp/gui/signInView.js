@@ -98,7 +98,11 @@ class AuthenticateForm extends WGrid {
         this.setAt(9, 0,
             mkIButton('button')
             .setAttribute('value', txx.fwSignInSignIn)
-            .on('html.click', message => this.send({ messageName: 'SignIn' }))
+            //.on('html.click', message => this.send({ messageName: 'SignIn' }))
+            .on('html.click', message => mkWOverlay({
+                opacity: .5,
+                //backgroundColor: 'steelblue',
+            }).showOver(this))
         )
 
         this.setAt(11, 0,

@@ -321,6 +321,11 @@ register(class HtmlElement extends HtmlNode {
         return children;
     }
 
+    blur() {
+        this.node.blur();
+        return this;
+    }
+
     clear() {
         this.node.replaceChildren();
         return this;
@@ -390,6 +395,11 @@ register(class HtmlElement extends HtmlNode {
         return array;
     }
 
+    focus() {
+        this.node.focus();
+        return this;
+    }
+
     getAttribute(name) {
         return this.node.getAttribute(name);
     }
@@ -439,12 +449,12 @@ register(class HtmlElement extends HtmlNode {
                 }
 
                 x += node.offsetLeft;
-                y += node.offsetTop;f
+                y += node.offsetTop;
                 node = node.offsetParent;
             }
         }
 
-        return { x:x, y:y, dx:dx, dy:dy };
+        return { left:x, top:y, width:dx, height:dy };
     }
 
     getStyle(propertyName, value) {

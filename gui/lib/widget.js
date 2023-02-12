@@ -342,6 +342,8 @@ register(class Widget extends Emitter {
         if (parent) {
             return parent.widget();
         }
+
+        return null;
     }
 
     prepend(...args) {

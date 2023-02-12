@@ -87,7 +87,7 @@ register(class Doc extends Emitter {
     }
 
     activeElement() {
-        return this.doc.activeElement;
+        return mkHtmlElement(this.doc.activeElement);
     }
 
     characterSet() {
