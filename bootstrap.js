@@ -368,92 +368,36 @@ async function seedUser(dbc) {
         Ipc.sendWorkers({ messageName: '#ServerReady' });
         // **********************************************************************************
         // **********************************************************************************
+        // **********************************************************************************
+        // **********************************************************************************
+        // **********************************************************************************
+        // **********************************************************************************
         let dbc = await dbConnect();
 
         if (false) {
-            let link = await mkLink(dbc, {
-                func: async (dbc, args, reason) => {
-                    return {
-                        mime: 'text/plain',
-                        content: `OPENING LINK: ${this.code}`,
-                    };
-                },
-            });
-
-            console.log(link.code);
-        }
-
-        if (false) {
-            if (false) {
-                let msg = await mkEmailMessage(dbc, 1n);
-                console.log(msg.getOtherRecipients());
-            }
-            else if (false) {
-                let msg = await mkEmailMessage(dbc, {
-                    category: 'smtpsend',
-                    bulk: false,
-                    reason: '/ResetPassword/DboUser/4743',
-                    from: 'charlie@kodeprogramming.org',
-                    subject: 'Welcome back my friends.',
-                    to: [
-                        'chris.wittmann@icloud.com',
-                        'chris.wittmann@infosearch.online',
-                    ],
-                    text: 'hello email message',
-                    html: `<!DOCTYPE html>
-                    <html>
-                        <head>
-                        </head>
-                        <body>
-                            <h1>My Email Message</h1>
-                        </body>
-                    </html>
-                    `
-                });
-                console.log(msg);
-            }
-            else if (false) {
-                setTimeout(async () => {
-                    let response = await Ipc.queryPrimary({
-                        messageName: '#EmailSpoolerSpool',
-                        bulk: false,
-                        reason: 'ResetPassword',
-                        reasonType: 'DboUser',
-                        reasonOid: 4743n,
-                        from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
-                        subject: 'Welcome back my friends.',
-                        to: { addr: 'chris.wittmann@icloud.com', name: 'Christoph Wittmann' },
-                        text: 'TEST MESSAGE!',
-                    });
-
-                    console.log(response);
-                }, 1000);
-            }
-            else if (false) {
-                let mx = await Ipc.queryPrimary({
-                    messageName: '#DnsResolveMx',
-                    domain: 'infosearchtest.com',
-                })
-                console.log(mx);
-            }
-        }
-        if (false) {
             setTimeout(async () => {
-                let response = await Ipc.query({
-                    messageName: '#DnsResolveMx',
-                    domain: 'infosearchtest.com',
+                let response = await Ipc.queryPrimary({
+                    messageName: '#EmailSpoolerSpool',
+                    bulk: false,
+                    reason: 'ResetPassword',
+                    reasonType: 'DboUser',
+                    reasonOid: 4743n,
+                    from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
+                    subject: 'Welcome back my friends.',
+                    to: { addr: 'chris.wittmann@icloud.com', name: 'Christoph Wittmann' },
+                    text: 'TEST MESSAGE!',
                 });
 
                 console.log(response);
             }, 1000);
         }
 
-        if (false) {
-            let addr = await EmailAddresses.ensureFromAddr(dbc, 'charlie@kodeprogramming.org');
-        }
-
         await dbc.commit();
         await dbc.free();
+        // **********************************************************************************
+        // **********************************************************************************
+        // **********************************************************************************
+        // **********************************************************************************
         // **********************************************************************************
         // **********************************************************************************
     }
