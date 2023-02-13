@@ -23,83 +23,6 @@
 
 
 /*****
- * A class that encapsulates a single content object, which must be located at
- * a unique URL.  It's primary purpose is to support the HTTP server by serving
- * as an instance of data that can be fed via the HTTP server.  Each content
- * object contains additional meta data to facilitate content management.
-*****/
-class Resource {
-    static formatters = {
-        binary: buffer => buffer,
-        string: buffer => buffer.toString(),
-    };
-
-    constructor(reference, module) {
-        return new Promise(async (ok, fail) => {
-            this.module = module;
-            this.oneTime = false;
-            this.url = reference.expandedUrl;
-            this.value = null;
-            this.reference = reference;
-            this.tlsMode = reference.tlsMode ? reference.tlsMode : 'best';
-
-            if ('path' in reference) {
-                this.category = 'content';
-                this.path = reference.expandedPath;
-                this.mime = mkMime(PATH.extname(this.path));
-            }
-            else if ('webx' in reference) {
-                this.category = 'webx';
-                this.value = await module.mkWebx(reference);
-            }
-            else if ('hook' in reference) {
-                this.category = 'hook';
-            }
-            else {
-                logPrimary(`    WARNING: "Unable to process reference:\n.   reference: "${toJson(reference, true)}"`);
-            }
-
-            ok(this);
-        });
-    }
-
-    async get(alg) {
-        let value = this.value;
-
-        if (value === null) {
-            try {
-                let buffer = await FILES.readFile(this.path);
-                value = { '': Resource.formatters[this.mime.type](buffer) };
-
-                if (Config.cache && buffer.length <= 1024*1024*Config.cacheMB) {
-                    this.value = value;
-                }
-            } 
-            catch (e) {
-                return {
-                    url: this.url,
-                    mime: mkMime('text/plain'),
-                    value: `ERROR: ${this.path}`,
-                    error: true,
-                };
-            }
-        }
-
-        if (!(alg in value)) {
-            value[alg] = await compress(alg, value['']);
-        }
-
-        return {
-            url: this.url,
-            mime: this.mime,
-            value: value[alg],
-            error: false,
-        };
-    }
-}
-
-
-/*****
  * A hook is a one-use pseudo resource generally used for special purposes. For
  * instance, we need a HookResource when performing ACME certification.  It can
  * also be used with designated single purpose dynamic links.  For instance, if
@@ -146,6 +69,7 @@ register(class HookResource {
         this.timeout = null;
         this.tlsMode = 'best';
         this.milliseconds = 0;
+        this.category = 'hook';
         this.makePromise();
 
         if (typeof hook == 'object') {
@@ -264,99 +188,5 @@ register(class HookResource {
         }, milliseconds);
 
         return this;
-    }
-});
-
-
-/*****
- * Each process gets it's own singleton content object, which may be used by the
- * HTTP or any other server that needs to refer to content.  Each content item
- * has a unique URL.  On the aggregate level, the content from each module is
- * segregated to ensure unique URLs for each register content file.
-*****/
-singleton(class ResourceLibrary {
-    constructor() {
-        this.urls = {};
-        this.builtin = false;
-    }
-
-    deregister(url) {
-        for (let filtered of Object.keys(this.urls).filter(key => key.startsWith(url))) {
-            delete this.urls[filtered];
-        }
-    }
-
-    async expandReference(reference) {
-        let expanded = [];
-
-        if ('path' in reference) {
-            let absPath = absolutePath(env.kodePath, reference.path);
-
-            if (await pathExists(absPath)) {
-                let stats = await FILES.stat(absPath);
-
-                if (stats.isFile()) {
-                    reference.expandedUrl = reference.url;
-                    reference.expandedPath = absPath;
-                    return [reference];
-                }
-                else if (stats.isDirectory()) {
-                    for (let filePath of await recurseFiles(absPath)) {
-                        let baseName = PATH.basename(filePath);
-                        let relative = filePath.substr(reference.path.length);
-
-                        if (!baseName.startsWith('.')) {
-                            let expandedReference = clone(reference);
-                            expandedReference.expandedUrl = PATH.join(reference.url, relative);
-                            expandedReference.expandedPath = filePath;
-                            expanded.push(expandedReference);
-                        }
-                    }
-
-                    for (let dirPath of await recurseDirectories(absPath)) {
-                        let indexPath = PATH.join(dirPath, 'index.html');
-
-                        if (await pathExists(indexPath)) {
-                            let stats = await FILES.stat(indexPath);
-
-                            if (stats.isFile()) {
-                                let expandedReference = clone(reference);
-                                let relative = dirPath.substr(reference.path.length);
-                                expandedReference.expandedUrl = PATH.join(reference.url, relative);
-                                expandedReference.expandedPath = indexPath;
-                                expanded.push(expandedReference);
-                            }
-                        }
-                    }
-                }
-            }
-            else {
-                logPrimary(`    WARNING: "File Not Found"  PATH: "${reference.path}"`);
-            }
-        }
-        else {
-            reference.expandedUrl = reference.url;
-            expanded.push(reference);
-        }
-
-        return expanded;
-    }
-    
-    async get(url) {
-        if (url in this.urls) {
-            return await this.urls[url];;
-        }
-    }
-    
-    async register(module, reference) {
-        for (let ref of await this.expandReference(reference)) {
-            if (ref.expandedUrl in this.urls) {
-                logPrimary(`    WARNING: "Duplicate URL ignored"  URL: "${ref.expandedUrl}"`);
-            }
-            else {
-                let resource = await (new Resource(ref, module));
-                this.urls[resource.url] = resource;
-            }
-        }
     }
 });

@@ -87,10 +87,10 @@ if (CLUSTER.isWorker) {
 
             try {
                 if (req.method() in { GET:0, POST:0 }) {
-                    let resource = await ResourceLibrary.get(req.pathname());
+                    let webItem = await WebLibrary.get(req.pathname());
 
-                    if (resource) {
-                        await this.handleResource(req, rsp, tls, resource);
+                    if (webItem) {
+                        await this.handleWebItem(req, rsp, tls, webItem);
                     }
                     else {
                         rsp.endStatus(404);
@@ -120,14 +120,14 @@ if (CLUSTER.isWorker) {
             await dbc.free();
         }
 
-        async handleResource(req, rsp, tls, resource) {
-            if (!(resource.tlsMode in { best:0, must:0, none:0 })) {
+        async handleWebItem(req, rsp, tls, webItem) {
+            if (!(webItem.tlsMode in { best:0, must:0, none:0 })) {
                 rsp.endStatus(404);
                 return;                
             }
 
             if (tls) {
-                if (resource.tlsMode == 'none') {
+                if (webItem.tlsMode == 'none') {
                     if (this.http) {
                         rsp.setHeader('Location', `${req.fullRequest().replace('https', 'http')}`);
                         rsp.endStatus(301);
@@ -140,7 +140,7 @@ if (CLUSTER.isWorker) {
                 }
             }
             else {
-                if (resource.tlsMode == 'must') {
+                if (webItem.tlsMode == 'must') {
                     if (this.https) {
                         rsp.setHeader('Location', `${req.fullRequest().replace('http', 'https')}`);
                         rsp.endStatus(301);
@@ -151,7 +151,7 @@ if (CLUSTER.isWorker) {
                         return;
                     }
                 }
-                else if (resource.tlsMode == 'best') {
+                else if (webItem.tlsMode == 'best') {
                     if (this.https) {
                         rsp.setHeader('Location', `${req.fullRequest().replace('http', 'https')}`);
                         rsp.endStatus(301);
@@ -160,11 +160,11 @@ if (CLUSTER.isWorker) {
                 }
             }
 
-            if (resource.category == 'webx') {
-                await resource.value.handleRequest(req, rsp);
+            if (webItem.category == 'webx') {
+                await webItem.value.handleRequest(req, rsp);
             }
-            else if (resource.category == 'hook') {
-                let response = await resource.reference.hook.accept({
+            else if (webItem.category == 'hook') {
+                let response = await webItem.reference.hook.accept({
                     method: req.method(),
                     url: req.url(),
                     headers: req.headers(),
@@ -174,7 +174,7 @@ if (CLUSTER.isWorker) {
                 rsp.end(response.mime, response.content);
             }
             else if (req.method() == 'GET') {
-                let content = await resource.get(rsp.encoding);
+                let content = await webItem.get(rsp.encoding);
 
                 if (content.error) {
                     rsp.mime = mkMime('text/plain');
@@ -205,11 +205,11 @@ if (CLUSTER.isWorker) {
 
         async upgrade(httpReq, socket, headPacket) {
             let req = await mkHttpRequest(this, httpReq);
-            let resource = await ResourceLibrary.get(req.pathname());
+            let webItem = await WebLibrary.get(req.pathname());
 
-            if (resource && resource.category == 'webx') {
+            if (webItem && webItem.category == 'webx') {
                 try {
-                    await resource.value.upgrade(req, socket, headPacket);
+                    await webItem.value.upgrade(req, socket, headPacket);
                 }
                 catch (e) {
                     log(`Web Socket Upgrade Request Error: ${req.url()}`, e);

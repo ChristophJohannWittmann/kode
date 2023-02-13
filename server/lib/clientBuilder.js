@@ -34,7 +34,7 @@
  * itself.  Don't worry about it.  This code will dedupe file names.  The result
  * is that the individually specified file will appear before the others.
 *****/
-register(async function buildClientCode(paths, debug) {
+register(async function buildClientCode(paths) {
     let raw = [];
     let fileArray = [];
     let fileSet = mkStringSet();
@@ -69,7 +69,7 @@ register(async function buildClientCode(paths, debug) {
         }
     }
 
-    if (debug) {
+    if (Config.debug) {
         return raw.join('');
     }
     else {

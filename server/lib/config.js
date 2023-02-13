@@ -33,35 +33,17 @@
 singleton(class Config {
     async loadSystem() {
         if (!env.configPath || !await pathExists(env.configPath)) {
-            return `Configuration directory not found: "${env.configPath}"`;
+            return `Configuration file not found: "${env.configPath}"`;
         }
         
         let stats = await FILES.stat(env.configPath);
 
-        if (!stats.isDirectory()) {
-            return `Configuration directory is not a standard directory" "${env.configPath}"`;
-        }
-
-        await FILES.chmod(env.configPath, 0o700);
-
-        for (let path of await recurseFiles(env.configPath)) {
-            await FILES.chmod(path, 0o600);
-        }
-
-        let serverConfigPath = PATH.join(env.configPath, 'kode.json');
-
-        if (!await pathExists(serverConfigPath)) {
-            return `Server configuration path not found: "${serverConfigPath}"`;
-        }
-
-        stats = await FILES.stat(serverConfigPath);
-
         if (!stats.isFile()) {
-            return `Server configuration path is not a regular file: "${serverConfigPath}"`;
+            return `Configuration file is not a reegular directory" "${env.configPath}"`;
         }
 
-        
-        let buffer = await FILES.readFile(serverConfigPath);
+        await FILES.chmod(env.configPath, 0o600);
+        let buffer = await FILES.readFile(env.configPath);
         let systemConfig = fromJson(buffer.toString());
         
         for (let key in systemConfig) {

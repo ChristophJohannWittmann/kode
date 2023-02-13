@@ -32,7 +32,7 @@
 register(class DbDatabase {
     static databases = {};
 
-    constructor(dbName) {
+    constructor(dbName, dbSettings) {
         if (!dbName.startsWith('@')) {
             throw new Error(`Database name must start with "@": ${dbName}`);
         }
@@ -44,36 +44,23 @@ register(class DbDatabase {
         this.name = dbName;
         this.schemaMap = {};
         this.schemaArray = [];
-        this.duplicates = mkStringSet();
+        this.tableNames = mkStringSet();
+        this.settings = dbSettings;
         DbDatabase.databases[this.name] = this;
-    }
 
-    checkDuplicates() {
-        let tables = mkStringSet();
-        this.duplicates = mkStringSet();
-
-        for (let schema of this.schemaArray) {
-            for (let table of schema) {
-                if (tables.has(table.name)) {
-                    this.duplicates.set(table.name);
-                }
-                else {
-                    tables.set(table.name);
-                }
+        for (let schemaName of dbSettings.schemas) {
+            if (schemaName in this.schemaMap) {
+                throw new Error(`Duplicate schema "${schemaName}" for database "${this.name}".`);
+            }
+            else if (!(schemaName in DbSchema.schemas)) {
+                throw new Error(`Undefined schema "${schemaName}" for database "${this.name}".`);                
+            }
+            else {
+                let schema = DbSchema.schemas[schemaName];
+                this.schemaArray.push(schema);
+                this.schemaMap[schemaName] = schema;
             }
         }
-
-        return this;
-    }
-
-    checkSettings() {
-        let settings = Config.databases[this.name];
-        return settings ? true : false;
-    }
-
-    clearDuplicates() {
-        this.duplicates = mkStringSet();
-        return this;
     }
 
     clearSchema(schemaName) {
@@ -82,10 +69,6 @@ register(class DbDatabase {
         }
 
         return this;
-    }
-
-    hasDuplicates() {
-        return this.duplicates.length() > 0;
     }
 
     hasSchema(schemaName) {

@@ -133,6 +133,11 @@
 
                         container[makerName] = makerFunc;
                         container[`${func.name}`] = func;
+
+                        if (typeof send == 'function') {
+                            send({ messageName: '#ClassRegistered', clss: func, maker: makerFunc });
+                        }
+
                         return makerFunc;
                     }
                     else {

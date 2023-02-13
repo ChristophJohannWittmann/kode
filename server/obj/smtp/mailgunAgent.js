@@ -95,6 +95,7 @@ if (CLUSTER.isPrimary) {
  * message.
 *****/
 if (CLUSTER.isWorker) {
+    return;
     if ('mailgun' in Config.smtp && Config.smtp.agentKey == 'mailgun') {
         Ipc.on('#ServerReady:http', async message => {
             ResourceLibrary.register(builtinModule, {

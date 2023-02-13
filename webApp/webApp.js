@@ -141,8 +141,9 @@ const builtinCssVariables = {
  * handling HTTP and web socket requests.
 *****/
 register(class WebApp extends Webx {
-    constructor(module, reference) {
-        super(module, reference);
+    constructor(reference) {
+        super(reference);
+        console.log(reference);
         this.webSockets = {};
     }
 
@@ -452,6 +453,7 @@ register(class WebApp extends Webx {
     }
 
     async init(cssPath, htmlPath) {
+        return;
         await super.init();
         await this.loadApplicationText();
 

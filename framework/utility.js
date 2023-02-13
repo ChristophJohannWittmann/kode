@@ -142,7 +142,7 @@ function enumerateClassHierarchy(arg, method) {
     if (typeof arg == 'object') {
         ctor = Reflect.getPrototypeOf(arg).constructor;
     }
-    else if (typeof arg == 'function' && arg.toString.startsWith('class')) {
+    else if (typeof arg == 'function' && arg.toString().startsWith('class')) {
         ctor = arg;
     }
 
@@ -171,6 +171,18 @@ register(function classHierarchyList(arg) {
 
 register(function classHierarchyStack(arg) {
     return enumerateClassHierarchy(arg, 'push');
+});
+
+register(function classExtends(clss, base) {
+    if (clss !== base) {
+        for (let baseClss of classHierarchyStack(clss)) {
+            if (baseClss === base) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 });
 
 

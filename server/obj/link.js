@@ -133,6 +133,7 @@ register(class Link extends DboLink {
  * category, Linkx must be extended and the respond() method must be overridden.
 *****/
 if (CLUSTER.isWorker) {
+    return;
     register(class Linkx extends Webx {
         constructor(module, reference) {
             super(module, reference);

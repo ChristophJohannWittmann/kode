@@ -32,8 +32,9 @@
  * and some basic common features that are required for all web extensions.
 *****/
 register(class Webx extends Emitter {
-    constructor(module, reference) {
+    constructor(reference) {
         super();
+        return;
         this.valid = true;
         this.module = module;
         this.reference = reference;

@@ -100,7 +100,6 @@ global.env = {
     memory:         ({ free: OS.freemem(), total: OS.totalmem() }),
     pid:            PROC.pid,
     kodePath:       PATH.join(__dirname, '.'),
-    modulePath:     PATH.join(__dirname, './modules'),
     daemonPath:     PATH.join(__dirname, './server/daemons'),
     serverPath:     PATH.join(__dirname, './server/servers'),
     tempPath:       '/tmp',
@@ -154,21 +153,43 @@ async function seedUser(dbc) {
 
 
 /*****
+ * The startup hook function is here primarily for testing.  Sometimes, it's easy
+ * to try out a new class or feature rigth after the server has started and has
+ * been fully loaded and initialized.  That's the purpose of this function. It's
+ * easiest to simply place a return as the first line of code to ensure that this
+ * hook is disabled.
+*****/
+async function startupHook() {
+    return;
+    setTimeout(async () => {
+        let dbc = await dbConnect();
+
+        let response = await Ipc.queryPrimary({
+            messageName: '#EmailSpoolerSpool',
+            bulk: false,
+            reason: 'ResetPassword',
+            reasonType: 'DboUser',
+            reasonOid: 4743n,
+            from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
+            subject: 'Welcome back my friends.',
+            to: { addr: 'chris.wittmann@icloud.com', name: 'Christoph Wittmann' },
+            text: 'TEST MESSAGE!',
+        });
+
+        await dbc.commit();
+        await dbc.free();
+
+        console.log(response);
+    }, 1000);
+}
+
+
+/*****
  * This is the code that bootstraps the server and this is the entry point into
  * the kode application server.  The kode framework is NOT an application.  It's
  * a framework that loads in modules.  A module represents a namespace and some
  * code.  The module's code is automatically integrated into the running server
  * by responding to HTTP, websocker requests, and other server-bases requests.
- * 
- * Here's what happens in order:
- *     (1)  Load and import builtin modules
- *     (2)  Load and import user modules
- *     (3)  Start workers (primary only)
- *     (4)  Start daemons (primary only)
- *     (5)  Start servers (primary only)
- * 
- * Once this function is exited, the application will continue to execute until
- * instructed to stop with a system-wide #Stop message.
 *****/
 (async () => {
     /********************************************
@@ -181,7 +202,9 @@ async function seedUser(dbc) {
         env.configPath = PATH.join(__dirname, '..', PROC.argv[2]);
     }
 
-    if (CLUSTER.isPrimary) console.log(`[ Searching Configuration Path "${env.configPath}" ]`);
+    if (CLUSTER.isPrimary) {
+        console.log(`[ Searching Configuration Path "${env.configPath}" ]`);
+    }
 
     require('./server/lib/utility.js');
     require('./server/lib/config.js');
@@ -195,6 +218,8 @@ async function seedUser(dbc) {
         PROC.exit(-1);
     }
 
+    Config.sealOff();
+
     /********************************************
      * Infrastructure Code
      *******************************************/
@@ -206,10 +231,10 @@ async function seedUser(dbc) {
     require('./server/lib/html.js');
     require('./server/lib/ipc.js');
     require('./server/lib/logging.js');
-    require('./server/lib/module.js');
     require('./server/lib/multilingualText.js');
     require('./server/lib/pool.js');
     require('./server/lib/server.js');
+    require('./server/lib/thunk.js');
     require('./server/lib/utility.js');
     require('./server/lib/webSocket.js');
     require('./server/lib/webx.js');
@@ -245,7 +270,7 @@ async function seedUser(dbc) {
         require('./server/daemons/emailSpooler.js');
     }
     else {
-        require('./server/lib/resource.js');
+        require('./server/lib/WebLibrary.js');
     }
 
     require('./server/servers/http.js');
@@ -275,72 +300,71 @@ async function seedUser(dbc) {
      *******************************************/
     logPrimary('[ Loading Modules ]');
 
-    Config.moduleMap = {};
-    Config.moduleArray = [];
+    for (let rawModulePath of Config.modules) {
+        let thunk;
+        let modulePath = absolutePath(PATH.parse(env.configPath).dir, rawModulePath);
 
-    async function loadModule(modulePath) {
-        let module = mkModule(modulePath);
-        await module.load();
+        if (await pathExists(modulePath)) {
+            let stats = await FILES.stat(modulePath);
 
-        if (module.getStatus() == 'ok') {
-            await module.loadConfig();
+            if (stats.isDirectory()) {
+                let thunkPath = PATH.join(modulePath, 'thunk.js');
 
-            if (module.status == 'ok') {
-                await module.loadReferences();
-                Config.moduleArray.push(module);
-                Config.moduleMap[module.getContainer()] = module;
-                logPrimary(`    ${module.getInfo()}`);
+                if (await pathExists(thunkPath)) {
+                    stats = await FILES.stat(thunkPath);
+
+                    if (stats.isFile() && thunkPath.endsWith('.js')) {
+                        thunk = await require(thunkPath)(modulePath);
+                        await thunk.loadSchemas();
+                        await thunk.loadServer();
+                    }
+                    else {
+                        console.log(`Error: Thunk at "${thunkPath} is not a regular javascript file."`);
+                        continue;
+                    }
+                }
+                else {
+                    console.log(`Error: Path to thunk "${thunkPath} not found."`);
+                    continue;
+                }
+            }
+            else {
+                console.log(`Error: Module Path "${modulePath} is not a directory."`);
+                continue;
             }
         }
-
-        if (module.getStatus() == 'fail') {
-            logPrimary(`    ${module.getInfo()}`);
-            logPrimary(module.getDiagnostic());
-            module.erase();
+        else {
+            console.log(`Error: Module Path "${modulePath} not found."`);
+            continue;
         }
-
-        return module;
-    }
-
-    await loadModule('#BUILTIN');
-
-    for (let modulePath of Config.modules) {
-        await loadModule(absolutePath(env.configPath, modulePath));
     }
 
     await onSingletons();
-    Config.sealOff();
 
     /********************************************
      * Analyze and Upgrade Databases
      *******************************************/
     logPrimary('[ Preparing Databases ]');
 
-    if (CLUSTER.isPrimary) {
-        for (let db of DbDatabase) {
-            let dups = db.checkDuplicates().duplicates;
-
-            if (dups.length() == 0) {
-                if (db.checkSettings()) {
-                    await db.upgrade();
-                }
-            }
-            else {
-                for (let dup of dups) {
-                    logPrimary(`    (duptable) Duplicate database table: "${dup}"" in database "${db.name}"`);
-                }
-            }
-        }
-
-        let dbc = await dbConnect();
-
-        if ((await dbc.query(`SELECT COUNT(*) FROM _user`)).data[0].count == 0) {
-            await seedUser(dbc);
-        }
-
-        await dbc.commit();
-        await dbc.free();
+    for (let dbName in Config.databases) {
+        let dbSettings = Config.databases[dbName];
+        let dbDatabase = mkDbDatabase(dbName, dbSettings);
     }
+
+    if (CLUSTER.isPrimary) {
+        for (dbDatabase of DbDatabase) {
+            await dbDatabase.upgrade();
+        }
+    }
+
+    let dbc = await dbConnect();
+
+    if (selectDboUser(dbc).length == 0) {
+        await seeduser(dbc);
+    }
+
+    await dbc.commit();
+    await dbc.free();
 
     /********************************************
      * Start Servers
@@ -355,8 +379,7 @@ async function seedUser(dbc) {
                 let server;
                 eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
                 await server.start();
-                Ipc.sendPrimary({ messageName: `#ServerReady:${serverName}` });
-                Ipc.sendWorkers({ messageName: `#ServerReady:${serverName}` });
+                Ipc.sendHost({ messageName: `#ServerReady:${serverName}` });
             }
         }
 
@@ -366,40 +389,6 @@ async function seedUser(dbc) {
         logPrimary('[ Kode Application Server Ready ]');
         Ipc.sendPrimary({ messageName: '#ServerReady' });
         Ipc.sendWorkers({ messageName: '#ServerReady' });
-        // **********************************************************************************
-        // **********************************************************************************
-        // **********************************************************************************
-        // **********************************************************************************
-        // **********************************************************************************
-        // **********************************************************************************
-        let dbc = await dbConnect();
-
-        if (false) {
-            setTimeout(async () => {
-                let response = await Ipc.queryPrimary({
-                    messageName: '#EmailSpoolerSpool',
-                    bulk: false,
-                    reason: 'ResetPassword',
-                    reasonType: 'DboUser',
-                    reasonOid: 4743n,
-                    from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
-                    subject: 'Welcome back my friends.',
-                    to: { addr: 'chris.wittmann@icloud.com', name: 'Christoph Wittmann' },
-                    text: 'TEST MESSAGE!',
-                });
-
-                console.log(response);
-            }, 1000);
-        }
-
-        await dbc.commit();
-        await dbc.free();
-        // **********************************************************************************
-        // **********************************************************************************
-        // **********************************************************************************
-        // **********************************************************************************
-        // **********************************************************************************
-        // **********************************************************************************
     }
     else {
         const serverName = PROC.env.KODE_SERVER_NAME;
@@ -410,6 +399,14 @@ async function seedUser(dbc) {
             if (config.active) {
                 let server;
                 eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
+            }
+
+            if (serverName == 'http') {
+                for (let thunk of Thunk.thunks) {
+                    await thunk.loadClient();
+                    await thunk.loadWebResources();
+                    await thunk.loadWebExtensions();
+                }
             }
         }
 
