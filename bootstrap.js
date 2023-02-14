@@ -316,7 +316,6 @@ async function startupHook() {
                     if (stats.isFile() && thunkPath.endsWith('.js')) {
                         thunk = await require(thunkPath)(modulePath);
                         await thunk.loadSchemas();
-                        await thunk.loadServer();
                     }
                     else {
                         console.log(`Error: Thunk at "${thunkPath} is not a regular javascript file."`);
@@ -402,8 +401,10 @@ async function startupHook() {
             }
 
             if (serverName == 'http') {
+                await Webx.load();
+
                 for (let thunk of Thunk.thunks) {
-                    await thunk.loadClient();
+                    await thunk.loadServer();
                     await thunk.loadWebResources();
                     await thunk.loadWebExtensions();
                 }

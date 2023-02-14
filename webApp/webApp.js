@@ -23,111 +23,6 @@
 
 
 /*****
- * Default CSS colors for the built in style sheet.  If the developer does not
- * provide alternate colors in the module.json file, use these colors here for
- * the GUI.
-*****/
-const builtinCssVariables = {
-    light: {
-        widget_border_width: '1px',
-        widget_border_radius: '5px',
-        widget_outline_width: '2px',
-        widget_outline_radius: '5px',
-
-        widget_color: '#2F4F5F',
-        widget_background_color: '#FFFFFF',
-        widget_border_color: '#C0C0C0',
-
-        widget_hover_color: '#2F4F5F',
-        widget_hover_background_color: '#F9F9F9',
-        widget_hover_border_color: '#C0C0C0',
-
-        widget_focus_color: '#646464',
-        widget_focus_background_color: '#FFFFFF',
-        widget_focus_border_color: '#C0C0C0',
-        widget_focus_outline_color: '#FF8C00',
-
-        widget_disabled_color: '#BBBBBB',
-        widget_disabled_background_color: '#FFFFFF',
-        widget_disabled_border_color: '#C0C0C0',
-
-        widget_error_color: '#DC143C',
-        widget_error_background_color: '#FFF9F9',
-        widget_error_border_color: '#DC143C',
-
-        menu_color: '#2F4F5F',
-        menu_background_color: '#F9F9F9',
-        menu_hover_color: '#2F4F5F',
-        menu_hover_background_color: '#DDDDDD',
-        menu_disabled_color: '#BBBBBB',
-        menu_disabled_background_color: '#F9F9F9',
-
-        main_color: '#2F4F5F',
-        main_background_color: '#FFFFFF',
-        main_border_color: '#778899',
-        main_outline_color: '#FF8C00',
-        main_hover_color: '#2F4F4F',
-        main_hover_background_color: '#787878',
-
-        alt_color: '#4682B4',
-        alt_background_color: '#FDFDFD',
-        alt_border_color: '#4682B4',
-        alt_outline_color: '#FF8C00',
-        alt_hover_color: '#2F4F4F',
-        alt_hover_background_color: '#FF8C00',
-    },
-    dark: {
-        widget_border_width: '1px',
-        widget_border_radius: '5px',
-        widget_outline_width: '2px',
-        widget_outline_radius: '5px',
-
-        widget_color: '#FFFFFF',
-        widget_background_color: '#000000',
-        widget_border_color: '#565656',
-
-        widget_hover_color: '#FFFFFF',
-        widget_hover_background_color: '#222222',
-        widget_hover_border_color: '#565656',
-
-        widget_focus_color: '#FFFFFF',
-        widget_focus_background_color: '#000000',
-        widget_focus_border_color: '#565656',
-        widget_focus_outline_color: '#FF8C00',
-
-        widget_disabled_color: '#A9A9A9',
-        widget_disabled_background_color: '#000000',
-        widget_disabled_border_color: '#C0C0C0',
-
-        widget_error_color: '#DC143C',
-        widget_error_background_color: '#222222',
-        widget_error_border_color: '#DC143C',
-
-        menu_color: '#FFFFFF',
-        menu_background_color: '#222222',
-        menu_hover_color: '#C0C0C0',
-        menu_hover_background_color: '#444444',
-        menu_disabled_color: '#BBBBBB',
-        menu_disabled_background_color: '#222222',
-
-        main_color: '#FFFFFF',
-        main_background_color: '#000000',
-        main_border_color: '#F0F8FF',
-        main_outline_color: '#FF8C00',
-        main_hover_color: '#2F4F4F',
-        main_hover_background_color: '#787878',
-
-        alt_color: '#B0C4DE',
-        alt_background_color: '#222222',
-        alt_border_color: '#4682B4',
-        alt_outline_color: '#FF8C00',
-        alt_hover_color: '#2F4F4F',
-        alt_hover_background_color: '#FF8C00',
-    }
-};
-
-
-/*****
  * A webapp is just one specific type of web extension and probably the most
  * frequencly employed.  A webapp is an extension with specific behavior: (1)
  * an undecorated GET results in responding with a dynamically built HTML doc,
@@ -141,187 +36,77 @@ const builtinCssVariables = {
  * handling HTTP and web socket requests.
 *****/
 register(class WebApp extends Webx {
-    constructor(reference) {
-        super(reference);
-        console.log(reference);
+    constructor(thunk, reference) {
+        super(thunk, reference);
         this.webSockets = {};
-    }
+        this.tlsMode = 'best';
 
-    async buildCSS(path, variables) {
-        if (variables) {
-            let template = mkTextTemplate((await FILES.readFile(path)).toString());
-
-            for (let symbol in template.symbols) {
-                if (symbol in variables) {
-                    template.set(symbol, variables[symbol]);
-                }
-                else {
-                    template.set(symbol, '');
-                }
-            }
-
-            var verboseCss = template.toString();
+        if (Array.isArray(this.reference.text)) {
+            this.reference.text.unshift(PATH.join(env.kodePath, 'webApp/webAppText.js'));
         }
         else {
-            var verboseCss = (await FILES.readFile(path)).toString();
+            this.reference.text = [ PATH.join(env.kodePath, 'webApp/webAppText.js') ];
         }
-
-        if (this.reference.debug) {
-            return verboseCss;
-        }
-        else {
-            return await minifyCss(verboseCss);
-        }
-    }
-
-    buildCssVariables(cssVariables) {
-        const schemeSettings = {};
-
-        for (let section in cssVariables) {
-            schemeSettings[section] = [];
-
-            for (let settingName in cssVariables[section]) {
-                schemeSettings[section].push(`        --${settingName.replaceAll('_', '-')}: ${cssVariables[section][settingName]};`);
-            }
-
-            schemeSettings[section] = schemeSettings[section].join('\n');
-        }
-
-        return schemeSettings;
-    }
-
-    async buildHTML() {
-        let html = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html'))).toString();
-
-        if (this.reference.debug) {
-            var htmlJs = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html.js'))).toString();
-        }
-        else {
-            html = await minifyHtml(html);
-            var htmlJs = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html.js.min'))).toString();
-        }
-
-        return html.replace('${webAppJs}', htmlJs);
-    }
-
-    async buildLinks() {
-        let links = [];
-        this.links = '';
-
-        if (Array.isArray(this.reference.favicons)) {
-            for (let favicon of this.reference.favicons) {
-                switch (favicon.type) {
-                    case 'icon':
-                        let parsed = PATH.parse(favicon.href);
-                        let mime = mkMime(parsed.ext);
-
-                        links.push(
-                            await htmlElement('link',
-                                htmlAttribute('rel', favicon.type),
-                                htmlAttribute('type', mime.code),
-                                htmlAttribute('href', favicon.href)
-                            ).toCompact()
-                        );
-                        break;
-
-                    case 'shortcut icon':
-                        links.push(
-                            await htmlElement('link',
-                                htmlAttribute('rel', favicon.type),
-                                htmlAttribute('href', favicon.href)
-                            ).toCompact()
-                        );
-                        break;
-                }
-            }
-        }
-
-        if (links.length) {
-            this.links = `\n        ${links.join('\n        ')}`;
-        }
-    }
-
-    calcApplicationLanguage(req) {
-        let acceptLanguage = req.acceptLanguage();
-
-        if (Object.keys(acceptLanguage).length) {
-            for (let lang in acceptLanguage) {
-                let language = this.multilingualText.hasLanguage(lang);
-
-                if (language) {
-                    return language;
-                }
-            }
-        }
-
-        return this.multilingualText.getLanguage();
     }
 
     async handleGET(req, rsp) {
-        let handlerName = `handleGet${req.query()}`;
+        let language = this.calcLanguage(req);
+        let appText = toJson(this.text.getLanguage(language));
 
-        if (handlerName in this) {
-            await this[handlerName](req, rsp);
-        }
-        else if (req.query().startsWith('STYLESHEET')) {
-            await this.handleGetSTYLESHEET(req, rsp);
-        }
-        else {
-            let language = this.calcApplicationLanguage(req);
-            let apptext = toJson(this.multilingualText.getLanguage(language));
+        let html = [
+            '<!DOCTYPE html>',
+            '<html class="fill margin-none padding-none">',
+            '  <head>',
+            '    <meta charset="utf-8">',
+            '    <meta name="viewport" content="width=device-width, initial-scale=1">',
+            '    <meta name="color-scheme" content="dark light">',
+            `    <title>${this.reference.title}</title>`,
+        ];
 
-            let doc = mkTextTemplate(this.html).set({
-                styleSheets: this.styleSheetLinks,
-                title: this.module.settings.title,
-                description: this.module.settings.description,
-                links: this.links,
-                url: this.reference.url,
-                websocket: this.settings.websocket,
-                apptext: apptext,
-                homeView: this.settings.homeView,
-                container: this.module.settings.container,
-                bootedAt: env.booted.toString(),
-            });
-
-            rsp.end(200, 'text/html', await doc.toString());
-        }
-    }
-
-    async handleGetCLIENTAPPLICATION(req, rsp) {
-        if (!(rsp.encoding in this.clientApplication)) {
-            this.clientApplication[rsp.encoding] = await compress(rsp.encoding, this.clientApplication['']);
+        for (let cssUrl of this.getCssUrls()) {
+            html.push(`    <link rel="stylesheet" href="${cssUrl}">`);
         }
 
-        rsp.preEncoded = true;
-        rsp.end(this.clientApplication[rsp.encoding]);
-    }
-
-    async handleGetCLIENTFRAMEWORK(req, rsp) {
-        if (!(rsp.encoding in this.framework)) {
-            this.framework[rsp.encoding] = await compress(rsp.encoding, this.framework['']);
+        for (let favicon of this.favicons) {
+            html.push('    ' + favicon);
         }
 
-        rsp.preEncoded = true;
-        rsp.end(this.framework[rsp.encoding]);
-    }
+        html.push('    <script src="/CLIENTFRAMEWORK.js"></script>');
 
-    async handleGetSTYLESHEET(req, rsp) {
-        if (req.query().indexOf('/') > 0) {
-            let [ path, number ] = req.query().trim().split('/');
-            let index = parseInt(number);
-
-            if (index >= 0 && index < this.styleSheets.length) {
-                if (!(rsp.encoding in this.styleSheets[index])) {
-                    this.styleSheets[index][rsp.encoding] = await compress(rsp.encoding, this.styleSheets[index]['']);
-                }
-
-                rsp.preEncoded = true;
-                rsp.end(200, 'text/css', this.styleSheets[index][rsp.encoding]);
-                return;
-            }
+        if (this.getClientCodeUrl()) {
+            html.push(`    <script src="${this.getClientCodeUrl()}"></script>`);
         }
 
-        rsp.endStatus(404);
+        html.push(`    <script src="${this.webAppClientUrl}"></script>`);
+
+        let script = [
+            `        const webAppSettings = {`,
+            '            verify: () => false,',
+            '            password: () => false,',
+            `            container: () => ${this.thunk.opts.container},`,
+            `            homeView: () => ${this.thunk.opts.container}.mk${this.reference.home}(),`,
+            '            session: () => null,',
+            `            url: () => '${this.reference.url}',`,
+            '            session: () => null,',
+            `            websocket: () => ${this.reference.webSocket},`,
+            '        };',
+            `        const txx = ${appText};`,
+            '        Object.freeze(txx);',
+            `        const booted = '${env.booted}';`,
+            ].join('\n');
+
+        script = Config.debug ? script : await minifyJs(script);
+
+        [
+            '    <script>',
+            script,
+            '    </script>',
+            '  </head>',
+            '  <body onload="bootstrap()">',
+            '  </body>',
+            '</html>',
+        ].forEach(line => html.push(line));
+        rsp.end(200, 'text/html', html.join('\n'));
     }
 
     async handleMessage(message) {
@@ -453,9 +238,212 @@ register(class WebApp extends Webx {
     }
 
     async init(cssPath, htmlPath) {
-        return;
         await super.init();
+        this.webAppClientUrl = `/WEBAPPCODE.js`;
+
+        mkWebBlob(
+            this.webAppClientUrl,
+            'text/javascript',
+            await buildClientCode([
+                PATH.join(env.kodePath, 'webapp/gui'),
+            ])
+        );
+    }
+
+    async onUpgrade(req, webSocket) {
+        webSocket.on('#MessageReceived', message => this.handleWebSocket(webSocket, message));
+    }
+});
+// *********************************************************************************************
+// *********************************************************************************************
+// *********************************************************************************************
+// *********************************************************************************************
+// *********************************************************************************************
+    /*
+    async buildCSS(path, variables) {
+        if (variables) {
+            let template = mkTextTemplate((await FILES.readFile(path)).toString());
+
+            for (let symbol in template.symbols) {
+                if (symbol in variables) {
+                    template.set(symbol, variables[symbol]);
+                }
+                else {
+                    template.set(symbol, '');
+                }
+            }
+
+            var verboseCss = template.toString();
+        }
+        else {
+            var verboseCss = (await FILES.readFile(path)).toString();
+        }
+
+        if (this.reference.debug) {
+            return verboseCss;
+        }
+        else {
+            return await minifyCss(verboseCss);
+        }
+    }
+
+    buildCssVariables(cssVariables) {
+        const schemeSettings = {};
+
+        for (let section in cssVariables) {
+            schemeSettings[section] = [];
+
+            for (let settingName in cssVariables[section]) {
+                schemeSettings[section].push(`        --${settingName.replaceAll('_', '-')}: ${cssVariables[section][settingName]};`);
+            }
+
+            schemeSettings[section] = schemeSettings[section].join('\n');
+        }
+
+        return schemeSettings;
+    }
+    */
+
+    /*
+    async buildHTML() {
+        let html = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html'))).toString();
+
+        if (this.reference.debug) {
+            var htmlJs = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html.js'))).toString();
+        }
+        else {
+            html = await minifyHtml(html);
+            var htmlJs = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html.js.min'))).toString();
+        }
+
+        return html.replace('${webAppJs}', htmlJs);
+    }
+    */
+
+    /*
+    async buildLinks() {
+        let links = [];
+        this.links = '';
+
+        if (Array.isArray(this.reference.favicons)) {
+            for (let favicon of this.reference.favicons) {
+                switch (favicon.type) {
+                    case 'icon':
+                        let parsed = PATH.parse(favicon.href);
+                        let mime = mkMime(parsed.ext);
+
+                        links.push(
+                            await htmlElement('link',
+                                htmlAttribute('rel', favicon.type),
+                                htmlAttribute('type', mime.code),
+                                htmlAttribute('href', favicon.href)
+                            ).toCompact()
+                        );
+                        break;
+
+                    case 'shortcut icon':
+                        links.push(
+                            await htmlElement('link',
+                                htmlAttribute('rel', favicon.type),
+                                htmlAttribute('href', favicon.href)
+                            ).toCompact()
+                        );
+                        break;
+                }
+            }
+        }
+
+        if (links.length) {
+            this.links = `\n        ${links.join('\n        ')}`;
+        }
+    }
+    */
+
+    /*
+    calcApplicationLanguage(req) {
+        let acceptLanguage = req.acceptLanguage();
+
+        if (Object.keys(acceptLanguage).length) {
+            for (let lang in acceptLanguage) {
+                let language = this.multilingualText.hasLanguage(lang);
+
+                if (language) {
+                    return language;
+                }
+            }
+        }
+
+        return this.multilingualText.getLanguage();
+    }
+    */
+
+    /*
+    async handleGetCLIENTAPPLICATION(req, rsp) {
+        if (!(rsp.encoding in this.clientApplication)) {
+            this.clientApplication[rsp.encoding] = await compress(rsp.encoding, this.clientApplication['']);
+        }
+
+        rsp.preEncoded = true;
+        rsp.end(this.clientApplication[rsp.encoding]);
+    }
+
+    async handleGetCLIENTFRAMEWORK(req, rsp) {
+        if (!(rsp.encoding in this.framework)) {
+            this.framework[rsp.encoding] = await compress(rsp.encoding, this.framework['']);
+        }
+
+        rsp.preEncoded = true;
+        rsp.end(this.framework[rsp.encoding]);
+    }
+    */
+
+    /*
+    async handleGetSTYLESHEET(req, rsp) {
+        if (req.query().indexOf('/') > 0) {
+            let [ path, number ] = req.query().trim().split('/');
+            let index = parseInt(number);
+
+            if (index >= 0 && index < this.styleSheets.length) {
+                if (!(rsp.encoding in this.styleSheets[index])) {
+                    this.styleSheets[index][rsp.encoding] = await compress(rsp.encoding, this.styleSheets[index]['']);
+                }
+
+                rsp.preEncoded = true;
+                rsp.end(200, 'text/css', this.styleSheets[index][rsp.encoding]);
+                return;
+            }
+        }
+
+        rsp.endStatus(404);
+    }
+    */
+
+
+    /*
+    async init(cssPath, htmlPath) {
+        await super.init();
+
         await this.loadApplicationText();
+
+        async loadClient() {
+            let paths = this.opts.client.map(path => this.mkPath(path));
+            this.clientCode = await buildClientCode(paths);
+            return this;
+        }
+
+        async loadServer() {
+            setContainer(this.opts.container);
+
+            for (let path of this.opts.server) {
+                let absPath = this.mkPath(path);
+
+                for (let filePath of await recurseFiles(absPath)) {
+                    require(filePath);
+                }
+            }
+
+            return this;
+        }
 
         this.framework = { '': await buildClientCode([
                 'framework/core.js',
@@ -530,7 +518,9 @@ register(class WebApp extends Webx {
         await mkTicketEndpoints(this);
         await mkUserEndpoints(this);
     }
+    */
 
+    /*
     async loadApplicationText() {
         this.multilingualText = mkWebAppText();
 
@@ -554,8 +544,19 @@ register(class WebApp extends Webx {
 
         this.multilingualText.finalize();
     }
+    */
 
-    async onWebSocket(req, webSocket) {
-        webSocket.on('#MessageReceived', message => this.handleWebSocket(webSocket, message));
+    /*
+    async loadHtmlTemplate() {
+        let html = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html'))).toString();
+
+        if (this.reference.debug) {
+            var htmlJs = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html.js'))).toString();
+        }
+        else {
+            html = await minifyHtml(html);
+            var htmlJs = (await FILES.readFile(PATH.join(env.kodePath, 'webApp/webApp.html.js.min'))).toString();
+        }
     }
-});
+    */
+

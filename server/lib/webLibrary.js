@@ -122,3 +122,56 @@ register(class WebResource {
         };
     }
 });
+
+
+/*****
+ * The WebBlob class is a type of web item that's precomputed by the system and
+ * then stored in WebLibrary.  Originally, these were created to provide blobs
+ * of jovascript representing entire minified frameworks.  It seems clear that
+ * either binary or text data can be provided as a resource using this approach.
+*****/
+register(class WebBlob {
+    constructor(url, mime, blob, tlsMode) {
+        return new Promise(async (ok, fail) => {
+            this.url = url;
+            this.mime = mime;
+            this.blob = blob;
+            this.tlsMode = tlsMode ? tlsMode : 'best';
+            this.category = 'content';
+            this.mime = mkMime(mime);
+            this.value = null;
+            WebLibrary.register(this.url, this);
+            ok(this);
+        });
+    }
+
+    async get(alg) {
+        let value = this.value;
+
+        if (value === null) {
+            try {
+                value = { '': WebResource.formatters[this.mime.type](this.blob) };
+                this.value = value;
+            } 
+            catch (e) {
+                return {
+                    url: this.url,
+                    mime: mkMime('text/plain'),
+                    value: `ERROR: ${this.path}`,
+                    error: true,
+                };
+            }
+        }
+
+        if (!(alg in value)) {
+            value[alg] = await compress(alg, value['']);
+        }
+
+        return {
+            url: this.url,
+            mime: this.mime,
+            value: value[alg],
+            error: false,
+        };
+    }
+});

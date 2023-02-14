@@ -38,11 +38,27 @@ register(class Thunk {
         Thunk.thunks.push(this);
     }
 
+    /*
     async loadClient() {
-        let paths = this.opts.client.map(path => this.mkPath(path));
-        this.clientCode = await buildClientCode(paths);
+        let paths = this.reference.client.map(path => this.thunk.mkPath(path));
+        let clientCode = await buildClientCode(paths);
+
+        if (clientCode) {
+            this.clientCodeUrl = `${this.reference.url}/CLIENTCODE.js`;
+
+            mkWebBlob(
+                this.clientCodeUrl,
+                'text/javascript',
+                clientCode,
+            );
+        }
+        else {
+            this.clientCodeUrl = '';
+        }
+
         return this;
     }
+    */
 
     async loadServer() {
         setContainer(this.opts.container);
@@ -81,8 +97,9 @@ register(class Thunk {
                 }
 
                 let webx;
-                eval(`webx = ${makerName}(reference);`);
+                eval(`webx = ${makerName}(this, reference);`);
                 await webx.init();
+                WebLibrary.register(webx.reference.url, webx)
             }
         }
 
@@ -106,6 +123,11 @@ register(class Thunk {
     }
 
     mkPath(subpath) {
-        return PATH.join(this.path, subpath);
+        if (PATH.isAbsolute(subpath)) {
+            return subpath;
+        }
+        else {
+            return PATH.join(this.path, subpath);
+        }
     }
 });

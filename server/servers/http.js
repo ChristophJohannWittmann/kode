@@ -160,8 +160,8 @@ if (CLUSTER.isWorker) {
                 }
             }
 
-            if (webItem.category == 'webx') {
-                await webItem.value.handleRequest(req, rsp);
+            if (webItem instanceof Webx) {
+                await webItem.handleRequest(req, rsp);
             }
             else if (webItem.category == 'hook') {
                 let response = await webItem.reference.hook.accept({

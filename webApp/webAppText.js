@@ -27,103 +27,99 @@
  * by the development team.  Other languages will be added as needed and as
  * requexted by influential end users and developer community organizations.
 *****/
-register(class WebAppText extends MultilingualText {
-    constructor() {
-        super({
-            // ****************************************************************
-            // Forgot
-            // ****************************************************************
-            fwForgotEmail: {
-                en: `Enter email address here`,
-            },
-            fwForgotInstructions: {
-                en: `Enter your email adddress and click "Reset Password Now".  If you have an active account, an email with a password reset link will be sent to you.`,
-            },
-            fwForgotReset: {
-                en: `Reset Password Now`,
-            },
-            fwForgotSignIn: {
-                en: `Back to sign in`,
-            },
-            fwSignInForgotPassword: {
-                en: `Forgot Password`,
-            },
+exports = module.exports = {
+    // ****************************************************************
+    // Forgot
+    // ****************************************************************
+    fwForgotEmail: {
+        en: `Enter email address here`,
+    },
+    fwForgotInstructions: {
+        en: `Enter your email adddress and click "Reset Password Now".  If you have an active account, an email with a password reset link will be sent to you.`,
+    },
+    fwForgotReset: {
+        en: `Reset Password Now`,
+    },
+    fwForgotSignIn: {
+        en: `Back to sign in`,
+    },
+    fwSignInForgotPassword: {
+        en: `Forgot Password`,
+    },
 
-            // ****************************************************************
-            // SignIn
-            // ****************************************************************
-            fwSignInPassword: {
-                en: `Password`,
-            },
-            fwSignInSignIn: {
-                en: `Sign In`,
-            },
-            fwSignInUsername: {
-                en: `Email`,
-            },
+    // ****************************************************************
+    // SignIn
+    // ****************************************************************
+    fwSignInPassword: {
+        en: `Password`,
+    },
+    fwSignInSignIn: {
+        en: `Sign In`,
+    },
+    fwSignInUsername: {
+        en: `Email`,
+    },
 
-            // ****************************************************************
-            // Misc
-            // ****************************************************************
-            fwMiscActive: {
-                en: `Active`,
-            },
-            fwMiscSessionClosed: {
-                en: `Your session has been closed.  Please sign in again.`,
-            },
+    // ****************************************************************
+    // Misc
+    // ****************************************************************
+    fwMiscActive: {
+        en: `Active`,
+    },
+    fwMiscSessionClosed: {
+        en: `Your session has been closed.  Please sign in again.`,
+    },
 
-            // ****************************************************************
-            // Nav
-            // ****************************************************************
-            fwNavCancel: {
-                en: `Cancel`,
-            },
-            fwNavDone: {
-                en: `Done`,
-            },
-            fwNavSignout: {
-                en: `Signout`,
-            },
+    // ****************************************************************
+    // Nav
+    // ****************************************************************
+    fwNavCancel: {
+        en: `Cancel`,
+    },
+    fwNavDone: {
+        en: `Done`,
+    },
+    fwNavSignout: {
+        en: `Signout`,
+    },
 
-            // ****************************************************************
-            // Net
-            // ****************************************************************
-            fwNetAcme: {
-                en: `ACME Provider`,
-            },
-            fwNetAddress: {
-                en: `IP Address`,
-            },
-            fwNetCert: {
-                en: `Certificate`,
-            },
-            fwNetCertExpires: {
-                en: `Expiration`,
-            },
-            fwNetCertify: {
-                en: `Request/Renew TLS Certificate`,
-            },
-            fwNetCopyKeyPem: {
-                en: `Copy Public Key (PEM)`,
-            },
-            fwNetCreateKeyPair: {
-                en: `Create Cryptographic Key Pair`,
-            },
-            fwNetDomain: {
-                en: `Domain`,
-            },
-            fwNetHost: {
-                en: `Host`,
-            },
-            fwNetInterface: {
-                en: `Network Interface`,
-            },
-            fwNetPrivateKey: {
-                en: `Private Key`,
-            },
-            fwNetPublicKey: {
-                en: `Public Key`,
-            },
-        });
-    }
-});
+    // ****************************************************************
+    // Net
+    // ****************************************************************
+    fwNetAcme: {
+        en: `ACME Provider`,
+    },
+    fwNetAddress: {
+        en: `IP Address`,
+    },
+    fwNetCert: {
+        en: `Certificate`,
+    },
+    fwNetCertExpires: {
+        en: `Expiration`,
+    },
+    fwNetCertify: {
+        en: `Request/Renew TLS Certificate`,
+    },
+    fwNetCopyKeyPem: {
+        en: `Copy Public Key (PEM)`,
+    },
+    fwNetCreateKeyPair: {
+        en: `Create Cryptographic Key Pair`,
+    },
+    fwNetDomain: {
+        en: `Domain`,
+    },
+    fwNetHost: {
+        en: `Host`,
+    },
+    fwNetInterface: {
+        en: `Network Interface`,
+    },
+    fwNetPrivateKey: {
+        en: `Private Key`,
+    },
+    fwNetPublicKey: {
+        en: `Public Key`,
+    },
+};
