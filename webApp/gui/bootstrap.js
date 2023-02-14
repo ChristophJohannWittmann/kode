@@ -51,13 +51,11 @@
         window.home = null;
         body.push(mkFWSignInView());
 
-        /*
         win.on('focus', async message => {
             if (booted != await queryServer({ messageName: 'PublicGetBootHash' })) {
-                doc.location().reload();
+                doc.location().reload(); 
             }
         });
-        */
     });
 
 
@@ -124,12 +122,10 @@
      * to the server.
     *****/
     register(async function signIn(sessionState) {
-        /*
         if (booted != await queryServer({ messageName: 'PublicGetBootHash' })) {
             doc.location().reload();
             return;
         }
-        */
 
         body.pop();
         window.home = webAppSettings.homeView()

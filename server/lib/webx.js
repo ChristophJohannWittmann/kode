@@ -38,6 +38,7 @@ register(class Webx extends Emitter {
         super();
         this.thunk = thunk
         this.reference = reference;
+        this.tlsMode = 'best';
         this.cssUrls = mkStringSet();
         this.webxCssUrl = `${this.reference.url}/STYLESHEET.css`;
         this.cssUrls.set(this.webxCssUrl);
@@ -79,10 +80,6 @@ register(class Webx extends Emitter {
         return this.cssUrls.list();
     }
 
-    getClientCodeUrl() {
-        return this.clientCodeUrl;
-    }
-
     async handleRequest(req, rsp) {
         try {
             let handlerName = `handle${req.method()}`;
@@ -102,8 +99,6 @@ register(class Webx extends Emitter {
     }
 
     async init() {
-        await this.loadServer();
-        await this.loadClient();
         await this.loadWebxCss();
         await this.loadCss();
         await this.loadFavIcons();
@@ -127,26 +122,6 @@ register(class Webx extends Emitter {
                 'gui/widgets',
             ], Config.debug)
         );
-    }
-
-    async loadClient() {
-        let paths = this.reference.client.map(path => this.thunk.mkPath(path));
-        let clientCode = await buildClientCode(paths);
-
-        if (clientCode) {
-            this.clientCodeUrl = `${this.reference.url}/CLIENTCODE.js`;
-
-            mkWebBlob(
-                this.clientCodeUrl,
-                'text/javascript',
-                clientCode,
-            );
-        }
-        else {
-            this.clientCodeUrl = '';
-        }
-
-        return this;
     }
 
     async loadCss() {
@@ -203,20 +178,6 @@ register(class Webx extends Emitter {
                 }
             }
         }
-    }
-
-    async loadServer() {
-        setContainer(this.thunk.opts.container);
-
-        for (let path of this.reference.server) {
-            let absPath = this.mkPath(path);
-
-            for (let filePath of await recurseFiles(absPath)) {
-                require(filePath);
-            }
-        }
-
-        return this;
     }
 
     async loadText() {
@@ -288,7 +249,7 @@ register(class Webx extends Emitter {
     }
 
     async upgrade(req, socket, headPacket) {
-        if (this.reference.websocket) {
+        if (this.reference.webSocket) {
             if (Reflect.has(this, 'onUpgrade')) {
                 let secureKey = req.header('sec-websocket-key');
                 let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);
@@ -307,7 +268,7 @@ register(class Webx extends Emitter {
             
                 headers.push('\r\n');
                 socket.write(headers.join('\r\n'));
-                await this.onWebSocket(req, webSocket);
+                await this.onUpgrade(req, webSocket);
             }
         }
     }

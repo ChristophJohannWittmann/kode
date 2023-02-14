@@ -36,15 +36,21 @@ register(class Thunk {
         this.path = path;
         this.opts = opts ? opts : {};
         Thunk.thunks.push(this);
+        this.clientCodeUrl = '';
     }
 
-    /*
+    getClientCodeUrl() {
+        return this.clientCodeUrl;
+    }
+
     async loadClient() {
-        let paths = this.reference.client.map(path => this.thunk.mkPath(path));
+        let paths = this.opts.client.map(path => this.mkPath(path));
         let clientCode = await buildClientCode(paths);
+        clientCode = `setContainer('${this.opts.container}');\n` + clientCode;
+        clientCode = Config.debug ? clientCode : await minifyJs(script);
 
         if (clientCode) {
-            this.clientCodeUrl = `${this.reference.url}/CLIENTCODE.js`;
+            this.clientCodeUrl = `/${this.opts.container}/CLIENTCODE.js`;
 
             mkWebBlob(
                 this.clientCodeUrl,
@@ -52,13 +58,9 @@ register(class Thunk {
                 clientCode,
             );
         }
-        else {
-            this.clientCodeUrl = '';
-        }
 
         return this;
     }
-    */
 
     async loadServer() {
         setContainer(this.opts.container);

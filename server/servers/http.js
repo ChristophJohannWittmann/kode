@@ -207,9 +207,9 @@ if (CLUSTER.isWorker) {
             let req = await mkHttpRequest(this, httpReq);
             let webItem = await WebLibrary.get(req.pathname());
 
-            if (webItem && webItem.category == 'webx') {
+            if (webItem && webItem instanceof Webx) {
                 try {
-                    await webItem.value.upgrade(req, socket, headPacket);
+                    await webItem.upgrade(req, socket, headPacket);
                 }
                 catch (e) {
                     log(`Web Socket Upgrade Request Error: ${req.url()}`, e);

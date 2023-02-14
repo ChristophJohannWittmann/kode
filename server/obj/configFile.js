@@ -28,22 +28,13 @@
  * the configuration file for the kode server.  This class is used by system
  * administrators when managing the server configuration.
 *****/
-register(async function loadConfigFile(name) {
-    let exists = true;
-    const filePath = name ? PATH.join(env.configPath, `${name}.json`) : PATH.join(env.configPath, 'kode.json');
-
+register(async function loadConfigFile() {
     class ServerSettings {
         constructor() {
             return new Promise(async (ok, fail) => {
-                if (await isFile(filePath)) {
-                    try {
-                        let buffer = await FILES.readFile(filePath);
-                        let object = fromJson(buffer.toString());
-                        Object.assign(this, object);
-                    }
-                    catch (e) {}
-                }
-
+                let buffer = await FILES.readFile(env.configPath);
+                let object = fromJson(buffer.toString());
+                Object.assign(this, object);
                 ok(this);
             });
         }
@@ -53,7 +44,7 @@ register(async function loadConfigFile(name) {
         }
 
         async save() {
-            await FILES.writeFile(filePath, toJson(this, true));
+            await FILES.writeFile(env.configPath, toJson(this, true));
         }
     }
 

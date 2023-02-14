@@ -159,7 +159,7 @@ async function seedUser(dbc) {
  * easiest to simply place a return as the first line of code to ensure that this
  * hook is disabled.
 *****/
-async function startupHook() {
+async function startupDevelopmentHook() {
     return;
     setTimeout(async () => {
         let dbc = await dbConnect();
@@ -247,7 +247,6 @@ async function startupHook() {
     require('./server/dbms/dbObject.js');
 
     require('./webApp/webApp.js');
-    require('./webApp/webAppText.js');
     require('./webApp/lib/endpoint.js');
     require('./webApp/lib/configEndpoints.js');
     require('./webApp/lib/dbmsEndpoints.js');
@@ -379,6 +378,10 @@ async function startupHook() {
                 eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
                 await server.start();
                 Ipc.sendHost({ messageName: `#ServerReady:${serverName}` });
+
+                if (Config.debug) {
+                    setTimeout(() => startupDevelopmentHook(), 1000);
+                }
             }
         }
 
@@ -405,6 +408,7 @@ async function startupHook() {
 
                 for (let thunk of Thunk.thunks) {
                     await thunk.loadServer();
+                    await thunk.loadClient();
                     await thunk.loadWebResources();
                     await thunk.loadWebExtensions();
                 }
