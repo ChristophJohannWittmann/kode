@@ -246,7 +246,7 @@ register(class WebApp extends Webx {
             this.webAppClientUrl,
             'text/javascript',
             await buildClientCode([
-                PATH.join(env.kodePath, 'webapp/gui'),
+                PATH.join(env.kodePath, 'webApp/gui'),
             ])
         );
 

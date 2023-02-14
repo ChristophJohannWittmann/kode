@@ -90,7 +90,10 @@ if (PROC.argv.length != 3) {
  * This is where installation takes place.  The first step is to detect
  * the application platform, which then specifies how we're going to install
  * the kode application on that platform as an autostart / authrestart server
- * app.
+ * app.  Here's a sample command line:
+ * 
+ *      sudo node ./kode/install.js /home/ec2-user/kode.json
+ * 
 *****/
 const systemd = '/etc/systemd/system';
 
@@ -109,5 +112,6 @@ const systemd = '/etc/systemd/system';
 
         await FILES.writeFile(serviceFile, serviceCode);
         await execShell(`${sudoPath} systemctl daemon-reload`);
+        console.log('ok');
     }
 })();

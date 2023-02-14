@@ -269,7 +269,7 @@ async function startupDevelopmentHook() {
         require('./server/daemons/emailSpooler.js');
     }
     else {
-        require('./server/lib/WebLibrary.js');
+        require('./server/lib/webLibrary.js');
     }
 
     require('./server/servers/http.js');
