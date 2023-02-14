@@ -94,156 +94,162 @@ if (CLUSTER.isPrimary) {
  * create a new smtprec msg, and then notify the host regarding the incoming email
  * message.
 *****/
-if (CLUSTER.isWorker) {
-    return;
-    if ('mailgun' in Config.smtp && Config.smtp.agentKey == 'mailgun') {
-        Ipc.on('#ServerReady:http', async message => {
-            ResourceLibrary.register(builtinModule, {
-                url: '/api/mg',
-                webx: 'MailGun',
-            });
-        });
+register(class SmtpApiMailGun extends Webx {
+    constructor(thunk, reference) {
+        super(thunk, reference);
+        WebLibrary.register(reference.url, this);
+    }
 
-        register(class SmtpApiMailGun extends Webx {
-            constructor(module, reference) {
-                super(module, reference);
-                this.config = Config.smtp.mailgun;
-            }
-
-            async checkEventSignature(event) {
-                if (typeof event.signature == 'object') {
-                    if (typeof event.signature.token == 'string' && typeof event.signature.timestamp == 'string') {
-                        if (typeof event.signature.signature == 'string') {
-                            let content = `${event.signature.timestamp}${event.signature.token}`;
-                            let verificationSignature = Crypto.signHmac('sha256', this.config.apiKey, content, 'hex');
-                            return verificationSignature == event.signature.signature;
-                        }
-                    }
-                }
-
-                return false;
-            }
-
-            async checkMessageSignature(formData) {
-                if (typeof formData.token == 'object' && typeof formData.token.content == 'string') {
-                    if (typeof formData.timestamp == 'object' && typeof formData.timestamp.content == 'string') {
-                        if (typeof formData.signature == 'object' && typeof formData.signature.content == 'string') {
-                            let content = `${formData.timestamp.content}${formData.token.content}`;
-                            let verificationSignature = Crypto.signHmac('sha256', this.config.apiKey, content, 'hex');
-                            return verificationSignature == formData.signature.content;
-                        }
-                    }
-                }
-
-                return false
-            }
-
-            async handlePOST(req, rsp) {
-                try {
-                    if (req.mime().code == 'multipart/form-data' && req.mime().props.boundary) {
-                        let formData = parseMultipartFormData(req.body(), req.mime().props.boundary);
-
-                        if (this.checkMessageSignature(formData)) {
-                            await this.OnReceived(formData);
-                            rsp.endStatus(200);
-                        }
-                        else {
-                            rsp.endStatus(401);
-                        }
-                    }
-                    else if (req.isMessage()) {
-                        let event = req.message();
-
-                        if (await this.checkEventSignature(event)) {
-                            await this.onEvent(event['event-data']);
-                            rsp.endStatus(200);
-                        }
-                        else {
-                            rsp.endStatus(401);
-                        }
-                    }
-                    else {
-                        rsp.endStatus(404);
-                    }
-                }
-                catch (e) {
-                    rsp.endStatus(500);
+    async checkEventSignature(event) {
+        if (typeof event.signature == 'object') {
+            if (typeof event.signature.token == 'string' && typeof event.signature.timestamp == 'string') {
+                if (typeof event.signature.signature == 'string') {
+                    let content = `${event.signature.timestamp}${event.signature.token}`;
+                    let verificationSignature = Crypto.signHmac('sha256', this.reference.apiKey, content, 'hex');
+                    return verificationSignature == event.signature.signature;
                 }
             }
+        }
 
-            async onEvent(event) {
-                const eventMap = {
-                    'clicked': 'Clicked',
-                    'complained': 'Complained',
-                    'delivered': 'Delivered',
-                    'failed-permanent': 'FailedPerm',
-                    'failed-temporary': 'FailedTemp',
-                    'opened': 'Opened',
-                    'unsubscribed': 'OptedOut',
-                };
+        return false;
+    }
 
-                if (event.event == 'failed') {
-                    var status = eventMap[`failed-${event.severity}`];
+    async checkMessageSignature(formData) {
+        if (typeof formData.token == 'object' && typeof formData.token.content == 'string') {
+            if (typeof formData.timestamp == 'object' && typeof formData.timestamp.content == 'string') {
+                if (typeof formData.signature == 'object' && typeof formData.signature.content == 'string') {
+                    let content = `${formData.timestamp.content}${formData.token.content}`;
+                    let verificationSignature = Crypto.signHmac('sha256', this.reference.apiKey, content, 'hex');
+                    return verificationSignature == formData.signature.content;
+                }
+            }
+        }
+
+        return false
+    }
+
+    async handlePOST(req, rsp) {
+        try {
+            if (req.mime().code == 'multipart/form-data' && req.mime().props.boundary) {
+                let formData = parseMultipartFormData(req.body(), req.mime().props.boundary);
+
+                if (this.checkMessageSignature(formData)) {
+                    await this.OnReceived(formData);
+                    rsp.endStatus(200);
                 }
                 else {
-                    var status = eventMap[event.event]; 
-                }
-
-                let message = {
-                    messageName: '#EmailSpoolerApi',
-                    msgid: `${event.message.headers['message-id']}>`,
-                    recipient: { addr: event.recipient, status: status },
-                };
-
-                Ipc.sendPrimary(message);
-            }
-
-            async OnReceived(formData) {
-                let data = {
-                    category: 'smtprecv',
-                    bulk: false,
-                    msgId: formData['Message-Id'].content,
-                    from: formData.Sender.content,
-                    subject: formData.Subject.content,
-                };
-
-                for (let section of ['To', 'Cc', 'Bcc']) {
-                    if (section in formData) {
-                        data[section.toLowerCase()] = formData[section].content;
-                    }
-                    else if (section.toLowerCase() in formData) {
-                        data[section] = formData[section.toLowerCase()].content;
-                    }
-                }
-
-                for (let section of [{ src: 'body-html', dst: 'html' }, { src: 'body-plain', dst: 'text' }]) {
-                    if (section.src in formData) {
-                        data[section.dst] = formData[section.src].content;
-                    }
-                }
-
-                if (typeof formData['attachment-count'] == 'object') {
-                    data.attachments = [];
-
-                    for (let i = 1; i <= parseInt(formData['attachment-count'].content); i++) {
-                        data.attachments.push(formData[`attachment-${i}`]);
-                    }
-                }
-
-                let dbc = await dbConnect();
-
-                try {
-                    let emailMessage = await mkEmailMessage(dbc, data);
-                    await dbc.commit();
-                    emailMessage.announceReceived();
-                }
-                catch (e) {
-                    await dbc.rollback();
-                }
-                finally {
-                    await dbc.free();
+                    rsp.endStatus(401);
                 }
             }
-        });
+            else if (req.isMessage()) {
+                let event = req.message();
+
+                if (await this.checkEventSignature(event)) {
+                    await this.onEvent(event['event-data']);
+                    rsp.endStatus(200);
+                }
+                else {
+                    rsp.endStatus(401);
+                }
+            }
+            else {
+                rsp.endStatus(404);
+            }
+        }
+        catch (e) {
+            rsp.endStatus(500);
+        }
     }
-}
+
+    async onEvent(event) {
+        const eventMap = {
+            'clicked': 'Clicked',
+            'complained': 'Complained',
+            'delivered': 'Delivered',
+            'failed-permanent': 'FailedPerm',
+            'failed-temporary': 'FailedTemp',
+            'opened': 'Opened',
+            'unsubscribed': 'OptedOut',
+        };
+
+        if (event.event == 'failed') {
+            var status = eventMap[`failed-${event.severity}`];
+        }
+        else {
+            var status = eventMap[event.event]; 
+        }
+
+        let message = {
+            messageName: '#EmailSpoolerApi',
+            msgid: `${event.message.headers['message-id']}>`,
+            recipient: { addr: event.recipient, status: status },
+        };
+
+        Ipc.sendPrimary(message);
+    }
+
+    async OnReceived(formData) {
+        let data = {
+            category: 'smtprecv',
+            bulk: false,
+            msgId: formData['Message-Id'].content,
+            from: formData.Sender.content,
+            subject: formData.Subject.content,
+        };
+
+        for (let section of ['To', 'Cc', 'Bcc']) {
+            if (section in formData) {
+                data[section.toLowerCase()] = formData[section].content;
+            }
+            else if (section.toLowerCase() in formData) {
+                data[section] = formData[section.toLowerCase()].content;
+            }
+        }
+
+        for (let section of [{ src: 'body-html', dst: 'html' }, { src: 'body-plain', dst: 'text' }]) {
+            if (section.src in formData) {
+                data[section.dst] = formData[section.src].content;
+            }
+        }
+
+        if (typeof formData['attachment-count'] == 'object') {
+            data.attachments = [];
+
+            for (let i = 1; i <= parseInt(formData['attachment-count'].content); i++) {
+                data.attachments.push(formData[`attachment-${i}`]);
+            }
+        }
+
+        let dbc = await dbConnect();
+
+        try {
+            let emailMessage = await mkEmailMessage(dbc, data);
+
+            for (let recipient of Object.values(emailMessage.pinned.recipients)) {
+                recipient.status = 'received';
+                await recipient.save(dbc);
+            }
+
+            await dbc.commit();
+            emailMessage.announceReceived();
+        }
+        catch (e) {
+            await dbc.rollback();
+        }
+        finally {
+            await dbc.free();
+        }
+    }
+});
+
+
+/*****
+ * If mailgun is the select SMTP agent, this code will create an instance of the
+ * mail gun agent at the configured URL.  Moreover, we're only doing this for
+ * worker processes since the primery process does not server HTTP/HTTP traffic.
+*****/
+(() => {
+    if (CLUSTER.isWorker && Config.smtp.agentKey == 'mailgun') {
+        fwThunk.opts.references.push(Config.smtp.mailgun);
+    }
+})();

@@ -133,3 +133,16 @@ register(class Thunk {
         }
     }
 });
+
+
+/*****
+ * This is a thunk that's created for automatically opening Webx object that are
+ * part of the framework and are controlled by kode.json rather than by a module's
+ * thunk.js program file.
+*****/
+global.fwThunk = mkThunk('', {
+    container: '',
+    server: [],
+    client: [],
+    references: [],
+});

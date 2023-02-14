@@ -193,7 +193,7 @@ singleton(class EmailSpooler extends Daemon {
             if (msgid) {
                 msg.status = 'sending';
                 msg.msgid = msgid;
-                msg.agent = `SMTP/${this.agentKey}; ${this.agentConf.name}`;
+                msg.agent = `SMTP/${this.agentKey}; ${this.agentConf.title}`;
             }
             else {
                 msg.status = 'stuck';

@@ -60,7 +60,7 @@ register(class EmailMessage extends DboMsg {
                         const agentConf = Config.smtp[agentKey];
                         this.status = 'closed';
                         this.msgid = arg.msgId;
-                        this.agent = `SMTP/${agentKey}; ${agentConf.agentName}`;
+                        this.agent = `SMTP/${agentKey}; ${agentConf.title}`;
                     }
                 }
             }
