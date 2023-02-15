@@ -41,13 +41,12 @@ register(class Link extends DboLink {
         return new Promise(async (ok, fail) => {
             if (typeof arg == 'object') {
                 this.opens = 0;
-                this.path = arg.path;
                 this.limit = arg.limit ? arg.limit : 1;
                 this.expires = arg.expires ? arg.expires : mkTime('max');
                 this.reason = arg.reason ? arg.reason : '';
                 this.reasonType = arg.reasonType ? arg.reasonType : '';
                 this.reasonOid = arg.reasonOid ? arg.reasonOid : 0n;
-                this.data = arg.data ? arg.data : {};
+                this.action = arg.action ? arg.action : {};
                 this.closed = false;
                 this.closedOn = mkTime(0);
 
@@ -110,16 +109,8 @@ register(class Link extends DboLink {
         if (typeof this.reason != 'string') return false;
         if (typeof this.reasonType != 'string') return false;
         if (typeof this.reasonOid != 'bigint') return false;
-        if (typeof this.data != 'object') return false;
-
-        if (typeof this.path != 'string' || this.path.trim() == '') {
-            return false;
-        }
-
-        this.path = this.path.trim();
-        this.path = !this.path.endsWith('/') ? this.path : this.path.substr(0, this.path.length - 1);
-        this.path = this.path.startsWith('/') ? this.path : `/${this.path}`;
-
+        if (typeof this.action != 'object') return false;
+        if (typeof this.action.type != 'string') return false;
         return true;
     }
 });
@@ -132,69 +123,77 @@ register(class Link extends DboLink {
  * features must be registered only in the worker!  To handle a dyanmic link
  * category, Linkx must be extended and the respond() method must be overridden.
 *****/
-if (CLUSTER.isWorker) {
-    return;
-    register(class Linkx extends Webx {
-        constructor(module, reference) {
-            super(module, reference);
-        }
+register(class Linkx extends Webx {
+    constructor(thunk, reference) {
+        super(thunk, reference);
+        WebLibrary.register(reference.url, this);
+    }
 
-        async handleGET(req, rsp) {
-            const dbc = await dbConnect();
+    async handleGET(req, rsp) {
+        const dbc = await dbConnect();
+        let link = await mkLink(dbc, req.query());
 
-            try {
-                let link = await mkLink(dbc, req.query());
+        if (link) {
+            if (link.isAvailable()) {
+                let handlerName = `handle${link.action.type.toUpperCase()}`;
 
-                if (link && link.isAvailable()) {
-                    let result = await this.handleLink(dbc, link);
-                    link.opens++;
+                if (typeof this[handlerName] == 'function') {
+                    try {
+                        await this[handlerName](rsp, link);
+                    }
+                    catch (e) {
+                        let error = [
+                            `Error: ${e.toString()}`,
+                            `Stack: ${e.stack}`
+                        ];
 
-                    if (link.opens >= link.limit) {
+                        rsp.end(500, 'text/plain', error.join('\r\n'));
+                    }
+
+                    if (++link.opens >= link.limit) {
                         await link.close(dbc);
                     }
                     else {
                         await link.save(dbc);                
                     }
-
-                    if (result !== false) {
-                        if ('headers in result') {
-                            for (let headerName in result.headers) {
-                                rsp.setHeader(headerName, result.headers[headerName]);
-                            }
-                        }
-
-                        rsp.end(200, result.mime, result.content);
-                    }
-                    else {
-                        rsp.endStatus(400);
-                    }
                 }
                 else {
+                    await link.close(dbc);
                     rsp.endStatus(404);
                 }
-
-                await dbc.commit();
-                await dbc.free();
             }
-            catch (e) {
-                await dbc.rollback();
-                await dbc.free();
-
-                let error = [
-                    `Path: ${req.path()}`,
-                    `Error: ${e.toString()}`,
-                    `Stack: ${e.stack}`
-                ];
-
-                rsp.end(500, 'text/plain', error.join('\r\n'));
+            else {
+                await link.close(dbc);
+                rsp.endStatus(404);
             }
         }
-
-        async handleLink(dbc, link) {
-            return {
-                mime: 'text/plain',
-                content: '-- override handleLink to complete Linkx extensions --',
-            };
+        else {
+            rsp.endStatus(404);
         }
-    });
-}
+
+        await dbc.commit();
+        await dbc.free();
+    }
+
+    async handleREDIRECT(rsp, link) {
+        rsp.setHeader('Location', link.action.url);
+        rsp.end(307, 'text/plain', '');
+    }
+});
+
+
+/*****
+ * Each worker needs this webx for handling requests to open links.  Each link
+ * has a unique code that identifies its purpose.  Link links are configured to
+ * simply be https://host.com/link?<link-code>.
+*****/
+(() => {
+    if (CLUSTER.isWorker) {
+        fwThunk.opts.references.push({
+            url: '/link',
+            webx: 'Linkx',
+            title: 'Link Handler',
+        });
+    }
+})();
+

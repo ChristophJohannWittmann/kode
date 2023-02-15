@@ -160,7 +160,22 @@ async function seedUser(dbc) {
  * hook is disabled.
 *****/
 async function startupDevelopmentHook() {
-    return;
+    let dbc = await dbConnect();
+
+    /*
+    let link = await mkLink(dbc, {
+        reason: 'test',
+        limit: 4,
+        expires: mkTime(2023, 2, 28),
+        action: {
+            type: 'redirect',
+            url: 'http://google.com',
+        }
+    });
+    console.log(link);
+    */
+
+    /*
     setTimeout(async () => {
         let dbc = await dbConnect();
 
@@ -181,6 +196,10 @@ async function startupDevelopmentHook() {
 
         console.log(response);
     }, 1000);
+    */
+
+    await dbc.commit();
+    await dbc.free();
 }
 
 
