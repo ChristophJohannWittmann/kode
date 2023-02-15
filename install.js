@@ -59,7 +59,7 @@ global.PROC      = require('process');
 function createSystemdServiceCode(sudoPath, nodePath, kodePath, confPath) {
 return `
 [Unit]
-Description=Kode
+Description=kodeJS
 
 [Service]
 Type=simple
