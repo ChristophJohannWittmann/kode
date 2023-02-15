@@ -57,35 +57,81 @@ singleton(class WebLibrary {
 
 
 /*****
+ * WebItem is the base class for non programmatic resources stored in a web
+ * library.  Programmatic items in the WebLibrary must extend other classes and
+ * also provide their own unique interface.
+*****/
+register(class WebItem {
+    constructor() {
+        this.registered = false;
+    }
+
+    deregister() {
+        if (this.registered == 'worker') {
+            WebLibrary.deregister(this.url);
+        }
+        else if (this.registered == 'primary') {
+            Ipc.sendPrimary({
+                messageName: '#WebLibraryDeregister',
+                url: this.url,
+            });
+        }
+
+        this.registered = false;
+        return this;
+    }
+
+    async register(primary) {
+        if (!this.registered) {
+            if (primary) {
+                if (this instanceof WebBlob) {
+                    let url = await Ipc.queryPrimary({
+                        messageName: '#WebLibraryRegister',
+                        url: this.url,
+                        mime: this.mime,
+                        blob: this.blob,
+                        tlsMode: this.tlsMode,
+                    });
+
+                    this.registered = 'primary';
+                }
+            }
+            else {
+                WebLibrary.register(this.url, this);
+                this.registered = 'worker';
+            }
+        }
+
+        return this;
+    }
+
+    requested() {
+        return new Promise(async (ok, fail) => {
+        });
+    }
+});
+
+
+/*****
  * A class that encapsulates a single content object, which must be located at
  * a unique URL.  It's primary purpose is to support the HTTP server by serving
  * as an instance of data that can be fed via the HTTP server.  Each content
  * object contains additional meta data to facilitate content management.
 *****/
-register(class WebResource {
+register(class WebResource extends WebItem {
     static formatters = {
         binary: buffer => buffer,
         string: buffer => buffer.toString(),
     };
 
     constructor(url, path, tlsMode) {
-        return new Promise(async (ok, fail) => {
-            this.url = url;
-            this.path = path;
-            this.tlsMode = tlsMode ? tlsMode : 'best';
-            this.category = 'content';
-            this.mime = mkMime(PATH.extname(this.path));
-            this.value = null;
-            WebLibrary.register(this.url, this);
-
-            if (this.url.endsWith('/index.html')) {
-                let url = this.url.substr(0, this.url.length - '/index.html'.length);
-                url = url ? url : '/';
-                WebLibrary.register(url, this);
-            }
-
-            ok(this);
-        });
+        super();
+        this.url = url;
+        this.path = path;
+        this.tlsMode = tlsMode ? tlsMode : 'best';
+        this.category = 'content';
+        this.mime = mkMime(PATH.extname(this.path));
+        this.value = null;
     }
 
     async get(alg) {
@@ -130,19 +176,16 @@ register(class WebResource {
  * of jovascript representing entire minified frameworks.  It seems clear that
  * either binary or text data can be provided as a resource using this approach.
 *****/
-register(class WebBlob {
+register(class WebBlob extends WebItem {
     constructor(url, mime, blob, tlsMode) {
-        return new Promise(async (ok, fail) => {
-            this.url = url;
-            this.mime = mime;
-            this.blob = blob;
-            this.tlsMode = tlsMode ? tlsMode : 'best';
-            this.category = 'content';
-            this.mime = mkMime(mime);
-            this.value = null;
-            WebLibrary.register(this.url, this);
-            ok(this);
-        });
+        super();
+        this.url = url;
+        this.mime = mime;
+        this.blob = blob;
+        this.tlsMode = tlsMode ? tlsMode : 'best';
+        this.category = 'content';
+        this.mime = mkMime(mime);
+        this.value = null;
     }
 
     async get(alg) {

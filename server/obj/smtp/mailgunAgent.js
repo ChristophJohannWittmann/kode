@@ -249,7 +249,7 @@ register(class SmtpApiMailGun extends Webx {
  * worker processes since the primery process does not server HTTP/HTTP traffic.
 *****/
 (() => {
-    if (CLUSTER.isWorker && Config.smtp.agentKey == 'mailgun') {
+    if (CLUSTER.isWorker) {
         fwThunk.opts.references.push(Config.smtp.mailgun);
     }
 })();

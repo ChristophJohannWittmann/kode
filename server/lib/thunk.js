@@ -52,11 +52,11 @@ register(class Thunk {
         if (clientCode) {
             this.clientCodeUrl = `/${this.opts.container}/CLIENTCODE.js`;
 
-            mkWebBlob(
+            await mkWebBlob(
                 this.clientCodeUrl,
                 'text/javascript',
                 clientCode,
-            );
+            ).register();
         }
 
         return this;
@@ -101,7 +101,7 @@ register(class Thunk {
                 let webx;
                 eval(`webx = ${makerName}(this, reference);`);
                 await webx.init();
-                WebLibrary.register(webx.reference.url, webx)
+                WebLibrary.register(webx.reference.url, webx);
             }
         }
 
@@ -116,7 +116,13 @@ register(class Thunk {
                 for (let filePath of await recurseFiles(path)) {
                     let subPath = filePath.substr(path.length);
                     let subUrl = PATH.join(reference.url, subPath);
-                    await mkWebResource(subUrl, filePath);
+                    await mkWebResource(subUrl, filePath).register();
+
+                    if (subUrl.endsWith('/index.html')) {
+                        let indexUrl = subUrl.substr(0, subUrl.length - '/index.html'.length);
+                        indexUrl = indexUrl ? indexUrl : '/';
+                        await mkWebResource(indexUrl, filePath).register();
+                    }
                 }
             }
         }

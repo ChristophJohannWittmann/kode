@@ -513,3 +513,23 @@ register(function toSnakeCase(camelCase) {
         }
     }).join('');
 });
+
+
+/*****
+ * Use this to wait for asynchronouse processes to complete by polling a function
+ * on a periodic basis.  The func parameter is an argumentless function the returns
+ * a boolean like value of either true or false.  When func() returns true, the
+ * promise is fulfilled and the calling code can continue it's inline execution.
+*****/
+register(function waitFor(func, interval) {
+    return new Promise(async (ok, fail) => {
+        if (func()) ok();
+
+        let intervalObject = setInterval(() => {
+            if (func()) {
+                clearInterval(intervalObject);
+                ok();
+            }
+        }, interval);
+    });
+});

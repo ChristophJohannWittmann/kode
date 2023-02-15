@@ -103,6 +103,7 @@ global.env = {
     daemonPath:     PATH.join(__dirname, './server/daemons'),
     serverPath:     PATH.join(__dirname, './server/servers'),
     tempPath:       '/tmp',
+    loaded:         false,
 };
 
 
@@ -149,57 +150,6 @@ async function seedUser(dbc) {
 
     user.emailOid = email.oid;
     await user.save(dbc);
-}
-
-
-/*****
- * The startup hook function is here primarily for testing.  Sometimes, it's easy
- * to try out a new class or feature rigth after the server has started and has
- * been fully loaded and initialized.  That's the purpose of this function. It's
- * easiest to simply place a return as the first line of code to ensure that this
- * hook is disabled.
-*****/
-async function startupDevelopmentHook() {
-    let dbc = await dbConnect();
-
-    /*
-    let link = await mkLink(dbc, {
-        reason: 'test',
-        limit: 4,
-        expires: mkTime(2023, 2, 28),
-        action: {
-            type: 'redirect',
-            url: 'http://google.com',
-        }
-    });
-    console.log(link);
-    */
-
-    /*
-    setTimeout(async () => {
-        let dbc = await dbConnect();
-
-        let response = await Ipc.queryPrimary({
-            messageName: '#EmailSpoolerSpool',
-            bulk: false,
-            reason: 'ResetPassword',
-            reasonType: 'DboUser',
-            reasonOid: 4743n,
-            from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
-            subject: 'Welcome back my friends.',
-            to: { addr: 'chris.wittmann@icloud.com', name: 'Christoph Wittmann' },
-            text: 'TEST MESSAGE!',
-        });
-
-        await dbc.commit();
-        await dbc.free();
-
-        console.log(response);
-    }, 1000);
-    */
-
-    await dbc.commit();
-    await dbc.free();
 }
 
 
@@ -286,6 +236,7 @@ async function startupDevelopmentHook() {
         require('./server/daemons/events.js');
         require('./server/daemons/session.js');
         require('./server/daemons/emailSpooler.js');
+        require('./server/daemons/webLibrary.js');
     }
     else {
         require('./server/lib/webLibrary.js');
@@ -297,7 +248,13 @@ async function startupDevelopmentHook() {
     /********************************************
      * Initialize Server Boot Hash
      *******************************************/
-    env.booted = (await Crypto.hash('sha256', Date.now().toString())).toString('base64');
+    if (CLUSTER.isPrimary) {
+        env.booted = (await Crypto.hash('sha256', Date.now().toString())).toString('base64');
+        Ipc.on('##BOOTED', message => Message.reply(message, env.booted));
+    }
+    else {
+        env.booted = await Ipc.queryPrimary({ messageName: '##BOOTED' });
+    }
 
     /********************************************
      * Load Objects
@@ -393,23 +350,20 @@ async function startupDevelopmentHook() {
             let config = Config.servers[serverName];
 
             if (config.active) {
+                console.log(`    (${serverName}) starting`);
                 let server;
                 eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
                 await server.start();
-                Ipc.sendHost({ messageName: `#ServerReady:${serverName}` });
-
-                if (Config.debug) {
-                    setTimeout(() => startupDevelopmentHook(), 1000);
-                }
+                console.log(`    (${serverName}) ready`);
             }
         }
 
         clearBootMode();
         await onSingletons();
 
-        logPrimary('[ Kode Application Server Ready ]');
-        Ipc.sendPrimary({ messageName: '#ServerReady' });
-        Ipc.sendWorkers({ messageName: '#ServerReady' });
+        logPrimary('[ Kode Application Host Ready ]');
+        Ipc.sendPrimary({ messageName: '#ApplicationHostReady' });
+        Ipc.sendWorkers({ messageName: '#ApplicationHostReady' });
     }
     else {
         const serverName = PROC.env.KODE_SERVER_NAME;
@@ -434,6 +388,74 @@ async function startupDevelopmentHook() {
             }
         }
 
+        if (CLUSTER.worker.id == 1 && Config.debug) {
+            Ipc.on('#ApplicationHostReady', message => developmentHook());
+        }
+
         await onSingletons();
     }
 })();
+
+
+/*****
+ * The startup hook function is here development and test.  Sometimes, it's easy
+ * to try out a new class or feature rigth after the server has started and has
+ * been fully loaded and initialized.  That's the purpose of this function. It's
+ * easiest to simply place a return as the first line of code to ensure that this
+ * hook is disabled.
+*****/
+async function developmentHook() {
+    let dbc = await dbConnect();
+
+    /*
+    let link = await mkLink(dbc, {
+        reason: 'test',
+        limit: 4,
+        expires: mkTime(2023, 2, 28),
+        action: {
+            type: 'redirect',
+            url: 'http://google.com',
+        }
+    });
+    console.log(link);
+    */
+
+    /*
+    setTimeout(async () => {
+        let dbc = await dbConnect();
+
+        let response = await Ipc.queryPrimary({
+            messageName: '#EmailSpoolerSpool',
+            bulk: false,
+            reason: 'ResetPassword',
+            reasonType: 'DboUser',
+            reasonOid: 4743n,
+            from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
+            subject: 'Welcome back my friends.',
+            to: { addr: 'chris.wittmann@icloud.com', name: 'Christoph Wittmann' },
+            text: 'TEST MESSAGE!',
+        });
+
+        await dbc.commit();
+        await dbc.free();
+
+        console.log(response);
+    }, 1000);
+    */
+
+    /*
+    let url = '/test/url/dog';
+    let hook = mkWebBlob(url, 'text/plain', 'Hello Value');
+    await hook.register(true);
+
+    setTimeout(async () => {
+        console.log(`awaiting ${url}`);
+        await Ipc.queryPrimary({ messageName: '#WebLibraryWait', url: url });
+        console.log('ACCEPTED');
+        hook.deregister();
+    }, 100);
+    */
+
+    await dbc.commit();
+    await dbc.free();
+}

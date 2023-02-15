@@ -74,11 +74,22 @@ if (CLUSTER.isWorker) {
                     cert: crypto.cert.certificate[0],
                     ca: crypto.cert.certificate[1],
                 }, (httpReq, httpRsp) => this.handle(httpReq, httpRsp, true));
+
                 this.https.listen(this.config.https, this.getAddress());
                 this.https.on('upgrade', (...args) => this.upgrade(...args));
             }
-            
-            Ipc.sendPrimary({ messageName: `#ServerWorkerStarted:${serverName}` });
+
+            (async () => {
+                if (this.http) {
+                    await waitFor(() => this.http.listening === true, 100);
+                }
+
+                if (this.https) {
+                    await waitFor(() => this.https.listening === true, 100);
+                }
+
+                Ipc.sendPrimary({ messageName: `#ServerWorkerStarted:${serverName}` });
+            })();
         }
 
         async handle(httpReq, httpRsp, tls) {
@@ -88,6 +99,14 @@ if (CLUSTER.isWorker) {
             try {
                 if (req.method() in { GET:0, POST:0 }) {
                     let webItem = await WebLibrary.get(req.pathname());
+
+                    if (!webItem) {
+                        let reply = await Ipc.queryPrimary({ messageName: '#WebLibraryGet', url: req.pathname() });
+
+                        if (reply) {
+                            webItem = mkWebBlob(reply.url, reply.mime, reply.blob, reply.tlsMode);
+                        }
+                    }
 
                     if (webItem) {
                         await this.handleWebItem(req, rsp, tls, webItem);
@@ -163,17 +182,7 @@ if (CLUSTER.isWorker) {
             if (webItem instanceof Webx) {
                 await webItem.handleRequest(req, rsp);
             }
-            else if (webItem.category == 'hook') {
-                let response = await webItem.reference.hook.accept({
-                    method: req.method(),
-                    url: req.url(),
-                    headers: req.headers(),
-                    content: req.body(),
-                });
-
-                rsp.end(response.mime, response.content);
-            }
-            else if (req.method() == 'GET') {
+            else if (webItem instanceof WebItem && req.method() == 'GET') {
                 let content = await webItem.get(rsp.encoding);
 
                 if (content.error) {

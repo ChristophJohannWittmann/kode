@@ -106,14 +106,10 @@ register(class AcmeProvider {
                 let keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
                 let keyAuthorization = `${this.challenge.token}.${thumbprint}`;
 
-                let hook = mkHookResource(keyChallenge, async (...args) => {
-                    return {
-                        status: 200,
-                        mime: 'text/plain',
-                        headers: {},
-                        content: keyAuthorization,
-                    };
-                }).setTlsMode('none').setTimeout(30000);
+                let hook = mkWebBlob(keyChallenge, 'text/plain', keyAuthorization, 'none')
+                await hook.register(true);
+                await Ipc.queryPrimary({ messageName: '#WebLibraryWait', url: keyChallenge });
+                hook.deregister();
                 reply = await this.post(this.challenge.url, {});
 
                 if (reply.status == 200) {

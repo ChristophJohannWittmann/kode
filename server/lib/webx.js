@@ -106,7 +106,7 @@ register(class Webx extends Emitter {
     }
 
     static async load() {
-        mkWebBlob(
+        await mkWebBlob(
             Webx.frameworkUrl,
             'text/javascript',
             await buildClientCode([
@@ -121,7 +121,7 @@ register(class Webx extends Emitter {
                 'gui/widgets/panel.js',
                 'gui/widgets',
             ], Config.debug)
-        );
+        ).register();
     }
 
     async loadCss() {
@@ -140,7 +140,7 @@ register(class Webx extends Emitter {
                             cssText = Config.debug ? cssText : await minifyCss(cssText);
                             let cssUrl = `/${this.opts.container}/STYLESHEET${++count}`;
                             this.cssUrls.set(cssUrl);
-                            mkWebBlob(cssUrl, 'text/css', cssText);
+                            await mkWebBlob(cssUrl, 'text/css', cssText).register();
                         }
                     }
                 }
@@ -244,7 +244,7 @@ register(class Webx extends Emitter {
         }
 
         let cssText = Config.debug ? cssTemplate.toString() : await minifyCss(cssTemplate.toString());
-        mkWebBlob(this.webxCssUrl, 'text/css', cssText);
+        await mkWebBlob(this.webxCssUrl, 'text/css', cssText).register();
 
     }
 

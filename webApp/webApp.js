@@ -242,13 +242,13 @@ register(class WebApp extends Webx {
         await super.init();
         this.webAppClientUrl = `/WEBAPPCODE.js`;
 
-        mkWebBlob(
+        await mkWebBlob(
             this.webAppClientUrl,
             'text/javascript',
             await buildClientCode([
                 PATH.join(env.kodePath, 'webApp/gui'),
             ])
-        );
+        ).register();
 
         await mkConfigEndpoints(this);
         await mkDbmsEndpoints(this);
