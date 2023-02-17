@@ -23,6 +23,12 @@
 
 
 /*****
+ * The sign-in view is used for signing into the web app.  Basic authentication
+ * employs the user of a username (email address) and a password.  We use emails
+ * exclusively because they should be unique to each individual.  It supports
+ * the expected standard features such as forgot-password-help requests.  This
+ * view has a single form centered in its middle, which is either the auth form
+ * or the reset-password form.
 *****/
 register(class FWSignInView extends WGrid {
     constructor() {
@@ -33,8 +39,8 @@ register(class FWSignInView extends WGrid {
 
         this.data = mkActiveData({
             mode: 'Authenticate',
-            username: 'charlie@kodeprogramming.org',
-            password: 'password',
+            username: '',
+            password: '',
         });
 
         this.setAt(1, 1, mkWidget('div')
@@ -65,13 +71,21 @@ register(class FWSignInView extends WGrid {
             signIn(rsp);
         }
         else {
-            console.log('What a bummer.  Could not sign in.')
+            await mkWAlertDialog({
+                text: txx.fwSignInFailed,
+            });
         }
     }
 });
 
 
 /*****
+ * This form provides the core features for signing in.  It's where you enter
+ * your username and password, which if successful, open the application home
+ * page.  This form calls the view's signIn() method to handle authentication
+ * with the server endpoints, and if successful, will continue to the next step
+ * of multi-factor authentication or on to the application home page in case of
+ * single-factor authentication.
 *****/
 class AuthenticateForm extends WGrid {
     constructor(data) {
@@ -96,19 +110,13 @@ class AuthenticateForm extends WGrid {
         .setAttribute('autocomplete', 'current-password');
 
         this.setAt(9, 0,
-            mkIButton('button')
+            mkIButton()
             .setAttribute('value', txx.fwSignInSignIn)
             .on('html.click', message => this.send({ messageName: 'SignIn' }))
-            /*
-            .on('html.click', message => mkWOverlay({
-                opacity: .5,
-                //backgroundColor: 'steelblue',
-            }).showOver(this))
-            */
         )
 
         this.setAt(11, 0,
-            mkIButton('button')
+            mkIButton()
             .setAttribute('value', txx.fwSignInForgotPassword)
             .on('html.click', message => this.data.mode = 'ForgotPassword')
         )
@@ -117,6 +125,11 @@ class AuthenticateForm extends WGrid {
 
 
 /*****
+ * As expected, users can submit a request to reset their password.  That's done
+ * by submitting this form along with a populated email address.  Note that the
+ * password reset will geneate a link that's email to the user.  Upon clicking
+ * that link, multi-factor authentication will be enforced before continuing to
+ * the password page.
 *****/
 class ForgotCredentialsForm extends WGrid {
     constructor(data) {
@@ -138,13 +151,13 @@ class ForgotCredentialsForm extends WGrid {
         .setAttribute('autocomplete', 'email');
 
         this.setAt(7, 0,
-            mkIButton('button')
+            mkIButton()
             .setAttribute('value', txx.fwForgotReset)
             .on('html.click', message => this.send({ messageName: 'ResetPassword' }))
         )
 
         this.setAt(9, 0,
-            mkIButton('button')
+            mkIButton()
             .setAttribute('value', txx.fwForgotSignIn)
             .on('html.click', message => this.data.mode = 'Authenticate')
         )

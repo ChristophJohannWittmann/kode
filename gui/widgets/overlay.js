@@ -23,55 +23,88 @@
 
 
 /*****
+ * An overlay is a SPAN element that's raised over the bottom layer of the doc.
+ * Given that each overlay may have it's own z-index, overlays are able to
+ * overlay each other.  The constructor's opts value normally specifies position,
+ * which tells the overlay object how to arrange itself over the overlaid widget.
+ * "fill" means that the overlay should exactly cover the overlaid widget
+ * pursuiant to the "gap" property.  "center" means that the overlay is centered
+ * over the overlaid widget but not match the size of the overlaid.
 *****/
 register(class WOverlay extends Widget {
-    static nextZ = 100;
-
     constructor(opts) {
-        super('div');
-        this.settings = {};
+        super('span');
         this.blurred = null;
         this.overlaid = null;
         this.opts = typeof opts == 'object' ? opts : new Object();
-        this.settings.position = 'absolute';
-        this.settings.zIndex = WOverlay.nextZ++;
-        this.settings.backgroundColor = typeof opts.backgroundColor == 'string' ? opts.backgroundColor : '#F7F7F7';
-        this.settings.opacity = this.opts.opacity ? this.opts.opacity.toString() : .4;
+
+        if (!(this.opts.position in { fill:0, center:0 })) {
+            this.opts.position = 'fill';
+        }
+
+        this.settings = {
+            position: 'absolute',
+            display: 'block',
+        };
     }
 
-    center() {
+    adjustArea() {
+        let offset = this.overlaid.getOffset();
 
+        if (this.opts.position == 'fill') {
+            if (typeof this.opts.gap == 'number') {
+                offset.left = offset.left + this.opts.gap;
+                offset.top = offset.top + this.opts.gap;
+                offset.width = offset.width - 2*this.opts.gap;
+                offset.height = offset.height - 2*this.opts.gap;
+            }
+        }
+        else if (this.opts.position == 'center') {
+            let thisOffset = this.getOffset();
+
+            let width = thisOffset.width;
+            let height = thisOffset.height;
+
+            if (typeof this.opts.minWidth == 'number') {
+                width < this.opts.minWidth ? width = this.opts.minWidth : false;
+            }
+
+            if (typeof this.opts.minHeight == 'number') {
+                height < this.opts.minHeight ? height = this.opts.minHeight : false;
+            }
+
+            let woff = Math.floor((offset.width - width)/2);
+            let hoff = Math.floor((offset.height - height)/2);
+
+            offset.left = offset.left + woff;
+            offset.top = offset.top + hoff;
+            offset.width = offset.width - 2*woff;
+            offset.height = offset.height - 2*hoff;
+        }
+
+        this.settings.left = `${offset.left}px`;
+        this.settings.top = `${offset.top}px`;
+        this.settings.width = `${offset.width}px`;
+        this.settings.height = `${offset.height}px`;
     }
 
     hide() {
         if (this.overlaid) {
             this.remove();
             this.overeload = null;
-            this.blurred ? this.blurred.focus() : false;
+            this.blurred ? this.blurred.focus() : null;
         }
 
         return this;
     }
 
-    showOver(arg) {
+    show(htmlElement) {
         if (!this.overlaid) {
-            this.overlaid = mkHtmlElement(reducio(arg)).widget();
-            this.overlaidOffset = this.overlaid.getOffset();
-
-            for (let item of ['left', 'top', 'width', 'height']) {
-                if (typeof this.opts[item] == 'string') {
-                    this.settings[item] = this.opts[item];
-                }
-                else if (typeof this.opts[item] == 'number') {
-                    this.settings[item] = `${this.opts[item]}px`;
-                }
-                else {
-                    this.settings[item] = `${this.overlaidOffset[item]}px`;
-                }
-            }
-
-            this.setStyle(this.settings);
+            this.overlaid = mkHtmlElement(reducio(htmlElement)).widget();
             this.overlaid.append(this);
+
+            this.adjustArea();
+            this.setStyle(this.settings);
 
             this.blurred = doc.activeElement();
             this.blurred.blur();

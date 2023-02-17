@@ -50,6 +50,9 @@ exports = module.exports = {
     // ****************************************************************
     // SignIn
     // ****************************************************************
+    fwSignInFailed: {
+        en: `Sorry, we are unable to authenticate your username and password.`,
+    },
     fwSignInPassword: {
         en: `Password`,
     },
@@ -66,8 +69,14 @@ exports = module.exports = {
     fwMiscActive: {
         en: `Active`,
     },
+    fwMiscCancel: {
+        en: `Cancel`,
+    },
     fwMiscSessionClosed: {
         en: `Your session has been closed.  Please sign in again.`,
+    },
+    fwMiscOk: {
+        en: `Ok`,
     },
 
     // ****************************************************************

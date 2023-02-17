@@ -21,36 +21,123 @@
  * THE SOFTWARE.
 *****/
 
-register(function doKludgeConfirm(text) {
-    return confirm(text);
-});
-register(function doKludgeAlert(text) {
-    alert(text);
-});
-
 
 /*****
+ * The dialogs is the web app implementation of the standard model dialog box.
+ * It's simple to construct and use with the intent of providing information to
+ * the user as simple plain text.  It's implemented as a two-overlay widget.
+ * The outer widget is a shield and covers the entire document body.  Overlaid
+ * on the shield is the dialog content, which is split into two rows: (a) text
+ * notification and (b) ok/cancel buttons.
 *****/
-register(class WDialog extends Widget {
-    constructor() {
-        super();
+register(class WDialog extends WOverlay {
+    static minWidth = 300;
+    static minHeight = 200;
+
+    constructor(opts) {
+        super({
+            tagName: 'span',
+            position: 'center',
+            minWidth: WDialog.minWidth,
+            minHeight: WDialog.minHeight,
+        });
+
+        this.setWidgetStyle('dialog-content');
+        doc.on('html.keydown', message => message.event.key == 'Escape' ? this.hide() : false);
+        body.pushFilter({ blur: '6px' })
+
+        let overlayOpts = new Object();
+        typeof opts.autoHide == 'number' ? overlayOpts.autoHide = opts.autoHide : false;
+
+        this.shield = mkWOverlay(overlayOpts);
+        this.shield.setWidgetStyle('dialog-shield');
+        this.shield.setClasses('alt-colors');
+        this.shield.show(html);
+
+        super.show(this.shield);
+        this.append(opts.content);
+
+        if (typeof opts.autoHide == 'number') {
+            this.timeout = setTimeout(() => this.hide(), opts.autoHide);
+        }
+
+        this.promise = new Promise((ok, fail) => {
+            this.hide = value => {
+                this.timeout ? clearTimeout(this.timeout) : false;
+                delete this.timeout;
+                body.popFilter();
+                this.shield.hide();
+                ok(value);
+            }
+        });
+    }
+
+    show() {
     }
 });
 
 
 /*****
+ * The alert dialog, like the window.alert() function, provides a notification
+ * to the user, which is normally closed when the user clicks the provided OK
+ * button.  Here's an example of the usage:  await mkWAlertDialog('some-text');
+*****/
+register(class WAlertDialog extends WDialog {
+    constructor(opts) {
+        const body = (opts.content = mkWTable('dialog-table')).getBody();
+
+        body.mkRowAppend()
+        .mkCellAppend(typeof opts.text == 'string' ? opts.text : '[EMPTY]')
+        .getLastCell().setStyle('text-align', 'left');
+
+        body.mkRowAppend()
+        .mkCellAppend(
+            mkIButton()
+            .setValue(txx.fwMiscOk)
+            .on('html.click', message => this.hide())
+        );
+
+        super(opts);
+        return this.promise;
+    }
+});
+
+
+/*****
+ * The confirm dialog, like the window.confirm() function, provides notification
+ * to the user, who then clicks either "OK" or "Cancel" to either complete the
+ * requested operation or to cancel it.  This is the sanity check dialog box.
+ * Standard usage is with a branch:
+ * 
+ *      if (await mkWConfirmDialog('are-you-sure')) {
+ *          // do it!
+ *      }
+ *      else {
+ *          // don't do it!
+ *      }
 *****/
 register(class WConfirmDialog extends WDialog {
-    constructor() {
-        super();
-    }
-});
+    constructor(opts) {
+        const body = (opts.content = mkWTable('dialog-table')).getBody();
 
+        body.mkRowAppend()
+        .mkCellAppend(typeof opts.text == 'string' ? opts.text : '[EMPTY]')
+        .getLastCell().setAttribute('colspan', 2)
+        .setStyle('text-align', 'left');
 
-/*****
-*****/
-register(class WInfoDialog extends WDialog {
-    constructor() {
-        super();
+        body.mkRowAppend()
+        .mkCellAppend(
+            mkIButton()
+            .setValue(txx.fwMiscOk)
+            .on('html.click', message => this.hide(true))
+        )
+        .mkCellAppend(
+            mkIButton()
+            .setValue(txx.fwMiscCancel)
+            .on('html.click', message => this.hide(false))
+        );
+
+        super(opts);
+        return this.promise;
     }
 });

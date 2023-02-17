@@ -325,10 +325,15 @@ global.webxCssVars = {
 
         alt_color: '#4682B4',
         alt_background_color: '#FDFDFD',
-        alt_border_color: '#4682B4',
+        alt_border_color: '#B0C4DE',
         alt_outline_color: '#FF8C00',
         alt_hover_color: '#2F4F4F',
         alt_hover_background_color: '#FF8C00',
+
+        dialog_color: '#828282',
+        dialog_background_color: '#FFFFFF',
+        dialog_border: 'solid 2px #B0C4DE',
+        dialog_border_radius: '7px',
     },
     dark: {
         widget_border_width: '1px',
@@ -377,5 +382,10 @@ global.webxCssVars = {
         alt_outline_color: '#FF8C00',
         alt_hover_color: '#2F4F4F',
         alt_hover_background_color: '#FF8C00',
+
+        dialog_color: '#B0C4DE',
+        dialog_background_color: '#222222',
+        dialog_border: 'solid 2px #4682B4',
+        dialog_border_radius: '7px',
     }
 };

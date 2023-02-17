@@ -129,7 +129,7 @@ register(class Mime {
             entry = Mime.byExtension[text];
         }
         else if (`.${text}` in Mime.byExtension) {
-            entry = Mime.byExtension[text];
+            entry = Mime.byExtension[`.${text}`];
         }
         else {
             try {

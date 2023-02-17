@@ -105,6 +105,14 @@ register(class WTableSection extends Widget {
         this.cellTag = cellTag;
     }
 
+    getLastRow() {
+        let rows = this.children();
+
+        if (rows.length) {
+            return rows[rows.length - 1];
+        }
+    }
+
     getRowAt(index) {
         if (typeof index == 'number') {
             let rows = this.children();
@@ -270,6 +278,14 @@ register(class WTableRow extends Widget {
         }
 
         return selected;
+    }
+
+    getLastCell() {
+        let cells = this.children();
+
+        if (cells.length) {
+            return cells[cells.length - 1];
+        }
     }
 
     getWidgetStyle() {

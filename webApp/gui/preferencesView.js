@@ -24,9 +24,9 @@
 
 /*****
 *****/
-register(class FWVerifyEmailView extends WGrid {
+register(class FWPreferencesView extends WGrid {
     constructor() {
         super('h1');
-        this.set('FWVerifyEmailView').on('html.click', message => queryServer('SelfSignOut'));
+        this.set('FWPreferencesView').on('html.click', message => console.log(message));
     }
 });

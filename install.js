@@ -92,7 +92,7 @@ if (PROC.argv.length != 3) {
  * the kode application on that platform as an autostart / authrestart server
  * app.  Here's a sample command line:
  * 
- *      sudo node ./kode/install.js /home/ec2-user/kode.json
+ *      sudo node ./kodeJS/install.js /home/ec2-user/kode.json
  * 
 *****/
 const systemd = '/etc/systemd/system';

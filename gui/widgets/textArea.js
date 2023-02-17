@@ -42,13 +42,13 @@ register(class WTextArea extends InputBaseWidget {
             this.valueChanged(message.event.target.value);
         });
 
-        doc.on('keydown', message => {
+        doc.on('html.keydown', message => {
             if (this.entryFilter) {
                 this.entryFilter.handle(event, this);
             }
         });
 
-        doc.on('keyup', message => {
+        doc.on('html.keyup', message => {
             if (this.entryFilter) {
                 this.entryFilter.handle(event, this);
             }

@@ -76,7 +76,7 @@ register(class WArea extends Widget {
             [ area.colMin, area.colMax ] = this.computeSpan(optArea.col);
         }
 
-        this.styleRule.set({
+        this.setStyle({
             display: 'grid',
             height: '100%',
             gridTemplateRows: opts.rows,
@@ -113,7 +113,7 @@ register(class WArea extends Widget {
 
             area.widget = widget;
 
-            area.widget.styleRule.set({
+            area.widget.setStyle({
                 gridRow: area.rowMin == area.rowMax ? area.rowMin + 1 : `${area.rowMin + 1} / span ${area.rowMax + 1}`,
                 gridColumn: area.colMin == area.colMax ? area.colMin + 1 : `${area.colMin + 1} / span ${area.colMax + 1}`,
             });

@@ -65,9 +65,12 @@
      * close outthe websocket and null it out before clearing the application
      * view stack and replacing that entire stack with the sign-in view.
     *****/
-    on('#CloseApp', message => {
+    on('#CloseApp', async message => {
         if (message.notify) {
-            doKludgeAlert(message.notify);
+            await mkAlertDialog({
+                autoHide: 3000,
+                text: message.notify,
+            });
         }
 
         signOut();

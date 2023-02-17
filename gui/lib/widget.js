@@ -45,6 +45,7 @@ register(class Widget extends Emitter {
         this[Widget.handlerKey] = {};
         this.id = Widget.nextId++;
         this.selector = `widget${this.id}`;
+        this.filters = [];
 
         if (arg instanceof HtmlElement) {
             this.htmlElement = arg;
@@ -173,6 +174,15 @@ register(class Widget extends Emitter {
             name: 'className',
             value: '',
         });
+
+        return this;
+    }
+
+    clearFilters() {
+        if (this.filters.length) {
+            this.setStyle('filter', this.filters[0].toString());
+            this.filters = [];
+        }
 
         return this;
     }
@@ -336,6 +346,19 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    popFilter() {
+        if (this.filters.length) {
+            this.filters.pop();
+            this.setStyle('filter', this.filters[this.filters.length - 1].toString());
+
+            if (this.filters.length == 1) {
+                this.filters.pop();
+            }
+        }
+
+        return this;
+    }
+
     parent() {
         let parent = this.htmlElement.parent();
 
@@ -354,6 +377,27 @@ register(class Widget extends Emitter {
             type: 'add',
             widget: this,
         });
+
+        return this;
+    }
+
+    pushFilter(filter) {
+        if (this.filters.length == 0) {
+            this.filters.push(mkWFilter(this));
+        }
+
+        if (filter instanceof WFilter) {
+            this.filters.push(filter);
+            this.setStyle('filter', filter.toString());
+        }
+        else if (typeof filter == 'object') {
+            let filterObj = mkWFilter(filter);
+            this.filters.push(filterObj);
+            this.setStyle('filter', filterObj.toString());
+        }
+        else if (this.filters.length == 1) {
+            this.filters.pop();
+        }
 
         return this;
     }

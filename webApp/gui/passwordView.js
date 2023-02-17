@@ -27,6 +27,6 @@
 register(class FWPasswordView extends WGrid {
     constructor() {
         super('h1');
-        this.set('FWSetPasswordView').on('html.click', message => queryServer('SelfSignOut'));
+        this.set('FWSetPasswordView').on('html.click', message => console.log(message));
     }
 });
