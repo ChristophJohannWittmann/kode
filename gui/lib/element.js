@@ -95,6 +95,18 @@ register(function reducio(arg) {
     else if (arg instanceof Widget) {
         return arg.htmlElement.node;
     }
+    else if (arg instanceof SVGElement) {
+        return arg;
+    }
+    else if (arg instanceof SvgElement) {
+        return arg.node;
+    }
+    else if (arg instanceof MathMLElement) {
+        return arg;
+    }
+    else if (arg instanceof MathElement) {
+        return arg.node;
+    }
     else {
         return document.createTextNode(arg);
     }
@@ -271,7 +283,7 @@ register(class HtmlText extends HtmlNode {
     }
 
     copy() {
-        return htmlText(this.text());
+        return makeHtmlText(this.text());
     }
   
     text() {
@@ -292,7 +304,19 @@ register(class HtmlElement extends HtmlNode {
     static propagationKey = Symbol('propagation');
 
     constructor(arg) {
-        super(reducio(arg));
+        if (arg instanceof HTMLElement) {
+            super(arg);
+        }
+        else if (arg instanceof HtmlElement) {
+            super(arg.node)
+        }
+        else if (typeof arg == 'string') {
+            super(document.createElement(arg.toLowerCase()));
+        }
+        else {
+            super(document.createElement('notag'));
+        }
+
         this.node[HtmlElement.propagationKey] = {};
     }
 
@@ -352,7 +376,7 @@ register(class HtmlElement extends HtmlNode {
     }
 
     copy() {
-        let copy = htmlElement(this.tagName());
+        let copy = mkHtmlElement(this.tagName());
 
         for (let attribute of Object.entries(this.getAttributes())) {
             copy.setAttribute(attribute.name, attribute.value);
@@ -650,26 +674,6 @@ register(class HtmlElement extends HtmlNode {
             widget.brand(this);
             return widget;
         }
-    }
-});
-
-
-/*****
- * Global functions for creating new DOM nodes.  These functions create new,
- * independent nodes, unlike the wrapper classes provided above.  The elements
- * they create are uninitialized, which means the caller needs to perform a
- * bit of setup before the returned nodes are useful.
-*****/
-register(function htmlText(data) {
-    return mkHtmlText(document.createTextNode(data));
-});
-
-register(function htmlElement(arg) {
-    if (arg.startsWith('@')) {
-        return mkHtmlElement(document.createElementNS('http://www.w3.org/2000/svg', arg.substr(1).toLowerCase()));
-    }
-    else {
-        return mkHtmlElement(document.createElement(arg.toLowerCase()));
     }
 });
 

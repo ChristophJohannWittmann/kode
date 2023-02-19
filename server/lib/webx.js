@@ -40,7 +40,7 @@ register(class Webx extends Emitter {
         this.reference = reference;
         this.tlsMode = 'best';
         this.cssUrls = mkStringSet();
-        this.webxCssUrl = `${this.reference.url}/STYLESHEET.css`;
+        this.webxCssUrl = `${this.reference.url == '/' ? '' : this.reference.url}/STYLESHEET.css`;
         this.cssUrls.set(this.webxCssUrl);
     }
 
@@ -105,7 +105,7 @@ register(class Webx extends Emitter {
         await this.loadText();
     }
 
-    static async load() {
+    static async initialize() {
         await mkWebBlob(
             Webx.frameworkUrl,
             'text/javascript',
@@ -114,6 +114,7 @@ register(class Webx extends Emitter {
                 'framework/message.js',
                 'framework',
                 'gui/lib/entryFilter.js',
+                'gui/lib/element.js',
                 'gui/lib',
                 'gui/widgets/inputBase.js',
                 'gui/widgets/input.js',
@@ -127,10 +128,10 @@ register(class Webx extends Emitter {
     async loadCss() {
         let count = 0;
 
-        if (Array.isArray(this.reference.css)) {
-            for (let cssPath of this.reference.css) {
+        if (Array.isArray(this.reference.cssSheets)) {
+            for (let cssPath of this.reference.cssSheets) {
                 if (cssPath.endsWith('.css')) {
-                    let absPath = this.mkPath(cssPath);
+                    let absPath = this.thunk.mkPath(cssPath);
 
                     if (await pathExists(absPath)) {
                         let stats = await FILES.stat(absPath);
@@ -138,7 +139,7 @@ register(class Webx extends Emitter {
                         if (stats.isFile()) {
                             let cssText = (await FILES.readFile(absPath)).toString();
                             cssText = Config.debug ? cssText : await minifyCss(cssText);
-                            let cssUrl = `/${this.opts.container}/STYLESHEET${++count}`;
+                            let cssUrl = `${this.reference.url == '/' ? '' : this.reference.url}/STYLESHEET${++count}.css`;
                             this.cssUrls.set(cssUrl);
                             await mkWebBlob(cssUrl, 'text/css', cssText).register();
                         }

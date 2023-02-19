@@ -23,19 +23,15 @@
 
 
 /*****
- * A useful function that is utilized to build a client library, whether it's the
- * overall client framework or if it's a set of applcation files.  Iterate through
- * the array of paths and load files as encountered.  Files are processed directly
- * while directories ore expanded to load each file and sub-directory file in
- * alphabetical order.  There are files taht must appear before others in client
- * library blob.  Hence, place dependencies earlier on in the paths array, which
- * is the input parameter.  If you have a single file in a directory that needs to
- * be first in line, just put in the path of that file followed by the directory
- * itself.  Don't worry about it.  This code will dedupe file names.  The result
- * is that the individually specified file will appear before the others.
+ * On-demend GUI components are GUI classes that are not downloaded along with
+ * the client or application framework code.  A client application may want to
+ * restrict access to certain GUI components such as org editor or user editor
+ * to users that are authorized.  Moreover, it may make sense to provide onl
+ * the basic GUI components for opening the web app to improve download time.
+ * On demend GUI components are loaded after the web app if up and running for
+ * the user.
 *****/
-register(async function buildClientCode(paths) {
-    let rawJS = [];
+register(async function buildOnDemand(lib, paths) {
     let fileSet = mkStringSet();
 
     for (let path of paths) {
@@ -52,7 +48,7 @@ register(async function buildClientCode(paths) {
         if (stats.isFile() && path.endsWith('.js')) {
             let code = (await FILES.readFile(path)).toString();
             fileSet.set(path);
-            rawJS.push(code);
+            raw.push(code);
         }
         else if (stats.isDirectory()) {
             for (let filePath of await recurseFiles(path)) {
@@ -60,12 +56,21 @@ register(async function buildClientCode(paths) {
 
                 if (stats.isFile() && filePath.endsWith('.js') && !fileSet.has(filePath)) {
                     fileSet.set(filePath);
-                    let code = (await FILES.readFile(filePath)).toString();
-                    rawJS.push(code);
+                    let js = (await FILES.readFile(filePath)).toString();
+                    let match = js.match(/register *\( *class *([a-zA-Z0-9_]+)/m);
+
+                    if (match) {
+                        let className = match[1];
+
+                        if (className in lib) {
+                            throw new Error(`Dupulicate class name encountered while loading on-demand objects: "${className}"`);
+                        }
+                        else {
+                            lib[className] = mkBuffer(Config.debug ? await minifyJs(js) : js).toString('base64');
+                        }
+                    }
                 }
             }
         }
     }
-
-    return Config.debug ? rawJS.join('') : await minifyJs(rawJS.join(''));
 });

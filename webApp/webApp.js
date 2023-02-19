@@ -36,6 +36,8 @@
  * handling HTTP and web socket requests.
 *****/
 register(class WebApp extends Webx {
+    static onDemandGui = {};
+
     constructor(thunk, reference) {
         super(thunk, reference);
         this.webSockets = {};
@@ -260,6 +262,10 @@ register(class WebApp extends Webx {
         await mkTemplateEndpoints(this);
         await mkTicketEndpoints(this);
         await mkUserEndpoints(this);
+    }
+
+    static async initialize() {
+        await buildOnDemand(WebApp.onDemandGui, [PATH.join(env.kodePath, 'webApp/onDemand')]);
     }
 
     async onUpgrade(req, webSocket) {

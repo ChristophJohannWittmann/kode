@@ -24,6 +24,8 @@
 
 (() => {
     /*****
+     * Here are some utility functions that are required for generating strings
+     * representations of timestamp values.
     *****/
     const dateStr = value => {
         if (value instanceof Time) {

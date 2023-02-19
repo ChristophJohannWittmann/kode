@@ -201,6 +201,7 @@ async function seedUser(dbc) {
     require('./server/lib/ipc.js');
     require('./server/lib/logging.js');
     require('./server/lib/multilingualText.js');
+    require('./server/lib/onDemandBuilder.js');
     require('./server/lib/pool.js');
     require('./server/lib/server.js');
     require('./server/lib/thunk.js');
@@ -333,8 +334,8 @@ async function seedUser(dbc) {
 
     let dbc = await dbConnect();
 
-    if (selectDboUser(dbc).length == 0) {
-        await seeduser(dbc);
+    if ((await selectDboUser(dbc)).length == 0) {
+        await seedUser(dbc);
     }
 
     await dbc.commit();
@@ -377,7 +378,8 @@ async function seedUser(dbc) {
             }
 
             if (serverName == 'http') {
-                await Webx.load();
+                await Webx.initialize();
+                await WebApp.initialize();
 
                 for (let thunk of Thunk.thunks) {
                     await thunk.loadServer();

@@ -47,20 +47,14 @@ register(class Widget extends Emitter {
         this.selector = `widget${this.id}`;
         this.filters = [];
 
-        if (arg instanceof HtmlElement) {
-            this.htmlElement = arg;
-        }
-        else {
-            this.htmlElement = htmlElement(arg ? arg : 'div');
-        }
-
+        this.htmlElement = mkHtmlElement(arg ? arg : 'div');
         this.htmlElement.setAttribute('id', this.selector);
         this.brand(this.htmlElement);
         this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
         this.setAttribute('widget-border', 'none');
 
         this.on('html.click', message => {
-            doc.send(message)
+            doc.send(message);
         });
     }
 
