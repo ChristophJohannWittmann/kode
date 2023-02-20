@@ -24,10 +24,13 @@
 
 /*****
 *****/
-register(class SvgElement extends HtmlNode {
+register(class SvgElement extends DocElement {
     constructor(arg) {
         if (arg instanceof SVGElement) {
             super(arg);
+        }
+        else if (arg instanceof SvgElement) {
+            super(arg.node);
         }
         else if (typeof arg == 'string') {
             super(document.createElementNS('http://www.w3.org/2000/svg', arg));

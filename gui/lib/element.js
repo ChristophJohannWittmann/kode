@@ -23,6 +23,360 @@
 
 
 /*****
+ * Creates a new, independent copy of a DOM node as a new instance.  This does
+ * NOT perform a deep copy!  It is used by the deep copy algorithm, but focuses
+ * on a single node.  The trick here is to determine the how to create copy of
+ * the specifid node.  The returned value is a wrapper.
+*****/
+register(function copyDocNode(arg) {
+    if (arg instanceof Text) {
+        return mkDocText(arg.wholeText);
+    }
+    else if (arg instanceof DocText) {
+        return mkDocText(arg.node.wholeText);
+    }
+    else if (arg instanceof HTMLElement) {
+        return mkHtmlElement(arg.name());
+    }
+    else if (arg instanceof HtmlElement) {
+        return mkHtmlElement(arg.node.nodeName);
+    }
+    else if (arg instanceof Widget) {
+        return mkHtmlElement(arg.htmlElement.node.nodeName);
+    }
+    else if (arg instanceof SVGElement) {
+        return mkSvgElement(arg.node.nodeName);
+    }
+    else if (arg instanceof SvgElement) {
+        return mkSvgElement(arg.name());
+    }
+    else if (arg instanceof MathMLElement) {
+        return mkMathElement(are.node.nodeName);
+    }
+    else if (arg instanceof MathElement) {
+        return mkMathElement(arg.name());
+    }
+    else {
+        null;
+    }
+});
+
+
+/*****
+ * Analyzes the argument type with and returns which DocNode or DocElement type
+ * to return to the caller.  In any case, the returned value is always once of
+ * the wrapper objects defined in this source file.  If we're unable to find
+ * any specific type of object, just return a Text node using the argument as
+ * the value to be converted to text.
+*****/
+register(function wrapDocNode(arg) {
+    if (arg instanceof Text) {
+        return mkDocText(arg);
+    }
+    else if (arg instanceof DocText) {
+        return arg;
+    }
+    else if (arg instanceof HTMLElement) {
+        return mkHtmlElement(arg);
+    }
+    else if (arg instanceof HtmlElement) {
+        return arg;
+    }
+    else if (arg instanceof Widget) {
+        return arg.htmlElement;
+    }
+    else if (arg instanceof SVGElement) {
+        return mkSvgElement(arg);
+    }
+    else if (arg instanceof SvgElement) {
+        return arg;
+    }
+    else if (arg instanceof MathMLElement) {
+        return mkMathElement(arg);
+    }
+    else if (arg instanceof MathElement) {
+        return arg;
+    }
+    else {
+        return document.createTextNode(arg);
+    }
+});
+
+
+/*****
+ * Reverses the effect of any DOM node wrapping by returning the naked DOM node
+ * object.  The return node extends beyond HTML because it includes our wrapper
+ * objects as well as SVG and MathML elements, both of which extend Node.
+*****/
+register(function unwrapDocNode(arg) {
+    if (arg instanceof Text) {
+        return arg;
+    }
+    else if (arg instanceof DocText) {
+        return arg.node;
+    }
+    else if (arg instanceof HTMLElement) {
+        return arg;
+    }
+    else if (arg instanceof HtmlElement) {
+        return arg.node;
+    }
+    else if (arg instanceof Widget) {
+        return arg.htmlElement.node;
+    }
+    else if (arg instanceof SVGElement) {
+        return arg;
+    }
+    else if (arg instanceof SvgElement) {
+        return arg.node;
+    }
+    else if (arg instanceof MathMLElement) {
+        return arg;
+    }
+    else if (arg instanceof MathElement) {
+        return arg.node;
+    }
+    else {
+        null;
+    }
+});
+
+
+/*****
+ * The DocNode class provides a wrapper for existing DOM HTMLElements and Text
+ * objects.  This class is NOT used for creating new objects.  It's only for
+ * wrapping existing objects with a more efficient API.  DocNode is the base
+ * class for DocText and HtmlElement.  Methods in this class are applicable for
+ * both types of derived object instances.
+*****/
+register(class DocNode {
+    constructor(node) {
+        this.node = node;
+    }
+
+    append(...args) {
+        for (let arg of args) {
+            this.node.appendChild(unwrapDocNode(arg));
+        }
+
+        return this;
+    }
+
+    clear() {
+        this.node.replaceChildren();
+        return this;
+    }
+
+    children() {
+        let children = [];
+
+        for (let i = 0; i < this.node.childNodes.length; i++) {
+            children.push(wrapDocNode(this.node.childNodes.item(i)));
+        }
+
+        return children;
+    }
+
+    dir() {
+        console.dir(this.node);
+        return this;
+    }
+
+    doc() {
+        return mkDoc(this.node.ownerDocument);
+    }
+
+    firstChild() {
+        if (this.node.firstChild) {
+            return wrapDocNode(this.node.firstChild);
+        }
+
+        return null;
+    }
+
+    insertAfter(...args) {
+        if (this.node.parentNode) {
+            let nextSibling = this.node.nextSibling;
+  
+            if (nextSibling) {
+                for (let arg of args) {
+                    this.node.parentNode.insertBefore(unwrapDocNode(arg), nextSibling);
+                }
+            }
+            else {
+                for (let arg of args) {
+                    this.node.parentNode.appendChild(unwrapDocNode(arg));
+                }
+            }
+        }
+  
+        return this;
+    }
+
+    insertBefore(...args) {
+        if (this.node.parentNode) {
+            for (let arg of args) {
+                this.node.parentNode.insertBefore(unwrapDocNode(arg), this.node);
+            }
+        }
+
+        return this;
+    }
+
+    isElement() {
+        return this.node instanceof DocElement;
+    }
+  
+    isSame(arg) {
+        return unwrapDocNode(arg).isSameNode(this.node);
+    }
+
+    isText() {
+        return this.node instanceof Text;
+    }
+
+    lastChild() {
+        if (this.node.lastChild) {
+            return wrapDocNode(this.node.lastChild);
+        }
+
+        return null;
+    }
+
+    length() {
+        return this.children().length;
+    }
+
+    log() {
+        console.log(this.node);
+        return this;
+    }
+
+    name() {
+        return this.node.nodeName.toLowerCase();
+    }
+  
+    nextSibling() {
+        if (this.node.nextSibling) {
+            return wrapDocNode(this.node.nextSibling);
+        }
+
+        return null;
+    }
+  
+    parent() {
+        if (this.node.parentNode) {
+            return wrapDocNode(this.node.parentNode);
+        }
+        else {
+            return null;
+        }
+    }
+  
+    parentElement() {
+        if (this.node.parentElement) {
+            return wrapDocNode(this.node.parentElement);
+        }
+        else {
+            return null;
+        }
+    }
+
+    prepend(...args) {
+        if (this.node.childNodes.length) {
+            let beforeChild = this.node.firstChild;
+
+            for (let arg of args) {
+                this.node.insertBefore(unwrapDocNode(arg), beforeChild);
+            }
+        }
+        else {
+            for (let arg of args) {
+                this.node.appendChild(unwrapDocNode(arg));
+            }
+        }
+
+        return this;
+    }
+  
+    prevSibling() {
+        if (this.node.previousSibling) {
+            return wrapDocNode(this.node.previousSibling);
+        }
+        else {
+            return null;
+        }
+    }
+
+    remove() {
+        if (this.node.parentNode) {
+            this.node.parentNode.removeChild(this.node);
+        }
+
+        return this;
+    }
+
+    replace(...args) {
+        if (this.node.parentNode) {
+            let inserted;
+
+            if (args.length) {
+                inserted = unwrapDocNode(args[0]);
+                this.node.parentNode.replaceChild(inserted, this.node);
+
+                for (let i = 1; i < args.length; i++) {
+                    let node = unwrapDocNode(args[i]);
+                    inserted.insertAfter(node, inserted);
+                    inserted = node;
+                }
+            }
+            else {
+                this.node.parentNode.removeChild(this.node);
+            }
+        }
+
+        return this;
+    }
+
+    [Symbol.iterator]() {
+        return this.children()[Symbol.iterator]();
+    }
+
+    textContent() {
+        return this.node.textContent;
+    }
+
+    type() {
+        return this.node.nodeType;
+    }
+
+    value() {
+        return this.node.nodeValue;
+    }
+});
+
+
+/*****
+ * The DocText element is a wrapper the DOM built in Text class.  Instances
+ * of DocText are return in API class that refer to the underlying Text class.
+ * Moreover, DocText provides a link-free copy function.
+*****/
+register(class DocText extends DocNode {
+    constructor(arg) {
+        super(unwrapDocNode(arg));
+    }
+
+    copy() {
+        return copyDocNode(this);
+    }
+  
+    text() {
+        return this.node.wholeText;
+    }
+});
+
+
+/*****
  * A wrapper class for native DOM-related events.  The intention is to provide
  * additional data and additional features to enhance code that uses and handles
  * HTML-generated events.
@@ -75,284 +429,14 @@
 
 
 /*****
- * Normalization means to convert the passed element into either a standard DOM
- * Text object or a standard HTMLElement object.  An acceptable argument must
- * be either of those two or one of the wrapper types, HtmlText or HtmlElement.
+ * An element is distinguished from an HTML Element to be more generic.  It is
+ * the base class/interface for node types such as HTMLElement, SVGElement, and
+ * MathMLElement.  It has attributes, children, a parent, ... etc.  Just keep
+ * in min that this wrapper class is non-specific.
 *****/
-register(function reducio(arg) {
-    if (arg instanceof HTMLElement) {
-        return arg;
-    }
-    else if (arg instanceof HtmlElement) {
-        return arg.node;
-    }
-    else if (arg instanceof Text) {
-        return arg;
-    }
-    else if (arg instanceof HtmlText) {
-        return arg.node;
-    }
-    else if (arg instanceof Widget) {
-        return arg.htmlElement.node;
-    }
-    else if (arg instanceof SVGElement) {
-        return arg;
-    }
-    else if (arg instanceof SvgElement) {
-        return arg.node;
-    }
-    else if (arg instanceof MathMLElement) {
-        return arg;
-    }
-    else if (arg instanceof MathElement) {
-        return arg.node;
-    }
-    else {
-        return document.createTextNode(arg);
-    }
-});
-
-
-/*****
- * The HtmlNode class provides a wrapper for existing DOM HTMLElements and Text
- * objects.  This class is NOT used for creating new objects.  It's only for
- * wrapping existing objects with a more efficient API.  HtmlNode is the base
- * class for HtmlText and HtmlElement.  Methods in this class are applicable for
- * both types of derived object instances.
-*****/
-register(class HtmlNode {
+register(class DocElement extends DocNode {
     constructor(node) {
-        this.node = node;
-    }
-
-    dir() {
-        console.dir(this.node);
-        return this;
-    }
-
-    firstChild() {
-        if (this.node.firstChild) {
-            let child = this.node.firstChild;
-
-            if (child instanceof HTMLElement) {
-                return mkHtmlElement(child);
-            }
-            else {
-                return mkHtmlText(child);
-            }
-        }
-
-        return null;
-    }
-
-    insertAfter(...args) {
-        if (this.node.parentNode) {
-            let nextSibling = this.node.nextSibling;
-  
-            if (nextSibling) {
-                for (let arg of args) {
-                    this.node.parentNode.insertBefore(reducio(arg), nextSibling);
-                }
-            }
-            else {
-                for (let arg of args) {
-                    this.node.parentNode.appendChild(reducio(arg));
-                }
-            }
-        }
-  
-        return this;
-    }
-
-    insertBefore(...args) {
-        if (this.node.parentNode) {
-            for (let arg of args) {
-                this.node.parentNode.insertBefore(reducio(arg), this.node);
-            }
-        }
-
-        return this;
-    }
-
-    isElement() {
-        return this.node instanceof HTMLElement;
-    }
-  
-    isSame(arg) {
-        if (arg instanceof Node) {
-            return this.node.isSameNode(arg);
-        }
-        else if (arg instanceof DomNode) {
-            return this.node.isSameNode(arg.node);
-        }
-        else {
-            return false;
-        }
-    }
-
-    isText() {
-        return this.node instanceof Text;
-    }
-
-    lastChild() {
-        if (this.node.lastChild) {
-            let child = this.node.firstChild;
-
-            if (child instanceof HTMLElement) {
-                return mkHtmlElement(child);
-            }
-            else {
-                return mkHtmlText(child);
-            }
-        }
-
-        return null;
-    }
-
-    log() {
-        console.log(this.node);
-        return this;
-    }
-  
-    nextSibling() {
-        if (this.node.nextSibling) {
-            return mkHtmlElement(this.node.nextSibling);
-        }
-
-        return null;
-    }
-  
-    parent() {
-        if (this.node.parentNode) {
-            return mkHtmlElement(this.node.parentNode);
-        }
-        else {
-            return null;
-        }
-    }
-  
-    prevSibling() {
-        if (this.node.previousSibling) {
-            return mkHtmlElement(this.node.previousSibling);
-        }
-        else {
-            return null;
-        }
-    }
-
-    remove() {
-        if (this.node.parentNode) {
-            this.node.parentNode.removeChild(this.node);
-        }
-
-        return this;
-    }
-
-    replace(...args) {
-        if (this.node.parentNode) {
-            let inserted;
-
-            if (args.length) {
-                inserted = reducio(args[0]);
-                this.node.parentNode.replaceChild(inserted, this.node);
-
-                for (let i = 1; i < args.length; i++) {
-                    let node = reducio(args[i]);
-                    inserted.insertAfter(node, inserted);
-                    inserted = node;
-                }
-            }
-            else {
-                this.node.parentNode.removeChild(this.node);
-            }
-        }
-
-        return this;
-    }
-});
-
-
-/*****
- * The HtmlText element is a wrapper the DOM built in Text class.  Instances
- * of HtmlText are return in API class that refer to the underlying Text class.
- * Moreover, HtmlText provides a link-free copy function.
-*****/
-register(class HtmlText extends HtmlNode {
-    constructor(arg) {
-        super(reducio(arg));
-    }
-
-    copy() {
-        return makeHtmlText(this.text());
-    }
-  
-    text() {
-        return this.node.wholeText;
-    }
-});
-
-
-/*****
- * The HtmlElement provides a wrapper for the underlying DOM HTMLElement object.
- * Primarily, it's an extension or refrinement of the underlying DOM API and is
- * oriented to facilitate chaining function calls, where possible.  Note that get
- * and has calls do NOT logically support chaining.  Additionally, this class
- * also wraps the standard Emitter class to make the event-structure associated
- * with an HMTLElement fits within the framework API for events and messaging.
-*****/
-register(class HtmlElement extends HtmlNode {
-    static propagationKey = Symbol('propagation');
-
-    constructor(arg) {
-        if (arg instanceof HTMLElement) {
-            super(arg);
-        }
-        else if (arg instanceof HtmlElement) {
-            super(arg.node)
-        }
-        else if (typeof arg == 'string') {
-            super(document.createElement(arg.toLowerCase()));
-        }
-        else {
-            super(document.createElement('notag'));
-        }
-
-        this.node[HtmlElement.propagationKey] = {};
-    }
-
-    append(...args) {
-        for (let arg of args) {
-            this.node.appendChild(reducio(arg));
-        }
-
-        return this;
-    }
-
-    children() {
-        let children = [];
-
-        for (let i = 0; i < this.node.childNodes.length; i++) {
-            let child = this.node.childNodes.item(i);
-
-            if (child instanceof Element) {
-                children.push(mkHtmlElement(child));
-            }
-            else if (child instanceof Text) {
-                children.push(mkHtmlText(child));
-            }
-        }
-
-        return children;
-    }
-
-    blur() {
-        this.node.blur();
-        return this;
-    }
-
-    clear() {
-        this.node.replaceChildren();
-        return this;
+        super(node);
     }
 
     clearAttribute(name) {
@@ -370,13 +454,8 @@ register(class HtmlElement extends HtmlNode {
         return this;
     }
 
-    clearData(key) {
-        delete this.node.dataset[name];
-        return this;
-    }
-
     copy() {
-        let copy = mkHtmlElement(this.tagName());
+        let copy = copyDocNode(this);
 
         for (let attribute of Object.entries(this.getAttributes())) {
             copy.setAttribute(attribute.name, attribute.value);
@@ -401,27 +480,18 @@ register(class HtmlElement extends HtmlNode {
 
     enum() {
         let array = [];
-        let stack = [this.node];
+        let stack = [this];
 
         while(stack.length) {
-            let node = stack.pop();
+            let docNode = stack.shift();
+            array.push(docNode);
 
-            for (let i = 0; i < node.childNodes.length; i++) {
-                let child = node.childNodes.item(i);
-
-                if (child instanceof Element) {
-                    stack.push(child);
-                    array.push(mkHtmlElement(child));
-                }
+            for (let child of docNode) {
+                array.push(child);
             }
         }
 
         return array;
-    }
-
-    focus() {
-        this.node.focus();
-        return this;
     }
 
     getAttribute(name) {
@@ -448,41 +518,12 @@ register(class HtmlElement extends HtmlNode {
         return set;
     }
 
-    getData(key) {
-        return this.node.dataset[key];
-    }
-
     getInnerHtml() {
         return this.node.innerHTML;
     }
 
-    getOffset() {
-        let x = 0;
-        let y = 0;
-        let dx = 0;
-        let dy = 0;
-        let node = this.node;
-
-        if (node) {
-            dx = node.offsetWidth;
-            dy = node.offsetHeight;
-
-            while (node) {
-                if (node.tagName.toLowerCase() in { body:0, head:0, html:0 }) {
-                    break;
-                }
-
-                x += node.offsetLeft;
-                y += node.offsetTop;
-                node = node.offsetParent;
-            }
-        }
-
-        return { left:x, top:y, width:dx, height:dy };
-    }
-
-    getStyle(propertyName, value) {
-        return this.node.style[propertyName];
+    getOuterHtml() {
+        return this.node.outerHTML;
     }
 
     hasAttribute(name) {
@@ -491,14 +532,6 @@ register(class HtmlElement extends HtmlNode {
 
     hasClassName(className) {
         return this.node.classList.contains(className);
-    }
-
-    hasData(key) {
-        return key in this.node.dataset;
-    }
-
-    length() {
-        return this.children().length;
     }
 
     off(messageName, handler) {
@@ -567,27 +600,6 @@ register(class HtmlElement extends HtmlNode {
         return this;
     }
 
-    outerHtml() {
-        return this.node.outerHTML;
-    }
-
-    prepend(...args) {
-        if (this.node.childNodes.length) {
-            let beforeChild = this.node.firstChild;
-
-            for (let arg of args) {
-                this.node.insertBefore(reducio(arg), beforeChild);
-            }
-        }
-        else {
-            for (let arg of args) {
-                this.node.appendChild(reducio(arg));
-            }
-        }
-
-        return this;
-    }
-
     queryAll(selector) {
         let selected = [];
   
@@ -635,23 +647,14 @@ register(class HtmlElement extends HtmlNode {
         return this;
     }
 
-    setData(name, value) {
-        this.node.dataset[name] = value;
-        return this;
-    }
-
     setInnerHtml(innerHtml) {
         this.node.innerHTML = innerHtml;
         return this;
     }
 
-    setStyle(propertyName, value) {
-        this.node.style[propertyName] = value;
+    setOuterHtml(outerHtml) {
+        this.node.outerHTML = outerHtml;
         return this;
-    }
-
-    [Symbol.iterator]() {
-        return this.children()[Symbol.iterator]();
     }
 
     tagName() {
@@ -660,6 +663,114 @@ register(class HtmlElement extends HtmlNode {
 
     toggleClassName(className) {
         this.node.classList.toggle();
+        return this;
+    }
+});
+
+
+/*****
+ * The HtmlElement provides a wrapper for the underlying DOM HTMLElement object.
+ * Primarily, it's an extension or refrinement of the underlying DOM API and is
+ * oriented to facilitate chaining function calls, where possible.  Note that get
+ * and has calls do NOT logically support chaining.  Additionally, this class
+ * also wraps the standard Emitter class to make the event-structure associated
+ * with an HMTLElement fits within the framework API for events and messaging.
+*****/
+register(class HtmlElement extends DocElement {
+    static propagationKey = Symbol('propagation');
+
+    constructor(arg) {
+        if (arg instanceof HTMLElement) {
+            super(arg);
+        }
+        else if (arg instanceof HtmlElement) {
+            super(arg.node)
+        }
+        else if (typeof arg == 'string') {
+            super(document.createElement(arg.toLowerCase()));
+        }
+        else {
+            super(document.createElement('noname'));
+        }
+
+        this.node[HtmlElement.propagationKey] = {};
+    }
+
+    blur() {
+        this.node.blur();
+        return this;
+    }
+
+    clearData(key) {
+        delete this.node.dataset[name];
+        return this;
+    }
+
+    focus() {
+        this.node.focus();
+        return this;
+    }
+
+    getData(key) {
+        return this.node.dataset[key];
+    }
+
+    getOffset() {
+        let x = 0;
+        let y = 0;
+        let dx = 0;
+        let dy = 0;
+        let node = this.node;
+
+        if (node) {
+            dx = node.offsetWidth;
+            dy = node.offsetHeight;
+
+            while (node) {
+                if (node.nodeName.toLowerCase() in { body:0, head:0, html:0 }) {
+                    break;
+                }
+
+                x += node.offsetLeft;
+                y += node.offsetTop;
+                node = node.offsetParent;
+            }
+        }
+
+        return { left:x, top:y, width:dx, height:dy };
+    }
+
+    getOffsetBottom() {
+        return this.node.offsetBottom;
+    }
+
+    getOffsetLeft() {
+        return this.node.offsetLeft;
+    }
+
+    getOffsetRight() {
+        return this.node.offsetRight;
+    }
+
+    getOffsetTop() {
+        return this.node.offsetTop;
+    }
+
+    getStyle(propertyName, value) {
+        return this.node.style[propertyName];
+    }
+
+    hasData(key) {
+        return key in this.node.dataset;
+    }
+
+    setData(name, value) {
+        this.node.dataset[name] = value;
+        return this;
+    }
+
+    setStyle(propertyName, value) {
+        this.node.style[propertyName] = value;
         return this;
     }
 
@@ -696,7 +807,7 @@ register(class HtmlElement extends HtmlNode {
         'tr': ['table'],
     };
 
-    register(function htmlImport(outerHtml) {
+    register(function importElement(outerHtml) {
         const match = outerHtml.match(/< *([0-9A-Za-z]+)/);
 
         if (match) {

@@ -95,8 +95,12 @@ register(class Widget extends Emitter {
     }
 
     brand(arg) {
-        let htmlElement = reducio(arg);
-        htmlElement[Widget.widgetKey] = this;
+        let naked = unwrapDocNode(arg);
+
+        if (naked && naked[Widget.widgetKey] === undefined) {
+            naked[Widget.widgetKey] = this;
+        }
+
         return this;
     }
 

@@ -24,10 +24,13 @@
 
 /*****
 *****/
-register(class MathElement extends HtmlNode {
+register(class MathElement extends DocElement {
     constructor(arg) {
         if (arg instanceof MathMLElement) {
             super(arg);
+        }
+        else if (arg instanceof MathElement) {
+            super(arg.node);
         }
         else if (typeof arg == 'string') {
             super(document.createElementNS('http://www.w3.org/1998/Math/MathML', arg));

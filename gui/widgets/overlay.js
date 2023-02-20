@@ -100,7 +100,7 @@ register(class WOverlay extends Widget {
 
     show(htmlElement) {
         if (!this.overlaid) {
-            this.overlaid = mkHtmlElement(reducio(htmlElement)).widget();
+            this.overlaid = mkHtmlElement(unwrapDocNode(htmlElement)).widget();
             this.overlaid.append(this);
 
             this.adjustArea();
