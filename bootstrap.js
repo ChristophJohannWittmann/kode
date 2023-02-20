@@ -171,6 +171,10 @@ async function seedUser(dbc) {
     await user.setGrant(dbc, { permission: 'user' });
     await user.setGrant(dbc, { permission: 'system' });
 
+    if (env.orgs) {
+        await user.setGrant(dbc, { permission: 'org' });
+    }
+
     let domain = await mkDboDomain({
         name: 'kodeprogramming.org',
         tld: 'org',
@@ -375,21 +379,22 @@ async function seedUser(dbc) {
         }
     }
 
-    let dbc = await dbConnect();
-
-    if ((await selectDboUser(dbc)).length == 0) {
-        await seedUser(dbc);
-    }
-
-    await dbc.commit();
-    await dbc.free();
-
     /********************************************
      * Loading Server Preferences
      *******************************************/
      if (CLUSTER.isPrimary) {
+        let dbc = await dbConnect();
+
         logPrimary('[ Configuring Preferences ]');
         await loadOrgPreference(dbc);
+
+        if ((await selectDboUser(dbc)).length == 0) {
+            logPrimary('[ Adding user charlie@kodeprogramming.org ]');
+            await seedUser(dbc);
+        }
+
+        await dbc.commit();
+        await dbc.free();
     }
 
     /********************************************

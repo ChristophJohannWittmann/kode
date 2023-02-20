@@ -41,7 +41,7 @@ singleton(class SessionManager extends Daemon {
 
     async onAuthorize(message) {
         if (message.session && message.session in this.byKey) {
-            let authorization = await this.byKey[message.session].authorize(message.permission, message.context);
+            let authorization = await this.byKey[message.session].authorize(message.permission);
             return Message.reply(message, authorization);
         }
 
@@ -122,7 +122,7 @@ singleton(class SessionManager extends Daemon {
         };
 
         for (let session of Object.values(this.byKey)) {
-            let authorization = await session.authorize(message.endpoint.permission, message.context);
+            let authorization = await session.authorize(message.endpoint.permission);
 
             if (authorization.granted) {
                 notification.socketId = session.socketId;
@@ -135,6 +135,18 @@ singleton(class SessionManager extends Daemon {
                 }
             }
         }
+    }
+
+    async onSetOrg(message) {
+        if ('session' in message) {
+            if (message.session in this.byKey) {
+                if (typeof message.oigOid == 'bigint') {
+                    return Message.reply(message, this.byKey[message.session].setOrgOid());
+                }
+            }
+        }
+
+        Message.reply(message, false);
     }
 
     onSetSocket(message) {

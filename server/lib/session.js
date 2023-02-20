@@ -38,7 +38,7 @@ register(class Session {
             this.workerId = workerId;
             this.idleMinutes = idleMinutes;
             this.pendingMessages = [];
-            let dbc = await dbConnect();
+            this.dbc = await dbConnect();
 
             let seed = `${(new Date()).toString()}${this.user.userName}`;
             this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
@@ -47,29 +47,30 @@ register(class Session {
                 this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
             }
 
-            this.grants = mkStringSet((await this.user.getGrants(dbc)).map(grant => grant.context));
+            this.orgOid = this.userOid;
+            this.grants = mkStringSet((await this.user.getGrants(this.dbc)).map(grant => grant.context));
 
-            await dbc.rollback();
-            await dbc.free();
+            await this.dbc.rollback();
+            await this.dbc.free();
+            delete this.dbc;
 
             ok(this);
         });
     }
 
-    async authorize(permission, requestContext) {
+    async authorize(permission) {
         if (permission) {
-            let context = mkContext(requestContext);
-            context.permission = permission;
+            let context;
+
+            if (this.orgOid == 0) {
+                context = mkContext({ permission: permission });
+            }
+            else {
+                context = mkContext({ permission: permission, orgOid: this.orgOid });
+            }
 
             if (this.grants.has(context.toBase64())) {
                 return { granted: true, user: this.user };
-            }
-            else if ('org' in context) {
-                delete context.org;
-
-                if (this.grants.has(context.toBase64())) {
-                    return { granted: true, user: this.user };
-                }
             }
 
             return { granted: false, user: this.user };
@@ -99,9 +100,15 @@ register(class Session {
         this.pendingMessages.push(message);
     }
 
-    setSecurityContext(contextName, value) {
-        this.contexts[contextName] = value;
-        return this;
+    setOrgOid(orgOid) {
+        if (this.user.orgOid == 0n) {
+            if (typeof message.orgOid == 'bigint' && this.orgOid != message.orgOid) {
+                this.orgOid = message.orgOid;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     setSocket(webSocketId) {

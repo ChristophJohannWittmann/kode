@@ -138,7 +138,6 @@ register(class EndpointContainer {
             messageName: '#SessionManagerAuthorize',
             session: trx['#Session'],
             permission: endpoint.permission,
-            context: trx.context ? trx.context : null,
         });
 
         if (authorization.granted) {
