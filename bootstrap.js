@@ -108,6 +108,49 @@ global.env = {
 
 
 /*****
+ * When a server is first started, we need to initialize how it will operate
+ * with regards to multi organization mode.  In the kode configuration file,
+ * we need to have a setting called "orgs", which is a boolean.  True indicates
+ * that users will belong to organizations, whiel false indicates that the
+ * server will deactive the concept of user organizations.  This code deletes
+ * the setting from the configuration JSON file once the server has been
+ * initialized.
+*****/
+async function loadOrgPreference(dbc) {
+    let preference = await selectOneDboPreference(dbc, `_name='Orgs'`);
+
+    if (!preference) {
+        preference = mkDboPreference({
+            name: 'Orgs',
+            value: {}
+        });
+
+        await preference.save(dbc);
+    }
+
+    if (typeof preference.value.active == 'boolean') {
+        env.orgs = preference.value.active;
+    }
+    else if (typeof Config.orgs == 'boolean') {
+        env.orgs = Config.orgs;
+        preference.value.active = env.orgs;
+        await preference.save(dbc);
+    }
+    else {
+        throw new Error(`Expecting single-use boolean value called "orgs" in "${env.configPath}"!`);
+    }
+
+    if ('orgs' in Config) {
+        let config = await loadConfigFile();
+        delete config.orgs;
+        await config.save();
+    }
+
+    logPrimary(`    Server is operating in "${env.orgs ? 'Org' : 'non-Org'}" mode.`);
+}
+
+
+/*****
  * This function is called only when first bootstrapping a new server with an
  * empty user database.  Create a new user named Charlie Root, which will be used
  * for signing in to get things going.
@@ -340,6 +383,14 @@ async function seedUser(dbc) {
 
     await dbc.commit();
     await dbc.free();
+
+    /********************************************
+     * Loading Server Preferences
+     *******************************************/
+     if (CLUSTER.isPrimary) {
+        logPrimary('[ Configuring Preferences ]');
+        await loadOrgPreference(dbc);
+    }
 
     /********************************************
      * Start Servers

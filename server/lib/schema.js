@@ -53,16 +53,6 @@ mkDbSchema(
         ]
     },
     {
-        name: 'conf',
-        columns: [
-            { name: 'name',         type: dbText, size:   50 },
-            { name: 'value',        type: dbJson, size: 2000 },
-        ],
-        indexes: [
-            'name:asc',
-        ]
-    },
-    {
         name: 'credentials',
         columns: [
             { name: 'userOid',    type: dbInt64            },
@@ -252,15 +242,12 @@ mkDbSchema(
         ]
     },
     {
-        name: 'setting',
+        name: 'preference',
         columns: [
-            { name: 'ownerType',   type: dbText, size:   20 },
-            { name: 'ownerOid',    type: dbInt64            },
-            { name: 'name',        type: dbText, size:   50 },
-            { name: 'value',       type: dbJson, size: 2000 },
+            { name: 'name',         type: dbText, size:   50 },
+            { name: 'value',        type: dbJson, size: 2000 },
         ],
         indexes: [
-            'ownerType:asc, ownerOid:asc',
             'name:asc',
         ]
     },
@@ -290,6 +277,7 @@ mkDbSchema(
         name: 'user',
         columns: [
             { name: 'emailOid',     type: dbInt64           },
+            { name: 'orgOid',       type: dbInt64           },
             { name: 'firstName',    type: dbText, size: 100 },
             { name: 'lastName',     type: dbText, size: 100 },
             { name: 'title',        type: dbText, size:  20 },
@@ -301,10 +289,24 @@ mkDbSchema(
             { name: 'failures',     type: dbInt32           },
         ],
         indexes: [
+            'orgOid:asc',
             'lastName:asc',
             'firstName:asc',
             'lastName:asc, firstName:asc',
             'authType:asc',
+        ]
+    },
+    {
+        name: 'userSetting',
+        columns: [
+            { name: 'userOid',     type: dbInt64            },
+            { name: 'name',        type: dbText, size:   50 },
+            { name: 'value',       type: dbJson, size: 2000 },
+        ],
+        indexes: [
+            'userOid:asc',
+            'userOid:asc, name:asc',
+            'name:asc',
         ]
     },
     {
