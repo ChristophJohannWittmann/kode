@@ -460,17 +460,10 @@ register(class Widget extends Emitter {
 
             this.send({
                 messageName: 'Widget.Changed',
-                type: 'remove',
+                type: 'replace',
                 widget: this,
+                replacements: filtered,
             });
-
-            for (let childWidget of filtered) {
-                this.send({
-                    messageName: 'Widget.Changed',
-                    type: 'add',
-                    widget: this,
-                });
-            }
         }
 
         return this;

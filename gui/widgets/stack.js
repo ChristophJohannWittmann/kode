@@ -285,6 +285,17 @@ register(class WStack extends Widget {
         }
     }
 
+    replaceWidget(widget, replacement) {
+        for (let i = 0; i < this.stack.length; i++) {
+            let item = this.stack[i];
+
+            if (item.id == widget.id) {
+                this.stack.splice(i, 1, replacement);
+                item.htmlElement.replace(replacement.htmlElement);
+            }
+        }
+    }
+
     removeAt(index) {
         if (index >= 0 && index < this.stack.length) {
             let widget = this.stack[index];

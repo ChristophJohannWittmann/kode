@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2017-2022 Kode Programming
+ * Copyright (c) 2017-2023 Kode Programming
  * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,7 +30,7 @@
  * network interface you're currently using, the server will reboot without it
  * being available.
 *****/
-register(class FWNetIfaceView extends WPanel {
+register(class NetIfaceEditor extends WPanel {
     constructor(ifaceName) {
         super('form');
         this.ifaceName = ifaceName;

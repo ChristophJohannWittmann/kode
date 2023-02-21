@@ -57,7 +57,7 @@ register(function copyDocNode(arg) {
         return mkMathElement(arg.name());
     }
     else {
-        null;
+        return document.createTextNode(arg);
     }
 });
 
@@ -137,7 +137,7 @@ register(function unwrapDocNode(arg) {
         return arg.node;
     }
     else {
-        null;
+        return document.createTextNode(arg);
     }
 });
 

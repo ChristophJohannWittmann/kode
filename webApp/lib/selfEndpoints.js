@@ -44,6 +44,10 @@ register(class SelfEndpoints extends EndpointContainer {
     async [ mkEndpoint('SelfAddPhone') ](trx) {
     }
     
+    async [ mkEndpoint('SelfGetDarkWidget') ](trx) {
+        return DarkKode.getClass(trx.libName, trx.className);
+    }
+    
     async [ mkEndpoint('SelfModify') ](trx) {
     }
     

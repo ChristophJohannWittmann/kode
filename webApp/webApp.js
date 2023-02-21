@@ -36,8 +36,6 @@
  * handling HTTP and web socket requests.
 *****/
 register(class WebApp extends Webx {
-    static onDemandGui = {};
-
     constructor(thunk, reference) {
         super(thunk, reference);
         this.webSockets = {};
@@ -247,6 +245,7 @@ register(class WebApp extends Webx {
         await mkWebBlob(
             this.webAppClientUrl,
             'text/javascript',
+            DarkKode.getBlob('webapp') + 
             await buildClientCode([
                 PATH.join(env.kodePath, 'webApp/gui'),
             ])
@@ -265,7 +264,7 @@ register(class WebApp extends Webx {
     }
 
     static async initialize() {
-        await buildOnDemand(WebApp.onDemandGui, [PATH.join(env.kodePath, 'webApp/onDemand')]);
+        await DarkKode.import('webapp', [PATH.join(env.kodePath, 'webApp/dark')]);
     }
 
     async onUpgrade(req, webSocket) {

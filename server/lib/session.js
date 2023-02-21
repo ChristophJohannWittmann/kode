@@ -47,7 +47,7 @@ register(class Session {
                 this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
             }
 
-            this.orgOid = this.userOid;
+            this.orgOid = this.user.orgOid;
             this.grants = mkStringSet((await this.user.getGrants(this.dbc)).map(grant => grant.context));
 
             await this.dbc.rollback();
@@ -62,7 +62,7 @@ register(class Session {
         if (permission) {
             let context;
 
-            if (this.orgOid == 0) {
+            if (this.user.orgOid == 0) {
                 context = mkContext({ permission: permission });
             }
             else {

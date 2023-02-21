@@ -248,7 +248,7 @@ async function seedUser(dbc) {
     require('./server/lib/ipc.js');
     require('./server/lib/logging.js');
     require('./server/lib/multilingualText.js');
-    require('./server/lib/onDemandBuilder.js');
+    require('./server/lib/darkKode.js');
     require('./server/lib/pool.js');
     require('./server/lib/server.js');
     require('./server/lib/thunk.js');

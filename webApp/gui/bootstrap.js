@@ -67,8 +67,8 @@
     *****/
     on('#CloseApp', async message => {
         if (message.notify) {
-            await mkAlertDialog({
-                autoHide: 3000,
+            await mkWAlertDialog({
+                autoHide: 5000,
                 text: message.notify,
             });
         }

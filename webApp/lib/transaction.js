@@ -35,10 +35,6 @@ register(class WebAppTransaction extends Message {
         super();
         this['#connectionMap'] = {};
         this['#connectionArray'] = [];
-
-        if (!('context' in message)) {
-            message.context = {};
-        }
     }
 
     static async assign(trx, message) {

@@ -45,7 +45,10 @@
     *****/
     let chain = '';
     let container = global;
+    let swapped = null;
     global['#CHAIN'] = '';
+    global.chainKey = Symbol('chain');
+    global.containerKey = Symbol('container');
 
     global.getContainer = function(links) {
         if (links === undefined) {
@@ -65,6 +68,13 @@
             return container;
         }
     };
+
+    global.paws = function() {
+        if (swapped) {
+            container = swapped;
+            swapped = null;
+        }
+    }
 
     global.setContainer = function(links) {
         if (links !== undefined) {
@@ -86,6 +96,13 @@
 
         return container;
     };
+
+    global.swap = function(arg) {
+        if (!swapped) {
+            swapped = container;
+            container = arg;
+        }
+    }
 
 
     /*****
@@ -121,6 +138,9 @@
     global.register = func => {
         if (typeof func == 'function' && func.name) {
             if (!(func.name in container)) {
+                func[chainKey] = chain;
+                func[containerKey] = container;
+
                 if (func.toString().startsWith('class')) {
                     if (func.name.match(/^[A-Z]/)) {
                         let makerName = `mk${func.name}`;
