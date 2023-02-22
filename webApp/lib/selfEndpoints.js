@@ -48,6 +48,13 @@ register(class SelfEndpoints extends EndpointContainer {
         return DarkKode.getClass(trx.libName, trx.className);
     }
     
+    async [ mkEndpoint('SelfListGrants') ](trx) {
+        return await Ipc.queryPrimary({
+            messageName: '#SessionManagerListGrants',
+            session: trx['#Session'],
+        });
+    }
+    
     async [ mkEndpoint('SelfModify') ](trx) {
     }
     

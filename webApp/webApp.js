@@ -73,6 +73,10 @@ register(class WebApp extends Webx {
         html.push('    <script src="/CLIENTFRAMEWORK.js"></script>');
         html.push(`    <script src="${this.webAppClientUrl}"></script>`);
 
+        if (this.thunk.getDarkCodeUrl()) {
+            html.push(`    <script src="${this.thunk.getDarkCodeUrl()}"></script>`);
+        }
+
         if (this.thunk.getClientCodeUrl()) {
             html.push(`    <script src="${this.thunk.getClientCodeUrl()}"></script>`);
         }
@@ -86,6 +90,7 @@ register(class WebApp extends Webx {
             '            session: () => null,',
             `            url: () => '${this.reference.url}',`,
             '            session: () => null,',
+            '            user: () => null,',
             `            websocket: () => ${this.reference.webSocket},`,
             '        };',
             `        const txx = ${appText};`,

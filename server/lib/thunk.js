@@ -36,11 +36,16 @@ register(class Thunk {
         this.path = path;
         this.opts = opts ? opts : {};
         Thunk.thunks.push(this);
+        this.darkCodeUrl = '';
         this.clientCodeUrl = '';
     }
 
     getClientCodeUrl() {
         return this.clientCodeUrl;
+    }
+
+    getDarkCodeUrl() {
+        return this.darkCodeUrl;
     }
 
     async loadClient() {
@@ -57,6 +62,21 @@ register(class Thunk {
                 'text/javascript',
                 clientCode,
             ).register();
+        }
+
+        return this;
+    }
+
+    async loadDark() {
+        if (Array.isArray(this.opts.dark)) {
+            await DarkKode.import(
+                this.opts.container,
+                this.opts.dark.map(path => this.mkPath(path)),
+            );
+        }
+
+        if (!this.darkCodeUrl && !DarkKode.isEmpty(this.opts.container)) {
+            this.darkCodeUrl = `/${this.opts.container}/DARKCODE.js`;
         }
 
         return this;
@@ -150,5 +170,6 @@ global.fwThunk = mkThunk('', {
     container: '',
     server: [],
     client: [],
+    dark: [],
     references: [],
 });

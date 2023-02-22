@@ -80,6 +80,31 @@ exports = module.exports = {
     },
 
     // ****************************************************************
+    // App Menu
+    // ****************************************************************
+    fwMenuAccount: {
+        en: `Account`,
+    },
+    fwMenuPassword: {
+        en: `Password`,
+    },
+    fwMenuPreferences: {
+        en: `Preferences`,
+    },
+    fwMenuOrgs: {
+        en: `Organizations`,
+    },
+    fwMenuSignOut: {
+        en: `Sign Out`,
+    },
+    fwMenuSystem: {
+        en: `System`,
+    },
+    fwMenuUsers: {
+        en: `Manage Users`,
+    },
+
+    // ****************************************************************
     // Nav
     // ****************************************************************
     fwNavCancel: {

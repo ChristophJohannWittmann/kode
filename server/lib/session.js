@@ -96,6 +96,17 @@ register(class Session {
         return this.socketId !== false;
     }
 
+    listGrants() {
+        let grants = {};
+
+        for (let grant of this.grants) {
+            let grantObj = fromJson(mkBuffer(grant, 'base64').toString())[0];
+            grants[grantObj.permission] = grantObj;
+        }
+
+        return grants;
+    }
+
     queue(message) {
         this.pendingMessages.push(message);
     }

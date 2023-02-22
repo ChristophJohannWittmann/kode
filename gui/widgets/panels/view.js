@@ -36,6 +36,7 @@ register(class WView extends WPanel {
         this.nav = mkWNavBar();
         this.stack = mkWStack();
         this.append(this.nav);
+        this.append(mkHtmlElement('hr'));
         this.append(this.stack);
 
         this.proxy = mkMessageProxy(this);
@@ -52,6 +53,10 @@ register(class WView extends WPanel {
 
         this.on('Widget.Cancel', async message => await this.onCancel(message));
         this.on('Widget.Done', async message => await this.onDone(message));
+    }
+
+    length() {
+        return this.stack.length;
     }
 
     async onCancel(message) {
@@ -90,13 +95,13 @@ register(class WView extends WPanel {
     }
 
     pop() {
-        if (this.stack.length() > 1) {
+        this.stack.pop();
+        let top = this.stack.top();
+
+        if (this.stack.length() == 1) {
             let widget = this.nav.pop();
             this.unwire(widget);
         }
-
-        this.stack.pop();
-        let top = this.stack.top();
 
         if (top) {
             if (typeof top.isValid == 'function') {
@@ -121,7 +126,7 @@ register(class WView extends WPanel {
         return this;
     }
 
-    push(widget) {
+    push(widget, opts) {
         if (this.stack.length() == 1) {
             this.nav.push(this.done);
         }
@@ -140,7 +145,7 @@ register(class WView extends WPanel {
             this.modified = false;
         }
 
-        this.stack.push(widget);
+        this.stack.push(widget, opts);
         this.wire(widget);
         return this;
     }

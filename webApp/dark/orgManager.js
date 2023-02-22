@@ -27,5 +27,9 @@
 register(class OrgManager extends WPanel {
     constructor() {
         super('form');
+
+        return new Promise(async (ok, fail) => {
+            ok(this);
+        });
     }
 });

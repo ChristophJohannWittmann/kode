@@ -128,7 +128,7 @@ register(class WPopupMenu extends Widget {
     }
 
     getItem(tag) {
-        return this.query(`[menu-item-tag=${tag}]`);
+        return this.queryOne(`[menu-item-tag=${tag}]`);
     }
 
     open(widget, x, y) {
@@ -182,10 +182,10 @@ register(class WPopupMenu extends Widget {
  * is called with a single argument, the message, or 
 *****/
 register(class WMenuItem extends Widget {
-    constructor(tag, text) {
+    constructor(text, tag) {
         super('div');
-        this.setAttribute('menu-item-tag', tag);
         this.append(text);
+        tag ? this.setAttribute('menu-item-tag', tag) : this.setAttribute('menu-item-tag', text);
         this.clearAction();
         this.enable();
 

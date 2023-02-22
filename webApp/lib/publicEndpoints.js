@@ -57,6 +57,13 @@ register(class PublicEndpoints extends EndpointContainer {
                 sessionKey: sessionKey,
                 verifyEmail: !user.verified,
                 setPassword: !user.password,
+                user: {
+                    firstName: user.firstName,
+                    lastMame: user.lastName,
+                    title: user.title,
+                    suffix: user.suffix,
+                    orgOid: user.orgOid,
+                }
             };
         }
         else {

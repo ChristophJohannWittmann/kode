@@ -131,12 +131,15 @@
         }
 
         body.pop();
-        window.home = webAppSettings.homeView()
-        body.push(window.home);
 
         webAppSettings.session = () => sessionState.sessionKey;
         webAppSettings.password = () => sessionState.setPassword;
         webAppSettings.verify = () => sessionState.verifyEmail;
+        webAppSettings.user = () => sessionState.user;
+        
+        let homeStub = webAppSettings.homeView();
+        window.home = homeStub instanceof Promise ? await homeStub : homeStub;
+        body.push(window.home);
 
         if (webAppSettings.password()) {
             body.push(mkFWPasswordView());

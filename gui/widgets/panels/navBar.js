@@ -40,9 +40,29 @@ register(class WNavBar extends WPanel {
         this.setOrientation('horz');
     }
 
+    firstCtl() {
+        let children = this.ctls.children();
+
+        if (children.length) {
+            return children[0];
+        }
+
+        return null;
+    }
+
     getInfo() {
         let info = this.ctls.children();
         return info.length ? info[0] : null;
+    }
+
+    lastCtl() {
+        let children = this.ctls.children();
+
+        if (children.length) {
+            return children[children.length - 1];
+        }
+
+        return null;
     }
 
     pop() {

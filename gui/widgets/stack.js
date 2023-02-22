@@ -31,6 +31,8 @@
  * needed 
 *****/
 register(class WStack extends Widget {
+    static optsKey = Symbol('opts');
+
     constructor(arg) {
         super(arg);
         this.stack = [];
@@ -56,7 +58,7 @@ register(class WStack extends Widget {
         return -1;
     }
 
-    insertAt(index, widget) {
+    insertAt(index, widget, opts) {
         if (index >= 0 && !this.contains(widget)) {
             if (index < this.stack.length) {
                 this.stack.splice(index, 0, widget);
@@ -64,6 +66,8 @@ register(class WStack extends Widget {
             else {
                 this.stack.push(widget);
             }
+
+            this.windOpts(widget, opts);
 
             this.send({
                 messageName: 'Widget.Changed',
@@ -206,6 +210,7 @@ register(class WStack extends Widget {
         if (this.stack.length) {
             let top = this.top();
             this.stack.pop();
+            this.unwindOpts(top);
 
             if (this.stack.length) {
                 top.replace(this.top());
@@ -228,13 +233,15 @@ register(class WStack extends Widget {
     popBottom() {
         let shifted = null;
 
+        /*
         if (stack.length == 1) {
             shifted = this.stack.shift();
             let top = this.top();
             shifted.replace(top);
         }
         else if (stack.length > 1) {
-            shifted = this.stack.shift();   
+            shifted = this.stack.shift();
+            shifted.unwindOpts(shifted);
         }
 
         this.send({
@@ -243,13 +250,26 @@ register(class WStack extends Widget {
             widget: this,
             removed: shifted,
         });
+        */
+        if (stack.length.length) {
+            shifted = this.stack.shift();
+            shifted.unwindOpts(shifted);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'remove',
+                widget: this,
+                removed: shifted,
+            });
+        }
 
         return shifted;
     }
 
-    push(widget) {
+    push(widget, opts) {
         let top = this.top();
         this.stack.push(widget);
+        this.windOpts(widget, opts);
 
         if (top) {
             top.replace(widget);
@@ -271,6 +291,7 @@ register(class WStack extends Widget {
 
     pushBottom(widget) {
         this.stack.unshift(widget);
+        this.windOpts(widget, opts);
 
         this.send({
             messageName: 'Widget.Changed',
@@ -324,5 +345,26 @@ register(class WStack extends Widget {
         }
 
         return null;
+    }
+
+    unwindOpts(widget) {
+        if (widget[WStack.optsKey]) {
+            let opts = widget[WStack.optsKey];
+            delete widget[WStack.optsKey];
+
+            if (opts.disable) {
+                opts.disable.enable();
+            }
+        }
+    }
+
+    windOpts(widget, opts) {
+        if (opts) {
+            widget[WStack.optsKey] = opts;
+
+            if (opts.disable) {
+                opts.disable.disable();
+            }
+        }
     }
 });

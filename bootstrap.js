@@ -440,6 +440,7 @@ async function seedUser(dbc) {
                 for (let thunk of Thunk.thunks) {
                     await thunk.loadServer();
                     await thunk.loadClient();
+                    await thunk.loadDark();
                     await thunk.loadWebResources();
                     await thunk.loadWebExtensions();
                 }

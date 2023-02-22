@@ -109,6 +109,14 @@ singleton(class DarkKode {
         }
     }
 
+    isEmpty(libName) {
+        if (libName in this.libs) {
+            return Object.keys(this.libs[libName]) == 0;
+        }
+
+        return true;
+    }
+
     [Symbol.iterator]() {
         return Object.keys(this.libs)[Symbol.iterator]();
     }

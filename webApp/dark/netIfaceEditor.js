@@ -62,24 +62,24 @@ register(class NetIfaceEditor extends WPanel {
 
             let keyMenu = mkWPopupMenu()
             .append(
-                mkWMenuItem('CreateKeys', txx.fwNetCreateKeyPair)
+                mkWMenuItem(txx.fwNetCreateKeyPair, 'CreateKeys')
                 .setAction(() => this.createKeyPair())
             );
 
             let publicKeyMenu = mkWPopupMenu()
             .append(
-                mkWMenuItem('Certify', txx.fwNetCopyKeyPem)
+                mkWMenuItem(txx.fwNetCopyKeyPem, 'Certify')
                 .setAction(() => this.copyPublicKey('pem'))
                 .bind(this.editor.modifiable, 'publicKey', (mi, value) => value == '[NONE]' ? mi.disable() : mi.enable())
             )
             .append(
-                mkWMenuItem('CreateKeys', txx.fwNetCreateKeyPair)
+                mkWMenuItem(txx.fwNetCreateKeyPair, 'CreateKeys')
                 .setAction(() => this.createKeyPair())
             );
 
             let certMenu = mkWPopupMenu()
             .append(
-                mkWMenuItem('Certify', txx.fwNetCertify)
+                mkWMenuItem(txx.fwNetCertify, 'Certify')
                 .setAction(() => this.certify())
                 .bind(this.editor.modifiable, 'privateKey', (mi, value) => value == '[NONE]' ? mi.disable() : mi.enable())
             );

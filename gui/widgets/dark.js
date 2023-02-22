@@ -60,6 +60,12 @@ register(class DarkWidget extends Widget {
         paws();
 
         let widget = Reflect.apply(this.container[this.makerName], window, this.args);
+        widget.id = this.id;
+
+        for(let symbol of Object.getOwnPropertySymbols(this)) {
+            widget[symbol] = this[symbol];
+        }
+
         this.replace(widget);
     }
 

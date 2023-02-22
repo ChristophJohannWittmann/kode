@@ -24,7 +24,7 @@
 
 /*****
 *****/
-register(class WRecordViewer extends WTable {
+register(class WArrayEditor extends WTable {
     constructor(readonly) {
         super();
         this.invalid = 0;

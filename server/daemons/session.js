@@ -97,7 +97,6 @@ singleton(class SessionManager extends Daemon {
 
     async onGetUserSessions(message) {
         if (message.userOid in this.byUser) {
-
         }
 
         Message.reply(message, []);
@@ -111,6 +110,17 @@ singleton(class SessionManager extends Daemon {
         }
 
         Message.reply(message, false);
+    }
+
+    async onListGrants(message) {
+        if ('session' in message) {
+            if (message.session in this.byKey) {
+                let session = this.byKey[message.session];
+                return Message.reply(message, session.listGrants());
+            }
+        }
+
+        Message.reply(message, {});
     }
 
     async onNotifyClient(message) {
