@@ -24,7 +24,7 @@
 
 /*****
 *****/
-register(class FWPasswordView extends WGrid {
+register(class PasswordManager extends WPanel {
     constructor() {
         super('h1');
         this.set('FWSetPasswordView').on('html.click', message => console.log(message));

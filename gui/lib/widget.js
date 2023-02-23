@@ -301,6 +301,16 @@ register(class Widget extends Emitter {
         this.htmlElement.insertBefore(...args);
     }
 
+    static is(widget1, widget2) {
+        if (widget1 instanceof Widget) {
+            if (widget2 instanceof Widget) {
+                return widget1.selector == widget2.selector;
+            }
+        }
+
+        return false;
+    }
+
     isDisabled() {
         return this.hasAttribute('disabled');
     }

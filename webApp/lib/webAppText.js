@@ -82,9 +82,6 @@ exports = module.exports = {
     // ****************************************************************
     // App Menu
     // ****************************************************************
-    fwMenuAccount: {
-        en: `Account`,
-    },
     fwMenuPassword: {
         en: `Password`,
     },
@@ -101,7 +98,7 @@ exports = module.exports = {
         en: `System`,
     },
     fwMenuUsers: {
-        en: `Manage Users`,
+        en: `Users`,
     },
 
     // ****************************************************************

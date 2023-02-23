@@ -205,7 +205,7 @@ register(class Webx extends Emitter {
     async loadWebxCss() {
         let vars;
         let varsPath = '';
-        let cssContent = (await FILES.readFile(PATH.join(env.kodePath, 'server/lib/webx.css'))).toString();
+        let cssContent = (await FILES.readFile(PATH.join(env.kodePath, 'gui/lib/widget.css'))).toString();
         let cssTemplate = mkTextTemplate(cssContent);
 
         if (this.reference.vars) {
@@ -316,6 +316,8 @@ global.webxCssVars = {
         menu_hover_background_color: '#DDDDDD',
         menu_disabled_color: '#BBBBBB',
         menu_disabled_background_color: '#F9F9F9',
+        menu_separator: 'solid 1px #244F5F',
+        menu_separator_lite: 'solid 1px #DFDFDF',
 
         main_color: '#2F4F5F',
         main_background_color: '#FFFFFF',
@@ -367,8 +369,10 @@ global.webxCssVars = {
         menu_background_color: '#222222',
         menu_hover_color: '#C0C0C0',
         menu_hover_background_color: '#444444',
-        menu_disabled_color: '#BBBBBB',
+        menu_disabled_color: '#777777',
         menu_disabled_background_color: '#222222',
+        menu_separator: 'solid 1px #FFFFFF',
+        menu_separator_lite: 'solid 1px #373737',
 
         main_color: '#FFFFFF',
         main_background_color: '#000000',

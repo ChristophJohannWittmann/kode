@@ -23,79 +23,63 @@
 
 
 /*****
+ * The main application menu is created with this framework class.  When the main
+ * menu is constructed, it's placed in the global container as "mainMenu".  Each
+ * application will need to determine whether a main menu is required and how to
+ * manage what's on it.  In general, this core framework menu provides features
+ * to support all of the webapp's built in features.
 *****/
 register(class MainMenu extends WPopupMenu {
     constructor(grants) {
         super();
 
         return new Promise(async (ok, fail) => {
+            if (webAppSettings.user().orgOid == 0) {
+                this.append(
+                    mkWMenuItem(txx.fwMenuOrgs, "Orgs")
+                    .setAction(mkSingletonViewMenuAction(home, mkOrgManager))
+                );
+            }
+
             this.append(
-                mkWMenuItem(txx.fwMenuAccount, "Account")
-                //.setAction(() => this.copyPublicKey('pem'))
-                //.bind(this.editor.modifiable, 'publicKey', (mi, value) => value == '[NONE]' ? mi.disable() : mi.enable())
+                mkWMenuItem(txx.fwMenuPassword, "Password")
+                    .setAction(mkSingletonViewMenuAction(home, mkPasswordManager))
             );
 
             this.append(
                 mkWMenuItem(txx.fwMenuPreferences, "Preferences")
-                //.setAction(() => this.createKeyPair())
+                    .setAction(mkSingletonViewMenuAction(home, mkPreferencesManager))
             );
-
-            this.append(
-                mkWMenuItem(txx.fwMenuPassword, "Password")
-                //.setAction(() => this.createKeyPair())
-            );
-
-            if ('user' in grants) {
-                this.append(
-                    mkWMenuItem(txx.fwMenuUsers, "Users")
-                    //.setAction(() => this.createKeyPair())
-                );
-            }
-
-            if (webAppSettings.user().orgOid == 0) {
-                this.append(
-                    mkWMenuItem(txx.fwMenuOrgs, "Orgs")
-                    .setAction(() => {
-                        /*
-                        if (this.orgsView) {
-                            home.moveTop(this.orgsView);
-                        }
-                        else {
-                            this.orgsView = mkOrgManager('public');
-                            home.push(this.orgsView);
-                        }
-                        */
-                        home.push(mkOrgManager('public'));
-                    })
-                );
-            }
 
             if ('system' in grants) {
                 this.append(
                     mkWMenuItem(txx.fwMenuSystem, "System")
-                    .setAction(() => {
-                        /*
-                        if (this.systemView) {
-                            home.moveTop(this.systemView);
-                        }
-                        else {
-                            this.systemView = mkNetIfaceEditor('public');
-                            home.push(this.systemView);
-                        }
-                        */
-                        home.push(mkNetIfaceEditor('public'));
-                    })
+                    .setAction(mkSingletonViewMenuAction(home, mkNetIfaceEditor, 'public'))
+                );
+            }
+
+            if ('user' in grants) {
+                this.append(
+                    mkWMenuItem(txx.fwMenuUsers, "Users")
+                    .setAction(mkSingletonViewMenuAction(home, mkUserManager))
                 );
             }
 
             this.append(
-                mkWMenuItem(txx.fwMenuSignOut, "SignOut")
-                .setAction(async () => {
-                    await queryServer({ messageName: 'SelfSignOut' });
-                    signOut();
-                })
+                mkWMenuSeparator(true)
             );
 
+            this.append(
+                mkWMenuItem(txx.fwMenuSignOut, "SignOut")
+                .setAction(
+                    mkFunctionMenuAction(async (menuItem, message) => {
+                        await queryServer({ messageName: 'SelfSignOut' });
+                        signOut();
+                    })
+                )
+            );
+
+            global.mainMenu = this;
             ok(this);
         });
     }

@@ -104,7 +104,7 @@ register(class WView extends WPanel {
     }
 
     pop() {
-        this.stack.pop();
+        let popped = this.stack.pop();
         let top = this.stack.top();
 
         if (this.stack.length() == (this.backplane ? 1 : 0)) {
@@ -132,11 +132,24 @@ register(class WView extends WPanel {
             this.modified = false;
         }
 
+        this.send({
+            messageName: 'View.Pop',
+            view: this,
+            popped: popped,
+        });
+
         return this;
     }
 
     promote(widget) {
         this.stack.promote(widget);
+
+        this.send({
+            messageName: 'View.Promote',
+            view: this,
+            widget: widget,
+        });
+
         return this;
     }
 
@@ -161,6 +174,13 @@ register(class WView extends WPanel {
 
         this.stack.push(widget);
         this.wire(widget);
+
+        this.send({
+            messageName: 'View.Push',
+            view: this,
+            widget: widget,
+        });
+
         return this;
     }
 

@@ -60,6 +60,7 @@ register(class DarkWidget extends Widget {
 
         let widget = Reflect.apply(this.container[this.makerName], window, args);
         widget.id = this.id;
+        widget.selector = this.selector;
         this.replace(widget);
     }
 });

@@ -177,6 +177,32 @@ register(class WPopupMenu extends Widget {
 
 
 /*****
+ * It's what you expect!  It's a horizontal line drawn that separates one section
+ * of the menu from others.  There are two styles: regular and lite.  The lite
+ * separate is less distinct can be used to separate subsections, while regular
+ * separators should be used for marking or separating a distinction between main
+ * or primary sections of the menu.
+*****/
+register(class WMenuSeparator extends Widget {
+    constructor(lite, tag) {
+        super('hr');
+        this.tag = tag ? tag : this.selector;
+        lite ? this.setLite() : this.setRegular();
+    }
+
+    setLite() {
+        this.setWidgetStyle('menu-separator-lite');
+        return this;
+    }
+
+    setRegular() {
+        this.setWidgetStyle('menu-separator');
+        return this;
+    }
+});
+
+
+/*****
  * A menu item represents a choice on a popup menu.  A menu item has values to
  * display and an action item.  The action item can be either a function, which
  * is called with a single argument, the message, or 
@@ -185,7 +211,7 @@ register(class WMenuItem extends Widget {
     constructor(text, tag) {
         super('div');
         this.append(text);
-        tag ? this.setAttribute('menu-item-tag', tag) : this.setAttribute('menu-item-tag', text);
+        tag ? this.setAttribute('menu-item-tag', tag) : this.setAttribute('menu-item-tag', this.selector);
         this.clearAction();
         this.enable();
 
@@ -195,8 +221,16 @@ register(class WMenuItem extends Widget {
     }
 
     clearAction() {
-        this.action = async message => {};
+        this.action = null;
         return this;        
+    }
+
+    clearIcon() {
+        return this;
+    }
+
+    clearOpen() {
+        return this;
     }
 
     disable() {
@@ -213,8 +247,8 @@ register(class WMenuItem extends Widget {
 
     onEnter(message) {
         if (this.action instanceof WPopupMenu) {
-            let ev = message.event.rawEvent();
-            this.action.open(this, ev.x, ev.y);
+            //let ev = message.event.rawEvent();
+            //this.action.open(this, ev.x, ev.y);
         }
     }
 
@@ -229,14 +263,22 @@ register(class WMenuItem extends Widget {
         if (!this.hasAttribute('disabled')) {
             this.parent().close();
 
-            if (typeof this.action == 'function') {
-                setTimeout(() => this.action(message), 10);
+            if (this.action instanceof MenuAction) {
+                setTimeout(() => this.action.onClick(this, message), 10);
             }
         }
     }
 
-    setAction(func) {
-        this.action = func;
+    setIcon(icon) {
+        return this;
+    }
+
+    setOpen() {
+        return this;
+    }
+
+    setAction(action) {
+        this.action = action;
         return this;
     }
 });

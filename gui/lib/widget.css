@@ -1311,3 +1311,14 @@ body {
     width: 100%;
     text-align: center;
 }
+
+
+/***********************************************
+ * Menu Separator
+ ***********************************************/
+[widget-style=menu-separator] {
+    border: var(--menu-separator);
+}
+[widget-style=menu-separator-lite] {
+    border: var(--menu-separator-lite);
+}

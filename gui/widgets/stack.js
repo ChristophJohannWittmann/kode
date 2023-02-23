@@ -86,7 +86,7 @@ register(class WStack extends Widget {
 
     promote(widget) {
         for (let child of this) {
-            if (Object.is(child, widget)) {
+            if (child.selector == widget.selector) {
                 child.remove();
                 child.reveal();
                 this.push(child);
