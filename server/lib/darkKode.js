@@ -46,7 +46,7 @@ singleton(class DarkKode {
     constructor(...args) {
         super(...args)
         this.libName = '${libName}';
-        this.download();
+        this.download(...args);
     }
 });`;
 

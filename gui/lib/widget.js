@@ -119,7 +119,9 @@ register(class Widget extends Emitter {
     }
 
     children() {
-        return this.htmlElement.children().map(child => child.widget());
+        return this.htmlElement.children()
+        .filter(child => child instanceof DocElement)
+        .map(child => child.widget());
     }
 
     clear() {
@@ -192,6 +194,13 @@ register(class Widget extends Emitter {
         }
 
         return this;
+    }
+
+    conceal() {
+        if (typeof this.cssDisplay == 'undefined') {
+            this.cssDisplay = this.getStyle('display');
+            this.setStyle('display', 'none');
+        }
     }
 
     dir() {
@@ -467,6 +476,13 @@ register(class Widget extends Emitter {
         }
 
         return this;
+    }
+
+    reveal() {
+        if (typeof this.cssDisplay == 'string') {
+            this.setStyle('display', this.cssDisplay);
+            delete this.cssDisplay;
+        }
     }
 
     set(innerHtml) {

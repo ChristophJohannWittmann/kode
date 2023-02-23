@@ -42,10 +42,9 @@ register(class DarkWidget extends Widget {
         this.makerName = `mk${this.className}`;
         this.chain = this.ctor[chainKey];
         this.container = this.ctor[containerKey];
-        this.isDownLoading();
     }
 
-    async download() {
+    async download(...args) {
         let darkWidget = await queryServer({
             messageName: 'SelfGetDarkWidget',
             libName: this.libName,
@@ -59,34 +58,8 @@ register(class DarkWidget extends Widget {
         eval(mkBuffer(darkWidget, 'base64').toString());
         paws();
 
-        let widget = Reflect.apply(this.container[this.makerName], window, this.args);
+        let widget = Reflect.apply(this.container[this.makerName], window, args);
         widget.id = this.id;
-
-        for(let symbol of Object.getOwnPropertySymbols(this)) {
-            widget[symbol] = this[symbol];
-        }
-
         this.replace(widget);
-    }
-
-    isDownLoading() {
-        this.set('DOWNLING STUFF FOR YOU...');
-    }
-
-    replace(...widgets) {
-        let parent = this.htmlElement.parent().widget();
-
-        if (parent) {
-            let filtered = widgets.filter(w => w instanceof Widget);
-
-            if (parent instanceof WStack && widgets.length == 1) {
-                parent.replaceWidget(this, widgets[0]);
-            }
-            else {
-                super.replace(...widgets);
-            }
-        }
-
-        return this;
     }
 });

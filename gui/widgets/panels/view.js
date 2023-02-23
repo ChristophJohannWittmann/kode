@@ -135,6 +135,11 @@ register(class WView extends WPanel {
         return this;
     }
 
+    promote(widget) {
+        this.stack.promote(widget);
+        return this;
+    }
+
     push(widget) {
         if (this.stack.length() == (this.backplane ? 1 : 0)) {
             this.nav.push(this.done);

@@ -33,13 +33,11 @@
 register(class WStack extends Widget {
     constructor(arg) {
         super(arg);
-        this.stack = [];
         this.setWidgetStyle('stack');
     }
 
     clear() {
         super.clear();
-        this.stack = [];
     }
 
     contains(widget) {
@@ -47,8 +45,10 @@ register(class WStack extends Widget {
     }
 
     indexOf(widget) {
-        for (let i = 0; i < this.stack.length; i++) {
-            if (Object.is(this.stack[i], widget)) {
+        let children = this.children();
+
+        for (let i = 0; i < children.length; i++) {
+            if (Object.is(children[i], widget)) {
                 return i;
             }
         }
@@ -56,162 +56,19 @@ register(class WStack extends Widget {
         return -1;
     }
 
-    insertAt(index, widget) {
-        if (index >= 0 && !this.contains(widget)) {
-            if (index < this.stack.length) {
-                this.stack.splice(index, 0, widget);
-            }
-            else {
-                this.stack.push(widget);
-            }
-
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'insert',
-                widget: this,
-                index: index,
-                inserted: widget,
-            });
-        }
-
-        return widget;
-    }
-
     length() {
-        return this.stack.length;
-    }
-
-    move(fromIndex, toIndex) {
-        if (fromIndex < 0 || fromIndex >= this.stack.length) {
-            return;
-        }
-
-        if (toIndex < 0 || toIndex >= this.stack.length) {
-            return;
-        }
-
-        if (fromIndex < toIndex) {
-            let widget = this.stack[fromIndex];
-            this.stack.splice(fromIndex, 1);
-            this.stack.splice(toIndex+1, 0, widget);
-
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'move',
-                widget: this,
-                fromIndex: fromIndex,
-                toIndex: toIndex,
-            });
-
-            return widget;
-        }
-        else if (fromIndex > toIndex) {
-            let widget = this.stack[fromIndex];
-            this.stack.splice(fromIndex, 1);
-            this.stack.splice(toIndex-1, 0, widget);
-
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'move',
-                widget: this,
-                fromIndex: fromIndex,
-                toIndex: toIndex,
-            });
-
-            return widget;
-        }
-    }
-
-    moveBottom(fromIndex) {
-        if (fromIndex >= 0 && fromIndex < this.stack.length) {
-            if (fromIndex > 0) {
-                let widget = this.stack[fromIndex];
-                this.stack.splice(fromIndex, 1);
-                this.stack.unshift(widget);
-
-                this.send({
-                    messageName: 'Widget.Changed',
-                    type: 'move',
-                    widget: this,
-                    fromIndex: fromIndex,
-                    toIndex: 0,
-                });
-
-                return widget;
-            }
-        }
-    }
-
-    moveDown(fromIndex) {
-        if (fromIndex >= 0 && fromIndex < this.stack.length) {
-            if (fromIndex > 0) {
-                let widget = this.stack[fromIndex];
-                this.stack.splice(fromIndex, 1);
-                this.stack.splice(fromIndex-1, 0, widget);
-
-                this.send({
-                    messageName: 'Widget.Changed',
-                    type: 'move',
-                    widget: this,
-                    fromIndex: fromIndex,
-                    toIndex: fromIndex-1,
-                });
-
-                return widget;
-            }
-        }
-    }
-
-    moveTop(fromIndex) {
-        if (fromIndex >= 0 && fromIndex < this.stack.length) {
-            if (fromIndex < this.stack.length - 1) {
-                let widget = this.stack[fromIndex];
-                this.stack.splice(fromIndex, 1);
-                this.stack.push(widget);
-
-                this.send({
-                    messageName: 'Widget.Changed',
-                    type: 'move',
-                    widget: this,
-                    fromIndex: fromIndex,
-                    toIndex: this.stack.length-1,
-                });
-
-                return widget;
-            }
-        }
-    }
-
-    moveUp(fromIndex) {
-        if (fromIndex >= 0 && fromIndex < this.stack.length) {
-            if (fromIndex < this.stack.length - 1) {
-                let widget = this.stack[fromIndex];
-                this.stack.splice(fromIndex, 1);
-                this.stack.splice(fromIndex+1, 0, widget);
-
-                this.send({
-                    messageName: 'Widget.Changed',
-                    type: 'move',
-                    widget: this,
-                    fromIndex: fromIndex,
-                    toIndex: fromIndex+1,
-                });
-
-                return widget;
-            }
-        }
+        return this.children().length;
     }
 
     pop() {
-        if (this.stack.length) {
-            let top = this.top();
-            this.stack.pop();
+        let children = this.children();
 
-            if (this.stack.length) {
-                top.replace(this.top());
-            }
-            else {
-                top.remove();
+        if (children.length) {
+            let top = children[children.length - 1];
+            top.remove();
+
+            if (children.length > 1) {
+                children[children.length - 2].reveal();
             }
 
             this.send({
@@ -223,99 +80,52 @@ register(class WStack extends Widget {
 
             return top;
         }
+
+        return null;
     }
 
-    popBottom() {
-        let shifted = null;
-
-        if (stack.length.length) {
-            shifted = this.stack.shift();
-
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'remove',
-                widget: this,
-                removed: shifted,
-            });
+    promote(widget) {
+        for (let child of this) {
+            if (Object.is(child, widget)) {
+                child.remove();
+                child.reveal();
+                this.push(child);
+                break;
+            }
         }
 
-        return shifted;
+        return this;
     }
 
     push(widget) {
-        let top = this.top();
-        this.stack.push(widget);
+        let children = this.children();
 
-        if (top) {
-            top.replace(widget);
+        if (children.length) {
+            children[children.length - 1].conceal();
         }
-        else {
-            this.append(widget);
-        }
+
+        this.append(widget);
 
         this.send({
             messageName: 'Widget.Changed',
             type: 'push',
             widget: this,
             added: widget,
-            index: this.stack.length-1,
+            index: children.length,
         });
 
-        return widget;
-    }
-
-    pushBottom(widget) {
-        this.stack.unshift(widget);
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'insert',
-            widget: this,
-            added: widget,
-            index: 0,
-        });
-
-        if (this.stack.length == 1) {
-            this.append(widget);
-        }
-    }
-
-    replaceWidget(widget, replacement) {
-        for (let i = 0; i < this.stack.length; i++) {
-            let item = this.stack[i];
-
-            if (item.id == widget.id) {
-                this.stack.splice(i, 1, replacement);
-                item.htmlElement.replace(replacement.htmlElement);
-            }
-        }
-    }
-
-    removeAt(index) {
-        if (index >= 0 && index < this.stack.length) {
-            let widget = this.stack[index];
-            this.stack.splice(index, 1);
-
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'remove',
-                widget: this,
-                removed: widget,
-            });
-
-            return widget;
-        }
-
-        return null;
+        return this;
     }
 
     [Symbol.iterator]() {
-        return this.stack[Symbol.iterator]();
+        return this.children()[Symbol.iterator]();
     }
 
     top() {
-        if (this.stack.length) {
-            return this.stack[this.stack.length - 1];
+        let children = this.children();
+
+        if (children.length) {
+            return children[children.length - 1];
         }
 
         return null;
