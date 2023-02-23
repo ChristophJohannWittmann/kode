@@ -137,8 +137,7 @@
         webAppSettings.verify = () => sessionState.verifyEmail;
         webAppSettings.user = () => sessionState.user;
         
-        let homeStub = webAppSettings.homeView();
-        window.home = homeStub instanceof Promise ? await homeStub : homeStub;
+        window.home = webAppSettings.homeView();
         body.push(window.home);
 
         if (webAppSettings.password()) {

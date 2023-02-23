@@ -55,16 +55,36 @@ register(class MainMenu extends WPopupMenu {
             if (webAppSettings.user().orgOid == 0) {
                 this.append(
                     mkWMenuItem(txx.fwMenuOrgs, "Orgs")
-                    .setAction(async () => home.push(await queryServer({
-                        messageName: '',
-                    })))
+                    .setAction(() => {
+                        /*
+                        if (this.orgsView) {
+                            home.moveTop(this.orgsView);
+                        }
+                        else {
+                            this.orgsView = mkOrgManager('public');
+                            home.push(this.orgsView);
+                        }
+                        */
+                        home.push(mkOrgManager('public'));
+                    })
                 );
             }
 
             if ('system' in grants) {
                 this.append(
                     mkWMenuItem(txx.fwMenuSystem, "System")
-                    .setAction(() => home.push(mkNetIfaceEditor('public'), { disable: this.getItem('System') }))
+                    .setAction(() => {
+                        /*
+                        if (this.systemView) {
+                            home.moveTop(this.systemView);
+                        }
+                        else {
+                            this.systemView = mkNetIfaceEditor('public');
+                            home.push(this.systemView);
+                        }
+                        */
+                        home.push(mkNetIfaceEditor('public'));
+                    })
                 );
             }
 
