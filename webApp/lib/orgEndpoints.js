@@ -35,7 +35,7 @@ register(class OrgEndpoints extends EndpointContainer {
     async [ mkEndpoint('DeactivateOrg', 'org', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('GetOrgs', 'org', { notify: true }) ](trx) {
+    async [ mkEndpoint('ListOrgs', 'org', { notify: false }) ](trx) {
     }
     
     async [ mkEndpoint('ModifyOrg', 'org', { notify: true }) ](trx) {

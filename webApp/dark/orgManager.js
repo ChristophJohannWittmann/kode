@@ -22,11 +22,46 @@
 *****/
 
 
-/*****
-*****/
-register(class OrgManager extends WPanel {
-    constructor() {
-        super('form');
-        this.set('ORGANIZATIONS');
+(() => {
+    /*****
+    *****/
+    register(class OrgManager extends WPanel {
+        constructor() {
+            super('form');
+            this.setTitle(txx.fwOrgManagerTitle);
+
+            this.controller = mkActiveData({
+                mode: 'select',
+            });
+
+            this.append(this.controlled = mkWidget());
+
+            this.controlled.bind(this.controller, 'mode', {
+                list: new OrgList(this),
+                select: new OrgSelector(this),
+            });
+        }
+    });
+
+
+    /*****
+    *****/
+    class OrgSelector extends WPanel {
+        constructor(orgManager) {
+            super('form');
+            this.orgManager = orgManager;
+            this.set('O R G    S E L E C T O R');
+        }
     }
-});
+
+
+    /*****
+    *****/
+    class OrgList extends WPanel {
+        constructor(orgManager) {
+            super('form');
+            this.orgManager = orgManager;
+            this.set('O R G    L I S T');
+        }
+    }
+})();

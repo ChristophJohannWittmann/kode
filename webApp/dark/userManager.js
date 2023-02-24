@@ -22,11 +22,46 @@
 *****/
 
 
-/*****
-*****/
-register(class UserManager extends WPanel {
-    constructor() {
-        super('form');
-        this.set('U S E R    M A N A G E R');
+(() => {
+    /*****
+    *****/
+    register(class UserManager extends WPanel {
+        constructor() {
+            super('form');
+            this.setTitle(txx.fwUserManagerTitle);
+
+            this.controller = mkActiveData({
+                mode: 'select',
+            });
+
+            this.append(this.controlled = mkWidget());
+
+            this.controlled.bind(this.controller, 'mode', {
+                list: new UserList(this),
+                select: new UserSelector(this),
+            });
+        }
+    });
+
+
+    /*****
+    *****/
+    class UserSelector extends WPanel {
+        constructor(orgManager) {
+            super('form');
+            this.orgManager = orgManager;
+            this.set('U S E R    S E L E C T O R');
+        }
     }
-});
+
+
+    /*****
+    *****/
+    class UserList extends WPanel {
+        constructor(orgManager) {
+            super('form');
+            this.orgManager = orgManager;
+            this.set('U S E R    L I S T');
+        }
+    }
+})();

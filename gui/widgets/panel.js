@@ -39,6 +39,7 @@ register(class WPanel extends Widget {
 
     constructor(tagName) {
         super(tagName ? tagName : 'div');
+        this.title = null;
         this.circuits = mkMessageProxy(this);
         this.setWidgetStyle('panel');
 
@@ -75,6 +76,21 @@ register(class WPanel extends Widget {
     clearRefreshers(...endpointNames) {
         this.refreshers.clear(...endpointNames);
         return this;
+    }
+
+    clearTitle() {
+        if (this.title instanceof Widget) {
+            this.title.remove();
+            this.title = null;
+        }
+
+        return this;
+    }
+
+    getTitle() {
+        if (this.title) {
+            return this.title.get();
+        }
     }
 
     insertAfter(...args) {
@@ -151,6 +167,19 @@ register(class WPanel extends Widget {
 
     setRefreshers(...endpointNames) {
         this.refreshers.set(...endpointNames);
+        return this;
+    }
+
+    setTitle(title) {
+        if (typeof title == 'string') {
+            if (this.title) {
+                this.clearTitle();
+            }
+
+            this.title = mkWidget('h3').set(title.trim()).setClassName('margin-left-6');
+            this.prepend(this.title);
+        }
+
         return this;
     }
 

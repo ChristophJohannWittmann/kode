@@ -91,7 +91,7 @@ register(class SingletonViewMenuAction extends MenuAction {
     }
 
     async onPop(message) {
-        if (this.widget && Widget.is(this.widget, message.panel)) {
+        if (this.widget && Widget.is(this.widget, message.popped)) {
             this.widget = null;
             this.menuItem.clearOpen();
         }

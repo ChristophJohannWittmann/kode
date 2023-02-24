@@ -54,7 +54,7 @@ register(class MainMenu extends WPopupMenu {
             if ('system' in grants) {
                 this.append(
                     mkWMenuItem(txx.fwMenuSystem, "System")
-                    .setAction(mkSingletonViewMenuAction(home, mkNetIfaceEditor, 'public'))
+                    .setAction(mkSingletonViewMenuAction(home, mkSystemManager))
                 );
             }
 
