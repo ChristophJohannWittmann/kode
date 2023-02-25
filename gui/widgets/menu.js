@@ -211,6 +211,7 @@ register(class WMenuItem extends Widget {
     constructor(text, tag) {
         super('div');
         this.append(text);
+        this.permanent = false;
         tag ? this.setAttribute('menu-item-tag', tag) : this.setAttribute('menu-item-tag', this.selector);
         this.clearAction();
         this.enable();
@@ -233,6 +234,11 @@ register(class WMenuItem extends Widget {
         return this;
     }
 
+    clearPermanent() {
+        this.permanent = false;
+        return this;
+    }
+
     disable() {
         super.disable();
         this.setWidgetStyle('popup-menu-item-disabled');
@@ -243,6 +249,10 @@ register(class WMenuItem extends Widget {
         super.enable();
         this.setWidgetStyle('popup-menu-item');
         return this;
+    }
+
+    getPermanent() {
+        return this.permanent;
     }
 
     onEnter(message) {
@@ -274,6 +284,11 @@ register(class WMenuItem extends Widget {
     }
 
     setOpen() {
+        return this;
+    }
+
+    setPermanent() {
+        this.permanent = true;
         return this;
     }
 

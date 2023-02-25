@@ -32,6 +32,7 @@
 register(class MainMenu extends WPopupMenu {
     constructor(grants) {
         super();
+        global.mainMenu = this;
 
         return new Promise(async (ok, fail) => {
             if (webAppSettings.user().orgOid == 0) {
@@ -79,7 +80,6 @@ register(class MainMenu extends WPopupMenu {
                 )
             );
 
-            global.mainMenu = this;
             ok(this);
         });
     }

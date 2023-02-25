@@ -61,6 +61,36 @@ register(class FunctionMenuAction extends MenuAction {
 
 
 /*****
+ * A fixed MenuAction provides a MenuItem associated with a widget that is fixed
+ * and always available.  The caller makes the widget to be added to the view's
+ * stack, and this menu action keeps a reference to the fixed item, even when the
+ * view is popped.  Hence, it's initialized once and remains available as long
+ * as the menu item is available.
+*****/
+register(class FixedViewMenuAction extends MenuAction {
+    constructor(view, widget) {
+        super();
+        this.view = view;
+        this.widget = widget;
+    }
+
+    async onClick(menuItem, message) {
+        await super.onClick(menuItem, message);
+
+        if (this.widget.parent()) {
+            this.view.promote(this.widget);
+        }
+        else {
+            this.view.push(this.widget);
+        }
+    }
+
+    async onPop(message) {
+    }
+});
+
+
+/*****
  * A single view action combines a view with a menu to coordinate pushing and
  * popping a stack of panels on a view.  The concept is that the panel can be
  * opened once, when the menuItem is clicked.  When there is an instance of the
