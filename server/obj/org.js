@@ -25,7 +25,32 @@
 /*****
 *****/
 singleton(class Orgs {
-    constructor() {
+    async createOrg(dbc, opts) {
+    }
+
+    async getOrg(dbc, arg) {
+    }
+
+    async list(dbc, name, status) {
+        let filter = [];
+
+        if (name !== undefined) {
+            filter.push(`_name='${name}'`)
+        }
+
+        if (status !== undefined) {
+            filter.push(`_status='${status}'`)
+        }
+
+        if (filter.length == 0) {
+            filter.push('1=1');
+        }
+
+        return await selectDboOrg(dbc, filter.join(' AND '), '_name ASC');
+    }
+
+    async search(dbc, pattern) {
+        return await selectDboOrg(dbc, `_name ~* '${pattern}'`, '_name ASC');
     }
 });
 

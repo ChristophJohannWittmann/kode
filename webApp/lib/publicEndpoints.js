@@ -53,10 +53,16 @@ register(class PublicEndpoints extends EndpointContainer {
                 idleMinutes: trx['#Reference'].sessionIdle,
             });
 
+            let grants = await Ipc.queryPrimary({
+                messageName: '#SessionManagerListGrants',
+                session: sessionKey,
+            });
+
             return {
                 sessionKey: sessionKey,
                 verifyEmail: !user.verified,
                 setPassword: !user.password,
+                grants: grants,
                 user: {
                     firstName: user.firstName,
                     lastMame: user.lastName,

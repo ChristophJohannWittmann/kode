@@ -234,6 +234,29 @@ register(class AttributeBinding extends Binding {
 
 
 /*****
+ * A FunctionBinding is the most generic and provides the highest variety of uses.
+ * This type of binding simply calls a function when the ActiveData's value
+ * changes.  The method is invoked with a single parameter, which is the new
+ * value for the specified key.  NOTE THAT THIS BINDING TYPE IS UNIDIRECTIONAL!
+ * Messages flow from the the ActiveData object to the widget only.  The widget
+ * never sends data back to the ActiveData object.
+*****/
+register(class FunctionBinding extends Binding {
+    constructor(widget, activeData, key, method) {
+        super(widget, activeData, key);
+        this.method = method;
+    }
+
+    onActiveDataChanged() {
+        Reflect.apply(this.method, this.widget, [this.widget, this.activeData[this.key]]);
+    }
+
+    onWidgetChanged(value) {
+    }
+});
+
+
+/*****
  * A map binding is a very useful type of binding.  The active data key is used
  * as a lookup into a javascript object, whose values must be a preconstructed
  * widgets.  So the active data key value is used to find the appropriate widget
@@ -258,29 +281,6 @@ register(class MapBinding extends Binding {
         else {
             this.widget.clear();
         }
-    }
-
-    onWidgetChanged(value) {
-    }
-});
-
-
-/*****
- * A FunctionBinding is the most generic and provides the highest variety of uses.
- * This type of binding simply calls a function when the ActiveData's value
- * changes.  The method is invoked with a single parameter, which is the new
- * value for the specified key.  NOTE THAT THIS BINDING TYPE IS UNIDIRECTIONAL!
- * Messages flow from the the ActiveData object to the widget only.  The widget
- * never sends data back to the ActiveData object.
-*****/
-register(class FunctionBinding extends Binding {
-    constructor(widget, activeData, key, method) {
-        super(widget, activeData, key);
-        this.method = method;
-    }
-
-    onActiveDataChanged() {
-        Reflect.apply(this.method, this.widget, [this.widget, this.activeData[this.key]]);
     }
 
     onWidgetChanged(value) {

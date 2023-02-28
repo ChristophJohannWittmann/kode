@@ -67,6 +67,9 @@ register(class SelfEndpoints extends EndpointContainer {
     async [ mkEndpoint('SelfModifyPhone') ](trx) {
     }
     
+    async [ mkEndpoint('SelfSetOrg') ](trx) {
+    }
+    
     async [ mkEndpoint('SelfRemoveAddress') ](trx) {
     }
     

@@ -1322,3 +1322,11 @@ body {
 [widget-style=menu-separator-lite] {
     border: var(--menu-separator-lite);
 }
+
+
+/***********************************************
+ * Horizontal Rules
+ ***********************************************/
+[widget-style=hr-lite] {
+    border: solid 1px var(--widget-disabled-border-color);
+}

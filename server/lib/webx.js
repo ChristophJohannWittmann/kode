@@ -33,6 +33,7 @@
 *****/
 register(class Webx extends Emitter {
     static frameworkUrl = `/CLIENTFRAMEWORK.js`;
+    static dboObjectsUrl = `/DBOOBJECTSTUBS.js`;
 
     constructor(thunk, reference) {
         super();
@@ -123,6 +124,8 @@ register(class Webx extends Emitter {
                 'gui/widgets',
             ], Config.debug)
         ).register();
+
+        await Webx.loadDboObjectStubs();
     }
 
     async loadCss() {
@@ -147,6 +150,34 @@ register(class Webx extends Emitter {
                 }
             }
         }
+    }
+
+    static async loadDboObjectStubs() {
+        let code = [];
+
+        for (let dboThunk of dboThunks) {
+            let jsInit = [];
+
+            for (let propertyName in dboThunk.properties) {
+                let propertyFunc = dboThunk.properties[propertyName].type.init.toString();
+                let propertyValue = propertyFunc.match(/\(\) *=> *(.*)/);
+                jsInit.push(`this.${propertyName} = ${propertyValue[1]};`);
+            }
+
+            code.push(
+`
+register(class ${dboThunk.className} extends Jsonable {
+    constructor(value) {
+        super();
+        ${jsInit.join('\n        ')}
+        typeof value == 'object' ? Object.assign(this, value) : false;
+    }
+});
+`);
+        }
+
+        let javascript = Config.debug ? code.join('\n') : await minifyJs(code.join('\n'));
+        await mkWebBlob(this.dboObjectsUrl, 'text/javascript', javascript).register();
     }
 
     async loadFavIcons() {
@@ -304,7 +335,7 @@ global.webxCssVars = {
 
         widget_disabled_color: '#BBBBBB',
         widget_disabled_background_color: '#FFFFFF',
-        widget_disabled_border_color: '#C0C0C0',
+        widget_disabled_border_color: '#ECECEC',
 
         widget_error_color: '#DC143C',
         widget_error_background_color: '#FFF9F9',
@@ -359,7 +390,7 @@ global.webxCssVars = {
 
         widget_disabled_color: '#A9A9A9',
         widget_disabled_background_color: '#000000',
-        widget_disabled_border_color: '#C0C0C0',
+        widget_disabled_border_color: '#454545',
 
         widget_error_color: '#DC143C',
         widget_error_background_color: '#222222',

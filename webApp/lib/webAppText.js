@@ -157,8 +157,23 @@ exports = module.exports = {
     // ****************************************************************
     // Org Manager
     // ****************************************************************
-    fwOrgManagerTitle: {
+    fwOrgManagerCreateOrg: {
+        en: `Create Organization`,
+    },
+    fwOrgManagerEditTitle: {
+        en: `Organization`,
+    },
+    fwOrgManagerFound: {
+        en: `Organizations Found`,
+    },
+    fwOrgManagerListTitle: {
         en: `Organizations`,
+    },
+    fwOrgManagerSearch: {
+        en: `Search`,
+    },
+    fwOrgManagerShowList: {
+        en: `Show List`,
     },
 
     // ****************************************************************

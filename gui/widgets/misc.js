@@ -108,3 +108,16 @@ register(class WColdSpot extends WSpot {
         this.setWidgetStyle('coldspot');
     }
 });
+
+
+/*****
+ * Implementation of other miscellaneous widgets.  The primary reason for these
+ * classes is convenience.  For instance, maybe we need a widget based on some
+ * specific CSS styling.
+*****/
+register(class WHrLite extends Widget {
+    constructor() {
+        super('hr');
+        this.setWidgetStyle('hr-lite');
+    }
+});

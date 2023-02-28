@@ -64,6 +64,10 @@ register(class WView extends WPanel {
         return this.backplane;
     }
 
+    getStack() {
+        return this.stack;
+    }
+
     length() {
         return this.stack.length;
     }

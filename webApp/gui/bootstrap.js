@@ -133,6 +133,7 @@
         body.pop();
 
         webAppSettings.session = () => sessionState.sessionKey;
+        webAppSettings.grants = () => sessionState.grants;
         webAppSettings.password = () => sessionState.setPassword;
         webAppSettings.verify = () => sessionState.verifyEmail;
         webAppSettings.user = () => sessionState.user;

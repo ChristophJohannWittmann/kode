@@ -71,6 +71,7 @@ register(class WebApp extends Webx {
         }
 
         html.push('    <script src="/CLIENTFRAMEWORK.js"></script>');
+        html.push('    <script src="/DBOOBJECTSTUBS.js"></script>');
         html.push(`    <script src="${this.webAppClientUrl}"></script>`);
 
         if (this.thunk.getDarkCodeUrl()) {
@@ -92,6 +93,7 @@ register(class WebApp extends Webx {
             '            session: () => null,',
             '            user: () => null,',
             `            websocket: () => ${this.reference.webSocket},`,
+            '            grants: () => {},',
             '        };',
             `        const txx = ${appText};`,
             '        Object.freeze(txx);',

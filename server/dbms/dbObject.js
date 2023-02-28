@@ -22,6 +22,11 @@
 *****/
 
 
+/****
+*****/
+global.dboThunks = [];
+
+
 /*****
  * Base class is used for identifying any of the defined Dbo object classes.
  * You can do "instanceof DboBase" to check whether an object is some sort of
@@ -47,6 +52,7 @@ register(function defineDboType(schemaTable) {
     const className = `Dbo${schemaTable.name[0].toUpperCase()}${schemaTable.name.substr(1)}`;
     const chain = getContainer()['#CHAIN'];
     const prefix = chain ? `${chain}.` : '';
+    const container = getContainer(prefix);
 
     const fwdMap = {};
     const revMap = {};
@@ -61,6 +67,13 @@ register(function defineDboType(schemaTable) {
         name: column.name,
         type: column.type,
     }));
+
+    dboThunks.push({
+        chain: prefix,
+        container: container,
+        className: className,
+        properties: fwdMap,
+    });
     
     eval(`
     register(class ${className} extends DboBASE {

@@ -33,25 +33,25 @@ register(class WDynamic extends Widget {
         super(tagName);
 
         ActiveData.on(activeData, message => {
-            if (message.action == 'change' && message.key == key) {
+            if (message.action == 'change') {
                 let methodName = `on${message.key[0].toUpperCase()}${message.key.substr(1)}Changed`;
 
                 if (methodName in this) {
-                    this[methodName]();
+                    this[methodName](message);
                 }
             }
-            else if (message.action == 'add' && message.key == key) {
+            else if (message.action == 'add') {
                 let methodName = `on${message.key[0].toUpperCase()}${message.key.substr(1)}Added`;
 
                 if (methodName in this) {
-                    this[methodName]();
+                    this[methodName](message);
                 }
             }
-            else if (message.action == 'delete' && message.key == key) {
+            else if (message.action == 'delete') {
                 let methodName = `on${message.key[0].toUpperCase()}${message.key.substr(1)}Deleted`;
 
                 if (methodName in this) {
-                    this[methodName]();
+                    this[methodName](message);
                 }
             }
         });

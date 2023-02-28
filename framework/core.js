@@ -57,12 +57,14 @@
         else {
             let container = global;
 
-            for (let link of links.split('.')) {
-                if (!(link in container)) {
-                    container[link] = new Object();
-                }
+            if (links.trim()) {
+                for (let link of links.split('.')) {
+                    if (!(link in container)) {
+                        container[link] = new Object();
+                    }
 
-                container = container[link];
+                    container = container[link];
+                }
             }
 
             return container;
@@ -522,11 +524,11 @@
                     return mkActiveData(value);
                 }
                 else if ('#CTOR' in value) {
-                    let ctorContainer = getContainer(value['#CTOR'].container);
+                    let ctor = value['#CTOR'];
+                    let ctorContainer = getContainer(ctor.container);
 
-                    if (!(value['#CTOR'].maker in ctorContainer)) {
-                        let restoreChainTo = chain;
-                        setContainer(value['#CTOR'].container);
+                    if (!(ctor.maker in ctorContainer)) {
+                        swap(ctorContainer);
 
                         eval(`
                             register(class ${value['#CTOR'].maker.substr(2)} extends Jsonable {
@@ -537,10 +539,10 @@
                             });
                         `);
 
-                        setContainer(restoreChainTo);
+                        paws();
                     }
 
-                    return ctorContainer[value['#CTOR'].maker](value);
+                    return ctorContainer[ctor.maker](value);
                 }
             }
      

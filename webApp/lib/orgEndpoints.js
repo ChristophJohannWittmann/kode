@@ -36,6 +36,8 @@ register(class OrgEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('ListOrgs', 'org', { notify: false }) ](trx) {
+        let dbc = await trx.connect();
+        return await Orgs.list(dbc, trx.name, trx.status);
     }
     
     async [ mkEndpoint('ModifyOrg', 'org', { notify: true }) ](trx) {
@@ -45,5 +47,17 @@ register(class OrgEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('RemoveOrg', 'org', { notify: true }) ](trx) {
+    }
+    
+    async [ mkEndpoint('SearchOrgs', 'org', { notify: false }) ](trx) {
+        //let dbc = await trx.connect();
+        //return await Orgs.search(dbc, trx.pattern);
+
+        return [
+            mkDboOrg({ oid: 1n, name: 'Nathan Casino', status: 'active', description: 'North Hollywood', authType: 'simple' }),
+            mkDboOrg({ oid: 2n, name: 'Five Winds', status: 'active', description: 'Indiana', authType: 'twofactor' }),
+            mkDboOrg({ oid: 3n, name: 'Big Slots Vegas', status: 'active', description: 'On the Strip', authType: 'simple' }),
+            mkDboOrg({ oid: 4n, name: 'Herbal Valley Casino', status: 'inactive', description: '', authType: 'simple' }),
+        ];
     }
 });
