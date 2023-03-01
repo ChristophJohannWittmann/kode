@@ -123,13 +123,7 @@ register(class IDate extends WInput {
     }
 
     setValue(value) {
-        if (value instanceof Time) {
-            this.setAttribute('value', value.jsDateStr());
-        }
-        else if (value instanceof Date) {
-            this.setAttribute('value', mkTime(value).jsDateStr());
-        }
-
+        this.setAttribute('value', value.toISOString().substr(0, 10));
         return this;
     }
 });
@@ -144,13 +138,7 @@ register(class IDateTime extends WInput {
     }
 
     setValue(value) {
-        if (value instanceof Time) {
-            this.setAttribute('value', value.jsDateTimeStr());
-        }
-        else if (value instanceof Date) {
-            this.setAttribute('value', mkTime(value).jsDateTimeStr());
-        }
-
+        this.setAttribute('value', value.toISOString().substr(0, 19));
         return this;
     }
 });
@@ -259,13 +247,7 @@ register(class ITime extends WInput {
     }
 
     setValue(value) {
-        if (value instanceof Time) {
-            this.setAttribute('value', value.jsTimeStr());
-        }
-        else if (value instanceof Date) {
-            this.setAttribute('value', mkTime(value).jsTimeStr());
-        }
-
+        this.setAttribute('value', value.toISOString().substr(11, 8));
         return this;
     }
 });

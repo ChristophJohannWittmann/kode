@@ -30,11 +30,14 @@
  * based on changes to the mode, i.e., state, or changes to the flags.
 *****/
 register(class WStateMachine extends Emitter {
+    static nameKey = Symbol('Name');
+
     constructor(widget, modes, flagNames) {
         super();
         this.owner = widget;
         this.owner.on('Widget.Changed', message => this.send(message));
         this.widgets = {};
+        this.namedWidgets = {};
         this.flags = {};
         this.modes = mkStringSet(...(Array.isArray(modes) ? modes : []));
         this.mode = this.modes.length() ? modes[0] : '';
@@ -50,22 +53,26 @@ register(class WStateMachine extends Emitter {
         }
     }
 
-    addChild(widget, modes, flags) {
-        if (!(widget.id in this.widgets)) {
+    addChild(widget, name, modes, flags) {
+        if (!(widget.id in this.widgets) && name.trim() && !(name.trim() in this.namedWidgets)) {
+            widget[WStateMachine.nameKey] = name.trim();
+            widget.getStateMachine = () => this;
+
             this.widgets[widget.id] = {
                 widget: widget,
                 modes: mkStringSet((Array.isArray(modes) ? modes : []).filter(mode => this.modes.has(mode))),
                 flags: mkStringSet((Array.isArray(flags) ? flags : []).filter(swName => swName in this.flags)),
             }
 
+            this.namedWidgets[widget[WStateMachine.nameKey]] = this.widgets[widget.id];
             return true;
         }
 
         return false;
     }
 
-    appendChild(widget, modes, flags) {
-        if (this.addChild(widget, modes, flags)) {
+    appendChild(widget, name, modes, flags) {
+        if (this.addChild(widget, name, modes, flags)) {
             this.owner.append(widget);
             this.update();
         }
@@ -110,8 +117,14 @@ register(class WStateMachine extends Emitter {
         return this.mode;
     }
 
-    insertAfter(widget, modes, flags) {
-        if (this.addChild(widget, modes, flags)) {
+    getWidget(name) {
+        if (name in this.namedWidgets) {
+            return this.namedWidgets[name].widget;
+        }
+    }
+
+    insertAfter(widget, name, modes, flags) {
+        if (this.addChild(widget, name, modes, flags)) {
             this.insertAfter(widget);
             this.update();
         }
@@ -119,8 +132,8 @@ register(class WStateMachine extends Emitter {
         return this;
     }
 
-    insertBefore(widget, modes, flags) {
-        if (this.addChild(widget, modes, flags)) {
+    insertBefore(widget, name, modes, flags) {
+        if (this.addChild(widget, name, modes, flags)) {
             this.insertBefore(widget);
             this.update();
         }
@@ -128,8 +141,8 @@ register(class WStateMachine extends Emitter {
         return this;
     }
 
-    prependChild(widget, modes, flags) {
-        if (this.addChild(widget, modes, flags)) {
+    prependChild(widget, name, modes, flags) {
+        if (this.addChild(widget, name, modes, flags)) {
             this.owner.prepend(widget);
             this.update();
         }
@@ -139,6 +152,8 @@ register(class WStateMachine extends Emitter {
 
     removeChild(widget) {
         if (widget.id in this.widgets) {
+            delete widget.getStateMachine;
+            delete this.namedWidgets[widget[WStateMachine.nameKey]];
             delete this.widgets[widget.id];
             widget.remove();
             this.update();
@@ -192,11 +207,13 @@ register(class WStateMachine extends Emitter {
 
                     if (reveal) {
                         widgetInfo.widget.reveal();
+                        widgetInfo.widget.getRevealState = () => true;
                         continue;
                     }
                 }
 
                 widgetInfo.widget.conceal();
+                widgetInfo.widget.getRevealState = () => false;
             }
 
             const flags = {};

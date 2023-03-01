@@ -29,35 +29,46 @@ register(class OrgEndpoints extends EndpointContainer {
         super(webapp);
     }
     
-    async [ mkEndpoint('ActivateOrg', 'org', { notify: true }) ](trx) {
+    async [ mkEndpoint('OrgCreateOrg', 'org', { notify: true }) ](trx) {
+        let org = mkDboOrg(trx.dboOrg);
+        await org.save(await trx.connect());
+        return true;
     }
     
-    async [ mkEndpoint('DeactivateOrg', 'org', { notify: true }) ](trx) {
-    }
-    
-    async [ mkEndpoint('ListOrgs', 'org', { notify: false }) ](trx) {
+    async [ mkEndpoint('OrgListOrgs', 'org', { notify: false }) ](trx) {
         let dbc = await trx.connect();
         return await Orgs.list(dbc, trx.name, trx.status);
     }
     
-    async [ mkEndpoint('ModifyOrg', 'org', { notify: true }) ](trx) {
-    }
-    
-    async [ mkEndpoint('RecoverOrg', 'org', { notify: true }) ](trx) {
-    }
-    
-    async [ mkEndpoint('RemoveOrg', 'org', { notify: true }) ](trx) {
-    }
-    
-    async [ mkEndpoint('SearchOrgs', 'org', { notify: false }) ](trx) {
-        //let dbc = await trx.connect();
-        //return await Orgs.search(dbc, trx.pattern);
+    async [ mkEndpoint('OrgModifyOrg', 'org', { notify: true }) ](trx) {
+        let dbc = await trx.connect();
+        let org = await getDboOrg(dbc, trx.dboOrg.oid);
 
-        return [
-            mkDboOrg({ oid: 1n, name: 'Nathan Casino', status: 'active', description: 'North Hollywood', authType: 'simple' }),
-            mkDboOrg({ oid: 2n, name: 'Five Winds', status: 'active', description: 'Indiana', authType: 'twofactor' }),
-            mkDboOrg({ oid: 3n, name: 'Big Slots Vegas', status: 'active', description: 'On the Strip', authType: 'simple' }),
-            mkDboOrg({ oid: 4n, name: 'Herbal Valley Casino', status: 'inactive', description: '', authType: 'simple' }),
-        ];
+        if (org) {
+            org.name = trx.dboOrg.name;
+            org.status = trx.dboOrg.status;
+            org.note = trx.dboOrg.note;
+            org.authType = trx.dboOrg.authType;
+            await org.save(dbc);
+            return true;
+        }
+
+        return false;
+    }
+    
+    async [ mkEndpoint('OrgRecoverOrg', 'org', { notify: true }) ](trx) {
+    }
+    
+    async [ mkEndpoint('OrgRemoveOrg', 'org', { notify: true }) ](trx) {
+    }
+    
+    async [ mkEndpoint('OrgSearchOrgs', 'org', { notify: false }) ](trx) {
+        try {
+            let dbc = await trx.connect();
+            return await Orgs.search(dbc, trx.pattern);
+        }
+        catch (e) {
+            return [];
+        }
     }
 });

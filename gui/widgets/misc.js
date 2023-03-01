@@ -121,3 +121,13 @@ register(class WHrLite extends Widget {
         this.setWidgetStyle('hr-lite');
     }
 });
+
+register(class WSpace extends Widget {
+    constructor(width) {
+        super('span');
+        this.setStyle({
+            display: 'inline-block',
+            width: `${width}px`,
+        });
+    }
+});

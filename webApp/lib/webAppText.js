@@ -72,6 +72,9 @@ exports = module.exports = {
     fwMiscCancel: {
         en: `Cancel`,
     },
+    fwMiscInactive: {
+        en: `Inactive`,
+    },
     fwMiscSessionClosed: {
         en: `Your session has been closed.  Please sign in again.`,
     },
@@ -80,7 +83,7 @@ exports = module.exports = {
     },
 
     // ****************************************************************
-    // App Menu
+    // Menu
     // ****************************************************************
     fwMenuPassword: {
         en: `Password`,
@@ -157,8 +160,20 @@ exports = module.exports = {
     // ****************************************************************
     // Org Manager
     // ****************************************************************
+    fwOrgManagerAuthType: {
+        en: `Authorization Type`,
+    },
     fwOrgManagerCreateOrg: {
         en: `Create Organization`,
+    },
+    fwOrgManagerEditorName: {
+        en: `Name`,
+    },
+    fwOrgManagerEditorStatus: {
+        en: `Status`,
+    },
+    fwOrgManagerEditorNote: {
+        en: `Note`,
     },
     fwOrgManagerEditTitle: {
         en: `Organization`,

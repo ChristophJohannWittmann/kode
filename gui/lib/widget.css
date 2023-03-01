@@ -1000,6 +1000,17 @@ body {
 
 
 /***********************************************
+ * Panel
+ ***********************************************/
+[widget-style=panel] {
+    width: calc(100% - 4px);
+    padding: 0px;
+    /* margin-right: 4px; */
+    margin-left: 2px;
+}
+
+
+/***********************************************
  * Basic Table
  ***********************************************/
 [widget-style=table-basic] {
@@ -1109,16 +1120,6 @@ body {
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
     cursor:  pointer;
-}
-
-
-/***********************************************
- * Panel
- ***********************************************/
-[widget-style=panel] {
-    width: 100%;
-    margin: 0px;
-    padding: 0px;
 }
 
 
@@ -1262,6 +1263,7 @@ body {
     width: 100%;
     height: 100%;
     cursor: pointer;
+    font-size: var(--font-size-5);
     color: var(--menu-color);
     background-color: var(--menu-background-color);
 }
@@ -1277,6 +1279,12 @@ body {
     margin:  6px;
     width: 100%;
     height: 100%;
+}
+[widget-style=menu-separator] {
+    border: var(--menu-separator);
+}
+[widget-style=menu-separator-lite] {
+    border: var(--menu-separator-lite);
 }
 
 
@@ -1310,17 +1318,6 @@ body {
 [widget-style=dialog-table-td] {
     width: 100%;
     text-align: center;
-}
-
-
-/***********************************************
- * Menu Separator
- ***********************************************/
-[widget-style=menu-separator] {
-    border: var(--menu-separator);
-}
-[widget-style=menu-separator-lite] {
-    border: var(--menu-separator-lite);
 }
 
 

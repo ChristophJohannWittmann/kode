@@ -28,8 +28,8 @@
     register(class OrgManager extends WPanel {
         constructor() {
             super();
-            this.setTitle(txx.fwOrgManagerTitle);
-            this.editor = new OrgEditor(this);
+            this.setTitle(txx.fwOrgManagerListTitle);
+            this.setRefreshers('OrgCreateOrg', 'OrgModifyOrg');
 
             this.stm = mkWStateMachine(
                 this,
@@ -37,43 +37,73 @@
                 ['editor'],
             );
 
-            this.stm.on('StateMachine', message => {
-                if (message.mode == 'select') {
-                    this.setTitle(txx.fwOrgManagerListTitle);
-                }
-                else if (message.mode == 'edit') {
-                    this.setTitle(`${txx.fwOrgManagerEditTitle}: ${this.editor.controller.name}`);
-                }
-            });
-
             this.stm.disableUpdates()
-            .appendChild(new OrgCreator(this), ['select'], ['editor'])
-            .appendChild(mkWHrLite(), ['select'], ['editor'])
-            .appendChild(new OrgSelector(this), ['select'], [])
-            .appendChild(this.editor, ['edit'], ['editor']);
-            ('org' in webAppSettings.grants()) ? this.stm.setFlag('editor') : false;
+            .appendChild(new OrgCreator(), 'creator', ['select'], ['editor'])
+            .appendChild(new OrgSelector(), 'selector', ['select'], [])
+            .appendChild(new OrgEditor(), 'editor', ['edit'], ['editor'])
             this.stm.enableUpdates();
+            
+            this.stm.getWidget('creator').on('CreateOrg', message => this.createOrg());
+            this.stm.getWidget('selector').on('ClickOrg', message => this.clickOrg(message));
+            this.stm.getWidget('editor').on('CloseEditor', message => this.closeEditor());
+            this.stm.getWidget('editor').on('NameChanged', message => this.nameChanged(message.name));
+
+            if ('org' in webAppSettings.grants()) {
+                this.stm.setFlag('editor');
+
+                this.orgSelectMenu = mkWPopupMenu()
+                .append(
+                    mkWMenuItem('hello', 'dolly')
+                )
+            }
+
+            this.stm.setMode('select');
         }
 
-        closeOrg() {
+        clickOrg(message) {
+            /*
+            this.setTitle(txx.fwOrgManagerEditTitle);
+            this.stm.getWidget('editor').setDboOrg(dboOrg);
+            this.stm.setMode('edit');
+            */
+            console.log(message.dboOrg);
+
+            if ('org' in webAppSettings.grants()) {
+                this.orgSelectMenu.open(null, message.event.x, message.event.y);
+            }
+            else {
+            }
+        }
+
+        closeEditor() {
+            this.setTitle(txx.fwOrgManagerListTitle);
+            this.stm.setMode('select');
         }
 
         createOrg() {
-            this.editOrg(mkDboOrg({
+            let dboOrg = mkDboOrg({
                 name: 'Organization Name',
                 status: 'active',
-                description: 'organization info',
+                note: '',
                 authType: 'simple',
-            }));
-        }
+            });
 
-        editOrg(dboOrg) {
-            ActiveData.assign(this.editor.dboObject, dboOrg);
-            this.editor.set(toJson(dboOrg, true));
+            this.setTitle(txx.fwOrgManagerEditTitle);
+            this.stm.getWidget('editor').setDboOrg(dboOrg);
             this.stm.setMode('edit');
         }
 
-        selcectOrg(dboOrg) {
+        editOrg(dboOrg) {
+        }
+
+        async refresh() {
+            console.log('REFRESHING.....');
+            await this.stm.getWidget('creator').refresh();
+            await this.stm.getWidget('selector').refresh();
+            await this.stm.getWidget('editor').refresh();
+        }
+
+        async selectOrg(dboOrg) {
         }
     });
 
@@ -81,19 +111,20 @@
     /*****
     *****/
     class OrgCreator extends WGrid {
-        constructor(orgManager) {
+        constructor() {
             super({
                 rows: ['30px', '48px', '30px'],
                 cols: ['0px', '200px', 'auto'],
             });
 
-            this.orgManager = orgManager;
-
             this.setAt(1, 1,
                 mkIButton()
                 .setValue(txx.fwOrgManagerCreateOrg)
-                .on('html.click', message => this.orgManager.createOrg())
+                .on('html.click', message => this.send({ messageName: 'CreateOrg' }))
             );
+        }
+
+        async refresh() {
         }
     }
 
@@ -101,14 +132,13 @@
     /*****
     *****/
     class OrgSelector extends WGrid {
-        constructor(orgManager) {
+        constructor() {
             super({
                 rows: ['30px', '24px', '8px', '48px', '30px', '8px', '48px', '8px', 'auto'],
                 cols: ['auto', 'auto'],
             });
 
             this.timeout = null;
-            this.orgManager = orgManager;
             this.found = [];
 
             this.controller = mkActiveData({
@@ -121,30 +151,9 @@
 
             this.setAt(3, 0,
                 mkIText()
-                .on('html.keydown', message => {
-                    if (this.timeout) {
-                        clearTimeout(this.timeout);
-                        this.timeout = null;
-                    }
-
-                    this.timeout = setTimeout(async () => {
-                        this.timeout = null;
-
-                        if (this.controller.pattern.trim()) {
-                            this.found = await queryServer({
-                                messageName: 'SearchOrgs',
-                                pattern: this.controller.pattern.trim(),
-                            });
-                        }
-                        else {
-                            this.found = [];
-                        }
-
-                        this.updateResult();
-                    }, 500);
-                })
+                .on('html.keyup', message => this.refresh())
                 .bind(this.controller, 'pattern')
-            );
+            )
 
             this.setAt(6, 0, 
                 mkWidget('span')
@@ -153,7 +162,7 @@
                     .setStyle({
                         height: '24px',
                         width: '24px',
-                        marginRight: '10px',
+                        marginRight: '12px',
                     }),
                     mkWidget('span').set(txx.fwOrgManagerShowList),
                 )
@@ -170,11 +179,38 @@
                 body.mkRowAppend()
                 .mkCellAppend(
                     mkWHotSpot().setValue(dboOrg.name)
-                    .on('html.click', message => this.orgManager.editOrg(dboOrg))
+                    .on('html.click', message => this.send({
+                        messageName: 'ClickOrg',
+                        dboOrg: dboOrg,
+                        event: message.event,
+                    }))
                 )
             }
 
             return table;
+        }
+
+        async refresh() {
+            if (this.timeout) {
+                clearTimeout(this.timeout);
+                this.timeout = null;
+            }
+
+            this.timeout = setTimeout(async () => {
+                this.timeout = null;
+
+                if (this.controller.pattern.trim()) {
+                    this.found = await queryServer({
+                        messageName: 'OrgSearchOrgs',
+                        pattern: this.controller.pattern.trim(),
+                    });
+                }
+                else {
+                    this.found = [];
+                }
+
+                this.updateResult();
+            }, 500);
         }
 
         updateResult() {
@@ -191,10 +227,101 @@
     /*****
     *****/
     class OrgEditor extends WPanel {
-        constructor(orgManager) {
+        constructor() {
             super('form');
-            this.orgManager = orgManager;
-            this.controller = mkActiveData(mkDboOrg());
+        }
+
+        async cancel() {
+            this.send({ messageName: 'CloseEditor' });
+        }
+
+        async refresh() {
+        }
+
+        async save() {
+            if (this.orgEditor.value().oid == 0n) {
+                if (await queryServer({
+                    messageName: 'OrgCreateOrg',
+                    dboOrg: ActiveData.value(this.orgEditor.value()),
+                })) {
+                    this.send({ messageName: 'CloseEditor' });                    
+                }
+                else {
+                    await mkWAlertDialog({ text: 'Failed' });
+                }
+            }
+            else {
+                let dboClone = clone(this.dboOrg);
+                Object.assign(dboClone, this.orgEditor.value())
+
+                if (await queryServer({
+                    messageName: 'OrgModifyOrg',
+                    dboOrg: ActiveData.value(dboClone),
+                })) {
+                    this.send({ messageName: 'CloseEditor' });                    
+                }
+                else {
+                    await mkWAlertDialog({ text: 'Failed' });
+                }
+            }
+        }
+
+        setDboOrg(dboOrg) {
+            this.clear();
+
+            this.dboOrg = dboOrg;
+            this.orgEditor = mkWObjectEditor()
+            .addDbo(
+                dboOrg, {
+                    oid: {
+                        hidden: true,
+                    },
+                    created: {
+                        hidden: true,
+                    },
+                    updated: {
+                        hidden: true,
+                    },
+                    name: {
+                        label: txx.fwOrgManagerEditorName,
+                        readonly: false,
+                    },
+                    status: {
+                        label: txx.fwOrgManagerEditorStatus,
+                        readonly: false,
+                        type: ScalarEnum,
+                        choices: [
+                            { value: 'active',   text: txx.fwMiscActive },
+                            { value: 'inactive', text: txx.fwMiscInactive },
+                        ]
+                    },
+                    note: {
+                        label: txx.fwOrgManagerEditorNote,
+                        readonly: false,
+                    },
+                    authType: {
+                        label: txx.fwOrgManagerAuthType,
+                        readonly: true,
+                    },
+                }
+            );
+
+            this.orgSave = mkIButton().setValue(txx.fwNavDone)
+            .on('html.click', message => this.save());
+
+            this.orgCancel = mkIButton().setValue(txx.fwNavCancel)
+            .on('html.click', message => this.cancel());
+
+            this.append(
+                this.orgEditor,
+                mkWidget('div').append(
+                    this.orgSave,
+                    mkWSpace(24),
+                    this.orgCancel,
+                )
+                .setClassName('flex-h-cc')
+                .setStyle('margin-top', '20px')
+            );
         }
     }
 })();

@@ -65,6 +65,7 @@
                 this.acme = (await queryServer({
                     messageName: 'ConfigListAcmeProviders',
                 })).map(ca => ({ value: ca.provider, text: ca.name }));
+                console.log(this.acme);
 
                 let keyMenu = mkWPopupMenu()
                 .append(

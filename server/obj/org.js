@@ -53,12 +53,3 @@ singleton(class Orgs {
         return await selectDboOrg(dbc, `_name ~* '${pattern}'`, '_name ASC');
     }
 });
-
-
-/*****
-*****/
-register(class OrgObject extends DboOrg {
-    constructor(properties) {
-        super(properties);
-    }
-});

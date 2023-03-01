@@ -29,7 +29,7 @@
     *****/
     const dateStr = value => {
         if (value instanceof Time) {
-            return value.localeDateStr()
+            return value.toLocaleDateString()
         }
         else if (value instanceof Date) {
             return value.toLocaleDateString();
@@ -41,7 +41,7 @@
 
     const dateTimeStr = value => {
         if (value instanceof Time) {
-            return value.localeDateTimeStr()
+            return value.toLocaleString()
         }
         else if (value instanceof Date) {
             return value.toLocaleString();
@@ -53,7 +53,7 @@
 
     const timeStr = value => {
         if (value instanceof Time) {
-            return value.localeTimeStr()
+            return value.toLocaleTimeString()
         }
         else if (value instanceof Date) {
             return value.toLocaleTimeString();

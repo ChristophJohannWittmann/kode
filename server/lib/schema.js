@@ -214,7 +214,7 @@ mkDbSchema(
         columns: [
             { name: 'name',         type: dbText, size: 50 },
             { name: 'status',       type: dbText, size: 50 },
-            { name: 'description',  type: dbText, size:100 },
+            { name: 'note',         type: dbText, size:100 },
             { name: 'authType',     type: dbText, size: 20 },
         ],
         indexes: [
