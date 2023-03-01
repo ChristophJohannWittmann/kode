@@ -34,14 +34,22 @@ register(class WStateMachine extends Emitter {
 
     constructor(widget, modes, flagNames) {
         super();
-        this.owner = widget;
-        this.owner.on('Widget.Changed', message => this.send(message));
         this.widgets = {};
         this.namedWidgets = {};
         this.flags = {};
         this.modes = mkStringSet(...(Array.isArray(modes) ? modes : []));
         this.mode = this.modes.length() ? modes[0] : '';
         this.updatesEnabled = true;
+
+        this.owner = widget;
+        this.ownerRefresh = null;
+        this.owner.on('Widget.Changed', message => this.send(message));
+
+        if (typeof this.owner.refresh == 'function') {
+            this.ownerRefresh = this.owner.refresh;
+        }
+
+        this.owner.refresh = () => this.refresh();
 
         if (Array.isArray(flagNames)) {
             for (let flagName of flagNames) {
@@ -56,6 +64,7 @@ register(class WStateMachine extends Emitter {
     addChild(widget, name, modes, flags) {
         if (!(widget.id in this.widgets) && name.trim() && !(name.trim() in this.namedWidgets)) {
             widget[WStateMachine.nameKey] = name.trim();
+            widget.getOwner = () => this.owner;
             widget.getStateMachine = () => this;
 
             this.widgets[widget.id] = {
@@ -150,8 +159,21 @@ register(class WStateMachine extends Emitter {
         return this;
     }
 
+    refresh() {
+        for (let child of this.owner) {
+            if (typeof child.refresh == 'function') {
+                if (child instanceof Widget) {
+                    Reflect.apply(child.refresh, child, []);
+                }
+            }
+        }
+
+        this.ownerRefresh ? Reflect.apply(this.ownerRefresh, this.owner, []) : false;
+    }
+
     removeChild(widget) {
         if (widget.id in this.widgets) {
+            delete widget.getOwner;
             delete widget.getStateMachine;
             delete this.namedWidgets[widget[WStateMachine.nameKey]];
             delete this.widgets[widget.id];

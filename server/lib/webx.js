@@ -156,24 +156,46 @@ register(class Webx extends Emitter {
         let code = [];
 
         for (let dboThunk of dboThunks) {
-            let jsInit = [];
+            let jsInitializers = {};
 
             for (let propertyName in dboThunk.properties) {
                 let propertyFunc = dboThunk.properties[propertyName].type.init.toString();
                 let propertyValue = propertyFunc.match(/\(\) *=> *(.*)/);
-                jsInit.push(`this.${propertyName} = ${propertyValue[1]};`);
+                eval(`jsInitializers[propertyName] = ${propertyValue[1]} `)
             }
 
-            code.push(
-`
-register(class ${dboThunk.className} extends Jsonable {
-    constructor(value) {
-        super();
-        ${jsInit.join('\n        ')}
-        typeof value == 'object' ? Object.assign(this, value) : false;
-    }
-});
-`);
+            code.push(`
+            (() => {
+                let propertyNames = [${Object.keys(dboThunk.properties).map(name => `'${name}'`)}];
+                let initializers = fromJson('${toJson(jsInitializers)}');
+
+                register(class ${dboThunk.className} extends Jsonable {
+                    constructor(...args) {
+                        super();
+
+                        for (let propertyName of propertyNames) {
+                            this[propertyName] = initializers[propertyName];
+                        }
+
+                        this.assign(...args);
+                    }
+
+                    assign(...args) {
+                        for (let arg of args) {
+                            if (typeof arg == 'object') {
+                                for (let propertyName of propertyNames) {
+                                    if (propertyName in arg) {
+                                        this[propertyName] = arg[propertyName];
+                                    }
+                                }
+                            }
+                        }
+
+                        return this;
+                    }
+                });
+            })();
+            `);
         }
 
         let javascript = Config.debug ? code.join('\n') : await minifyJs(code.join('\n'));
@@ -349,6 +371,10 @@ global.webxCssVars = {
         menu_disabled_background_color: '#F9F9F9',
         menu_separator: 'solid 1px #244F5F',
         menu_separator_lite: 'solid 1px #DFDFDF',
+        menu_font_family: 'Arial',
+        menu_font_size: '17px',
+        menu_font_weight: 'Thin',
+        menu_min_height: '30px',
 
         main_color: '#2F4F5F',
         main_background_color: '#FFFFFF',
@@ -404,6 +430,10 @@ global.webxCssVars = {
         menu_disabled_background_color: '#222222',
         menu_separator: 'solid 1px #FFFFFF',
         menu_separator_lite: 'solid 1px #373737',
+        menu_font_family: 'Arial',
+        menu_font_size: '17px',
+        menu_font_weight: 'Thin',
+        menu_min_height: '30px',
 
         main_color: '#FFFFFF',
         main_background_color: '#000000',

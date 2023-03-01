@@ -251,6 +251,10 @@ register(class WMenuItem extends Widget {
         return this;
     }
 
+    getMenu() {
+        return this.parent();
+    }
+
     getPermanent() {
         return this.permanent;
     }

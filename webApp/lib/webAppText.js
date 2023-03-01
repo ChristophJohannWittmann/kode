@@ -166,6 +166,9 @@ exports = module.exports = {
     fwOrgManagerCreateOrg: {
         en: `Create Organization`,
     },
+    fwOrgManagerEditorSaveFailed: {
+        en: `Failed to save changes to Organization.`,
+    },
     fwOrgManagerEditorName: {
         en: `Name`,
     },
@@ -186,6 +189,12 @@ exports = module.exports = {
     },
     fwOrgManagerSearch: {
         en: `Search`,
+    },
+    fwOrgManagerSelectorEdit: {
+        en: `Edit`,
+    },
+    fwOrgManagerSelectorSwitch: {
+        en: `Switch to`,
     },
     fwOrgManagerShowList: {
         en: `Show List`,
