@@ -50,7 +50,7 @@
             this.stm.appendChild(new OrgCreator(), 'creator', ['select'], ['editor']);
             this.stm.appendChild(new OrgSelector(), 'selector', ['select'], []);
             this.stm.appendChild(new OrgEditor(), 'editor', ['edit'], ['editor']);
-            ('org' in webAppSettings.grants()) ? this.stm.setFlag('editor') : false;            
+            ('org' in webAppSettings.grants()) ? this.stm.setFlag('editor') : false;
             this.stm.setMode('select');
             this.stm.enableUpdates();
         }
@@ -141,6 +141,7 @@
                 )
             );
 
+            this.autofocus = { select: this.getAt(3, 0) };
             this.orgSelectMenu = mkWPopupMenu()
             .append(
                 mkWMenuItem(txx.fwOrgManagerSelectorEdit, 'Edit')

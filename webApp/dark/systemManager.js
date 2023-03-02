@@ -24,13 +24,14 @@
 
 (() => {
     /*****
-    *****/
+    *****
     register(class SystemManager extends WPanel {
         constructor() {
             super('div');
             this.append(new NetIfaceEditor('public'));
         }
     });
+    */
 
 
     /*****
@@ -41,10 +42,11 @@
      * network interface you're currently using, the server will reboot without it
      * being available.
     *****/
-    class NetIfaceEditor extends WPanel {
+    register(class SystemManager extends WPanel {
         constructor(ifaceName) {
             super('form');
-            this.ifaceName = ifaceName;
+            //this.ifaceName = ifaceName;
+            this.ifaceName = 'public';
 
             this.setRefreshers(
                 'ConfigCertifyIface',
@@ -200,5 +202,5 @@
             await this.editor.update();
             return this;
         }
-    }
+    });
 })();

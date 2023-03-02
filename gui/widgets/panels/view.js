@@ -54,6 +54,15 @@ register(class WView extends WPanel {
         this.on('Widget.Done', async message => await this.onDone(message));
     }
 
+    checkRemainOpen(widget) {
+        if (widget.remainOpen === true) {
+            this.done.disable();
+        }
+        else {
+            this.done.enable();
+        }
+    }
+
     getStack() {
         return this.stack;
     }
@@ -120,6 +129,8 @@ register(class WView extends WPanel {
             else {
                 this.modified = false;
             }
+
+            this.checkRemainOpen(top);
         }
         else {
             this.valid = true;
@@ -137,6 +148,7 @@ register(class WView extends WPanel {
 
     promote(widget) {
         this.stack.promote(widget);
+        this.checkRemainOpen(widget);
 
         this.send({
             messageName: 'View.Promote',
@@ -168,6 +180,7 @@ register(class WView extends WPanel {
 
         this.stack.push(widget);
         this.wire(widget);
+        this.checkRemainOpen(widget);
 
         this.send({
             messageName: 'View.Push',
@@ -205,6 +218,13 @@ register(class WView extends WPanel {
 
         if (top && typeof top.update == 'function') {
             await top.update();
+        }
+    }
+
+    wire(widget) {
+        console.log(widget);
+        for (let wire of WPanel.wires) {
+            this.circuits.route(widget, wire);
         }
     }
 });

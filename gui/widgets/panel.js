@@ -40,6 +40,7 @@ register(class WPanel extends Widget {
     constructor(tagName) {
         super(tagName ? tagName : 'div');
         this.title = null;
+        this.remainOpen = false;
         this.circuits = mkMessageProxy(this);
         this.setWidgetStyle('panel');
 
@@ -78,6 +79,11 @@ register(class WPanel extends Widget {
         return this;
     }
 
+    clearRemainOpen() {
+        this.remainOpen = false;
+        return this;
+    }
+
     clearTitle() {
         if (this.title instanceof Widget) {
             this.title.remove();
@@ -85,6 +91,10 @@ register(class WPanel extends Widget {
         }
 
         return this;
+    }
+
+    getRemainOpen() {
+        return this.remainOpen;
     }
 
     getTitle() {
@@ -167,6 +177,11 @@ register(class WPanel extends Widget {
 
     setRefreshers(...endpointNames) {
         this.refreshers.set(...endpointNames);
+        return this;
+    }
+
+    setRemainOpen() {
+        this.remainOpen = true;
         return this;
     }
 

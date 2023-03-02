@@ -37,9 +37,16 @@ register(class WStateMachine extends Emitter {
         this.widgets = {};
         this.namedWidgets = {};
         this.flags = {};
-        this.modes = mkStringSet(...(Array.isArray(modes) ? modes : []));
-        this.mode = this.modes.length() ? modes[0] : '';
+        this.mode = '';
+        this.modes = {};
+        this.autofocus = {};
         this.updatesEnabled = true;
+
+        if (Array.isArray(modes)) {
+            modes.forEach(mode => {
+                this.modes[mode.trim()] = {};
+            });
+        }
 
         this.owner = widget;
         this.ownerRefresh = null;
@@ -69,11 +76,18 @@ register(class WStateMachine extends Emitter {
 
             this.widgets[widget.id] = {
                 widget: widget,
-                modes: mkStringSet((Array.isArray(modes) ? modes : []).filter(mode => this.modes.has(mode))),
+                modes: mkStringSet((Array.isArray(modes) ? modes : []).filter(mode => (mode in this.modes))),
                 flags: mkStringSet((Array.isArray(flags) ? flags : []).filter(swName => swName in this.flags)),
             }
 
             this.namedWidgets[widget[WStateMachine.nameKey]] = this.widgets[widget.id];
+
+            if (typeof widget.autofocus == 'object') {
+                for (let mode in widget.autofocus) {
+                    this.autofocus[mode] = widget.autofocus[mode];
+                }
+            }
+
             return true;
         }
 
@@ -197,7 +211,7 @@ register(class WStateMachine extends Emitter {
     }
 
     setMode(mode) {
-        if (typeof mode == 'string' && this.modes.has(mode) && mode != this.mode) {
+        if (typeof mode == 'string' && (mode in this.modes) && mode != this.mode) {
             this.mode = mode;
             this.update();
         }
@@ -241,6 +255,9 @@ register(class WStateMachine extends Emitter {
             const flags = {};
             Object.values(this.flags).forEach(flag => flags[flag.name] = flag.on);
 
+            if (this.mode in this.autofocus) {
+                setTimeout(() => this.autofocus[this.mode].focus(), 10);
+            }
 
             this.send({
                 messageName: 'StateMachine',
