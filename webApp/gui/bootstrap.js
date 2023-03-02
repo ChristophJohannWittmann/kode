@@ -137,6 +137,7 @@
         webAppSettings.password = () => sessionState.setPassword;
         webAppSettings.verify = () => sessionState.verifyEmail;
         webAppSettings.user = () => sessionState.user;
+        webAppSettings.org = () => sessionState.org;
         
         window.home = webAppSettings.homeView();
         body.push(window.home);

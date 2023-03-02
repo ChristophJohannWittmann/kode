@@ -105,7 +105,12 @@ singleton(class SessionManager extends Daemon {
     async onGetSession(message) {
         if ('session' in message) {
             if (message.session in this.byKey) {
-                return Message.reply(message, this.byKey[message['session']]);
+                let session = this.byKey[message.session];
+
+                return Message.reply(message, {
+                    user: session.user,
+                    orgOid: session.orgOid,
+                });
             }
         }
 

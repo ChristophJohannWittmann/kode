@@ -24,6 +24,15 @@
 
 (() => {
     /*****
+     * The OrgManager is the view to enable authorized users to manage, create,
+     * modify, activate and deactive, organizations on the system.  If a server
+     * has been initialized with the preference Orgs = { active: true}, this view
+     * is made available on the sign in menu.  It's implemented as a state machine
+     * with three child panels.  When in select mode, authorized users can either
+     * select an existing organization or create a totally new organization.
+     * When in edit mode, the view is devoted to editing fields of either a new
+     * organizaiton or an existing organization that was opened for editing.  This
+     * view is also how all non-org users will find and navigate to an organization.
     *****/
     register(class OrgManager extends WPanel {
         constructor() {
@@ -49,6 +58,11 @@
 
 
     /*****
+     * The OrgCreator is the panel to enable authorized users to create a new
+     * organization from scratch.  It's available when the state machine is in
+     * 'select' mode.  It's just a button, when clicked creates an new empty
+     * DboOrg object and then opens the org editor by setting the state machine
+     * to be in 'edit' mode.
     *****/
     class OrgCreator extends WGrid {
         constructor() {
@@ -66,7 +80,7 @@
 
         createOrg() {
             let dboOrg = mkDboOrg({
-                name: 'Organization Name',
+                name: '',
                 status: 'active',
                 note: '',
                 authType: 'simple',
@@ -80,6 +94,14 @@
 
 
     /*****
+     * The OrgSelector is the panel to enable users to search for an organization
+     * using the organization name.  We're attempting to provide someting somewhat
+     * modern.  User's enter parts or snippets of an organization name.  When
+     * typeing stops, we wait several milliseconds before contacting the server to
+     * see what organizations match what we've typed.  By default, only the number
+     * of matching organizaitons is listed.  Click the show-list bottle to open the
+     * list, which is active and can be used either switch to that organization or
+     * to open that organization for editing.
     *****/
     class OrgSelector extends WGrid {
         constructor() {
@@ -184,9 +206,16 @@
             }, 500);
         }
 
-        switchOrg(dboOrg) {
-            console.log('switch Org');
-            console.log(dboOrg);
+        async switchOrg(dboOrg) {
+            let org = await queryServer({
+                messageName: 'SelfSetOrg',
+                orgOid: dboOrg.oid,
+            });
+
+            if (typeof org == 'object' || org === null) {
+                webAppSettings.org = () => org;
+                send({ messageName: '#RefreshClient' });
+            }
         }
 
         updateResult() {
@@ -201,6 +230,12 @@
 
 
     /*****
+     * The OrgEditor enables users to edit editable properties of the organization.
+     * This can also be used to activate or inactivate the organization.  When
+     * deactivation occurs, the back-end (server), will shut down all active
+     * sessions for users that belong to the deactivated organization.  Other-
+     * wise, it's just an object editor that connects to the back and updates the
+     * properties of the organization.
     *****/
     class OrgEditor extends WPanel {
         constructor() {

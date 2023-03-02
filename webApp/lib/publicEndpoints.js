@@ -58,6 +58,8 @@ register(class PublicEndpoints extends EndpointContainer {
                 session: sessionKey,
             });
 
+            let org = user.orgOid > 0 ? await getDboOrg(dbc, user.orgOid) : null;
+
             return {
                 sessionKey: sessionKey,
                 verifyEmail: !user.verified,
@@ -69,7 +71,8 @@ register(class PublicEndpoints extends EndpointContainer {
                     title: user.title,
                     suffix: user.suffix,
                     orgOid: user.orgOid,
-                }
+                },
+                org: org
             };
         }
         else {

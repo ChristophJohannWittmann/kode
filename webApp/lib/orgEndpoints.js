@@ -23,6 +23,11 @@
 
 
 /*****
+ * The fromework endpoints for managing organizations.  These endpoionts are
+ * only available to users with orgOid = 0n those with the "org" permission.
+ * The other other org-related endpoint that's not found here is in the self
+ * endpoints module.  That endpoint is where an user.orgOid == 0n user can
+ * select what organization they currently want to open.
 *****/
 register(class OrgEndpoints extends EndpointContainer {
     constructor(webapp) {
@@ -50,16 +55,22 @@ register(class OrgEndpoints extends EndpointContainer {
             org.note = trx.dboOrg.note;
             org.authType = trx.dboOrg.authType;
             await org.save(dbc);
+
+            // If org deactiveate, perform lots of clean-up
+            // Orgs.deactivate(org.oid);
+            // Need to unceremoniously close all sessions for the org.
+
             return true;
         }
 
         return false;
     }
     
-    async [ mkEndpoint('OrgRecoverOrg', 'org', { notify: true }) ](trx) {
-    }
-    
     async [ mkEndpoint('OrgRemoveOrg', 'org', { notify: true }) ](trx) {
+        // Stub to remove the org's individual DBMS.  This will remove
+        // data that's specific to the app and the org.  Note that the
+        // org object is never removed from the main OLTP DBMS.  It's only
+        // marked as being closed or inactive.
     }
     
     async [ mkEndpoint('OrgSearchOrgs', 'org', { notify: false }) ](trx) {

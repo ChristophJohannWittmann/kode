@@ -68,6 +68,28 @@ register(class SelfEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('SelfSetOrg') ](trx) {
+        if (typeof trx.orgOid == 'bigint' && trx.orgOid >= 0) {
+            let session = await Ipc.queryPrimary({
+                messageName: '#SessionManagerGetSession',
+                session: trx['#Session'],
+            });
+
+            let org;
+            let dbc = await trx.connect();
+
+            if (session.user.orgOid == 0) {
+                org = await getDboOrg(dbc, trx.orgOid);
+            }
+            else {
+                org = await getDboOrg(dbc, session.user.orgOid);
+            }
+
+            if (typeof org == 'object') {
+                return org;
+            }
+        }
+
+        return false;
     }
     
     async [ mkEndpoint('SelfRemoveAddress') ](trx) {

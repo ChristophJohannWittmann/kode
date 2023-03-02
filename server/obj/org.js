@@ -23,14 +23,11 @@
 
 
 /*****
+ * The Orgs object is a helper to provide functions for scanning, searching, and
+ * manipulating org objects.  Commonly used algorithms are implemented here and
+ * should be used throughout the server-side framework code.
 *****/
 singleton(class Orgs {
-    async createOrg(dbc, opts) {
-    }
-
-    async getOrg(dbc, arg) {
-    }
-
     async list(dbc, name, status) {
         let filter = [];
 

@@ -32,7 +32,6 @@
 register(class WView extends WPanel {
     constructor(tagName, horz, fwd) {
         super(tagName ? tagName : 'div');
-        this.backplane = false;
 
         this.nav = mkWNavBar();
         this.stack = mkWStack();
@@ -53,15 +52,6 @@ register(class WView extends WPanel {
 
         this.on('Widget.Cancel', async message => await this.onCancel(message));
         this.on('Widget.Done', async message => await this.onDone(message));
-    }
-
-    clearBackplane() {
-        this.backplane = false;
-        return this;
-    }
-
-    getBackplane() {
-        return this.backplane;
     }
 
     getStack() {
@@ -111,7 +101,7 @@ register(class WView extends WPanel {
         let popped = this.stack.pop();
         let top = this.stack.top();
 
-        if (this.stack.length() == (this.backplane ? 1 : 0)) {
+        if (this.stack.length() == 0) {
             let widget = this.nav.pop();
             this.unwire(widget);
         }
@@ -158,7 +148,7 @@ register(class WView extends WPanel {
     }
 
     push(widget) {
-        if (this.stack.length() == (this.backplane ? 1 : 0)) {
+        if (this.stack.length() == 0) {
             this.nav.push(this.done);
         }
 
@@ -203,11 +193,6 @@ register(class WView extends WPanel {
         if (top && typeof top.save == 'function') {
             await top.save();
         }
-    }
-
-    setBackplane() {
-        this.backplane = true;
-        return this;
     }
 
     top() {
