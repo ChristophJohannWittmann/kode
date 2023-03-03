@@ -177,7 +177,7 @@ register(class WObjectEditor extends WTable {
                     messageName: 'Widget.Validity',
                     valid: true,
                     widget: this,
-                })
+                });
             }
         }
         else {
@@ -188,7 +188,7 @@ register(class WObjectEditor extends WTable {
                     messageName: 'Widget.Validity',
                     valid: false,
                     widget: this,
-                })
+                });
             }
         }
     }

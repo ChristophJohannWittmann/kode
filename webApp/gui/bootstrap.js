@@ -45,11 +45,14 @@
         window.win = mkWin(window);
         window.doc = win.doc();
         window.styleSheet = doc.getStyleSheet('WebApp');
-        window.html = mkWHtml(doc);
+        window.html = mkWidget(doc);
         window.head = mkWHead(doc);
         window.body = mkWBody(doc);
         window.home = null;
-        body.push(mkFWSignInView());
+        window.stack = mkWStack();
+
+        body.append(stack);
+        stack.push(mkFWSignInView());
 
         win.on('focus', async message => {
             if (booted != await queryServer({ messageName: 'PublicGetBootHash' })) {
@@ -130,7 +133,7 @@
             return;
         }
 
-        body.pop();
+        stack.pop();
 
         webAppSettings.session = () => sessionState.sessionKey;
         webAppSettings.grants = () => sessionState.grants;
@@ -140,14 +143,14 @@
         webAppSettings.org = () => sessionState.org;
         
         window.home = webAppSettings.homeView();
-        body.push(window.home);
+        stack.push(window.home);
 
         if (webAppSettings.password()) {
-            body.push(mkFWPasswordView());
+            stack.push(mkFWPasswordView());
         }
 
         if (webAppSettings.verify()) {
-            body.push(mkFWVerifyEmailView());
+            stack.push(mkFWVerifyEmailView());
         }
 
         if (webAppSettings.websocket()) {
@@ -169,8 +172,8 @@
             webSocket = null;
         }
 
-        body.clear();
-        body.push(mkFWSignInView());
+        stack.clear();
+        stack.push(mkFWSignInView());
         window.home = null;
         webAppSettings.veryify = () => false;
         webAppSettings.password = () => false;

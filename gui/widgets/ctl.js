@@ -36,14 +36,20 @@ register(class WCtl extends Widget {
     }
 
     disable() {
-        super.disable();
-        this.setWidgetStyle(`${this.getWidgetStyle()}-disabled`);
+        if (this.isEnabled()) {
+            super.disable();
+            this.setWidgetStyle(`${this.getWidgetStyle()}-disabled`);
+        }
+
         return this;
     }
 
     enable() {
-        super.enable();
-        this.setWidgetStyle(this.getWidgetStyle().replace('-disabled', ''));
+        if (this.isDisabled()) {
+            super.enable();
+            this.setWidgetStyle(this.getWidgetStyle().replace('-disabled', ''));
+        }
+
         return this;
     }
 });

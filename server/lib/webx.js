@@ -119,8 +119,8 @@ register(class Webx extends Emitter {
                 'gui/lib',
                 'gui/widgets/inputBase.js',
                 'gui/widgets/input.js',
-                'gui/widgets/stack.js',
                 'gui/widgets/panel.js',
+                'gui/widgets/stack.js',
                 'gui/widgets',
             ], Config.debug)
         ).register();

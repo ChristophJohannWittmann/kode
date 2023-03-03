@@ -50,15 +50,19 @@ register(class OrgEndpoints extends EndpointContainer {
         let org = await getDboOrg(dbc, trx.dboOrg.oid);
 
         if (org) {
+            let deactivated = org.status == 'active' && org.dboStatus != 'active';
             org.name = trx.dboOrg.name;
             org.status = trx.dboOrg.status;
             org.note = trx.dboOrg.note;
             org.authType = trx.dboOrg.authType;
             await org.save(dbc);
 
-            // If org deactiveate, perform lots of clean-up
-            // Orgs.deactivate(org.oid);
-            // Need to unceremoniously close all sessions for the org.
+            if (decactivated) {
+                // If org deactiveate, perform lots of clean-up
+                // Orgs.deactivate(org.oid);
+                // Need to unceremoniously close all sessions for the org.
+                console.log('shut down active sessions for org users.');
+            }
 
             return true;
         }
@@ -67,6 +71,7 @@ register(class OrgEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('OrgRemoveOrg', 'org', { notify: true }) ](trx) {
+        console.log('OrgRemoveOrg ENDPOINT STUB');
         // Stub to remove the org's individual DBMS.  This will remove
         // data that's specific to the app and the org.  Note that the
         // org object is never removed from the main OLTP DBMS.  It's only

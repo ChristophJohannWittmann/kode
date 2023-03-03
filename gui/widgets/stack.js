@@ -30,7 +30,7 @@
  * To be honest, another widget will be created to perform the user-elements
  * needed to navigate the stack.
 *****/
-register(class WStack extends Widget {
+register(class WStack extends WPanel {
     constructor(arg) {
         super(arg);
         this.setWidgetStyle('stack');

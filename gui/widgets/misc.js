@@ -57,7 +57,7 @@ register(class WHead extends Widget {
  * As needed, specialized features will be added to each of these classes to
  * help manage, encapsulate, and minimize the code throughtout the framework.
 *****/
-register(class WBody extends WStack {
+register(class WBody extends Widget {
     constructor(doc) {
         super(doc.getBody());
     }

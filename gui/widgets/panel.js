@@ -44,12 +44,12 @@ register(class WPanel extends Widget {
         this.circuits = mkMessageProxy(this);
         this.setWidgetStyle('panel');
 
+        this.on('Widget.Changed', message => this.onChanged(message));
+        this.on('Widget.Modified', message => this.onModified(message));
+        this.on('Widget.Validity', message => this.onValidity(message));
+
         this.invalid = 0;
         this.modified = 0;
-
-        this.on('Widget.Changed', async message => await this.onChanged(message));
-        this.on('Widget.Modified', async message => await this.onModified(message));
-        this.on('Widget.Validity', async message => await this.onValidity(message));
 
         this.refreshers = mkStringSet();
         global.on('#NotifyClient', message => this.onNotify(message));

@@ -49,25 +49,27 @@ register(class MessageProxy {
     }
 
     route(emitter, messageIn, messageOut) {
-        let source = this.sources.get(emitter);
+        if (emitter instanceof Emitter) {
+            let source = this.sources.get(emitter);
 
-        if (!source) {
-            source = new Object({
-                emitter: emitter,
-                messages: {},
-                handler: message => this.handle(message, emitter),
-            });
+            if (!source) {
+                source = new Object({
+                    emitter: emitter,
+                    messages: {},
+                    handler: message => this.handle(message, emitter),
+                });
 
-            this.sources.set(emitter, source);
-        }
+                this.sources.set(emitter, source);
+            }
 
-        if (!(messageIn in source.messages)) {
-            source.messages[messageIn] = {
-                messageIn: messageIn,
-                messageOut: messageOut ? messageOut : messageIn,
-            };
+            if (!(messageIn in source.messages)) {
+                source.messages[messageIn] = {
+                    messageIn: messageIn,
+                    messageOut: messageOut ? messageOut : messageIn,
+                };
 
-            Reflect.apply(emitter.on, emitter, [messageIn, source.handler]);
+                Reflect.apply(emitter.on, emitter, [messageIn, source.handler]);
+            }
         }
 
         return this;
