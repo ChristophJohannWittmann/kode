@@ -201,6 +201,8 @@ register(class Widget extends Emitter {
             this.cssDisplay = this.getStyle('display');
             this.setStyle('display', 'none');
         }
+
+        return this;
     }
 
     dir() {
@@ -493,6 +495,8 @@ register(class Widget extends Emitter {
             this.setStyle('display', this.cssDisplay);
             delete this.cssDisplay;
         }
+
+        return this;
     }
 
     set(innerHtml) {

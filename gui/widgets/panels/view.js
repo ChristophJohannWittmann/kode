@@ -30,9 +30,10 @@
  * events within the WStack and it's descenents.
 *****/
 register(class WView extends WPanel {
+    static internalNav = Symbol('Internal');
+
     constructor(tagName, horz, fwd) {
         super(tagName ? tagName : 'div');
-
         this.nav = mkWNavBar();
         this.stack = mkWStack();
         this.append(this.nav);
@@ -42,22 +43,60 @@ register(class WView extends WPanel {
         this.done =
         mkWCtl()
         .set(txx.fwNavDone)
+        .setWidgetStyle('ctls-horz-ctl')
         .on('html.click', async message => this.onDone(message));
 
         this.cancel =
         mkWCtl()
         .set(txx.fwNavCancel)
+        .setWidgetStyle('ctls-horz-ctl')
         .on('html.click', async message => this.onCancel(message));
         this.on('Widget.Cancel', async message => await this.onCancel(message));
         this.on('Widget.Done', async message => await this.onDone(message));
+
+        this.done[WView.internalNav] = true;
+        this.cancel[WView.internalNav] = true;
     }
 
-    checkRemainOpen(widget) {
-        if (widget.remainOpen === true) {
-            this.done.disable();
+    adjustCtls() {
+        let top = this.stack.top();
+
+        if (top) {
+            let lastExternal = this.lastExternalCtl();
+            let valid = typeof top.isValid == 'function' ? top.isValid() : true;
+            let modified = typeof top.isModified == 'function' ? top.isModified() : false;
+
+            if (!this.done.parent()) {
+                if (lastExternal) {
+                    lastExternal.insertBefore(this.done);
+                }
+                else {
+                    this.nav.ctls.prepend(this.done);
+                }
+            }
+
+            if (modified) {
+                if (!this.cancel.parent()) {
+                    this.done.insertBefore(this.cancel);
+                }
+
+                if (valid) {
+                    top.remainOpen ? this.done.disable() : this.done.enable();
+                }
+                else {
+                    this.done.disable();
+                }
+            }
+            else {
+                this.cancel.remove();
+                top.remainOpen ? this.done.disable() : this.done.enable();
+            }
         }
         else {
-            this.done.enable();
+            this.invalid = 0;
+            this.modified = 0;
+            this.cancel.remove();
+            this.done.remove();
         }
     }
 
@@ -65,16 +104,32 @@ register(class WView extends WPanel {
         return this.stack;
     }
 
+    lastExternalCtl() {
+        let lastExternal = null;
+
+        for (let ctl of this.nav.ctls.children().reverse()) {
+            if (ctl[WView.internalNav]) {
+                break;
+            }
+
+            lastExternal = ctl;
+        }
+
+        return lastExternal;
+    }
+
     length() {
         return this.stack.length;
     }
 
     async onCancel(message) {
-        this.revert();
-        this.invalid = 0;
-        this.modified = 0;
-        this.cancel.remove();
-        this.done.enable();
+        if (this.isModified()) {
+            await this.revert();
+            this.invalid = 0;
+            this.modified = 0;
+            this.adjustCtls();
+        }
+
         return this;
     }
 
@@ -90,99 +145,69 @@ register(class WView extends WPanel {
 
     async onModified(message) {
         super.onModified(message);
-
-        if (message.modified) {
-            this.nav.push(this.cancel);
-        }
-        else {
-            this.cancel.remove();
-        }
+        this.adjustCtls();
     }
 
     async onValidity(message) {
         await super.onValidity(message);
-        this.isValid() ? this.done.enable() : this.done.disable();
+        this.adjustCtls();
     }
 
     pop() {
-        let popped = this.stack.pop();
-        let top = this.stack.top();
+        if (this.stack.length()) {
+            let popped = this.stack[this.stack.length - 1];
+            this.stack.pop();
+            this.adjustCtls();
 
-        if (this.stack.length() == 0) {
-            let widget = this.nav.pop();
+            this.send({
+                messageName: 'View.Pop',
+                view: this,
+                popped: popped,
+            });
         }
-
-        if (top) {
-            if (typeof top.isValid == 'function') {
-                this.valid = top.isValid();
-            }
-            else {
-                this.valid = true;
-            }
-
-            if (typeof top.isModified == 'function') {
-                this.modified = top.isModified();
-            }
-            else {
-                this.modified = false;
-            }
-
-            this.checkRemainOpen(top);
-        }
-        else {
-            this.valid = true;
-            this.modified = false;
-        }
-
-        this.send({
-            messageName: 'View.Pop',
-            view: this,
-            popped: popped,
-        });
 
         return this;
     }
 
     promote(widget) {
-        this.stack.promote(widget);
-        this.checkRemainOpen(widget);
+        if (this.stack.promote(widget)) {
+            this.adjustCtls();
 
-        this.send({
-            messageName: 'View.Promote',
-            view: this,
-            widget: widget,
-        });
+            this.send({
+                messageName: 'View.Promote',
+                view: this,
+                widget: widget,
+            });
+        }
 
         return this;
     }
 
     push(widget) {
-        if (this.stack.length() == 0) {
-            this.nav.push(this.done);
+        if (this.stack.push(widget)) {
+            this.adjustCtls();
+
+            this.send({
+                messageName: 'View.Push',
+                view: this,
+                widget: widget,
+            });
         }
 
-        if (typeof widget.isValid == 'function') {
-            this.valid = widget.isValid();
+        return this;
+    }
+
+    pushCtl(ctl) {
+        ctl[WView.internalNav] = false;
+        let lastExternal = this.lastExternalCtl();
+        ctl.setWidgetStyle('ctls-horz-ctl');
+
+        if (lastExternal) {
+            lastExternal.insertBefore(ctl);
         }
         else {
-            this.valid = true;
+            this.nav.ctls.prepend(ctl);
         }
-
-        if (typeof widget.isModified == 'function') {
-            this.modified = widget.isModified();
-        }
-        else {
-            this.modified = false;
-        }
-
-        this.stack.push(widget);
-        this.checkRemainOpen(widget);
-
-        this.send({
-            messageName: 'View.Push',
-            view: this,
-            widget: widget,
-        });
 
         return this;
     }

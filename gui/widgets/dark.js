@@ -58,9 +58,16 @@ register(class DarkWidget extends Widget {
         eval(mkBuffer(darkWidget, 'base64').toString());
         paws();
 
+        let parent = this.parent();
+
         let widget = Reflect.apply(this.container[this.makerName], window, args);
         widget.id = this.id;
         widget.selector = this.selector;
         this.replace(widget);
+
+        if (parent instanceof WPanel) {
+            parent.unwire(this);
+            parent.wire(widget);
+        }
     }
 });

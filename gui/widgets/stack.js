@@ -90,31 +90,37 @@ register(class WStack extends WPanel {
                 child.remove();
                 child.reveal();
                 this.push(child);
-                break;
+                return true;
             }
         }
 
-        return this;
+        return false;
     }
 
     push(widget) {
-        let children = this.children();
+        let child;
+        let index = 0;
 
-        if (children.length) {
-            children[children.length - 1].conceal();
+        for (child of this) {
+            index++;
+
+            if (child.selector == widget.selector) {
+                return false;
+            }
         }
 
-        this.append(widget);
+        child ? child.conceal() : false;
+        this.append(widget.reveal());
 
         this.send({
             messageName: 'Widget.Changed',
             type: 'push',
             widget: this,
             added: widget,
-            index: children.length,
+            index: index,
         });
 
-        return this;
+        return true;
     }
 
     [Symbol.iterator]() {
