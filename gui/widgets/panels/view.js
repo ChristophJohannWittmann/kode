@@ -170,6 +170,7 @@ register(class WView extends WPanel {
     }
 
     promote(widget) {
+        widget.getStackOverride ? console.log(widget.getStackOverride()) : false;
         if (this.stack.promote(widget)) {
             this.adjustCtls();
 

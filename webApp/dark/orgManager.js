@@ -145,9 +145,9 @@
             this.orgSelectMenu = mkWPopupMenu()
             .append(
                 mkWMenuItem(txx.fwOrgManagerSelectorEdit, 'Edit')
-                .setAction(mkFunctionMenuAction((menuItem, message) => this.editOrg(menuItem.getMenu().dboOrg))),
+                .setAction(mkFunctionMenuAction(home, (menuItem, message) => this.editOrg(menuItem.getMenu().dboOrg))),
                 mkWMenuItem(txx.fwOrgManagerSelectorSwitch, 'Switch')
-                .setAction(mkFunctionMenuAction((menuItem, message) => this.switchOrg(menuItem.getMenu().dboOrg))),
+                .setAction(mkFunctionMenuAction(home, (menuItem, message) => this.switchOrg(menuItem.getMenu().dboOrg))),
             );
 
             this.updateResult();
@@ -250,6 +250,13 @@
 
         async refresh() {
             this.close();
+        }
+
+        async revert() {
+            if (this.orgEditor) {
+                this.orgEditor.revert();
+                console.log('revert');
+            }
         }
 
         async save() {

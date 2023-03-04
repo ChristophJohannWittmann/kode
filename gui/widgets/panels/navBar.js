@@ -75,6 +75,9 @@ register(class WNavBar extends WPanel {
         return this;
     }
 
+    async revert() {
+    }
+
     setInfo(arg) {
         this.info.clear();
         this.info.append(arg);

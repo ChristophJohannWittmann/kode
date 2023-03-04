@@ -559,7 +559,7 @@ register(class Widget extends Emitter {
         });
 
         return this;
-     }
+    }
 
     setStyle(arg, value) {
         if (typeof arg == 'object') {

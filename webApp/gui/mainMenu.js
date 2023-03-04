@@ -73,7 +73,7 @@ register(class MainMenu extends WPopupMenu {
             this.append(
                 mkWMenuItem(txx.fwMenuSignOut, "SignOut")
                 .setAction(
-                    mkFunctionMenuAction(async (menuItem, message) => {
+                    mkFunctionMenuAction(home, async (menuItem, message) => {
                         await queryServer({ messageName: 'SelfSignOut' });
                         signOut();
                     })

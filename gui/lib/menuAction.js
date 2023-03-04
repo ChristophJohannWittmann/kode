@@ -31,7 +31,8 @@
  * make the user-requested action happen.
 *****/
 register(class MenuAction {
-    constructor() {
+    constructor(view) {
+        this.view = view;
         this.menuItem = null;
     }
 
@@ -48,8 +49,8 @@ register(class MenuAction {
  * provided function.
 *****/
 register(class FunctionMenuAction extends MenuAction {
-    constructor(func) {
-        super();
+    constructor(view, func) {
+        super(view);
         this.func = func;
     }
 
@@ -69,8 +70,7 @@ register(class FunctionMenuAction extends MenuAction {
 *****/
 register(class FixedViewMenuAction extends MenuAction {
     constructor(view, widget) {
-        super();
-        this.view = view;
+        super(view);
         this.widget = widget;
     }
 
@@ -99,8 +99,7 @@ register(class FixedViewMenuAction extends MenuAction {
 *****/
 register(class SingletonViewMenuAction extends MenuAction {
     constructor(view, maker, ...args) {
-        super();
-        this.view = view;
+        super(view);
         this.maker = maker;
         this.args = args;
         this.widget = null;
@@ -139,8 +138,7 @@ register(class SingletonViewMenuAction extends MenuAction {
 *****/
 register(class ToggleViewMenuAction extends MenuAction {
     constructor(view, maker, ...args) {
-        super();
-        this.view = view;
+        super(view);
         this.maker = maker;
         this.args = args;
         this.widget = null;

@@ -123,6 +123,9 @@ register(class WStack extends WPanel {
         return true;
     }
 
+    async revert() {
+    }
+
     [Symbol.iterator]() {
         return this.children()[Symbol.iterator]();
     }
