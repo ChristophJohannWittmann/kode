@@ -62,7 +62,7 @@ register(class WView extends WPanel {
         let top = this.stack.top();
 
         if (top) {
-            let lastExternal = this.lastExternalCtl();
+            let lastExternal = this.getLastExternalCtl();
             let valid = typeof top.isValid == 'function' ? top.isValid() : true;
             let modified = typeof top.isModified == 'function' ? top.isModified() : false;
 
@@ -100,11 +100,7 @@ register(class WView extends WPanel {
         }
     }
 
-    getStack() {
-        return this.stack;
-    }
-
-    lastExternalCtl() {
+    getLastExternalCtl() {
         let lastExternal = null;
 
         for (let ctl of this.nav.ctls.children().reverse()) {
@@ -116,6 +112,10 @@ register(class WView extends WPanel {
         }
 
         return lastExternal;
+    }
+
+    getStack() {
+        return this.stack;
     }
 
     length() {
@@ -155,7 +155,7 @@ register(class WView extends WPanel {
 
     pop() {
         if (this.stack.length()) {
-            let popped = this.stack[this.stack.length - 1];
+            let popped = this.stack.top();
             this.stack.pop();
             this.adjustCtls();
 
@@ -199,7 +199,7 @@ register(class WView extends WPanel {
 
     pushCtl(ctl) {
         ctl[WView.internalNav] = false;
-        let lastExternal = this.lastExternalCtl();
+        let lastExternal = this.getLastExternalCtl();
         ctl.setWidgetStyle('ctls-horz-ctl');
 
         if (lastExternal) {

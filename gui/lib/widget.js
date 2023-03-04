@@ -211,7 +211,11 @@ register(class Widget extends Emitter {
     }
 
     disable() {
-        this.setAttribute('disabled');
+        if (this.isEnabled()) {
+            this.setAttribute('disabled');
+            this.silence();
+        }
+
         return this;
     }
 
@@ -220,7 +224,11 @@ register(class Widget extends Emitter {
     }
 
     enable() {
-        this.clearAttribute('disabled');
+        if (this.isDisabled()) {
+            this.clearAttribute('disabled');
+            this.resume();
+        }
+
         return this;
     }
 

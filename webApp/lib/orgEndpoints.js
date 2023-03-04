@@ -58,6 +58,7 @@ register(class OrgEndpoints extends EndpointContainer {
             await org.save(dbc);
 
             if (decactivated) {
+                // TODO
                 // If org deactiveate, perform lots of clean-up
                 // Orgs.deactivate(org.oid);
                 // Need to unceremoniously close all sessions for the org.
@@ -71,11 +72,12 @@ register(class OrgEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('OrgRemoveOrg', 'org', { notify: true }) ](trx) {
-        console.log('OrgRemoveOrg ENDPOINT STUB');
+        // TODO
         // Stub to remove the org's individual DBMS.  This will remove
         // data that's specific to the app and the org.  Note that the
         // org object is never removed from the main OLTP DBMS.  It's only
         // marked as being closed or inactive.
+        console.log('OrgRemoveOrg ENDPOINT STUB');
     }
     
     async [ mkEndpoint('OrgSearchOrgs', 'org', { notify: false }) ](trx) {
