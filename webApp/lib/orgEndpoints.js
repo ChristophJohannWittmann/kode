@@ -37,7 +37,7 @@ register(class OrgEndpoints extends EndpointContainer {
     async [ mkEndpoint('OrgCreateOrg', 'org', { notify: true }) ](trx) {
         let org = mkDboOrg(trx.dboOrg);
         await org.save(await trx.connect());
-        return true;
+        return org;
     }
     
     async [ mkEndpoint('OrgListOrgs', 'org', { notify: false }) ](trx) {
@@ -50,14 +50,14 @@ register(class OrgEndpoints extends EndpointContainer {
         let org = await getDboOrg(dbc, trx.dboOrg.oid);
 
         if (org) {
-            let deactivated = org.status == 'active' && org.dboStatus != 'active';
+            let deactivated = org.status == 'active' && trx.dboOrg.status != 'active';
             org.name = trx.dboOrg.name;
             org.status = trx.dboOrg.status;
             org.note = trx.dboOrg.note;
             org.authType = trx.dboOrg.authType;
             await org.save(dbc);
 
-            if (decactivated) {
+            if (deactivated) {
                 // TODO
                 // If org deactiveate, perform lots of clean-up
                 // Orgs.deactivate(org.oid);

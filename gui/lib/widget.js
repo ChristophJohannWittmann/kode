@@ -286,6 +286,20 @@ register(class Widget extends Emitter {
         return this.get();
     }
 
+    getView() {
+        let parent = this.parent();
+
+        while (parent) {
+            if (parent instanceof WView) {
+                return parent;
+            }
+
+            parent = parent.parent();
+        }
+
+        return parent;
+    }
+
     getWidgetStyle() {
         return this.getAttribute('widget-style');
     }

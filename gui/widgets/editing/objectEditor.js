@@ -143,6 +143,14 @@ register(class WObjectEditor extends WTable {
         return this;
     }
 
+    getField(name) {
+        for (let fieldName in ActiveData.value(this.modifiable)) {
+            if (fieldName == name) {
+                return this.modifiable[fieldName];
+            }
+        }
+    }
+
     getFields() {
         const values = ActiveData.value(this.modifiable);
         return Object.entries(values).map(entry => ({ name: entry[0], value: entry[1] }));
@@ -229,11 +237,13 @@ register(class WObjectEditor extends WTable {
             modified: false,
         });
 
-        this.send({
-            messageName: 'Widget.Validity',
-            valid: true,
-            widget: this,
-        });
+        if (this.invalid > 0) {
+            this.send({
+                messageName: 'Widget.Validity',
+                valid: true,
+                widget: this,
+            });
+        }
 
         return this;
     }

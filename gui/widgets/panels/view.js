@@ -93,8 +93,6 @@ register(class WView extends WPanel {
             }
         }
         else {
-            this.invalid = 0;
-            this.modified = 0;
             this.cancel.remove();
             this.done.remove();
         }
@@ -125,8 +123,6 @@ register(class WView extends WPanel {
     async onCancel(message) {
         if (this.isModified()) {
             await this.revert();
-            this.invalid = 0;
-            this.modified = 0;
             this.adjustCtls();
         }
 
@@ -170,7 +166,6 @@ register(class WView extends WPanel {
     }
 
     promote(widget) {
-        widget.getStackOverride ? console.log(widget.getStackOverride()) : false;
         if (this.stack.promote(widget)) {
             this.adjustCtls();
 

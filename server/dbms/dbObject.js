@@ -188,20 +188,6 @@ register(function defineDboType(schemaTable) {
             return this;
         }
     });
-
-    register(async function assign${className}(${className}Obj, ...args) {
-        for (let arg of args) {
-            if (typeof arg == 'object') {
-                for (let propertyName in fwdMap) {
-                    if (propertyName in arg) {
-                        ${className}Obj[propertyName] = arg[propertyName];
-                    }
-                }
-            }
-        }
-
-        return ${className}Obj;
-    });
     
     register(async function create${className}(...args) {
         let ${className}Obj = mk${className}();
