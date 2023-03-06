@@ -37,6 +37,30 @@ register(class Emitter extends NonJsonable {
         this.silent = false;
     }
 
+    filterMessage(message, method) {
+        let filteredOut = false;
+
+        if ('*' in this.handlers) {
+            let handler = this.handlers['*'];
+            let thunks = handler.thunks;
+            handler.thunks = [];
+
+            thunks.forEach(thunk => {
+                if (!thunk.once) {
+                    handler.thunks.push(thunk);
+                }
+
+                if (typeof thunk.filter != 'function' || thunk.filter(message)) {
+                    if (thunk.func(message, method) === true) {
+                        filteredOut = true;
+                    }
+                }
+            });
+        }
+
+        return filteredOut;
+    }
+
     handles(messageName) {
         return messageName in this.handlers;
     }
@@ -126,40 +150,46 @@ register(class Emitter extends NonJsonable {
     }
 
     query(message) {
-        if (!(message instanceof Message)) {
-            message = mkMessage(message);
-        }
-
-        let trap = mkTrap();
-        message['#Trap'] = trap.id;
-
-        if (message.messageName in this.handlers) {
-            let handler = this.handlers[message.messageName];
-
-            if (handler.thunks.length) {
-                let thunks = handler.thunks;
-                handler.thunks = [];
-                Trap.setExpected(message['#Trap'], thunks.length);
-
-                thunks.forEach(thunk => {
-                    if (!thunk.once) {
-                        handler.thunks.push(thunk);
-                    }
-
-                    if (typeof thunk.filter != 'function' || thunk.filter(message)) {
-                        thunk.func(message);
-                    }
-                });
+        if (!this.silent) {
+            if (!(message instanceof Message)) {
+                message = mkMessage(message);
             }
-            else {
-                Trap.done(trap);
+
+            if (!this.filterMessage(message, 'query')) {
+                let trap = mkTrap();
+                message['#Trap'] = trap.id;
+
+                if (message.messageName in this.handlers) {
+                    let handler = this.handlers[message.messageName];
+
+                    if (handler.thunks.length) {
+                        let thunks = handler.thunks;
+                        handler.thunks = [];
+                        Trap.setExpected(message['#Trap'], thunks.length);
+
+                        thunks.forEach(thunk => {
+                            if (!thunk.once) {
+                                handler.thunks.push(thunk);
+                            }
+
+                            if (typeof thunk.filter != 'function' || thunk.filter(message)) {
+                                thunk.func(message);
+                            }
+                        });
+                    }
+                    else {
+                        Trap.done(trap);
+                    }
+                }
+                else {
+                    Trap.done(trap);
+                }
+
+                return trap.promise;
             }
         }
-        else {
-            Trap.done(trap);
-        }
 
-        return trap.promise;
+        return new Promise((ok, fail) => { ok(null); });
     }
 
     resume() {
@@ -173,20 +203,22 @@ register(class Emitter extends NonJsonable {
                 message = mkMessage(message);
             }
 
-            if (message.messageName in this.handlers) {
-                let handler = this.handlers[message.messageName];
-                let thunks = handler.thunks;
-                handler.thunks = [];
+            if (!this.filterMessage(message, 'send')) {
+                if (message.messageName in this.handlers) {
+                    let handler = this.handlers[message.messageName];
+                    let thunks = handler.thunks;
+                    handler.thunks = [];
 
-                thunks.forEach(thunk => {
-                    if (!thunk.once) {
-                        handler.thunks.push(thunk);
-                    }
+                    thunks.forEach(thunk => {
+                        if (!thunk.once) {
+                            handler.thunks.push(thunk);
+                        }
 
-                    if (typeof thunk.filter != 'function' || thunk.filter(message)) {
-                        thunk.func(message);
-                    }
-                });
+                        if (typeof thunk.filter != 'function' || thunk.filter(message)) {
+                            thunk.func(message);
+                        }
+                    });
+                }
             }
         }
     }

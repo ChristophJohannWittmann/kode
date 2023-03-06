@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2017-2022 Kode Programming
+ * Copyright (c) 2017-2023 Kode Programming
  * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,19 +24,9 @@
 
 /*****
 *****/
-register(class MathElement extends DocElement {
-    constructor(arg) {
-        if (arg instanceof MathMLElement) {
-            super(arg);
-        }
-        else if (arg instanceof MathElement) {
-            super(arg.node);
-        }
-        else if (typeof arg == 'string') {
-            super(document.createElementNS('http://www.w3.org/1998/Math/MathML', arg));
-        }
-        else {
-            super(document.createElementNS('http://www.w3.org/1998/Math/MathML', 'math'));
-        }
+register(class MathWidget extends Widget {
+    constructor() {
+        super('div');
+        this.append(mkMathElement('math'));
     }
 });

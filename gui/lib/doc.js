@@ -81,7 +81,7 @@ register(class Doc extends Emitter {
         ].forEach(eventName => this.doc.addEventListener(eventName, event => {
             this.send({
                 messageName: `html.${eventName}`,
-                event: mkHtmlEvent(event)
+                event: mkElementEvent(event)
             });
         }));
     }

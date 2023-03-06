@@ -24,10 +24,10 @@
 
 /*****
  * The WView class extends WPanel to provide features associated with a view.
- * A view is an area of the window, or all of it, that's a Wstack, on which
+ * A view is an area of the window, or all of it, that's a WStack, on which
  * panels or views are pushed and popped.  What's really important about this
  * is the need to dynamically the WCtl objects in a WCtls panel in response to
- * events within the WStack and it's descenents.
+ * events within the WStack and it's descendants.
 *****/
 register(class WView extends WPanel {
     static internalNav = Symbol('Internal');

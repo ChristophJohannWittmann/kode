@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2017-2022 Kode Programming
+ * Copyright (c) 2017-2023 Kode Programming
  * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,19 +24,9 @@
 
 /*****
 *****/
-register(class SvgElement extends DocElement {
-    constructor(arg) {
-        if (arg instanceof SVGElement) {
-            super(arg);
-        }
-        else if (arg instanceof SvgElement) {
-            super(arg.node);
-        }
-        else if (typeof arg == 'string') {
-            super(document.createElementNS('http://www.w3.org/2000/svg', arg));
-        }
-        else {
-            super(document.createElementNS('http://www.w3.org/2000/svg', 'svg'));
-        }
+register(class SvgWidget extends Widget {
+    constructor() {
+        super('div');
+        this.append(mkMathElement('svg'));
     }
 });

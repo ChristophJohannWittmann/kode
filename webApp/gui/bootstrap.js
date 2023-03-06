@@ -45,7 +45,7 @@
         window.win = mkWin(window);
         window.doc = win.doc();
         window.styleSheet = doc.getStyleSheet('WebApp');
-        window.html = mkWidget(doc);
+        window.html = mkWHtml(doc);
         window.head = mkWHead(doc);
         window.body = mkWBody(doc);
         window.home = null;

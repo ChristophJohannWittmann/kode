@@ -36,7 +36,6 @@
 *****/
 register(class Widget extends Emitter {
     static nextId = 1;
-    static initialized = {};
     static widgetKey = Symbol('widget');
     static handlerKey = Symbol('handler');
 
