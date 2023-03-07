@@ -31,6 +31,7 @@ register(class Doc extends Emitter {
     constructor(doc) {
         super();
         this.doc = doc;
+        this.focused = null;
 
         [
             'scroll',
@@ -87,7 +88,7 @@ register(class Doc extends Emitter {
     }
 
     activeElement() {
-        return mkHtmlElement(this.doc.activeElement);
+        return wrapDocNode(this.doc.activeElement);
     }
 
     characterSet() {
@@ -111,15 +112,19 @@ register(class Doc extends Emitter {
     }
 
     getBody() {
-        return mkHtmlElement(this.doc.body);
+        return wrapDocNode(this.doc.body);
+    }
+
+    getFocused() {
+        return this.focused;
     }
 
     getHead() {
-        return mkHtmlElement(this.doc.head);
+        return wrapDocNode(this.doc.head);
     }
 
     getHtml() {
-        return mkHtmlElement(this.doc.documentElement);
+        return wrapDocNode(this.doc.documentElement);
     }
 
     getStyleSheet(title) {
@@ -204,7 +209,7 @@ register(class Doc extends Emitter {
             let nodeList = document.querySelectorAll(selector);
       
             for (let i = 0; i < nodeList.length; i++) {
-                selected.push(mkHtmlElement(nodeList.item(i)));
+                selected.push(wrapDocNode(nodeList.item(i)));
             }
         }
 
@@ -216,7 +221,7 @@ register(class Doc extends Emitter {
             let selected = this.doc.querySelector(selector);
 
             if (selected) {
-                return mkHtmlElement(selected);
+                return wrapDocNode(selected);
             }
         }
 

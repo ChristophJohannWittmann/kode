@@ -24,46 +24,6 @@
 
 (() => {
     /*****
-     * Creates a new, independent copy of a DOM node as a new instance.  This does
-     * NOT perform a deep copy!  It is used by the deep copy algorithm, but focuses
-     * on a single node.  The trick here is to determine the how to create copy of
-     * the specifid node.  The returned value is a wrapper.
-    *****/
-    register(function copyDocNode(arg) {
-        if (arg instanceof Text) {
-            return mkDocText(arg.wholeText);
-        }
-        else if (arg instanceof DocText) {
-            return mkDocText(arg.node.wholeText);
-        }
-        else if (arg instanceof HTMLElement) {
-            return mkHtmlElement(arg.name());
-        }
-        else if (arg instanceof HtmlElement) {
-            return mkHtmlElement(arg.node.nodeName);
-        }
-        else if (arg instanceof Widget) {
-            return mkHtmlElement(arg.htmlElement.node.nodeName);
-        }
-        else if (arg instanceof SVGElement) {
-            return mkSvgElement(arg.node.nodeName);
-        }
-        else if (arg instanceof SvgElement) {
-            return mkSvgElement(arg.name());
-        }
-        else if (arg instanceof MathMLElement) {
-            return mkMathElement(are.node.nodeName);
-        }
-        else if (arg instanceof MathElement) {
-            return mkMathElement(arg.name());
-        }
-        else {
-            return document.createTextNode(arg);
-        }
-    });
-
-
-    /*****
      * Analyzes the argument type with and returns which DocNode or DocElement type
      * to return to the caller.  In any case, the returned value is always once of
      * the wrapper objects defined in this source file.  If we're unable to find
@@ -152,10 +112,24 @@
     *****/
     const cacheKey = Symbol('cache-key');
 
+    const internalUseOnly = mkStringSet(
+        'docNode',
+        'flags',
+        'focused',
+        'propagation'
+    );
+
     register(class DocNode {
         constructor(node) {
             this.node = node;
-            this[cacheKey] = {};
+
+            if (!(cacheKey in node)) {
+                this.node[cacheKey] = {
+                    docNode: this,
+                    focused: null,
+                    flags: {},
+                };
+            }
         }
 
         append(...args) {
@@ -163,7 +137,37 @@
                 this.node.appendChild(unwrapDocNode(arg));
             }
 
+            this.checkAutofocus(...args);
             return this;
+        }
+
+        assignFlag(name, bool) {
+            if (typeof bool == 'boolean') {
+                this.node[cacheKey].flags[name] = bool;
+            }
+
+            return this;
+        }
+
+        checkAutofocus(...args) {
+            let autofocus;
+
+            for (let arg of args) {
+                let bare = unwrapDocNode(arg);
+
+                if (bare[cacheKey] && bare[cacheKey].flags.autofocus === true) {
+                    if (typeof bare.focus == 'function') {
+                        autofocus = bare;
+                        break;
+                    }
+                }
+            }
+
+            if (autofocus) {
+                // TODO --
+                // don't call .widget()
+                wrapDocNode(autofocus).widget().focus();
+            }
         }
 
         children() {
@@ -182,8 +186,32 @@
         }
 
         clearCache(name) {
-            delete this[cacheKey][name];
+            if (!internalUseOnly.has(name)) {
+                delete this.node[cacheKey][name];
+            }
+
             return this;
+        }
+
+        clearFlag(name) {
+            delete this.node[cacheKey].flags[name];
+            return this;
+        }
+
+        descendants() {
+            let stack = [unwrapDocNode(this)];
+            let descendants = [];
+
+            while (stack.length) {
+                let node = stack.pop();
+                descendants.push(wrapDocNode(node));
+
+                for (let i = 0; i < node.childNodes.length; i++) {
+                    stack.push(node.childNodes.item(i));
+                }
+            }
+
+            return descendants;
         }
 
         dir() {
@@ -204,11 +232,20 @@
         }
 
         getCache(name) {
-            return this[cacheKey][name];
+            return this.node[cacheKey][name];
+        }
+
+        getFlag(name) {
+            let flags = this.node[cacheKey].flags;
+            return (name in flags) ? flags[name] : false;
         }
 
         hasCache(name) {
-            return (name in this[cachekey]);
+            return (name in this.node[cacheKey]);
+        }
+
+        hasFlag(name) {
+            return name in this.node[cacheKey].flags;
         }
 
         insertAfter(...args) {
@@ -227,6 +264,7 @@
                 }
             }
       
+            this.checkAutofocus(...args);
             return this;
         }
 
@@ -237,6 +275,7 @@
                 }
             }
 
+            this.checkAutofocus(...args);
             return this;
         }
 
@@ -269,6 +308,11 @@
             return this;
         }
 
+        logCache() {
+            console.log(this.node[cacheKey]);
+            return this;
+        }
+
         name() {
             return this.node.nodeName.toLowerCase();
         }
@@ -280,22 +324,42 @@
 
             return null;
         }
+
+        ownerDocument() {
+            let owner = this.node.ownerDocument;
+
+            if (owner) {
+                return mkDoc(owner);
+            }
+        }
+
+        owns(docNode) {
+            let stack = [docNode.node];
+
+            while(stack.length) {
+                let node = stack.pop();
+
+                for (let i = 0; i < this.node.childNodes.length; i++) {
+                    let node = this.node.childNodes.item(i);
+
+                    if (Object.is(cacheKey in node && node[cacheKey].docNode), docNode) {
+                        return true;
+                    }
+                }
+            }
+
+            return false
+        }
       
         parent() {
             if (this.node.parentNode) {
                 return wrapDocNode(this.node.parentNode);
-            }
-            else {
-                return null;
             }
         }
       
         parentElement() {
             if (this.node.parentElement) {
                 return wrapDocNode(this.node.parentElement);
-            }
-            else {
-                return null;
             }
         }
 
@@ -313,6 +377,7 @@
                 }
             }
 
+            this.checkAutofocus(...args);
             return this;
         }
       
@@ -352,11 +417,25 @@
                 }
             }
 
+            this.checkAutofocus(...args);
+            return this;
+        }
+
+        resetFlag(name) {
+            this.node[cacheKey].flags[name] = false;
             return this;
         }
 
         setCache(name, value) {
-            this[cacheKey][name] = value;
+            if (!internalUseOnly.has(name)) {
+                this.node[cacheKey][name] = value;
+            }
+
+            return this;
+        }
+
+        setFlag(name) {
+            this.node[cacheKey].flags[name] = true;
             return this;
         }
 
@@ -366,6 +445,14 @@
 
         textContent() {
             return this.node.textContent;
+        }
+
+        toggleFlag(name) {
+            if (name in this.node[cacheKey]) {
+                this.node[cacheKey].flags[name] = !this.node[cacheKey].flags[name];
+            }
+
+            return this;
         }
 
         type() {
@@ -386,10 +473,6 @@
     register(class DocText extends DocNode {
         constructor(arg) {
             super(unwrapDocNode(arg));
-        }
-
-        copy() {
-            return copyDocNode(this);
         }
       
         text() {
@@ -460,6 +543,11 @@
             this.setCache('propagation', mkStringSet());
         }
 
+        blur() {
+            setTimeout(() => this.node.blur(), 10);
+            return this;
+        }
+
         clearAttribute(name) {
             this.node.removeAttribute(name);
             return this;
@@ -473,22 +561,6 @@
         clearClassNames() {
             this.node.className = '';
             return this;
-        }
-
-        copy() {
-            let copy = copyDocNode(this);
-
-            for (let attribute of Object.entries(this.getAttributes())) {
-                copy.setAttribute(attribute.name, attribute.value);
-            }
-
-            if (this.node.childNodes.length) {
-                for (let child of this.children()) {
-                    copy.append(child.copy());
-                }
-            }
-
-            return copy;
         }
 
         disablePropagation(eventName) {
@@ -515,6 +587,11 @@
             }
 
             return array;
+        }
+
+        focus() {
+            setTimeout(() => this.node.focus(), 10);
+            return this;
         }
 
         getAttribute(name) {
@@ -713,23 +790,12 @@
                 super(document.createElement(arg.toLowerCase()));
             }
             else {
-                console.log(arg);
                 super(document.createElement('noname'));
             }
         }
 
-        blur() {
-            this.node.blur();
-            return this;
-        }
-
         clearData(key) {
             delete this.node.dataset[name];
-            return this;
-        }
-
-        focus() {
-            this.node.focus();
             return this;
         }
 

@@ -61,6 +61,7 @@ register(class WStack extends WPanel {
     }
 
     pop() {
+        this.saveFocus();
         let children = this.children();
 
         if (children.length) {
@@ -87,6 +88,7 @@ register(class WStack extends WPanel {
     promote(widget) {
         for (let child of this) {
             if (child.selector == widget.selector) {
+                this.saveFocus();
                 child.remove();
                 child.reveal();
                 this.push(child);
@@ -100,6 +102,7 @@ register(class WStack extends WPanel {
     push(widget) {
         let child;
         let index = 0;
+        this.saveFocus();
 
         for (child of this) {
             index++;
@@ -124,6 +127,17 @@ register(class WStack extends WPanel {
     }
 
     async revert() {
+    }
+
+    saveFocus() {
+        //console.log(doc.getFocused());
+        return;
+        let top = this.top();
+
+        if (top) {
+            let activeElement = doc.activeElement();
+            console.log(activeElement);
+        }
     }
 
     [Symbol.iterator]() {

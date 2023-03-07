@@ -95,6 +95,7 @@
                         label: txx.fwNetAddress,
                         readonly: false,
                         type: ScalarIp,
+                        autofocus: true,
                     },
                     domain: {
                         label: txx.fwNetDomain,

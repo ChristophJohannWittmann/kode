@@ -55,6 +55,11 @@ register(class Widget extends Emitter {
         this.on('html.click', message => {
             doc.send(message);
         });
+
+        /*
+        this.on('blur', message => this.onBlurred(message));
+        this.on('focus', message => this.onFocused(message));
+        */
     }
 
     append(...args) {
@@ -66,6 +71,11 @@ register(class Widget extends Emitter {
             widget: this,
         });
 
+        return this;
+    }
+
+    assignFlag(name, bool) {
+        this.htmlElement.assignFlag(name, bool);
         return this;
     }
 
@@ -149,6 +159,11 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    clearCache(name) {
+        this.htmlElement.clearCache(name);
+        return this;
+    }
+
     clearClasses() {
         this.setAttribute('class', '');
 
@@ -183,6 +198,11 @@ register(class Widget extends Emitter {
             this.filters = [];
         }
 
+        return this;
+    }
+
+    clearFlag(name) {
+        this.htmlElement.clearFlag(name);
         return this;
     }
 
@@ -236,7 +256,7 @@ register(class Widget extends Emitter {
     }
 
     focus() {
-        this.htmlElement.node.focus();
+        this.htmlElement.focus();
         return this;
     }
 
@@ -246,6 +266,22 @@ register(class Widget extends Emitter {
 
     getAttribute(name) {
         return this.htmlElement.getAttribute(name);
+    }
+
+    getAutofocus() {
+        for (let child of this.htmlElement.descendants()) {
+            if (child.getFlag('autofocus')) {
+                return child.widget();
+            }
+        }
+    }
+
+    getCache(name) {
+        return this.htmlElement.getCache(name);
+    }
+
+    getFlag(name) {
+        return this.htmlElement.getFlag(name);
     }
 
     getOffset() {
@@ -308,8 +344,16 @@ register(class Widget extends Emitter {
         return this.htmlElement.hasAttribute(name);
     }
 
+    hasCache(name) {
+        return this.htmlElement.hasCache(name);
+    }
+
     hasClassName(className) {
         return this.htmlElement.hasClassName(className);
+    }
+
+    hasFlag(name) {
+        return this.htmlElement.hasFlag(name);
     }
 
     height() {
@@ -374,6 +418,20 @@ register(class Widget extends Emitter {
         }
 
         return this;
+    }
+
+    onBlurred(message) {
+    }
+
+    onFocused(message) {
+        /*
+        let owner = this.ownerDocument();
+
+        if (owner) {
+            owner.focused = this;
+            console.log(owner.focused);
+        }
+        */
     }
 
     once(messageName, handler, filter) {
@@ -511,6 +569,11 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    resetFlag(name) {
+        this.htmlElement.resetFlag(name);
+        return this;
+    }
+
     reveal() {
         if (typeof this.cssDisplay == 'string') {
             this.setStyle('display', this.cssDisplay);
@@ -546,6 +609,11 @@ register(class Widget extends Emitter {
         return this;
     }
 
+    setCache(name, value) {
+        this.htmlElement.setCache(name, value);
+        return this;
+    }
+
     setClasses(classes) {
         this.setAttribute('class', classes);
 
@@ -571,6 +639,11 @@ register(class Widget extends Emitter {
             value: className,
         });
 
+        return this;
+    }
+
+    setFlag(name) {
+        this.htmlElement.setFlag(name);
         return this;
     }
 

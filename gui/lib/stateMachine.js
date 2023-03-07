@@ -32,11 +32,11 @@
 register(class WStateMachine extends Emitter {
     static nameKey = Symbol('Name');
 
-    constructor(widget, modes, flagNames) {
+    constructor(widget, modes, switchNames) {
         super();
         this.widgets = {};
         this.namedWidgets = {};
-        this.flags = {};
+        this.switches = {};
         this.mode = '';
         this.modes = {};
         this.autofocus = {};
@@ -58,17 +58,17 @@ register(class WStateMachine extends Emitter {
 
         this.owner.refresh = () => this.refresh();
 
-        if (Array.isArray(flagNames)) {
-            for (let flagName of flagNames) {
-                this.flags[flagName] = { 
-                    name: flagName,
+        if (Array.isArray(switchNames)) {
+            for (let switchName of switchNames) {
+                this.switches[switchName] = { 
+                    name: switchName,
                     on: false,
                 };
             }
         }
     }
 
-    addChild(widget, name, modes, flags) {
+    addChild(widget, name, modes, switches) {
         if (!(widget.id in this.widgets) && name.trim() && !(name.trim() in this.namedWidgets)) {
             widget[WStateMachine.nameKey] = name.trim();
             widget.getOwner = () => this.owner;
@@ -77,25 +77,18 @@ register(class WStateMachine extends Emitter {
             this.widgets[widget.id] = {
                 widget: widget,
                 modes: mkStringSet((Array.isArray(modes) ? modes : []).filter(mode => (mode in this.modes))),
-                flags: mkStringSet((Array.isArray(flags) ? flags : []).filter(swName => swName in this.flags)),
+                switches: mkStringSet((Array.isArray(switches) ? switches : []).filter(swName => swName in this.switches)),
             }
 
             this.namedWidgets[widget[WStateMachine.nameKey]] = this.widgets[widget.id];
-
-            if (typeof widget.autofocus == 'object') {
-                for (let mode in widget.autofocus) {
-                    this.autofocus[mode] = widget.autofocus[mode];
-                }
-            }
-
             return true;
         }
 
         return false;
     }
 
-    appendChild(widget, name, modes, flags) {
-        if (this.addChild(widget, name, modes, flags)) {
+    appendChild(widget, name, modes, switches) {
+        if (this.addChild(widget, name, modes, switches)) {
             this.owner.append(widget);
             this.update();
         }
@@ -103,10 +96,10 @@ register(class WStateMachine extends Emitter {
         return this;
     }
 
-    clearFlag(flagName) {
-        if (flagName in this.flags) {
-            if (this.flags[flagName].on) {
-                this.flags[flagName].on = false;
+    clearswitches(switchName) {
+        if (switchName in this.switches) {
+            if (this.switches[switchName].on) {
+                this.switches[switchName].on = false;
                 this.update();
             }
         }
@@ -128,9 +121,9 @@ register(class WStateMachine extends Emitter {
         return this;
     }
 
-    getFlag(flagName) {
-        if (flagName in this.flags) {
-            return this.flags[flagName].on;
+    getFlag(switchName) {
+        if (switchName in this.switches) {
+            return this.switches[switchName].on;
         }
 
         return false;
@@ -146,8 +139,8 @@ register(class WStateMachine extends Emitter {
         }
     }
 
-    insertAfter(widget, name, modes, flags) {
-        if (this.addChild(widget, name, modes, flags)) {
+    insertAfter(widget, name, modes, switches) {
+        if (this.addChild(widget, name, modes, switches)) {
             this.insertAfter(widget);
             this.update();
         }
@@ -155,8 +148,8 @@ register(class WStateMachine extends Emitter {
         return this;
     }
 
-    insertBefore(widget, name, modes, flags) {
-        if (this.addChild(widget, name, modes, flags)) {
+    insertBefore(widget, name, modes, switches) {
+        if (this.addChild(widget, name, modes, switches)) {
             this.insertBefore(widget);
             this.update();
         }
@@ -164,8 +157,8 @@ register(class WStateMachine extends Emitter {
         return this;
     }
 
-    prependChild(widget, name, modes, flags) {
-        if (this.addChild(widget, name, modes, flags)) {
+    prependChild(widget, name, modes, switches) {
+        if (this.addChild(widget, name, modes, switches)) {
             this.owner.prepend(widget);
             this.update();
         }
@@ -199,10 +192,10 @@ register(class WStateMachine extends Emitter {
         return false;
     }
 
-    setFlag(flagName) {
-        if (flagName in this.flags) {
-            if (!this.flags[flagName].on) {
-                this.flags[flagName].on = true;
+    setFlag(switchName) {
+        if (switchName in this.switches) {
+            if (!this.switches[switchName].on) {
+                this.switches[switchName].on = true;
                 this.update();
             }
         }
@@ -219,9 +212,9 @@ register(class WStateMachine extends Emitter {
         return this;
     }
 
-    toggleFlag(flagName) {
-        if (flagName in this.flags) {
-            this.flags[flagName].on = !this.flags[flagName];
+    toggleFlag(switchName) {
+        if (switchName in this.switches) {
+            this.switches[switchName].on = !this.switches[switchName];
             this.update();
         }
 
@@ -230,12 +223,14 @@ register(class WStateMachine extends Emitter {
 
     update() {
         if (this.updatesEnabled) {
+            let autofocus;
+
             for (let widgetInfo of Object.values(this.widgets)) {
                 if (widgetInfo.modes.has(this.mode)) {
                     let reveal = true;
 
-                    for (let flagName in this.flags) {
-                        if (widgetInfo.flags.has(flagName) && !this.flags[flagName].on) {
+                    for (let switchName in this.switches) {
+                        if (widgetInfo.switches.has(switchName) && !this.switches[switchName].on) {
                             reveal = false;
                             break;
                         }
@@ -244,6 +239,7 @@ register(class WStateMachine extends Emitter {
                     if (reveal) {
                         widgetInfo.widget.reveal();
                         widgetInfo.widget.getRevealState = () => true;
+                        autofocus = autofocus ? autofocus : widgetInfo.widget.getAutofocus();
                         continue;
                     }
                 }
@@ -252,18 +248,18 @@ register(class WStateMachine extends Emitter {
                 widgetInfo.widget.getRevealState = () => false;
             }
 
-            const flags = {};
-            Object.values(this.flags).forEach(flag => flags[flag.name] = flag.on);
+            const switches = {};
+            Object.values(this.switches).forEach(Switch => switches[Switch.name] = Switch.on);
 
-            if (this.mode in this.autofocus) {
-                setTimeout(() => this.autofocus[this.mode].focus(), 10);
+            if (autofocus) {
+                setTimeout(() => autofocus.focus(), 10);
             }
 
             this.send({
                 messageName: 'StateMachine',
                 stm: this,
                 mode: this.mode,
-                flags: flags,
+                switches: switches,
             });
         }
     }

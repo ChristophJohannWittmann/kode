@@ -123,7 +123,8 @@
                 .setAttribute('autocomplete', 'off')
                 .on('html.keyup', message => this.refresh())
                 .bind(this.controller, 'pattern')
-            )
+                .setFlag('autofocus')
+            );
 
             this.setAt(6, 0, 
                 mkWidget('span')
@@ -138,7 +139,6 @@
                 )
             );
 
-            this.autofocus = { select: this.getAt(3, 0) };
             this.orgSelectMenu = mkWPopupMenu()
             .append(
                 mkWMenuItem(txx.fwOrgManagerSelectorEdit, 'Edit')
@@ -255,6 +255,7 @@
                     name: {
                         label: txx.fwOrgManagerEditorName,
                         readonly: false,
+                        autofocus: true,
                     },
                     status: {
                         label: txx.fwOrgManagerEditorStatus,

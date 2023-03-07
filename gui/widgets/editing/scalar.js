@@ -167,6 +167,8 @@ define('WScalar', class WScalar extends Widget {
 
     constructor(activeData, key, opts) {
         super('div');
+        // TODO --
+        // put both as children and adjust according.
         this.viewer = opts.type.mkViewer(opts).bind(activeData, key);
         this.editor = opts.type.mkEditor(opts).bind(activeData, key);
         opts.readonly ? this.setReadOnly() : this.setReadWrite();
@@ -182,12 +184,22 @@ define('WScalar', class WScalar extends Widget {
         }
     }
 
+    blur() {
+        this.editor.blur();
+        return this;
+    }
+
     static dboReadonlyByDefault(propertyName) {
         if (propertyName.endsWith('Oid')) {
             return true;
         }
 
         return WScalar.dboReadonly.has(propertyName);
+    }
+
+    focus() {
+        this.editor.focus();
+        return this;
     }
 
     isReadonly() {
