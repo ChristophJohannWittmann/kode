@@ -90,7 +90,7 @@ register(class WCtls extends Widget {
         if (this.map.has(anchor) && !this.map.has(ctl)) {
             ctl.setWidgetStyle(`${this.getWidgetStyle()}-ctl`);
             this.dir == 'fwd' ? anchor.insertAfter(ctl) : this.anchor.insertBefore(ctl);
-            this.ctlMap.set(ctl, ctl);
+            this.map.set(ctl, ctl);
         }
 
         return this;
@@ -100,7 +100,7 @@ register(class WCtls extends Widget {
         if (this.map.has(anchor) && !this.map.has(ctl)) {
             ctl.setWidgetStyle(`${this.getWidgetStyle()}-ctl`);
             this.dir == 'fwd' ? anchor.insertBefore(ctl) : this.anchor.insertAfter(ctl);
-            this.ctlMap.set(ctl, ctl);
+            this.ctl.set(ctl, ctl);
         }
 
         return this;

@@ -38,17 +38,13 @@ register(class WTextArea extends InputBaseWidget {
         this.maxSize = 20000;
         this.setEntryFilter(entryFilter);
 
-        this.on('html.input', message => {
-            this.valueChanged(message.event.target.value);
-        });
-
-        doc.on('html.keydown', message => {
+        doc.on('dom.keydown', message => {
             if (this.entryFilter) {
                 this.entryFilter.handle(event, this);
             }
         });
 
-        doc.on('html.keyup', message => {
+        doc.on('dom.keyup', message => {
             if (this.entryFilter) {
                 this.entryFilter.handle(event, this);
             }

@@ -35,7 +35,7 @@ register(class WPopupMenu extends Widget {
     static showing = null;
 
     static init = (() => {
-        doc.on('html.click', message => {
+        doc.on('dom.click', message => {
             if (WPopupMenu.showing) {
                 let id = mkHtmlElement(message.event.rawEvent().target).getAttribute('id');
 
@@ -51,7 +51,7 @@ register(class WPopupMenu extends Widget {
             }
         });
 
-        doc.on('html.keyup', message => {
+        doc.on('dom.keyup', message => {
             if (WPopupMenu.showing) {
                 if (message.event.rawEvent().code == 'Escape') {
                     WPopupMenu.showing.close();
@@ -81,9 +81,9 @@ register(class WPopupMenu extends Widget {
 
     attach(widget, ...messageNames) {
         if (widget instanceof Widget) {
-            if (!(widget.id in this.widgets)) {
+            if (!(widget.getId() in this.widgets)) {
                 let widgetEntry = { widget: widget, messages: mkStringSet() };
-                this.widgets[widget.id] = widgetEntry;
+                this.widgets[widget.getId()] = widgetEntry;
 
                 widgetEntry.handler = message => {
                     let ev = message.event.rawEvent();
@@ -101,7 +101,7 @@ register(class WPopupMenu extends Widget {
     }
 
     close() {
-        if (WPopupMenu.showing.id == this.id) {
+        if (WPopupMenu.showing.getId() == this.getId()) {
             this.setStyle('display', 'none')
             delete this.anchor;
             WPopupMenu.showing = null;
@@ -111,13 +111,13 @@ register(class WPopupMenu extends Widget {
     }
 
     detach(widget) {
-        if (widget.id in this.widgets) {
-            if (WPopupMenu.showing && WPopupMenu.showing.id == this.id) {
+        if (widget.getId() in this.widgets) {
+            if (WPopupMenu.showing && WPopupMenu.showing.getId() == this.getId()) {
                 this.close();
             }
 
-            let widgetEntry = this.widgets[widget.id];
-            delete this.widgets[widget.id];
+            let widgetEntry = this.widgets[widget.getId()];
+            delete this.widgets[widget.getId()];
 
             for (let messageName of widgetEntry.messages) {
                 widget.off(messageName, widgetEntry.handler);
@@ -155,20 +155,20 @@ register(class WPopupMenu extends Widget {
     position(x, y) {
         let finalX = x;
         let finalY = y;
-        let size = this.size();
+        let rect = this.getOffset();
 
-        if (size.width > win.innerWidth()) {
+        if (rect.width > win.innerWidth()) {
             finalX = 0;
         }
-        else if (x + size.width > win.innerWidth()) {
-            finalX -= (x + size.width - win.innerWidth());
+        else if (x + rect.width > win.innerWidth()) {
+            finalX -= (x + rect.width - win.innerWidth());
         }
 
-        if (size.height > win.innerHeight()) {
+        if (rect.height > win.innerHeight()) {
             finalY = 0;
         }
-        else if (y + size.height > win.innerHeight()) {
-            finalY -= (y + size.height - win.innerHeight());
+        else if (y + rect.height > win.innerHeight()) {
+            finalY -= (y + rect.height - win.innerHeight());
         }
 
         return [ finalX, finalY ];
@@ -186,7 +186,7 @@ register(class WPopupMenu extends Widget {
 register(class WMenuSeparator extends Widget {
     constructor(lite, tag) {
         super('hr');
-        this.tag = tag ? tag : this.selector;
+        this.tag = tag ? tag : this.getId();
         lite ? this.setLite() : this.setRegular();
     }
 
@@ -210,15 +210,15 @@ register(class WMenuSeparator extends Widget {
 register(class WMenuItem extends Widget {
     constructor(text, tag) {
         super('div');
-        this.append(text);
+        this.append(mkDocText(text));
         this.permanent = false;
-        tag ? this.setAttribute('menu-item-tag', tag) : this.setAttribute('menu-item-tag', this.selector);
+        tag ? this.setAttribute('menu-item-tag', tag) : this.setAttribute('menu-item-tag', this.getId());
         this.clearAction();
         this.enable();
 
-        this.on('html.click', message => this.onSelect(message));
-        this.on('html.mouseenter', message => this.onEnter(message));
-        this.on('html.mouseleave', message => this.onLeave(message));
+        this.on('dom.click', message => this.onSelect(message));
+        this.on('dom.mouseenter', message => this.onEnter(message));
+        this.on('dom.mouseleave', message => this.onLeave(message));
     }
 
     clearAction() {

@@ -34,6 +34,27 @@ register(class InputBaseWidget extends Widget {
     constructor(tagName, widgetStyle) {
         super(tagName);
         this.setWidgetStyle(widgetStyle);
+        this.valid = true;
+
+        this.on('dom.input', message => {
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'attribute',
+                widget: this,
+                name: 'value',
+                value: message.event.target.value
+            });
+
+            if (this.isValid() != this.valid) {
+                this.valid = !this.valid;
+
+                this.send({
+                    messageName: 'Widget.Validity',
+                    valid: this.valid,
+                    widget: this,
+                });
+            }
+        });
     }
 
     disable() {
@@ -52,12 +73,7 @@ register(class InputBaseWidget extends Widget {
         return this.hasAttribute('disabled');
     }
 
-    valueChanged(value) {
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'value',
-            widget: this,
-            value: value,
-        });
+    isValid() {
+        return true;
     }
 });

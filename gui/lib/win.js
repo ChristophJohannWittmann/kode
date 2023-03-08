@@ -35,35 +35,35 @@ register(class Win extends Emitter {
         this.win = win;
 
         [
-            'error',
-            'languagechange',
-            'devicemotion',
-            'deviceorientation',
-            'resize',
-            'storage',
+            'afterprint',
             'animationcancel',
             'animiationend',
             'animationiteration',
             'animationstart',
+            'beforeunload',
+            'beforeprint',
+            'blur',
             'copy',
             'cut',
-            'paste',
-            'offline',
-            'online',
-            'blur',
+            'devicemotion',
+            'deviceorientation',
+            'DOMContentLoaded',
+            'error',
             'focus',
             'gamepadconnected',
             'gamepaddisconnected',
             'hashchange',
+            'languagechange',
+            'load',
+            'offline',
+            'online',
             'pagehide',
             'pageshow',
+            'paste',
             'popstate',
-            'beforeunload',
-            'DOMContentLoaded',
-            'load',
+            'resize',
+            'storage',
             'unload',
-            'afterprint',
-            'beforeprint',
         ].forEach(eventName => this.win.addEventListener(eventName, event => {
             this.send({ messageName: eventName, event: event });
         }));
@@ -110,7 +110,7 @@ register(class Win extends Emitter {
     }
 
     frameElement() {
-        return mkHtmlElement(this.win.frameElement);
+        return wrapDocNode(this.win.frameElement);
     }
 
     frames() {

@@ -29,8 +29,6 @@
         constructor() {
             super('form');
             this.setTitle(txx.fwUserManagerTitle);
-
-            this.stm = mkWStateMachine();
         }
     });
 
@@ -40,7 +38,7 @@
     class UserCreator extends WPanel {
         constructor() {
             super('form');
-            this.set('U S E R    S E L E C T O R');
+            this.setInnerHtml('U S E R    S E L E C T O R');
         }
     }
 
@@ -50,7 +48,7 @@
     class UserSelector extends WPanel {
         constructor() {
             super('form');
-            this.set('U S E R    S E L E C T O R');
+            this.setInnerHtml('U S E R    S E L E C T O R');
         }
     }
 
@@ -60,7 +58,7 @@
     class UserList extends WPanel {
         constructor() {
             super('form');
-            this.set('U S E R    L I S T');
+            this.setInnerHtml('U S E R    L I S T');
         }
     }
 })();

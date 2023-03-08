@@ -34,683 +34,472 @@
  * has an owingWidget() method that returns either the widget or null if not part
  * of a widget.
 *****/
-register(class Widget extends Emitter {
-    static nextId = 1;
-    static widgetKey = Symbol('widget');
-    static handlerKey = Symbol('handler');
+(() => {
+    let nextId = 1;
 
-    constructor(arg) {
-        super();
-        this[Widget.handlerKey] = {};
-        this.id = Widget.nextId++;
-        this.selector = `widget${this.id}`;
-        this.filters = [];
-
-        this.htmlElement = mkHtmlElement(arg ? arg : 'div');
-        this.htmlElement.setAttribute('id', this.selector);
-        this.brand(this.htmlElement);
-        this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
-        this.setAttribute('widget-border', 'none');
-
-        this.on('html.click', message => {
-            doc.send(message);
-        });
-
-        /*
-        this.on('blur', message => this.onBlurred(message));
-        this.on('focus', message => this.onFocused(message));
-        */
-    }
-
-    append(...args) {
-        this.htmlElement.append(...args);
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'add',
-            widget: this,
-        });
-
-        return this;
-    }
-
-    assignFlag(name, bool) {
-        this.htmlElement.assignFlag(name, bool);
-        return this;
-    }
-
-    bind(activeData, key, arg) {
-        if (arg) {
-            if (typeof arg == 'string') {
-                mkAttributeBinding(this, activeData, key, arg);
+    register(class Widget extends HtmlElement {
+        constructor(arg) {
+            if (arg instanceof Node) {
+                super(arg);
             }
-            else if (typeof arg == 'object') {
-                mkMapBinding(this, activeData, key, arg);
-            }
-            else if (typeof arg == 'function') {
-                mkFunctionBinding(this, activeData, key, arg);
-            }
-        }
-        else {
-            mkValueBinding(this, activeData, key);            
-        }
-
-        return this;
-    }
-
-    blur() {
-        this.htmlElement.node.blur();
-        return this;
-    }
-
-    brand(arg) {
-        let naked = unwrapDocNode(arg);
-
-        if (naked && naked[Widget.widgetKey] === undefined) {
-            naked[Widget.widgetKey] = this;
-        }
-
-        return this;
-    }
-
-    childAt(index) {
-        let children = this.htmlElement.children();
-
-        if (index >= 0 && index < children.length) {
-            let child = children[index];
-
-            if (child instanceof HtmlElement) {
-                return child.widget();
-            }
-        }
-
-        return null;
-    }
-
-    children() {
-        return this.htmlElement.children()
-        .filter(child => child instanceof DocElement)
-        .map(child => child.widget());
-    }
-
-    clear() {
-        this.htmlElement.clear();
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'remove',
-            widget: this,
-        });
-
-        return this;
-    }
-
-    clearAttribute(name) {
-        this.htmlElement.clearAttribute(name);
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'attribute',
-            widget: this,
-            name: name,
-            value: '',
-        });
-
-        return this;
-    }
-
-    clearCache(name) {
-        this.htmlElement.clearCache(name);
-        return this;
-    }
-
-    clearClasses() {
-        this.setAttribute('class', '');
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'attribute',
-            widget: this,
-            name: 'classes',
-            value: '',
-        });
-
-        return this;
-    }
-
-    clearClassName(className) {
-        this.htmlElement.clearClassName(className);
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'attribute',
-            widget: this,
-            name: 'className',
-            value: '',
-        });
-
-        return this;
-    }
-
-    clearFilters() {
-        if (this.filters.length) {
-            this.setStyle('filter', this.filters[0].toString());
-            this.filters = [];
-        }
-
-        return this;
-    }
-
-    clearFlag(name) {
-        this.htmlElement.clearFlag(name);
-        return this;
-    }
-
-    clearStyle() {
-        for (let i = 0; i < this.htmlElement.node.style.length; i++) {
-            let styleProperty = this.htmlElement.node.style.item(i);
-            this.htmlElement.node.style.removeProperty(styleProperty);
-        }
-
-        return this;
-    }
-
-    conceal() {
-        if (typeof this.cssDisplay == 'undefined') {
-            this.cssDisplay = this.getStyle('display');
-            this.setStyle('display', 'none');
-        }
-
-        return this;
-    }
-
-    dir() {
-        this.htmlElement.dir();
-        return this;
-    }
-
-    disable() {
-        if (this.isEnabled()) {
-            this.setAttribute('disabled');
-            this.silence();
-        }
-
-        return this;
-    }
-
-    disablePropagation(eventName) {
-        this.htmlElement.disablePropagation(eventName);
-    }
-
-    enable() {
-        if (this.isDisabled()) {
-            this.clearAttribute('disabled');
-            this.resume();
-        }
-
-        return this;
-    }
-
-    enablePropagation(eventName) {
-        this.htmlElement.enablePropagation(eventName);
-    }
-
-    focus() {
-        this.htmlElement.focus();
-        return this;
-    }
-
-    get() {
-        return this.htmlElement.getInnerHtml();
-    }
-
-    getAttribute(name) {
-        return this.htmlElement.getAttribute(name);
-    }
-
-    getAutofocus() {
-        for (let child of this.htmlElement.descendants()) {
-            if (child.getFlag('autofocus')) {
-                return child.widget();
-            }
-        }
-    }
-
-    getCache(name) {
-        return this.htmlElement.getCache(name);
-    }
-
-    getFlag(name) {
-        return this.htmlElement.getFlag(name);
-    }
-
-    getOffset() {
-        return this.htmlElement.getOffset();
-    }
-
-    getPanel() {
-        let parent = this.parent();
-
-        while (parent) {
-            if (parent instanceof WPanel) {
-                return parent;
+            else {
+                super(typeof arg == 'string' ? arg : 'div');
             }
 
-            parent = parent.parent();
+            this.setCache('id', nextId++);
+            this.setCache('concealed', null);
+            this.setCache('styles', []);
+            this.setId(`widget${this.getCache('id')}`);
+            this.setWidgetStyle('widget');
+            this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
         }
 
-        return parent;
-    }
-
-    getStyle(arg) {
-        if (arg) {
-            return this.htmlElement.node.style[arg];
-        }
-        else {
-            let style = {};
-
-            for (let i = 0; i < this.htmlElement.node.style.length; i++) {
-                let styleProperty = this.htmlElement.node.style.item(i);
-                style[styleProperty] = this.htmlElement.node.style[styleProperty];
-            }
-
-            return style;
-        }
-    }
-
-    getValue() {
-        return this.get();
-    }
-
-    getView() {
-        let parent = this.parent();
-
-        while (parent) {
-            if (parent instanceof WView) {
-                return parent;
-            }
-
-            parent = parent.parent();
-        }
-
-        return parent;
-    }
-
-    getWidgetStyle() {
-        return this.getAttribute('widget-style');
-    }
-
-    hasAttribute(name) {
-        return this.htmlElement.hasAttribute(name);
-    }
-
-    hasCache(name) {
-        return this.htmlElement.hasCache(name);
-    }
-
-    hasClassName(className) {
-        return this.htmlElement.hasClassName(className);
-    }
-
-    hasFlag(name) {
-        return this.htmlElement.hasFlag(name);
-    }
-
-    height() {
-        return this.htmlElement.node.offsetHeight;
-    }
-
-    insertAfter(...args) {
-        this.htmlElement.insertAfter(...args);
-    }
-
-    insertBefore(...args) {
-        this.htmlElement.insertBefore(...args);
-    }
-
-    static is(widget1, widget2) {
-        if (widget1 instanceof Widget) {
-            if (widget2 instanceof Widget) {
-                return widget1.selector == widget2.selector;
-            }
-        }
-
-        return false;
-    }
-
-    isDisabled() {
-        return this.hasAttribute('disabled');
-    }
-
-    isEnabled() {
-        return !this.hasAttribute('disabled');
-    }
-
-    length() {
-        return this.htmlElement.length();
-    }
-
-    log() {
-        this.htmlElement.log();
-        return this;
-    }
-
-    off(messageName, handler) {
-        super.off(messageName, handler);
-
-        if (messageName.startsWith('html.')) {
-            if (messageName in this[Widget.handlerKey]) {
-                if (this[Widget.handlerKey][messageName].count-- <= 0) {
-                    this.htmlElement.off(messageName.substr(5), this[Widget.handlerKey][messageName].handler);
-                    delete this[Widget.handlerKey][messageName];
-                }
-            }
-        }
-
-        return this;
-    }
-
-    on(messageName, handler, filter) {
-        super.on(messageName, handler, filter);
-
-        if (messageName.startsWith('html.')) {
-            this.registerHandler(messageName, false);
-        }
-
-        return this;
-    }
-
-    onBlurred(message) {
-    }
-
-    onFocused(message) {
-        /*
-        let owner = this.ownerDocument();
-
-        if (owner) {
-            owner.focused = this;
-            console.log(owner.focused);
-        }
-        */
-    }
-
-    once(messageName, handler, filter) {
-        super.once(messageName, handler, filter);
-
-        if (messageName.startsWith('html.')) {
-            this.registerHandler(messageName, true);
-        }
-
-        return this;
-    }
-
-    popFilter() {
-        if (this.filters.length) {
-            this.filters.pop();
-            this.setStyle('filter', this.filters[this.filters.length - 1].toString());
-
-            if (this.filters.length == 1) {
-                this.filters.pop();
-            }
-        }
-
-        return this;
-    }
-
-    parent() {
-        let parent = this.htmlElement.parent();
-
-        if (parent) {
-            return parent.widget();
-        }
-
-        return null;
-    }
-
-    prepend(...args) {
-        this.htmlElement.prepend(...args);
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'add',
-            widget: this,
-        });
-
-        return this;
-    }
-
-    pushFilter(filter) {
-        if (this.filters.length == 0) {
-            this.filters.push(mkWFilter(this));
-        }
-
-        if (filter instanceof WFilter) {
-            this.filters.push(filter);
-            this.setStyle('filter', filter.toString());
-        }
-        else if (typeof filter == 'object') {
-            let filterObj = mkWFilter(filter);
-            this.filters.push(filterObj);
-            this.setStyle('filter', filterObj.toString());
-        }
-        else if (this.filters.length == 1) {
-            this.filters.pop();
-        }
-
-        return this;
-    }
-
-    queryAll(selector) {
-        return this.htmlElement.queryAll(selector).map(htmlElement => htmlElement.widget());
-    }
-
-    queryOne(selector) {
-        let selected = this.htmlElement.queryOne(selector);
-
-        if (selected) {
-            selected = selected.widget();
-        }
-
-        return selected;
-    }
-
-    registerHandler(messageName, once) {
-        if (messageName in this[Widget.handlerKey]) {
-            this[Widget.handlerKey][messageName].count++;
-            return this[Widget.handlerKey][messageName].handler;
-        }
-        else {
-            let handler = message => {
-                message.messageName = `html.${message.messageName}`;
-                this.send(message);
-            };
-
-            this[Widget.handlerKey][messageName] = {
-                count: 1,
-                handler: handler,
-            };
-
-            once ? this.htmlElement.once(messageName.substr(5), handler) : this.htmlElement.on(messageName.substr(5), handler);
-            return handler;
-        }
-    }
-
-    remove() {
-        let parent = this.htmlElement.parent();
-
-        if (parent) {
-            this.htmlElement.remove();
-
-            this.send({
-                messageName: 'remove',
-                type: 'innerHTML',
-                widget: parent.widget(),
-            });
-        }
-
-        return this;
-    }
-
-    replace(...widgets) {
-        let parent = this.htmlElement.parent().widget();
-
-        if (parent) {
-            let filtered = widgets.filter(w => w instanceof Widget);
-            this.htmlElement.replace(...filtered);
+        append(...args) {
+            super.append(...args);
 
             this.send({
                 messageName: 'Widget.Changed',
-                type: 'replace',
+                type: 'innerHtml',
                 widget: this,
-                replacements: filtered,
+                value: this.children(),
             });
+
+            return this;
         }
 
-        return this;
-    }
+        bind(activeData, key, arg) {
+            if (arg) {
+                if (typeof arg == 'string') {
+                    mkAttributeBinding(this, activeData, key, arg);
+                }
+                else if (typeof arg == 'object') {
+                    mkMapBinding(this, activeData, key, arg);
+                }
+                else if (typeof arg == 'function') {
+                    mkFunctionBinding(this, activeData, key, arg);
+                }
+            }
+            else {
+                mkInnerHtmlBinding(this, activeData, key);            
+            }
 
-    resetFlag(name) {
-        this.htmlElement.resetFlag(name);
-        return this;
-    }
-
-    reveal() {
-        if (typeof this.cssDisplay == 'string') {
-            this.setStyle('display', this.cssDisplay);
-            delete this.cssDisplay;
+            return this;
         }
 
-        return this;
-    }
+        clear() {
+            super.clear();
 
-    set(innerHtml) {
-        this.htmlElement.setInnerHtml(innerHtml);
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'innerHtml',
+                widget: this,
+            });
 
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'innerHTML',
-            widget: this,
-        });
+            return this;
+        }
 
-        return this;
-    }
+        clearAttribute(name) {
+            super.clearAttribute(name);
 
-    setAttribute(name, value) {
-        this.htmlElement.setAttribute(name, value);
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'attribute',
+                widget: this,
+                name: name,
+                value: '',
+            });
 
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'attribute',
-            widget: this,
-            name: name,
-            value: value,
-        });
+            return this;
+        }
 
-        return this;
-    }
+        clearCache(name) {
+            delete super.getCache('widget')[name];
+            return this;
+        }
 
-    setCache(name, value) {
-        this.htmlElement.setCache(name, value);
-        return this;
-    }
+        clearClassName(className) {
+            super.clearClassName(className);
 
-    setClasses(classes) {
-        this.setAttribute('class', classes);
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'attribute',
+                widget: this,
+                name: 'className',
+            });
 
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'attribute',
-            widget: this,
-            name: 'classes',
-            value: classes,
-        });
+            return this;
+        }
 
-        return this;
-    }
+        clearClassNames() {
+            this.setAttribute('class', '');
 
-    setClassName(className) {
-        this.htmlElement.setClassName(className);
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'attribute',
+                widget: this,
+                name: 'className',
+            });
 
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'attribute',
-            widget: this,
-            name: 'className',
-            value: className,
-        });
+            return this;
+        }
 
-        return this;
-    }
+        clearStyle() {
+            super.clearStyle();
 
-    setFlag(name) {
-        this.htmlElement.setFlag(name);
-        return this;
-    }
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'style',
+                widget: this,
+            });
 
-    setStyle(arg, value) {
-        if (typeof arg == 'object') {
-            for (let property in arg) {
-                let value = arg[property];
-                this.htmlElement.node.style[property] = value;
+            return this;
+        }
+
+        clearValue() {
+            this.clearAttribute('value');
+            return this;
+        }
+
+        conceal() {
+            if (this.getCache('concealed') === null) {
+                this.silence();
+                this.setCache('concealed', new Placeholder(this));
+                this.replace(this.getCache('concealed'));
+                this.resume();
+            }
+
+            return this;
+        }
+
+        disable() {
+            if (this.isEnabled()) {
+                super.disable();
+
+                this.send({
+                    messageName: 'Widget.Changed',
+                    type: 'attribute',
+                    widget: this,
+                    name: 'disabled',
+                    value: true,
+                });
+
+                this.silence();
+            }
+
+            return this;
+        }
+
+        disablePropagation(eventName) {
+            this.getCache('propagation').clear(eventName);
+            return this;
+        }
+
+        enable() {
+            if (this.isDisabled()) {
+                super.enable();
+                this.resume();
+
+                this.send({
+                    messageName: 'Widget.Changed',
+                    type: 'attribute',
+                    widget: this,
+                    name: 'disabled',
+                    value: false,
+                });
+            }
+
+            return this;
+        }
+
+        getCache(name) {
+            return super.getCache('widget')[name];
+        }
+
+        getPanel() {
+            let parent = this.parent();
+
+            while (parent && !(parent instanceof WPanel)) {
+                parent = parent.parent();
+            }
+
+            return parent;
+        }
+
+        getView() {
+            let parent = this.parent();
+
+            while (parent && !(parent instanceof WView)) {
+                parent = parent.parent();
+            }
+
+            return parent;
+        }
+
+        getWidgetStyle() {
+            return this.getAttribute('widget-style');
+        }
+
+        hasCache(name) {
+            return super.getCache('widget')[name] !== undefined;
+        }
+
+        hasValue() {
+            return this.hasAttribute('value');
+        }
+
+        insertAfter(...args) {
+            super.insertAfter(...args);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'innerHtml',
+                widget: this,
+                value: this.children(),
+            });
+
+            return this;
+        }
+
+        insertBefore(...args) {
+            super.insertBefore(...args);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'innerHtml',
+                widget: this,
+                value: this.children(),
+            });
+
+            return this;
+        }
+
+        logWidget() {
+            console.log(this.getCache('widget'));
+            return this;
+        }
+
+        off(messageName, handler, filter) {
+            if (messageName.startsWith('dom.')) {
+                return super.off(messageName.substr(4), handler);
+            }
+            else {
+                return Reflect.apply(Emitter.prototype.off, this, [messageName, handler, filter]);
             }
         }
-        else {
-            arg == 'width' ? console.log(this) : false;
-            this.htmlElement.node.style[arg] = value;
+
+        on(messageName, handler, filter) {
+            if (messageName.startsWith('dom.')) {
+                return super.on(messageName.substr(4), handler);
+            }
+            else {
+                return Reflect.apply(Emitter.prototype.on, this, [messageName, handler, filter]);
+            }
         }
 
-        return this;
-    }
-
-    setValue(value) {
-        this.set(value);
-        return this;
-    }
-
-    setWidgetStyle(widgetStyle) {
-        this.setAttribute('widget-style', widgetStyle);
-        return this;
-    }
-
-    size() {
-        return {
-            width: this.htmlElement.node.offsetWidth,
-            height: this.htmlElement.node.offsetHeight,
-        };
-    }
-
-    [Symbol.iterator]() {
-        return this.children()[Symbol.iterator]();
-    }
-
-    tagName() {
-        return this.htmlElement.tagName();
-    }
-
-    toggleClassName(className) {
-        this.htmlElement.toggleClassName(className);
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'attribute',
-            widget: this,
-            name: 'className',
-            value: this.hasClassName() ? className : '',
-        });
-
-        return this;
-    }
-
-    unbind(activeData) {
-        if (activeData) {
-            Binding.unbind(activeData, this);
+        once(messageName, handler, filter) {
+            if (messageName.startsWith('dom.')) {
+                return super.once(messageName.substr(4), handler);
+            }
+            else {
+                return Reflect.apply(Emitter.prototype.once, this, [messageName, handler, filter]);
+            }
         }
-        else {
-            Binding.unbindWidget(this);
+
+        popStyle() {
+            let styleStack = this.getCache('styles');
+
+            if (styleStack.length) {
+                let style = styleStack[styleStack.length - 1];
+                this.clearStyle();
+                this.setStyle(style);
+            }
+
+            return this;
+        }
+
+        prepend(...args) {
+            super.prepend(...args);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'innerHtml',
+                widget: this,
+                value: this.children(),
+            });
+
+            return this;
+        }
+
+        pushStyle(styleObj) {
+            let style = this.getStyle();
+            this.getCache('styles').push(style);
+            style = clone(style);
+
+            for (let key in styleObj) {
+                style[key] = styleObj[key];
+            }
+
+            this.clearStyle();
+            this.setStyle(style);
+            return this;
+        }
+
+        remove() {
+            let parent = this.parent();
+
+            if (parent) {
+                super.remove();
+
+                this.send({
+                    messageName: 'remove',
+                    type: 'remove',
+                    widget: parent,
+                    value: parent.children(),
+                });
+            }
+
+            return this;
+        }
+
+        replace(...args) {
+            let parent = this.parent();
+
+            if (parent) {
+                super.replace(...args);
+
+                this.send({
+                    messageName: 'Widget.Changed',
+                    type: 'innerHtml',
+                    widget: parent,
+                    value: parent.children(),
+                });
+            }
+
+            return this;
+        }
+
+        reveal() {
+            if (this.getCache('concealed') instanceof Placeholder) {
+                this.silence();
+                this.getCache('concealed').replace(this);
+                this.setCache('concealed', null);
+                this.resume();
+            }
+
+            return this;
+        }
+
+        setAttribute(name, value) {
+            super.setAttribute(name, value);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'attribute',
+                widget: this,
+                name: name,
+                value: value,
+            });
+
+            return this;
+        }
+
+        setClassName(className) {
+            super.setClassName(className);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'className',
+                widget: this,
+                name: 'className',
+            });
+
+            return this;
+        }
+
+        setClassNames(classNames) {
+            super.setClassNames(classNames);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'classNames',
+                widget: this,
+                name: 'classNames',
+            });
+
+            return this;
+        }
+
+        setCache(name, value) {
+            super.getCache('widget')[name] = value;
+            return this;
+        }
+
+        setInnerHtml(innerHtml) {
+            super.setInnerHtml(innerHtml);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'innerHtml',
+                widget: this,
+                value: this.children(),
+            });
+
+            return this;
+        }
+
+        setOuterHtml(outerHtml) {
+            super.setOuterHtml(outerHtml);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'innerHtml',
+                widget: this,
+                value: this.children(),
+            });
+
+            return this;
+        }
+
+        setStyle(arg, value) {
+            super.setStyle(arg, value);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'style',
+                widget: this,
+                style: this.getStyle(),
+            });
+
+            return this;
+        }
+
+        setWidgetStyle(widgetStyle) {
+            this.setAttribute('widget-style', widgetStyle);
+            return this;
+        }
+
+        unbind(activeData) {
+            if (activeData) {
+                Binding.unbind(activeData, this);
+            }
+            else {
+                Binding.unbindWidget(this);
+            }
+
+            return this;
+        }
+    });
+
+    class Placeholder extends Widget {
+        constructor(widget) {
+            super('div');
+            this.widget = widget;
+            this.setStyle('display', 'none');
+            this.setId(this.widget.getId());
+        }
+
+        reveal() {
+            this.widget.reveal();
         }
     }
-
-    width() {
-        return this.htmlElement.node.offsetWidth;
-    }
-});
+})();

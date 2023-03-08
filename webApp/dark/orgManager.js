@@ -73,7 +73,7 @@
             this.setAt(1, 1,
                 mkIButton()
                 .setValue(txx.fwOrgManagerCreateOrg)
-                .on('html.click', message => this.createOrg())
+                .on('dom.click', message => this.createOrg())
             );
         }
 
@@ -121,7 +121,7 @@
             this.setAt(3, 0,
                 mkIText()
                 .setAttribute('autocomplete', 'off')
-                .on('html.keyup', message => this.refresh())
+                .on('dom.keyup', message => this.refresh())
                 .bind(this.controller, 'pattern')
                 .setFlag('autofocus')
             );
@@ -158,7 +158,7 @@
                 body.mkRowAppend()
                 .mkCellAppend(
                     mkWHotSpot().setValue(dboOrg.name)
-                    .on('html.click', message => this.clickOrg(dboOrg, message.event))
+                    .on('dom.click', message => this.clickOrg(dboOrg, message.event))
                 )
             }
 

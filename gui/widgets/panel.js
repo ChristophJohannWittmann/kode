@@ -187,7 +187,7 @@ register(class WPanel extends Widget {
                 this.clearTitle();
             }
 
-            this.title = mkWidget('h3').set(title.trim()).setClassName('margin-left-6');
+            this.title = mkWidget('h3').setInnerHtml(title.trim()).setClassName('margin-left-6');
             this.prepend(this.title);
         }
 

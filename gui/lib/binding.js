@@ -52,8 +52,8 @@ class Binding {
             this.activeDataId = ActiveData.id(this.activeData);
         }
 
-        if (!(this.widget.id in Binding.byWidget)) {
-            Binding.byWidget[this.widget.id] = {};
+        if (!(this.widget.getId() in Binding.byWidget)) {
+            Binding.byWidget[this.widget.getId()] = {};
             this.widget.on('Widget.Changed', Binding.onWidgetChanged);
         }
 
@@ -66,7 +66,7 @@ class Binding {
             this.activeData[key] = '';
         }
 
-        Binding.byWidget[this.widget.id][this.id] = this;
+        Binding.byWidget[this.widget.getId()][this.id] = this;
         Binding.byActiveData[this.activeDataId][this.id] = this;
     }
 
@@ -77,7 +77,7 @@ class Binding {
             for (let binding of Object.values(Binding.byActiveData[adId])) {
                 if (binding instanceof Binding) {
                     if (!binding.key || binding.key == message.key) {
-                        if (!Binding.silentWidget || binding.widget.id != Binding.silentWidget.id) {
+                        if (!Binding.silentWidget || binding.widget.getId() != Binding.silentWidget.getId()) {
                             binding.onActiveDataChanged();
                         }
                     }
@@ -87,14 +87,14 @@ class Binding {
     }
 
     static onWidgetChanged(message) {
-        for (let binding of Object.values(Binding.byWidget[message.widget.id])) {
+        for (let binding of Object.values(Binding.byWidget[message.widget.getId()])) {
             if (binding instanceof AttributeBinding) {
                 if (message.type == 'attribute' && message.name == binding.attributeName) {
                     binding.onWidgetChanged(message.value);
                 }
             }
-            else if (binding instanceof ValueBinding) {
-                if (message.type == 'value') {
+            else if (binding instanceof InnerHtmlBinding) {
+                if (message.type == 'innerHtml') {
                     binding.onWidgetChanged(message.value);
                 }
             }
@@ -112,7 +112,7 @@ class Binding {
             return;
         }
 
-        if (!(widget.id in Binding.byWidget)) {
+        if (!(widget.getId() in Binding.byWidget)) {
             return;
         }
 
@@ -120,9 +120,9 @@ class Binding {
             let [id, binding ] = entry;
 
             if (binding instanceof Binding) {
-                if (binding.widget.id == widget.id) {
+                if (binding.widget.getId() == widget.getId()) {
                     delete Binding.byActiveData[adId][id];
-                    delete Binding.byWidget[binding.widget.id][id];
+                    delete Binding.byWidget[binding.widget.getId()][id];
                 }
             }
         }
@@ -132,9 +132,9 @@ class Binding {
             delete Binding.byActiveData[adId];
         }
 
-        if (!Object.keys(Binding.byWidget[widget.id])) {
+        if (!Object.keys(Binding.byWidget[widget.getId()])) {
             widget.off('Widget.Changed', Binding.onWidgetChanged);
-            delete Binding.byWidget[widget.id];
+            delete Binding.byWidget[widget.getId()];
         }
     }
 
@@ -151,9 +151,9 @@ class Binding {
             let [id, binding ] = entry;
 
             if (binding instanceof Binding) {
-                widgets[binding.widget.id] = binding.widget;
+                widgets[binding.widget.getId()] = binding.widget;
                 delete Binding.byActiveData[adId][id];
-                delete Binding.byWidget[binding.widget.id][id];
+                delete Binding.byWidget[binding.widget.getId()][id];
             }
         }
 
@@ -171,26 +171,26 @@ class Binding {
     }
 
     static unbindWidget(widget) {
-        if (!(widget.id in Binding.byWidget)){
+        if (!(widget.getId() in Binding.byWidget)){
             return;
         }
 
         let activeDaten = {};
 
-        for (let entry of Object.entries(Binding.byWidget[widget.id])) {
+        for (let entry of Object.entries(Binding.byWidget[widget.getId()])) {
             let [id, binding ] = entry;
 
             if (binding instanceof Binding) {
                 let adId = ActiveData.id(binding.activeData);
                 activeDaten[adId] = binding.activeData;
                 delete Binding.byActiveData[adId][id];
-                delete Binding.byWidget[binding.widget.id][id];
+                delete Binding.byWidget[binding.widget.getId()][id];
             }
         }
 
-        if (!Object.keys(Binding.byWidget[widget.id]).length) {
+        if (!Object.keys(Binding.byWidget[widget.getId()]).length) {
             widget.off('Widget.Changed', Binding.onActiveDataChanged);
-            delete Binding.byWidget[widget.id];
+            delete Binding.byWidget[widget.getId()];
         }
 
         for (let adId of Object.keys(activeDaten)) {
@@ -295,16 +295,16 @@ register(class MapBinding extends Binding {
  * activeData will update it's widgets.  Note that atempting to bind a widget
  * to two different active Data keys will provide garbage.
 *****/
-register(class ValueBinding extends Binding {
+register(class InnerHtmlBinding extends Binding {
     constructor(widget, activeData, key) {
         super(widget, activeData, key);
         this.widget.silence();
 
         if (this.key) {
-            this.widget.setValue(this.activeData[this.key]);
+            this.widget.setInnerHtml(this.activeData[this.key]);
         }
         else {
-            this.widget.setValue(ActiveData.value(this.activeData));
+            this.widget.setInnerHtml(ActiveData.value(this.activeData));
         }
 
         this.widget.resume();
@@ -314,10 +314,10 @@ register(class ValueBinding extends Binding {
         this.widget.silence();
 
         if (this.key) {
-            this.widget.setValue(this.activeData[this.key]);
+            this.widget.setInnerHtml(this.activeData[this.key]);
         }
         else {
-            this.widget.setValue(ActiveData.value(this.activeData));
+            this.widget.setInnerHtml(ActiveData.value(this.activeData));
         }
 
         this.widget.resume();

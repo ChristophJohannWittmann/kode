@@ -43,7 +43,7 @@ register(class WDialog extends WOverlay {
         });
 
         this.setWidgetStyle('dialog-content');
-        doc.on('html.keydown', message => message.event.key == 'Escape' ? this.hide() : false);
+        doc.on('dom.keydown', message => message.event.key == 'Escape' ? this.hide() : false);
         body.pushFilter({ blur: '6px' })
 
         let overlayOpts = new Object();
@@ -94,7 +94,7 @@ register(class WAlertDialog extends WDialog {
         .mkCellAppend(
             mkIButton()
             .setValue(txx.fwMiscOk)
-            .on('html.click', message => this.hide())
+            .on('dom.click', message => this.hide())
         );
 
         super(opts);
@@ -129,12 +129,12 @@ register(class WConfirmDialog extends WDialog {
         .mkCellAppend(
             mkIButton()
             .setValue(txx.fwMiscOk)
-            .on('html.click', message => this.hide(true))
+            .on('dom.click', message => this.hide(true))
         )
         .mkCellAppend(
             mkIButton()
             .setValue(txx.fwMiscCancel)
-            .on('html.click', message => this.hide(false))
+            .on('dom.click', message => this.hide(false))
         );
 
         super(opts);

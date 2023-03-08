@@ -33,10 +33,6 @@
 register(class WSelect extends InputBaseWidget {
     constructor() {
         super('select', 'select');
-
-        this.on('html.input', message => {
-            this.valueChanged(this.getValue());
-        });
     }
 
     addGroup(label) {
@@ -347,7 +343,7 @@ register(class WOption extends Widget {
         super('option');
         this.setAttribute('value', value);
         this.setWidgetStyle('option');
-        this.set(text);
+        this.setInnerHtml(text);
         this.selectWidget = selectWidget;
         this.groupWidget = groupWidget;
     }
@@ -393,7 +389,7 @@ register(class WOption extends Widget {
     }
 
     setText(text) {
-        this.set(text);
+        this.setInnerHtml(text);
         return this;
     }
 

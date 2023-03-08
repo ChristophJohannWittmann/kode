@@ -32,34 +32,28 @@
     *****/
     register(function wrapDocNode(arg) {
         if (arg instanceof Text) {
-            return mkDocText(arg);
+            return arg[cacheKey] ? arg[cacheKey].docNode : mkDocText(arg);
         }
         else if (arg instanceof DocText) {
             return arg;
         }
         else if (arg instanceof HTMLElement) {
-            return mkHtmlElement(arg);
+            return arg[cacheKey] ? arg[cacheKey].docNode : mkHtmlElement(arg);
         }
         else if (arg instanceof HtmlElement) {
             return arg;
         }
-        else if (arg instanceof Widget) {
-            return arg.htmlElement;
-        }
         else if (arg instanceof SVGElement) {
-            return mkSvgElement(arg);
+            return arg[cacheKey] ? arg[cacheKey].docNode : mkSvgElement(arg);
         }
         else if (arg instanceof SvgElement) {
             return arg;
         }
         else if (arg instanceof MathMLElement) {
-            return mkMathElement(arg);
+            return arg[cacheKey] ? arg[cacheKey].docNode : mkMathElement(arg);
         }
         else if (arg instanceof MathElement) {
             return arg;
-        }
-        else {
-            return document.createTextNode(arg);
         }
     });
 
@@ -70,35 +64,11 @@
      * objects as well as SVG and MathML elements, both of which extend Node.
     *****/
     register(function unwrapDocNode(arg) {
-        if (arg instanceof Text) {
-            return arg;
-        }
-        else if (arg instanceof DocText) {
+        if (arg instanceof DocNode) {
             return arg.node;
         }
-        else if (arg instanceof HTMLElement) {
+        else if (arg instanceof Node) {
             return arg;
-        }
-        else if (arg instanceof HtmlElement) {
-            return arg.node;
-        }
-        else if (arg instanceof Widget) {
-            return arg.htmlElement.node;
-        }
-        else if (arg instanceof SVGElement) {
-            return arg;
-        }
-        else if (arg instanceof SvgElement) {
-            return arg.node;
-        }
-        else if (arg instanceof MathMLElement) {
-            return arg;
-        }
-        else if (arg instanceof MathElement) {
-            return arg.node;
-        }
-        else {
-            return document.createTextNode(arg);
         }
     });
 
@@ -115,30 +85,22 @@
     const internalUseOnly = mkStringSet(
         'docNode',
         'flags',
-        'focused',
-        'propagation'
+        'widget',
     );
 
-    register(class DocNode {
+    register(class DocNode extends Emitter {
         constructor(node) {
+            super();
             this.node = node;
 
             if (!(cacheKey in node)) {
                 this.node[cacheKey] = {
                     docNode: this,
-                    focused: null,
                     flags: {},
+                    propagation: {},
+                    widget: {},
                 };
             }
-        }
-
-        append(...args) {
-            for (let arg of args) {
-                this.node.appendChild(unwrapDocNode(arg));
-            }
-
-            this.checkAutofocus(...args);
-            return this;
         }
 
         assignFlag(name, bool) {
@@ -146,42 +108,6 @@
                 this.node[cacheKey].flags[name] = bool;
             }
 
-            return this;
-        }
-
-        checkAutofocus(...args) {
-            let autofocus;
-
-            for (let arg of args) {
-                let bare = unwrapDocNode(arg);
-
-                if (bare[cacheKey] && bare[cacheKey].flags.autofocus === true) {
-                    if (typeof bare.focus == 'function') {
-                        autofocus = bare;
-                        break;
-                    }
-                }
-            }
-
-            if (autofocus) {
-                // TODO --
-                // don't call .widget()
-                wrapDocNode(autofocus).widget().focus();
-            }
-        }
-
-        children() {
-            let children = [];
-
-            for (let i = 0; i < this.node.childNodes.length; i++) {
-                children.push(wrapDocNode(this.node.childNodes.item(i)));
-            }
-
-            return children;
-        }
-
-        clear() {
-            this.node.replaceChildren();
             return this;
         }
 
@@ -198,37 +124,17 @@
             return this;
         }
 
-        descendants() {
-            let stack = [unwrapDocNode(this)];
-            let descendants = [];
-
-            while (stack.length) {
-                let node = stack.pop();
-                descendants.push(wrapDocNode(node));
-
-                for (let i = 0; i < node.childNodes.length; i++) {
-                    stack.push(node.childNodes.item(i));
-                }
-            }
-
-            return descendants;
-        }
-
         dir() {
             console.dir(this.node);
             return this;
         }
 
         doc() {
-            return mkDoc(this.node.ownerDocument);
-        }
+            let owner = this.node.ownerDocument;
 
-        firstChild() {
-            if (this.node.firstChild) {
-                return wrapDocNode(this.node.firstChild);
+            if (owner) {
+                return mkDoc(owner);
             }
-
-            return null;
         }
 
         getCache(name) {
@@ -248,39 +154,8 @@
             return name in this.node[cacheKey].flags;
         }
 
-        insertAfter(...args) {
-            if (this.node.parentNode) {
-                let nextSibling = this.node.nextSibling;
-      
-                if (nextSibling) {
-                    for (let arg of args) {
-                        this.node.parentNode.insertBefore(unwrapDocNode(arg), nextSibling);
-                    }
-                }
-                else {
-                    for (let arg of args) {
-                        this.node.parentNode.appendChild(unwrapDocNode(arg));
-                    }
-                }
-            }
-      
-            this.checkAutofocus(...args);
-            return this;
-        }
-
-        insertBefore(...args) {
-            if (this.node.parentNode) {
-                for (let arg of args) {
-                    this.node.parentNode.insertBefore(unwrapDocNode(arg), this.node);
-                }
-            }
-
-            this.checkAutofocus(...args);
-            return this;
-        }
-
         isElement() {
-            return this.node instanceof DocElement;
+            return this instanceof DocElement;
         }
       
         isSame(arg) {
@@ -289,18 +164,6 @@
 
         isText() {
             return this.node instanceof Text;
-        }
-
-        lastChild() {
-            if (this.node.lastChild) {
-                return wrapDocNode(this.node.lastChild);
-            }
-
-            return null;
-        }
-
-        length() {
-            return this.children().length;
         }
 
         log() {
@@ -313,6 +176,11 @@
             return this;
         }
 
+        logFlags() {
+            console.log(this.node[cacheKey].flags);
+            return this;
+        }
+
         name() {
             return this.node.nodeName.toLowerCase();
         }
@@ -321,34 +189,14 @@
             if (this.node.nextSibling) {
                 return wrapDocNode(this.node.nextSibling);
             }
-
-            return null;
         }
 
-        ownerDocument() {
-            let owner = this.node.ownerDocument;
-
-            if (owner) {
-                return mkDoc(owner);
-            }
+        nodeType() {
+            return this.node.nodeType;
         }
 
-        owns(docNode) {
-            let stack = [docNode.node];
-
-            while(stack.length) {
-                let node = stack.pop();
-
-                for (let i = 0; i < this.node.childNodes.length; i++) {
-                    let node = this.node.childNodes.item(i);
-
-                    if (Object.is(cacheKey in node && node[cacheKey].docNode), docNode) {
-                        return true;
-                    }
-                }
-            }
-
-            return false
+        nodeValue() {
+            return this.node.nodeValue;
         }
       
         parent() {
@@ -362,31 +210,10 @@
                 return wrapDocNode(this.node.parentElement);
             }
         }
-
-        prepend(...args) {
-            if (this.node.childNodes.length) {
-                let beforeChild = this.node.firstChild;
-
-                for (let arg of args) {
-                    this.node.insertBefore(unwrapDocNode(arg), beforeChild);
-                }
-            }
-            else {
-                for (let arg of args) {
-                    this.node.appendChild(unwrapDocNode(arg));
-                }
-            }
-
-            this.checkAutofocus(...args);
-            return this;
-        }
       
         prevSibling() {
             if (this.node.previousSibling) {
                 return wrapDocNode(this.node.previousSibling);
-            }
-            else {
-                return null;
             }
         }
 
@@ -439,10 +266,6 @@
             return this;
         }
 
-        [Symbol.iterator]() {
-            return this.children()[Symbol.iterator]();
-        }
-
         textContent() {
             return this.node.textContent;
         }
@@ -454,14 +277,6 @@
 
             return this;
         }
-
-        type() {
-            return this.node.nodeType;
-        }
-
-        value() {
-            return this.node.nodeValue;
-        }
     });
 
 
@@ -472,7 +287,7 @@
     *****/
     register(class DocText extends DocNode {
         constructor(arg) {
-            super(unwrapDocNode(arg));
+            super(typeof arg == 'string' ? document.createTextNode(arg) : unwrapDocNode(arg));
         }
       
         text() {
@@ -543,8 +358,56 @@
             this.setCache('propagation', mkStringSet());
         }
 
-        blur() {
-            setTimeout(() => this.node.blur(), 10);
+        animate() {
+            console.log('TBD DocElement.animate()');
+        }
+
+        append(...args) {
+            for (let arg of args) {
+                this.node.appendChild(unwrapDocNode(arg));
+            }
+
+            this.checkAutofocus(...args);
+            return this;
+        }
+
+        checkAutofocus(...args) {
+            let autofocus;
+
+            for (let arg of args) {
+                let bare = unwrapDocNode(arg);
+
+                if (bare[cacheKey] && bare[cacheKey].flags.autofocus === true) {
+                    if (typeof bare.focus == 'function') {
+                        autofocus = bare;
+                        break;
+                    }
+                }
+            }
+
+            if (autofocus) {
+                autofocus.setFocus();
+            }
+        }
+
+        childAt(index) {
+            if (index >= 0 && index < this.node.childNodes.length) {
+                return wrapDocNode(this.node.childNodes.item(index));
+            }
+        }
+
+        children() {
+            let children = [];
+
+            for (let i = 0; i < this.node.childNodes.length; i++) {
+                children.push(wrapDocNode(this.node.childNodes.item(i)));
+            }
+
+            return children;
+        }
+
+        clear() {
+            this.node.replaceChildren();
             return this;
         }
 
@@ -563,8 +426,50 @@
             return this;
         }
 
+        clientHeight() {
+            return this.node.clientHeight;
+        }
+
+        clientLeft() {
+            return this.node.clientLeft;
+        }
+
+        clientTop() {
+            return this.node.clientTop;
+        }
+
+        clientWidth() {
+            return this.node.clientWidth;
+        }
+
+        descendants() {
+            let stack = [unwrapDocNode(this)];
+            let descendants = [];
+
+            while (stack.length) {
+                let node = stack.pop();
+                descendants.push(wrapDocNode(node));
+
+                for (let i = 0; i < node.childNodes.length; i++) {
+                    stack.push(node.childNodes.item(i));
+                }
+            }
+
+            return descendants;
+        }
+
+        disable() {
+            this.setAttribute('disabled');
+            return this;
+        }
+
         disablePropagation(eventName) {
             this.getCache('propagation').clear(eventName);
+            return this;
+        }
+
+        enable() {
+            this.clearAttribute('disabled');
             return this;
         }
 
@@ -589,9 +494,25 @@
             return array;
         }
 
+        firstChild() {
+            if (this.node.firstChild) {
+                return wrapDocNode(this.node.firstChild);
+            }
+        }
+
+        firstElementChild() {
+            if (this.node.firstElementChild) {
+                return wrapDocNode(this.node.firstElementChild);
+            }
+        }
+
         focus() {
             setTimeout(() => this.node.focus(), 10);
             return this;
+        }
+
+        getAnimation() {
+            console.log('TBD DocElement.getAnimation()');
         }
 
         getAttribute(name) {
@@ -606,6 +527,14 @@
             return this.node.getAttributeNames().map(attrName => {
                 return { name: attrName, value: this.node.getAttribute(attrName) };
             });
+        }
+
+        getBoundingClientRect() {
+            return this.node.getClientBoundingRect()
+        }
+
+        getBoundingRects() {
+            return this.node.getBoundingRects()
         }
 
         getClassNames() {
@@ -632,6 +561,79 @@
 
         hasClassName(className) {
             return this.node.classList.contains(className);
+        }
+
+        hasPointerCapture() {
+            console.log('TBD DocElement.hasPointerCapture()');
+        }
+
+        insertAdjacentHtml() {
+            console.log('TBD DocElement.insertAdjacetnHtml()');
+        }
+
+        insertAdjacentText() {
+            console.log('TBD DocElement.insertAdjacetnText()');
+        }
+
+        insertAfter(...args) {
+            if (this.node.parentNode) {
+                let nextSibling = this.node.nextSibling;
+      
+                if (nextSibling) {
+                    for (let arg of args) {
+                        this.node.parentNode.insertBefore(unwrapDocNode(arg), nextSibling);
+                    }
+                }
+                else {
+                    for (let arg of args) {
+                        this.node.parentNode.appendChild(unwrapDocNode(arg));
+                    }
+                }
+            }
+      
+            this.checkAutofocus(...args);
+            return this;
+        }
+
+        insertBefore(...args) {
+            if (this.node.parentNode) {
+                for (let arg of args) {
+                    this.node.parentNode.insertBefore(unwrapDocNode(arg), this.node);
+                }
+            }
+
+            this.checkAutofocus(...args);
+            return this;
+        }
+
+        isDisabled() {
+            return this.hasAttribute('disabled');
+        }
+
+        isEnabled() {
+            return !this.hasAttribute('disabled');
+        }
+
+        lastChild() {
+            if (this.node.lastChild) {
+                return wrapDocNode(this.node.lastChild);
+            }
+        }
+
+        lastElementChild() {
+            if (this.node.lastElementChild) {
+                return wrapDocNode(this.node.lastElementChild);
+            }
+        }
+
+        length() {
+            return this.node.childNodes.length;
+        }
+      
+        nextElementSibling() {
+            if (this.node.nextElementSibling) {
+                return wrapDocNode(this.node.nextSElementibling);
+            }
         }
 
         off(messageName, handler) {
@@ -662,7 +664,6 @@
                     this.node.EMITTER.send({
                         messageName: event.type,
                         htmlElement: this,
-                        widget: this[Widget.widgetKey],
                         event: mkElementEvent(event),
                     });
                 });
@@ -692,7 +693,6 @@
                     this.node.EMITTER.send({
                         messageName: event.type,
                         htmlElement: this,
-                        widget: this[Widget.widgetKey],
                         event: mkElementEvent(event),
                     });
                 });
@@ -700,6 +700,48 @@
 
             this.node.EMITTER.once(messageName, handler);
             return this;
+        }
+
+        owns(docNode) {
+            let stack = [docNode.node];
+
+            while(stack.length) {
+                let node = stack.pop();
+
+                for (let i = 0; i < this.node.childNodes.length; i++) {
+                    let node = this.node.childNodes.item(i);
+
+                    if (Object.is(cacheKey in node && node[cacheKey].docNode), docNode) {
+                        return true;
+                    }
+                }
+            }
+
+            return false
+        }
+
+        prepend(...args) {
+            if (this.node.childNodes.length) {
+                let beforeChild = this.node.firstChild;
+
+                for (let arg of args) {
+                    this.node.insertBefore(unwrapDocNode(arg), beforeChild);
+                }
+            }
+            else {
+                for (let arg of args) {
+                    this.node.appendChild(unwrapDocNode(arg));
+                }
+            }
+
+            this.checkAutofocus(...args);
+            return this;
+        }
+      
+        prevElementSibling() {
+            if (this.node.previousElementSibling) {
+                return wrapDocNode(this.node.previousSElementibling);
+            }
         }
 
         queryAll(selector) {
@@ -728,6 +770,22 @@
             return null;
         }
 
+        scroll() {
+            console.log('TBD DocElement.scroll()');
+        }
+
+        scrollBy() {
+            console.log('TBD DocElement.scrollBy()');
+        }
+
+        scrollIntoView() {
+            console.log('TBD DocElement.scrollIntoView()');
+        }
+
+        scrollTo() {
+            console.log('TBD DocElement.scrollTo()');
+        }
+
         setAttribute(name, value) {
             if (value === undefined) {
                 this.node.setAttribute(name, '');
@@ -754,18 +812,21 @@
             return this;
         }
 
+        setPointerCapture() {
+            console.log('TBD DocElement.setPointerCapture()');
+        }
+
         setOuterHtml(outerHtml) {
             this.node.outerHTML = outerHtml;
             return this;
         }
 
-        tagName() {
-            return this.node.tagName.toLowerCase();
+        [Symbol.iterator]() {
+            return this.children()[Symbol.iterator]();
         }
 
-        toggleClassName(className) {
-            this.node.classList.toggle();
-            return this;
+        tagName() {
+            return this.node.tagName.toLowerCase();
         }
     });
 
@@ -794,13 +855,50 @@
             }
         }
 
+        blur() {
+            setTimeout(() => this.node.blur(), 10);
+            return this;
+        }
+
         clearData(key) {
             delete this.node.dataset[name];
             return this;
         }
 
+        clearStyle() {
+            while (this.node.style.length) {
+                let styleProperty = this.node.style.item(0);
+                this.node.style.removeProperty(styleProperty);
+            }
+
+            return this;
+        }
+
+        clearTabIndex() {
+            this.node.tabIndex = 0;
+            return this;
+        }
+
+        click() {
+            setTimeout(() => this.node.click(), 10);
+            return this;
+        }
+
+        focus() {
+            setTimeout(() => this.node.focus(), 10);
+            return this;
+        }
+
         getData(key) {
             return this.node.dataset[key];
+        }
+
+        getId() {
+            return this.node.id;
+        }
+
+        getInnerHtml() {
+            return this.node.innerHTML;
         }
 
         getOffset() {
@@ -828,28 +926,68 @@
             return { left:x, top:y, width:dx, height:dy };
         }
 
-        getOffsetBottom() {
-            return this.node.offsetBottom;
+        getOffsetHeight() {
+            return this.node.offsetHeight;
         }
 
         getOffsetLeft() {
             return this.node.offsetLeft;
         }
 
-        getOffsetRight() {
-            return this.node.offsetRight;
-        }
-
         getOffsetTop() {
             return this.node.offsetTop;
         }
 
-        getStyle(propertyName, value) {
-            return this.node.style[propertyName];
+        getOffsetWidth() {
+            return this.node.offsetWidth;
+        }
+
+        getOuterHtml() {
+            return this.node.outerHTML;
+        }
+
+        getStyle(arg) {
+            if (arg) {
+                return this.node.style[arg];
+            }
+            else {
+                let style = {};
+
+                for (let i = 0; i < this.node.style.length; i++) {
+                    let styleProperty = this.node.style.item(i);
+                    style[styleProperty] = this.node.style[styleProperty];
+                }
+
+                return style;
+            }
+        }
+
+        getTabIndex() {
+            return this.node.tabIndex;
+        }
+
+        getTitle() {
+            return this.node.title;
         }
 
         hasData(key) {
             return key in this.node.dataset;
+        }
+
+        scrollHeight() {
+            return this.node.scrollHeight;
+        }
+
+        scrollLeft() {
+            return this.node.scrollLeft;
+        }
+
+        scrollTop() {
+            return this.node.scrollTop;
+        }
+
+        scrollWidth() {
+            return this.node.scrollWidth;
         }
 
         setData(name, value) {
@@ -857,22 +995,48 @@
             return this;
         }
 
-        setStyle(propertyName, value) {
-            this.node.style[propertyName] = value;
+        setId(id) {
+            this.node.id = id;
             return this;
         }
 
-        widget() {
-            if (Widget.widgetKey in this.node) {
-                return this.node[Widget.widgetKey];
+        setInnerText(text) {
+            this.node.innerText = text;
+            return this;
+        }
+
+        setOuterText(text) {
+            this.node.outerText = text;
+            return this;
+        }
+
+        setStyle(arg, value) {
+            if (typeof arg == 'object') {
+                for (let property in arg) {
+                    let value = arg[property];
+                    this.node.style[property] = value;
+                }
             }
             else {
-                let widget = mkWidget('DUMMY');
-                widget.htmlElement = this;
-                widget.setAttribute('widget-class', 'Widget');
-                widget.brand(this);
-                return widget;
+                this.node.style[arg] = value;
             }
+
+            return this;
+        }
+
+        setTabIndex(index) {
+            if (typeof index == 'number' && index > 0) {
+            }
+            else {
+                this.node.tabIndex = 0;
+            }
+
+            return this;
+        }
+
+        setTitle(title) {
+            this.node.title = title;
+            return this;
         }
     });
 

@@ -158,8 +158,8 @@ define('WScalar', class WScalar extends Widget {
     static dboReadonly = mkStringSet('oid', 'created', 'updated');
 
     static routed = [
-        'html.click',
-        'html.dblclick',
+        'dom.click',
+        'dom.dblclick',
         'Widget.Changed',
         'Widget.Modified',
         'Widget.Validity',
@@ -180,7 +180,7 @@ define('WScalar', class WScalar extends Widget {
         }
 
         if (opts.menu instanceof WPopupMenu) {
-            opts.menu.attach(this, 'html.click');
+            opts.menu.attach(this, 'dom.click');
         }
     }
 

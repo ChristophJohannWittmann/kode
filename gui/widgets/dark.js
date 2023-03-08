@@ -59,10 +59,8 @@ register(class DarkWidget extends Widget {
         paws();
 
         let parent = this.parent();
-
         let widget = Reflect.apply(this.container[this.makerName], window, args);
-        widget.id = this.id;
-        widget.selector = this.selector;
+        widget.setId(this.getId());
         this.replace(widget);
 
         if (parent instanceof WPanel) {

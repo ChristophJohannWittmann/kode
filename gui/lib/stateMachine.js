@@ -69,18 +69,18 @@ register(class WStateMachine extends Emitter {
     }
 
     addChild(widget, name, modes, switches) {
-        if (!(widget.id in this.widgets) && name.trim() && !(name.trim() in this.namedWidgets)) {
+        if (!(widget.getId() in this.widgets) && name.trim() && !(name.trim() in this.namedWidgets)) {
             widget[WStateMachine.nameKey] = name.trim();
             widget.getOwner = () => this.owner;
             widget.getStateMachine = () => this;
 
-            this.widgets[widget.id] = {
+            this.widgets[widget.getId()] = {
                 widget: widget,
                 modes: mkStringSet((Array.isArray(modes) ? modes : []).filter(mode => (mode in this.modes))),
                 switches: mkStringSet((Array.isArray(switches) ? switches : []).filter(swName => swName in this.switches)),
             }
 
-            this.namedWidgets[widget[WStateMachine.nameKey]] = this.widgets[widget.id];
+            this.namedWidgets[widget[WStateMachine.nameKey]] = this.widgets[widget.getId()];
             return true;
         }
 
@@ -179,11 +179,11 @@ register(class WStateMachine extends Emitter {
     }
 
     removeChild(widget) {
-        if (widget.id in this.widgets) {
+        if (widget.getId() in this.widgets) {
             delete widget.getOwner;
             delete widget.getStateMachine;
             delete this.namedWidgets[widget[WStateMachine.nameKey]];
-            delete this.widgets[widget.id];
+            delete this.widgets[widget.getId()];
             widget.remove();
             this.update();
             return true;

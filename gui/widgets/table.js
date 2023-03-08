@@ -96,7 +96,7 @@ register(class WTable extends Widget {
  * This class improves coding efficiency for tbody and thead elements associated
  * with the WTable instance.  The WTableSection creates rows, gets rows, deletes
  * rows and sorts them with clean API method calls.  Regardless of the rows'
- * content uniqueness, individual rows can be indentified with the widget.id.
+ * content uniqueness, individual rows can be indentified with the widget.getId().
 *****/
 register(class WTableSection extends Widget {
     constructor(sectionTag, cellTag) {
@@ -243,7 +243,7 @@ register(class WTableSection extends Widget {
  * This class improves coding efficiency for table row, tr, elements associated
  * with the WTable instance.  The WTableRow creates cells, gets cells, deletes
  * cells and sorts them with clean API method calls.  Regardless of the cells'
- * content uniqueness, individual cells can be indentified with the widget.id.
+ * content uniqueness, individual cells can be indentified with the widget.getId().
 *****/
 register(class WTableRow extends Widget {
     constructor(sectionTag, cellTag) {

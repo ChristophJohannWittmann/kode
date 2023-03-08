@@ -31,12 +31,8 @@ register(class Doc extends Emitter {
     constructor(doc) {
         super();
         this.doc = doc;
-        this.focused = null;
 
         [
-            'scroll',
-            'visibilitychange',
-            'wheel',
             'animationcancel',
             'animationend',
             'animationiteration',
@@ -44,7 +40,7 @@ register(class Doc extends Emitter {
             'contextmenu',
             'copy',
             'cut',
-            'paste',
+            'DOMContentLoaded',
             'drag',
             'dragend',
             'dragenter',
@@ -54,12 +50,11 @@ register(class Doc extends Emitter {
             'drop',
             'fullscreenchange',
             'fullscreenerror',
+            'gotpointercapture',
             'keydown',
             'keyup',
-            'DOMContentLoaded',
-            'readystatechange',
-            'gotpointercapture',
             'lostpointercapture',
+            'paste',
             'pointercancel',
             'pointerdown',
             'pointerenter',
@@ -70,7 +65,8 @@ register(class Doc extends Emitter {
             'pointerout',
             'pointerover',
             'pointerup',
-            'selectchange',
+            'readystatechange',
+            'scroll',
             'touchcancel',
             'touchend',
             'touchmove',
@@ -79,6 +75,9 @@ register(class Doc extends Emitter {
             'transitionend',
             'transitionrun',
             'transitionstart',
+            'selectchange',
+            'visibilitychange',
+            'wheel',
         ].forEach(eventName => this.doc.addEventListener(eventName, event => {
             this.send({
                 messageName: `html.${eventName}`,
@@ -112,19 +111,19 @@ register(class Doc extends Emitter {
     }
 
     getBody() {
-        return wrapDocNode(this.doc.body);
+        return this.doc.body;
     }
 
-    getFocused() {
-        return this.focused;
+    getDocument() {
+        return this.doc;
     }
 
     getHead() {
-        return wrapDocNode(this.doc.head);
+        return this.doc.head;
     }
 
     getHtml() {
-        return wrapDocNode(this.doc.documentElement);
+        return this.doc.documentElement
     }
 
     getStyleSheet(title) {
@@ -158,40 +157,6 @@ register(class Doc extends Emitter {
 
     location() {
         return this.doc.location;
-    }
-
-    onWidget(messageName, widget, handler) {
-        const filter = message => {
-            if (Widget.widgetKey in message.event.target) {
-                let eventWidget = message.event.target[Widget.widgetKey];
-
-                if (eventWidget.selector == widget.selector) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
-        this.on(messageName, handler, filter);
-        return this;
-    }
-
-    onceWidget(messageName, widget, handler) {
-        const filter = message => {
-            if (Widget.widgetKey in message.event.target) {
-                let eventWidget = message.event.target[Widget.widgetKey];
-
-                if (eventWidget.selector == widget.selector) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
-        this.once(messageName, handler, filter);
-        return this;
     }
 
     readyState() {

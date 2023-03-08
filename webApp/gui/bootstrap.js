@@ -42,15 +42,14 @@
     *****/
     register(async function bootstrap() {
         await onSingletons();
-        window.win = mkWin(window);
-        window.doc = win.doc();
-        window.styleSheet = doc.getStyleSheet('WebApp');
-        window.html = mkWHtml(doc);
-        window.head = mkWHead(doc);
-        window.body = mkWBody(doc);
-        window.home = null;
-        window.stack = mkWStack();
-
+        global.win = mkWin(window);
+        global.doc = win.doc();
+        global.styleSheet = doc.getStyleSheet('WebApp');
+        global.html = mkWidget(doc.getHtml());
+        global.head = mkWidget(doc.getHead());
+        global.body = mkWidget(doc.getBody());
+        global.home = null;
+        global.stack = mkWStack();
         body.append(stack);
         stack.push(mkFWSignInView());
 

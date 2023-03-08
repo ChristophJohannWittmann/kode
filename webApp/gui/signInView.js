@@ -96,29 +96,29 @@ class AuthenticateForm extends WGrid {
         });
 
         this.data = data;
-        this.setClasses('flex-h-cc alt-colors border-style-solid border-width-2 border-radius-2');
+        this.setClassNames('flex-h-cc alt-colors border-style-solid border-width-2 border-radius-2');
 
-        this.setAt(1, 0, mkWidget('div').set(txx.fwSignInUsername).setClasses('flex-h-sc font-weight-bold font-size-4'));
+        this.setAt(1, 0, mkWidget('div').setInnerHtml(txx.fwSignInUsername).setClassNames('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(3, 0, mkIEmail()
-        .bind(this.data, 'username'))
+        .bind(this.data, 'username', 'value'))
         .setAttribute('autofocus')
         .setAttribute('autocomplete', 'email');
 
-        this.setAt(5, 0, mkWidget('div').set(txx.fwSignInPassword).setClasses('flex-h-sc font-weight-bold font-size-4'));
+        this.setAt(5, 0, mkWidget('div').setInnerHtml(txx.fwSignInPassword).setClassNames('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(7, 0, mkIPassword()
-        .bind(this.data, 'password'))
+        .bind(this.data, 'password', 'value'))
         .setAttribute('autocomplete', 'current-password');
 
         this.setAt(9, 0,
             mkIButton()
             .setAttribute('value', txx.fwSignInSignIn)
-            .on('html.click', message => this.send({ messageName: 'SignIn' }))
+            .on('dom.click', message => this.send({ messageName: 'SignIn' }))
         )
 
         this.setAt(11, 0,
             mkIButton()
             .setAttribute('value', txx.fwSignInForgotPassword)
-            .on('html.click', message => this.data.mode = 'ForgotPassword')
+            .on('dom.click', message => this.data.mode = 'ForgotPassword')
         )
     }
 }
@@ -140,26 +140,26 @@ class ForgotCredentialsForm extends WGrid {
         });
 
         this.data = data;
-        this.setClasses('flex-h-cc alt-colors border-style-solid border-width-1 border-radius-2');
+        this.setClassNames('flex-h-cc alt-colors border-style-solid border-width-1 border-radius-2');
 
-        this.setAt(1, 0, mkWidget('div').set(txx.fwForgotInstructions));
+        this.setAt(1, 0, mkWidget('div').setInnerHtml(txx.fwForgotInstructions));
 
-        this.setAt(3, 0, mkWidget('div').set(txx.fwForgotEmail).setClasses('flex-h-sc font-weight-bold font-size-4'));
+        this.setAt(3, 0, mkWidget('div').setInnerHtml(txx.fwForgotEmail).setClassNames('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(5, 0, mkIEmail()
-        .bind(this.data, 'username'))
+        .bind(this.data, 'username', 'value'))
         .setAttribute('autofocus')
         .setAttribute('autocomplete', 'email');
 
         this.setAt(7, 0,
             mkIButton()
             .setAttribute('value', txx.fwForgotReset)
-            .on('html.click', message => this.send({ messageName: 'ResetPassword' }))
+            .on('dom.click', message => this.send({ messageName: 'ResetPassword' }))
         )
 
         this.setAt(9, 0,
             mkIButton()
             .setAttribute('value', txx.fwForgotSignIn)
-            .on('html.click', message => this.data.mode = 'Authenticate')
+            .on('dom.click', message => this.data.mode = 'Authenticate')
         )
     }
 }

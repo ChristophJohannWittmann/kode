@@ -86,8 +86,14 @@ register(class WStack extends WPanel {
     }
 
     promote(widget) {
+        console.log(widget.getId());
+        console.log('-------------');
+        this.children().forEach(child => {
+            console.log(child.getId());
+            console.log(child);
+        });
         for (let child of this) {
-            if (child.selector == widget.selector) {
+            if (child.getId() == widget.getId()) {
                 this.saveFocus();
                 child.remove();
                 child.reveal();
@@ -107,7 +113,7 @@ register(class WStack extends WPanel {
         for (child of this) {
             index++;
 
-            if (child.selector == widget.selector) {
+            if (child.getId() == widget.getId()) {
                 return false;
             }
         }

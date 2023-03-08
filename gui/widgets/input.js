@@ -36,43 +36,18 @@ register(class WInput extends InputBaseWidget {
     constructor(type) {
         super('input', 'input');
         this.setAttribute('type', type);
-        this.valid = true;
-
-        this.on('html.input', message => {
-            let node = message.event.target;
-            let widget = node[Widget.widgetKey];
-
-            if (widget) {
-                var value = widget.getValue();
-            }
-            else {
-                var value = node.value;
-            }
-
-            this.valueChanged(value);
-
-            if (this.isValid() != this.valid) {
-                this.valid = !this.valid;
-
-                this.send({
-                    messageName: 'Widget.Validity',
-                    valid: this.valid,
-                    widget: this,
-                });
-            }
-        });
     }
 
     getValue() {
-        return this.htmlElement.node.value;
+        return this.node.value;
     }
 
     isValid() {
-        return this.htmlElement.node.checkValidity();
+        return this.node.checkValidity();
     }
 
     setValue(value) {
-        this.htmlElement.node.value = value;
+        this.node.value = value;
         this.valid = this.isValid();
         return this;
     }
@@ -98,11 +73,11 @@ register(class ICheckbox extends WInput {
     }
 
     getValue() {
-        return this.htmlElement.node.checked;
+        return this.node.checked;
     }
 
     setValue(bool) {
-        this.htmlElement.node.checked = bool;
+        this.node.checked = bool;
         return this;
     }
 });
@@ -192,11 +167,11 @@ register(class IRadio extends WInput {
     }
 
     getValue() {
-        return this.htmlElement.node.checked;
+        return this.node.checked;
     }
 
     setValue(bool) {
-        this.htmlElement.node.checked = bool;
+        this.node.checked = bool;
         return this;
     }
 });

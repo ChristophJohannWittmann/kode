@@ -42,15 +42,15 @@ register(class WView extends WPanel {
 
         this.done =
         mkWCtl()
-        .set(txx.fwNavDone)
+        .setInnerHtml(txx.fwNavDone)
         .setWidgetStyle('ctls-horz-ctl')
-        .on('html.click', async message => this.onDone(message));
+        .on('dom.click', async message => this.onDone(message));
 
         this.cancel =
         mkWCtl()
-        .set(txx.fwNavCancel)
+        .setInnerHtml(txx.fwNavCancel)
         .setWidgetStyle('ctls-horz-ctl')
-        .on('html.click', async message => this.onCancel(message));
+        .on('dom.click', async message => this.onCancel(message));
         this.on('Widget.Cancel', async message => await this.onCancel(message));
         this.on('Widget.Done', async message => await this.onDone(message));
 
