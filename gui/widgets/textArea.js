@@ -31,9 +31,10 @@
  * integrates the textarea HTML element into the framework and provides an OO-
  * usability wrapper for the underlying textarea features.
 *****/
-register(class WTextArea extends InputBaseWidget {
+register(class WTextArea extends WEditor {
     constructor(entryFilter) {
-        super('textarea', 'textarea');
+        super('textarea');
+        this.setWidgetStyle('textarea');
         this.tabSize = 4;
         this.maxSize = 20000;
         this.setEntryFilter(entryFilter);
@@ -49,6 +50,15 @@ register(class WTextArea extends InputBaseWidget {
                 this.entryFilter.handle(event, this);
             }
         });
+
+        this.on('dom.input', message => {
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'value',
+                widget: this,
+                value: message.event.target.value,
+            });
+        });
     }
 
     clearEntryFilter() {
@@ -57,16 +67,16 @@ register(class WTextArea extends InputBaseWidget {
     }
 
     clearSelection() {
-        this.htmlElement.node.selectionEnd = this.htmlElement.node.selectionStart;
+        this.node.selectionEnd = this.node.selectionStart;
         return this;
     }
 
     getCaretIndex() {
-        return this.htmlElement.node.selectionStart;
+        return this.node.selectionStart;
     }
 
     getCaretPosition() {
-        return this.getPosition(this.htmlElement.node.selectionStart);
+        return this.getPosition(this.node.selectionStart);
     }
 
     getEntryFilter() {
@@ -74,7 +84,7 @@ register(class WTextArea extends InputBaseWidget {
     }
 
     getLength() {
-        return this.htmlElement.node.textLength;
+        return this.node.textLength;
     }
 
     getPosition(index) {
@@ -83,7 +93,7 @@ register(class WTextArea extends InputBaseWidget {
 
         return {
             row: rows.length - 1,
-            col: this.htmlElement.node.selectionStart - rowStart,
+            col: this.node.selectionStart - rowStart,
         };
     }
 
@@ -101,10 +111,10 @@ register(class WTextArea extends InputBaseWidget {
     }
 
     getSelection() {
-        if (this.htmlElement.node.selectionStart != this.htmlElement.node.selectionEnd) {
+        if (this.node.selectionStart != this.node.selectionEnd) {
             return {
-                start: this.htmlElement.node.selectionStart,
-                end: this.htmlElement.node.selectionEnd,
+                start: this.node.selectionStart,
+                end: this.node.selectionEnd,
             };
         }
         else {
@@ -124,7 +134,7 @@ register(class WTextArea extends InputBaseWidget {
     }
 
     getValue() {
-        return this.htmlElement.node.value;
+        return this.node.value;
     }
 
     hasEntryFilter() {
@@ -132,44 +142,48 @@ register(class WTextArea extends InputBaseWidget {
     }
 
     hasSelection() {
-        return this.htmlElement.node.selectionStart != this.htmlElement.node.selectionEnd;
+        return this.node.selectionStart != this.node.selectionEnd;
     }
 
     insertAfterCaret(text) {
-        this.insertAt(this.htmlElement.node.selectionStart, text);
+        this.insertAt(this.node.selectionStart, text);
         return this;
     }
 
     insertAt(index, text) {
         let value = this.getValue();
         let revisedValue = value.substring(0, index) + text + value.substring(index);
-        let revisedStart = this.htmlElement.node.selectionStart + text.length;
-        let revisedEnd = this.htmlElement.node.selectionEnd + text.length;
-        this.htmlElement.node.value = revisedValue;
-        this.htmlElement.node.setSelectionRange(revisedStart, revisedEnd);
+        let revisedStart = this.node.selectionStart + text.length;
+        let revisedEnd = this.node.selectionEnd + text.length;
+        this.node.value = revisedValue;
+        this.node.setSelectionRange(revisedStart, revisedEnd);
         return this;
     }
 
     insertBeforeCaret(text) {
-        this.insertAt(this.htmlElement.node.selectionStart + 1, text);
+        this.insertAt(this.node.selectionStart + 1, text);
         return this;
     }
 
+    isValid() {
+        return true;
+    }
+
     moveCaretEnd() {
-        this.setCaretPosition(this.htmlElement.node.textLength);
+        this.setCaretPosition(this.node.textLength);
         return this;
     }
 
     moveCaretEndOfLine() {
-        let rows = this.getRows(this.htmlElement.node.selectionStart);
+        let rows = this.getRows(this.node.selectionStart);
         let index = rows[rows.length - 1];
 
-        while (index < this.htmlElement.node.textLength && this.htmlElement.node.value[index] != '\n') {
+        while (index < this.node.textLength && this.node.value[index] != '\n') {
             index++;
         }
 
-        this.htmlElement.node.selectionStart = index;
-        this.htmlElement.node.selectionEnd = index;
+        this.node.selectionStart = index;
+        this.node.selectionEnd = index;
         return this;
     }
 
@@ -179,24 +193,24 @@ register(class WTextArea extends InputBaseWidget {
     }
 
     moveCaretStartOfLine() {
-        let rows = this.getRows(this.htmlElement.node.selectionStart);
-        this.htmlElement.node.selectionStart = rows[rows.length - 1];
-        this.htmlElement.node.selectionEnd = rows[rows.length - 1];
+        let rows = this.getRows(this.node.selectionStart);
+        this.node.selectionStart = rows[rows.length - 1];
+        this.node.selectionEnd = rows[rows.length - 1];
         return this;
     }
 
     setCaretIndex(index) {
         if (index < 0) {
-            this.htmlElement.node.selectionStart = 0;
-            this.htmlElement.node.selectionEnd = 0;
+            this.node.selectionStart = 0;
+            this.node.selectionEnd = 0;
         }
-        else if (index >= this.htmlElement.node.textLength) {
-            this.htmlElement.node.selectionStart = this.htmlElement.node.textLength - 1;
-            this.htmlElement.node.selectionEnd = this.htmlElement.node.textLength - 1;            
+        else if (index >= this.node.textLength) {
+            this.node.selectionStart = this.node.textLength - 1;
+            this.node.selectionEnd = this.node.textLength - 1;            
         }
         else {
-            this.htmlElement.node.selectionStart = index;
-            this.htmlElement.node.selectionEnd = index;
+            this.node.selectionStart = index;
+            this.node.selectionEnd = index;
         }
 
         return this;
@@ -209,14 +223,14 @@ register(class WTextArea extends InputBaseWidget {
 
     setSelection(start, end) {
         if (!start) {
-            this.htmlElement.node.select();
+            this.node.select();
         }
         else if (!end) {
-            end = this.htmlElement.node.textLength - 1;
-            this.htmlElement.node.setSelectionRange(start, end);
+            end = this.node.textLength - 1;
+            this.node.setSelectionRange(start, end);
         }
         else {
-            this.htmlElement.node.setSelectionRange(start, end);
+            this.node.setSelectionRange(start, end);
         }
 
         return this;
@@ -228,8 +242,10 @@ register(class WTextArea extends InputBaseWidget {
     }
 
     setValue(text) {
+        this.silence();
         let scrubbed = text.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
-        this.htmlElement.node.value = scrubbed;
+        this.node.value = scrubbed;
+        this.resume();
         return this;
     }
 });

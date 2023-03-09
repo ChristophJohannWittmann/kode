@@ -30,9 +30,19 @@
  * that the WSelect class implements the value-interface, which is needed for
  * binding a select element to an ActiveData instance.
 *****/
-register(class WSelect extends InputBaseWidget {
+register(class WSelect extends WEditor {
     constructor() {
-        super('select', 'select');
+        super('select');
+        this.setWidgetStyle('select');
+
+        this.on('dom.input', message => {
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'value',
+                widget: this,
+                value: message.event.target.value,
+            });
+        });
     }
 
     addGroup(label) {
@@ -42,7 +52,7 @@ register(class WSelect extends InputBaseWidget {
     }
 
     clear() {
-        for (let option of this.htmlElement.node.options) {
+        for (let option of this.node.options) {
             option.selected = false;
         }
 
@@ -90,7 +100,7 @@ register(class WSelect extends InputBaseWidget {
     }
 
     getOption(value) {
-        for (let option of this.htmlElement.node.options) {
+        for (let option of this.node.options) {
             let htmlElement = mkHtmlElement(option);
 
             if (htmlElement.getAttribute('value') == value) {
@@ -104,7 +114,7 @@ register(class WSelect extends InputBaseWidget {
     getOptionMap() {
         let map = {};
 
-        for (let option of this.htmlElement.node.options) {
+        for (let option of this.node.options) {
             map[option.getAttribute('value')] = mkHtmlElement(option).widget();
         }
 
@@ -114,7 +124,7 @@ register(class WSelect extends InputBaseWidget {
     getOptionArray() {
         let array = [];
 
-        for (let option of this.htmlElement.node.options) {
+        for (let option of this.node.options) {
             array.push(mkHtmlElement(option).widget());
         }
 
@@ -124,7 +134,7 @@ register(class WSelect extends InputBaseWidget {
     getSelectedMap() {
         let map = [];
 
-        for (let option of this.htmlElement.node.selectedOptions) {
+        for (let option of this.node.selectedOptions) {
             map[option.getAttribute('value')] = mkHtmlElement(option).widget();
         }
 
@@ -134,7 +144,7 @@ register(class WSelect extends InputBaseWidget {
     getSelectedArray() {
         let array = [];
 
-        for (let option of this.htmlElement.node.selectedOptions) {
+        for (let option of this.node.selectedOptions) {
             array.push(mkHtmlElement(option).widget());
         }
 
@@ -145,14 +155,14 @@ register(class WSelect extends InputBaseWidget {
         if (this.hasAttribute('multiple')) {
             let array = [];
 
-            for (let option of this.htmlElement.node.selectedOptions) {
+            for (let option of this.node.selectedOptions) {
                 array.push(option.getAttribute('value'));
             }
 
             return array;
         }
-        else if (this.htmlElement.node.selectedOptions.length) {
-            return this.htmlElement.node.selectedOptions[0].getAttribute('value');
+        else if (this.node.selectedOptions.length) {
+            return this.node.selectedOptions[0].getAttribute('value');
         }
         else {
             return '';
@@ -176,7 +186,7 @@ register(class WSelect extends InputBaseWidget {
     }
 
     hasOption(value) {
-        for (let option of this.htmlElement.node.options) {
+        for (let option of this.node.options) {
             let htmlElement = mkHtmlElement(option);
 
             if (htmlElement.getAttribute('value') == value) {
@@ -185,6 +195,10 @@ register(class WSelect extends InputBaseWidget {
         }
 
         return false;
+    }
+
+    isValid() {
+        return true;
     }
 
     removeGroup(label) {
@@ -228,6 +242,8 @@ register(class WSelect extends InputBaseWidget {
     }
 
     setValue(value, key) {
+        this.silence();
+
         if (typeof value == 'object') {
             if (!this.hasAttribute('multiple')) {
                 this.setAttribute('multiple');
@@ -239,7 +255,7 @@ register(class WSelect extends InputBaseWidget {
 
         let valueSet = mkStringSet(value);
 
-        for (let option of this.htmlElement.node.options) {
+        for (let option of this.node.options) {
             if (valueSet.has(option.getAttribute('value'))) {
                 option.selected = true;
             }
@@ -248,6 +264,7 @@ register(class WSelect extends InputBaseWidget {
             }
         }
 
+        this.resume();
         return this;
     }
 
@@ -349,12 +366,12 @@ register(class WOption extends Widget {
     }
 
     deselect() {
-        this.htmlElement.node.selected = false;
+        this.node.selected = false;
         return this;
     }
 
     disable() {
-        this.htmlElement.node.selected = false;
+        this.node.selected = false;
         this.setAttribute('disabled');
         return this;
     }
@@ -377,14 +394,14 @@ register(class WOption extends Widget {
     }
 
     isSelected() {
-        return this.htmlElement.node.selected;
+        return this.node.selected;
     }
 
     remove() {
     }
 
     select() {
-        this.htmlElement.node.selected = true;
+        this.node.selected = true;
         return this;
     }
 
@@ -394,7 +411,7 @@ register(class WOption extends Widget {
     }
 
     toggle() {
-        this.htmlElement.node.selected = !this.htmlElement.node.selected;
+        this.node.selected = !this.node.selected;
         return this;
     }
 });

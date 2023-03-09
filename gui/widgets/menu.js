@@ -37,21 +37,21 @@ register(class WPopupMenu extends Widget {
     static init = (() => {
         doc.on('dom.click', message => {
             if (WPopupMenu.showing) {
-                let id = mkHtmlElement(message.event.rawEvent().target).getAttribute('id');
+                let id = message.event.target.id;
 
-                if (id != WPopupMenu.showing.getAttribute('id')) {
+                if (!(id in WPopupMenu.showing.widgets)) {
                     for (let child of WPopupMenu.showing) {
-                        if (child.getAttribute('id') == id) {
+                        if (child.getId() == id) {
                             return;
                         }
                     }
-
+                    
                     WPopupMenu.showing.close();
                 }
             }
         });
 
-        doc.on('dom.keyup', message => {
+        doc.on('dom.keydown', message => {
             if (WPopupMenu.showing) {
                 if (message.event.rawEvent().code == 'Escape') {
                     WPopupMenu.showing.close();

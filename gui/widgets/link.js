@@ -91,11 +91,11 @@ register(class WLink extends Widget {
     }
 
     getHost() {
-        return this.htmlElement.node.host;
+        return this.node.host;
     }
 
     getHostname() {
-        return this.htmlElement.node.hostname;
+        return this.node.hostname;
     }
 
     getHref() {
@@ -103,23 +103,23 @@ register(class WLink extends Widget {
     }
 
     getOrigin() {
-        return this.htmlElement.node.origin;
+        return this.node.origin;
     }
 
     getPassword() {
-        return this.htmlElement.node.password;
+        return this.node.password;
     }
 
     getPathname() {
-        return this.htmlElement.node.pathname;
+        return this.node.pathname;
     }
 
     getPort() {
-        return this.htmlElement.node.port;
+        return this.node.port;
     }
 
     getProtocol() {
-        return this.htmlElement.node.protocol;
+        return this.node.protocol;
     }
 
     getReferrerPolicy() {
@@ -127,7 +127,7 @@ register(class WLink extends Widget {
     }
 
     getSearch() {
-        return this.htmlElement.node.search;
+        return this.node.search;
     }
 
     getTarget() {
@@ -135,7 +135,7 @@ register(class WLink extends Widget {
     }
 
     getUsername() {
-        return this.htmlElement.node.username;
+        return this.node.username;
     }
 
     setAutoFocus() {

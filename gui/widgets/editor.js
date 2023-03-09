@@ -23,31 +23,20 @@
 
 
 /*****
- * An HTML button element is very different than a type=button input element.
- * The button element's innerHTML is display on the browser, which makes the
- * button very powerful and even complex to use.  The WButton widget class is
- * the base class for a series of planned classes base around the HTML Button
- * Element.
 *****/
-register(class WButton extends Widget {
-    constructor() {
-        super('button');
-        this.setButtonType();
-        this.setWidgetStyle('buttontag');
-    }
+register(class WEditor extends Widget {
+    constructor(tagName) {
+        super(tagName);
 
-    setButtonType() {
-        this.setAttribute('type', 'button');
-        return this;
-    }
-
-    setResetType() {
-        this.setAttribute('type', 'reset');
-        return this;
-    }
-
-    setSubmitType() {
-        this.setAttribute('type', 'submit');
-        return this;
+        for (let methodName of [
+            'getUnmodified',
+            'getValue',
+            'setValue',
+            'isModified,',
+            'isValid',
+            'revert',
+            'save',
+        ]) {
+        }
     }
 });

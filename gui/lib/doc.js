@@ -37,9 +37,11 @@ register(class Doc extends Emitter {
             'animationend',
             'animationiteration',
             'animationstart',
+            'click',
             'contextmenu',
             'copy',
             'cut',
+            'dblclick',
             'DOMContentLoaded',
             'drag',
             'dragend',
@@ -80,7 +82,7 @@ register(class Doc extends Emitter {
             'wheel',
         ].forEach(eventName => this.doc.addEventListener(eventName, event => {
             this.send({
-                messageName: `html.${eventName}`,
+                messageName: `dom.${eventName}`,
                 event: mkElementEvent(event)
             });
         }));

@@ -47,7 +47,7 @@
             }
 
             this.setCache('id', nextId++);
-            this.setCache('concealed', null);
+            this.resetFlag('concealed');
             this.setCache('styles', []);
             this.setId(`widget${this.getCache('id')}`);
             this.setWidgetStyle('widget');
@@ -61,26 +61,26 @@
                 messageName: 'Widget.Changed',
                 type: 'innerHtml',
                 widget: this,
-                value: this.children(),
             });
 
             return this;
         }
 
         bind(activeData, key, arg) {
-            if (arg) {
-                if (typeof arg == 'string') {
-                    mkAttributeBinding(this, activeData, key, arg);
-                }
-                else if (typeof arg == 'object') {
-                    mkMapBinding(this, activeData, key, arg);
-                }
-                else if (typeof arg == 'function') {
-                    mkFunctionBinding(this, activeData, key, arg);
-                }
+            if (arg === Binding.valueBinding) {
+                mkValueBinding(this, activeData, key);
             }
-            else {
-                mkInnerHtmlBinding(this, activeData, key);            
+            else if (typeof arg == 'string') {
+                mkAttributeBinding(this, activeData, key, arg);
+            }
+            else if (typeof arg == 'object') {
+                mkMapBinding(this, activeData, key, arg);
+            }
+            else if (typeof arg == 'function') {
+                mkFunctionBinding(this, activeData, key, arg);
+            }
+            else if (arg === undefined) {
+                mkInnerHtmlBinding(this, activeData, key);
             }
 
             return this;
@@ -106,7 +106,7 @@
                 type: 'attribute',
                 widget: this,
                 name: name,
-                value: '',
+                value: null,
             });
 
             return this;
@@ -124,7 +124,8 @@
                 messageName: 'Widget.Changed',
                 type: 'attribute',
                 widget: this,
-                name: 'className',
+                name: 'class',
+                value: null,
             });
 
             return this;
@@ -137,7 +138,8 @@
                 messageName: 'Widget.Changed',
                 type: 'attribute',
                 widget: this,
-                name: 'className',
+                name: 'class',
+                value: null,
             });
 
             return this;
@@ -150,6 +152,7 @@
                 messageName: 'Widget.Changed',
                 type: 'style',
                 widget: this,
+                value: null,
             });
 
             return this;
@@ -161,10 +164,11 @@
         }
 
         conceal() {
-            if (this.getCache('concealed') === null) {
+            if (!this.getFlag('concealed')) {
                 this.silence();
-                this.setCache('concealed', new Placeholder(this));
-                this.replace(this.getCache('concealed'));
+                this.setFlag('concealed');
+                this.setCache('display', this.getStyle('display'));
+                this.setStyle('display', 'none');
                 this.resume();
             }
 
@@ -254,7 +258,6 @@
                 messageName: 'Widget.Changed',
                 type: 'innerHtml',
                 widget: this,
-                value: this.children(),
             });
 
             return this;
@@ -267,7 +270,6 @@
                 messageName: 'Widget.Changed',
                 type: 'innerHtml',
                 widget: this,
-                value: this.children(),
             });
 
             return this;
@@ -280,7 +282,7 @@
 
         off(messageName, handler, filter) {
             if (messageName.startsWith('dom.')) {
-                return super.off(messageName.substr(4), handler);
+                return super.off(messageName, handler);
             }
             else {
                 return Reflect.apply(Emitter.prototype.off, this, [messageName, handler, filter]);
@@ -289,7 +291,7 @@
 
         on(messageName, handler, filter) {
             if (messageName.startsWith('dom.')) {
-                return super.on(messageName.substr(4), handler);
+                return super.on(messageName, handler);
             }
             else {
                 return Reflect.apply(Emitter.prototype.on, this, [messageName, handler, filter]);
@@ -298,7 +300,7 @@
 
         once(messageName, handler, filter) {
             if (messageName.startsWith('dom.')) {
-                return super.once(messageName.substr(4), handler);
+                return super.once(messageName, handler);
             }
             else {
                 return Reflect.apply(Emitter.prototype.once, this, [messageName, handler, filter]);
@@ -324,7 +326,6 @@
                 messageName: 'Widget.Changed',
                 type: 'innerHtml',
                 widget: this,
-                value: this.children(),
             });
 
             return this;
@@ -352,9 +353,8 @@
 
                 this.send({
                     messageName: 'remove',
-                    type: 'remove',
+                    type: 'innerHtml',
                     widget: parent,
-                    value: parent.children(),
                 });
             }
 
@@ -371,7 +371,6 @@
                     messageName: 'Widget.Changed',
                     type: 'innerHtml',
                     widget: parent,
-                    value: parent.children(),
                 });
             }
 
@@ -379,10 +378,11 @@
         }
 
         reveal() {
-            if (this.getCache('concealed') instanceof Placeholder) {
+            if (this.getFlag('concealed')) {
                 this.silence();
-                this.getCache('concealed').replace(this);
-                this.setCache('concealed', null);
+                this.resetFlag('concealed');
+                this.setStyle('display', this.getCache('display'));
+                this.clearCache('display');
                 this.resume();
             }
 
@@ -408,9 +408,10 @@
 
             this.send({
                 messageName: 'Widget.Changed',
-                type: 'className',
+                type: 'attribute',
                 widget: this,
-                name: 'className',
+                name: 'class',
+                value: this.getAttribute('class'),
             });
 
             return this;
@@ -421,9 +422,10 @@
 
             this.send({
                 messageName: 'Widget.Changed',
-                type: 'classNames',
+                type: 'attribute',
                 widget: this,
-                name: 'classNames',
+                name: 'class',
+                value: this.getAttribute('class'),
             });
 
             return this;
@@ -441,7 +443,6 @@
                 messageName: 'Widget.Changed',
                 type: 'innerHtml',
                 widget: this,
-                value: this.children(),
             });
 
             return this;
@@ -454,7 +455,6 @@
                 messageName: 'Widget.Changed',
                 type: 'innerHtml',
                 widget: this,
-                value: this.children(),
             });
 
             return this;
@@ -467,7 +467,7 @@
                 messageName: 'Widget.Changed',
                 type: 'style',
                 widget: this,
-                style: this.getStyle(),
+                value: this.getStyle(),
             });
 
             return this;
@@ -489,17 +489,4 @@
             return this;
         }
     });
-
-    class Placeholder extends Widget {
-        constructor(widget) {
-            super('div');
-            this.widget = widget;
-            this.setStyle('display', 'none');
-            this.setId(this.widget.getId());
-        }
-
-        reveal() {
-            this.widget.reveal();
-        }
-    }
 })();

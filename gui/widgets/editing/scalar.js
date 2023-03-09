@@ -25,7 +25,9 @@
 (() => {
     /*****
      * Here are some utility functions that are required for generating strings
-     * representations of timestamp values.
+     * representations of timestamp values.  Note that the browser's language and
+     * local will ultimately determine the output format that's presented because
+     * the builtin string conversion functions are based on language and locale.
     *****/
     const dateStr = value => {
         if (value instanceof Time) {
@@ -66,7 +68,12 @@
 
     /*****
      * This is a global mapping that relates supported scalar types with the
-     * widgets used for viewing and editing a scalar value.
+     * widgets used for viewing and editing a scalar value.  A scalar is the
+     * lowest guy in the editing hierarchy.  They are editors that edit a
+     * single (scalar) value.  Each of these defined types are specific types
+     * of edtiors that perform the real work of a scalar.  The WScalar object
+     * iteself is a DIV, which provides the box or container for the underlying
+     * editor or viewer type.
     *****/
     define('ScalarBool', {
         mkViewer: opts => mkICheckbox().setWidgetStyle('scalarcheckbox').setAttribute('disabled', true),
@@ -154,34 +161,25 @@
  * the ability to rename the messages, which enables one to provide a more
  * coherent set of message names for messages from the proxied object.
 *****/
-define('WScalar', class WScalar extends Widget {
-    static dboReadonly = mkStringSet('oid', 'created', 'updated');
-
-    static routed = [
-        'dom.click',
-        'dom.dblclick',
-        'Widget.Changed',
-        'Widget.Modified',
-        'Widget.Validity',
-    ];
-
+register(class WScalar extends WEditor {
     constructor(activeData, key, opts) {
         super('div');
-        // TODO --
-        // put both as children and adjust according.
-        this.viewer = opts.type.mkViewer(opts).bind(activeData, key);
-        this.editor = opts.type.mkEditor(opts).bind(activeData, key);
+        this.viewer = opts.type.mkViewer(opts).bind(activeData, key, Binding.valueBinding);
+        this.editor = opts.type.mkEditor(opts).bind(activeData, key, Binding.valueBinding);
         opts.readonly ? this.setReadOnly() : this.setReadWrite();
-        let proxy = mkMessageProxy(this);
-
-        for (let messageName of WScalar.routed) {
-            proxy.route(this.editor, messageName);
-            proxy.route(this.viewer, messageName);
-        }
 
         if (opts.menu instanceof WPopupMenu) {
             opts.menu.attach(this, 'dom.click');
         }
+
+        mkMessageProxy(this)
+        .route(this.viewer, 'dom.click')
+        .route(this.editor, 'dom.click')
+        ;
+
+        this.editor.on('Widget.Changed', message => {
+            this.send(message);
+        });
     }
 
     blur() {
@@ -189,17 +187,12 @@ define('WScalar', class WScalar extends Widget {
         return this;
     }
 
-    static dboReadonlyByDefault(propertyName) {
-        if (propertyName.endsWith('Oid')) {
-            return true;
-        }
-
-        return WScalar.dboReadonly.has(propertyName);
-    }
-
     focus() {
         this.editor.focus();
         return this;
+    }
+
+    getValue() {
     }
 
     isReadonly() {
@@ -211,22 +204,7 @@ define('WScalar', class WScalar extends Widget {
     }
 
     isValid() {
-        return this.editor.htmlElement.node.checkValidity();
-    }
-
-    off(messageName, handler) {
-        super.off(messageName, handler);
-        return this;
-    }
-
-    on(messageName, handler, filter) {
-        super.on(messageName, handler, filter);
-        return this;
-    }
-
-    once(messageName, handler, filter) {
-        super.once(messageName, handler, filter);
-        return this;
+        return this.editor.node.checkValidity();
     }
 
     static selectType(value) {
@@ -256,14 +234,7 @@ define('WScalar', class WScalar extends Widget {
         this.append(this.editor);
         return this;
     }
-});
 
-
-/*****
- * The reason for taking this syntactically longer approach to defined WScalar
- * is that I want to be able to call mkScalar() with a opts.type value that
- * can be used to select from a WScalar subclass to construct.
-*****/
-define(`mkWScalar`, (activeData, key, opts) => {
-    return new WScalar(activeData, key, opts)
+    setValue(value) {
+    }
 });

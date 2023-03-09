@@ -27,6 +27,6 @@
 register(class PasswordManager extends WPanel {
     constructor() {
         super('h1');
-        this.set('FWSetPasswordView').on('dom.click', message => console.log(message));
+        this.setInnerHtml('FWSetPasswordView').on('dom.click', message => console.log(message));
     }
 });

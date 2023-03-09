@@ -100,13 +100,13 @@ class AuthenticateForm extends WGrid {
 
         this.setAt(1, 0, mkWidget('div').setInnerHtml(txx.fwSignInUsername).setClassNames('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(3, 0, mkIEmail()
-        .bind(this.data, 'username', 'value'))
+        .bind(this.data, 'username', Binding.valueBinding))
         .setAttribute('autofocus')
         .setAttribute('autocomplete', 'email');
 
         this.setAt(5, 0, mkWidget('div').setInnerHtml(txx.fwSignInPassword).setClassNames('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(7, 0, mkIPassword()
-        .bind(this.data, 'password', 'value'))
+        .bind(this.data, 'password', Binding.valueBinding))
         .setAttribute('autocomplete', 'current-password');
 
         this.setAt(9, 0,
@@ -146,7 +146,7 @@ class ForgotCredentialsForm extends WGrid {
 
         this.setAt(3, 0, mkWidget('div').setInnerHtml(txx.fwForgotEmail).setClassNames('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(5, 0, mkIEmail()
-        .bind(this.data, 'username', 'value'))
+        .bind(this.data, 'username', Binding.valueBinding))
         .setAttribute('autofocus')
         .setAttribute('autocomplete', 'email');
 

@@ -53,7 +53,7 @@
         body.append(stack);
         stack.push(mkFWSignInView());
 
-        win.on('focus', async message => {
+        win.on('dom.focus', async message => {
             if (booted != await queryServer({ messageName: 'PublicGetBootHash' })) {
                 doc.location().reload(); 
             }

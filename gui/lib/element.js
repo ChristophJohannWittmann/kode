@@ -55,6 +55,9 @@
         else if (arg instanceof MathElement) {
             return arg;
         }
+        else {
+            return mkDocText(arg.toString());
+        }
     });
 
 
@@ -69,6 +72,9 @@
         }
         else if (arg instanceof Node) {
             return arg;
+        }
+        else {
+            return document.createTextNode(arg.toString());
         }
     });
 
@@ -97,6 +103,7 @@
                 this.node[cacheKey] = {
                     docNode: this,
                     flags: {},
+                    listeners: {},
                     propagation: {},
                     widget: {},
                 };
@@ -154,8 +161,17 @@
             return name in this.node[cacheKey].flags;
         }
 
+        invoke(func) {
+            Reflect.apply(func, this, []);
+            return this;
+        }
+
         isElement() {
             return this instanceof DocElement;
+        }
+
+        isHtmlElement() {
+            return this instanceof HtmlElement;
         }
       
         isSame(arg) {
@@ -164,6 +180,10 @@
 
         isText() {
             return this.node instanceof Text;
+        }
+
+        isWidget() {
+            return this.node instanceof Widget;
         }
 
         log() {
@@ -244,7 +264,6 @@
                 }
             }
 
-            this.checkAutofocus(...args);
             return this;
         }
 
@@ -367,7 +386,6 @@
                 this.node.appendChild(unwrapDocNode(arg));
             }
 
-            this.checkAutofocus(...args);
             return this;
         }
 
@@ -386,7 +404,8 @@
             }
 
             if (autofocus) {
-                autofocus.setFocus();
+                let wrapped = wrapDocNode(autofocus);
+                autofocus.setFlag('autofocus');
             }
         }
 
@@ -591,7 +610,6 @@
                 }
             }
       
-            this.checkAutofocus(...args);
             return this;
         }
 
@@ -602,7 +620,6 @@
                 }
             }
 
-            this.checkAutofocus(...args);
             return this;
         }
 
@@ -637,68 +654,51 @@
         }
 
         off(messageName, handler) {
-            if ('EMITTER' in this.node) {
-                this.node.EMITTER.off(messageName, handler);
-            }
-
+            super.off(messageName, handler);
             return this;
         }
 
-        on(messageName, handler) {
-            if (!('EMITTER' in this.node)) {
-                this.node.EMITTER = mkEmitter();
-                this.node.LISTENERS = new Object();
-            }
-
-            if (!(messageName in this.node.LISTENERS)) {
-                this.node.addEventListener(messageName, event => {
-                    if (!Object.is(this.node, event.target)) {
-                        let propagation = cacheKey in event.target ? event.target[cacheKey].propagation : false;
-
-                        if (!propagation || !(event.type in propagation)) {
-                            event.stopPropagation();
-                            return;
-                        }
-                    }
-
-                    this.node.EMITTER.send({
-                        messageName: event.type,
+        on(messageName, handler, filter) {
+            if (!(messageName in this.node[cacheKey].listeners)) {
+                this.node.addEventListener(messageName.substr(4), event => {
+                    this.send({
+                        messageName: messageName,
                         htmlElement: this,
                         event: mkElementEvent(event),
                     });
+
+                    let propagation = cacheKey in event.target ? event.target[cacheKey].propagation : false;
+
+                    if (!propagation || !(event.type in propagation)) {
+                        event.stopPropagation();
+                        return;
+                    }
                 });
             }
 
-            this.node.EMITTER.on(messageName, handler);
+            super.on(messageName, handler, filter);
             return this;
         }
 
-        once(messageName, handler) {
-            if (!('EMITTER' in this.node)) {
-                this.node.EMITTER = mkEmitter();
-                this.node.LISTENERS = new Object();
-            }
-
-            if (!(messageName in this.node.LISTENERS)) {
-                this.node.addEventListener(messageName, event => {
-                    if (!Object.is(this.node, event.target)) {
-                        let propagation = cacheKey in event.target ? event.target[cacheKey].propagation : false;
-
-                        if (!propagation || !(event.type in propagation)) {
-                            event.stopPropagation();
-                            return;
-                        }
-                    }
-
-                    this.node.EMITTER.send({
-                        messageName: event.type,
+        once(messageName, handler, filter) {
+            if (!(messageName in this.node[cacheKey].listeners)) {
+                this.node.addEventListener(messageName.substr(4), event => {
+                    this.send({
+                        messageName: messageName,
                         htmlElement: this,
                         event: mkElementEvent(event),
                     });
+
+                    let propagation = cacheKey in event.target ? event.target[cacheKey].propagation : false;
+
+                    if (!propagation || !(event.type in propagation)) {
+                        event.stopPropagation();
+                        return;
+                    }
                 });
             }
 
-            this.node.EMITTER.once(messageName, handler);
+            super.once(messageName, handler, filter);
             return this;
         }
 
@@ -734,7 +734,6 @@
                 }
             }
 
-            this.checkAutofocus(...args);
             return this;
         }
       

@@ -36,6 +36,7 @@ class Binding {
     static byWidget = {};
     static byActiveData = {};
     static silentWidget = null;
+    static valueBinding = Symbol('ValueBinding');
 
     constructor(widget, activeData, key) {
         this.id = Binding.nextId++;
@@ -95,6 +96,11 @@ class Binding {
             }
             else if (binding instanceof InnerHtmlBinding) {
                 if (message.type == 'innerHtml') {
+                    binding.onWidgetChanged(message.value);
+                }
+            }
+            else if (binding instanceof ValueBinding) {
+                if (message.type == 'value') {
                     binding.onWidgetChanged(message.value);
                 }
             }
@@ -320,6 +326,35 @@ register(class InnerHtmlBinding extends Binding {
             this.widget.setInnerHtml(ActiveData.value(this.activeData));
         }
 
+        this.widget.resume();
+    }
+
+    onWidgetChanged(value) {
+        Binding.silentWidget = this.widget;
+        this.activeData[this.key] = value;
+        Binding.silentWidget = this.null;
+    }
+});
+
+
+/*****
+ * A value binding is a binding between a specific attribute of a widget
+ * and a key of an active data object.  Attribute bindings are bidirectional.
+ * A change to the widget updates the activeData object, and a change in the
+ * active Data will update it's widgets.  Note that atempting to bind a widget
+ * to two different active Data keys will provide garbage.
+*****/
+register(class ValueBinding extends Binding {
+    constructor(widget, activeData, key) {
+        super(widget, activeData, key);
+        this.widget.silence();
+        this.widget.setValue(this.activeData[key]);
+        this.widget.resume();
+    }
+
+    onActiveDataChanged() {
+        this.widget.silence();
+        this.widget.setValue(this.activeData[this.key]);
         this.widget.resume();
     }
 

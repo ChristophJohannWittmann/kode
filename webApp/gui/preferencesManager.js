@@ -27,6 +27,6 @@
 register(class PreferencesManager extends WPanel {
     constructor() {
         super('h1');
-        this.set('FWPreferencesView').on('dom.click', message => console.log(message));
+        this.setInnerHtml('FWPreferencesView').on('dom.click', message => console.log(message));
     }
 });

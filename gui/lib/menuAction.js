@@ -120,7 +120,7 @@ register(class SingletonViewMenuAction extends MenuAction {
     }
 
     async onPop(message) {
-        if (this.widget && Widget.is(this.widget, message.popped)) {
+        if (Object.is(this.widget, message.popped)) {
             this.widget = null;
             this.menuItem.clearOpen();
         }
@@ -157,7 +157,7 @@ register(class ToggleViewMenuAction extends MenuAction {
     }
 
     async onPop(message) {
-        if (this.widget && Widget.is(this.widget, message.popped)) {
+        if (Widget.is(this.widget, message.popped)) {
             this.widget = null;
             this.menuItem ? this.menuItem.enable() : false;
         }
