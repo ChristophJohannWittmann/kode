@@ -219,26 +219,6 @@
             return super.getCache('widget')[name];
         }
 
-        getPanel() {
-            let parent = this.parent();
-
-            while (parent && !(parent instanceof WPanel)) {
-                parent = parent.parent();
-            }
-
-            return parent;
-        }
-
-        getView() {
-            let parent = this.parent();
-
-            while (parent && !(parent instanceof WView)) {
-                parent = parent.parent();
-            }
-
-            return parent;
-        }
-
         getWidgetStyle() {
             return this.getAttribute('widget-style');
         }
@@ -387,6 +367,42 @@
             }
 
             return this;
+        }
+
+        searchAncestor(opts) {
+            let parent = this.parent();
+
+            if (opts.type == 'ctor') {
+                while (parent && !(parent instanceof opts.ctor)) {
+                    parent = parent.parent();
+                }
+            }
+            else if (opts.type == 'flag') {
+                while (parent && !parent.getFlag(opts.flagName)) {
+                    parent = parent.parent();
+                }
+            }
+            else {
+                parent = undefined;
+            }
+
+            return parent;
+        }
+
+        searchDescendant(opts) {
+            let stack = this.children();
+
+            while (stack.length) {
+                let descendant = stack.pop();
+
+                if (opts.type == 'flag') {
+                    if (descendant.getFlag(opts.flagName)) {
+                        return descendant;
+                    }
+                }
+
+                descendant.children().reverse().forEach(descendant => stack.push(descendant));
+            }
         }
 
         setAttribute(name, value) {

@@ -44,9 +44,7 @@ singleton(class DarkKode {
                 let js =
 `register(class ${className} extends DarkWidget {
     constructor(...args) {
-        super(...args)
-        this.libName = '${libName}';
-        this.download(...args);
+        super('${libName}', ...args)
     }
 });`;
 

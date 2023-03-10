@@ -161,7 +161,7 @@
  * the ability to rename the messages, which enables one to provide a more
  * coherent set of message names for messages from the proxied object.
 *****/
-register(class WScalar extends WEditor {
+register(class WScalar extends Widget {
     constructor(activeData, key, opts) {
         super('div');
         this.viewer = opts.type.mkViewer(opts).bind(activeData, key, Binding.valueBinding);
@@ -175,24 +175,25 @@ register(class WScalar extends WEditor {
         mkMessageProxy(this)
         .route(this.viewer, 'dom.click')
         .route(this.editor, 'dom.click')
-        ;
-
-        this.editor.on('Widget.Changed', message => {
-            this.send(message);
-        });
+        .route(this.editor, 'Widget.Changed')
+        .route(this.editor, 'Widget.Modified')
+        .route(this.editor, 'Widget.Validity');
     }
 
     blur() {
-        this.editor.blur();
+        if (this.editor.parent()) {
+            this.editor.blur();
+        }
+
         return this;
     }
 
     focus() {
-        this.editor.focus();
+        if (this.editor.parent()) {
+            this.editor.focus();
+        }
+        
         return this;
-    }
-
-    getValue() {
     }
 
     isReadonly() {
@@ -205,6 +206,10 @@ register(class WScalar extends WEditor {
 
     isValid() {
         return this.editor.node.checkValidity();
+    }
+
+    revert() {
+        console.log('revert');
     }
 
     static selectType(value) {
@@ -233,8 +238,5 @@ register(class WScalar extends WEditor {
         this.clear();
         this.append(this.editor);
         return this;
-    }
-
-    setValue(value) {
     }
 });

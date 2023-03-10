@@ -31,7 +31,7 @@
  * integrates the textarea HTML element into the framework and provides an OO-
  * usability wrapper for the underlying textarea features.
 *****/
-register(class WTextArea extends WEditor {
+register(class WTextArea extends Widget {
     constructor(entryFilter) {
         super('textarea');
         this.setWidgetStyle('textarea');

@@ -30,7 +30,7 @@
  * that the WSelect class implements the value-interface, which is needed for
  * binding a select element to an ActiveData instance.
 *****/
-register(class WSelect extends WEditor {
+register(class WSelect extends Widget {
     constructor() {
         super('select');
         this.setWidgetStyle('select');

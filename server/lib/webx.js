@@ -117,7 +117,7 @@ register(class Webx extends Emitter {
                 'gui/lib/entryFilter.js',
                 'gui/lib/element.js',
                 'gui/lib',
-                'gui/widgets/editor.js',
+                'gui/widgets/editable.js',
                 'gui/widgets/input.js',
                 'gui/widgets/select.js',
                 'gui/widgets/textArea.js',

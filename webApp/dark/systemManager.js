@@ -29,6 +29,9 @@
         constructor() {
             super('div');
             this.append(new NetIfaceEditor('public'));
+
+            this.on('Widget.Modified', message => console.log('modified'));
+            this.on('Widget.Validity', message => console.log('validity'));
         }
     });
 

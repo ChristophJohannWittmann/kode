@@ -34,38 +34,32 @@
  * with the fully functional widget.
 *****/
 register(class DarkWidget extends Widget {
-    constructor(...args) {
+    constructor(libName, ...args) {
         super('div');
-        this.args = args;
-        this.ctor = Reflect.getPrototypeOf(this).constructor;
-        this.className = this.ctor.name;
-        this.makerName = `mk${this.className}`;
-        this.chain = this.ctor[chainKey];
-        this.container = this.ctor[containerKey];
-    }
+        
+        (async () => {
+            const ctor = Reflect.getPrototypeOf(this).constructor;
+            const className = ctor.name;
+            const makerName = `mk${className}`;
+            const chain = ctor[chainKey];
+            const container = ctor[containerKey];
 
-    async download(...args) {
-        let darkWidget = await queryServer({
-            messageName: 'SelfGetDarkWidget',
-            libName: this.libName,
-            className: this.className,
-        });
+            let darkCode = await queryServer({
+                messageName: 'SelfGetDarkWidget',
+                libName: libName,
+                className: className,
+            });
 
-        delete this.container[this.className];
-        delete this.container[this.makerName];
+            delete container[className];
+            delete container[makerName];
 
-        swap(this.container);
-        eval(mkBuffer(darkWidget, 'base64').toString());
-        paws();
+            swap(container);
+            eval(mkBuffer(darkCode, 'base64').toString());
+            paws();
 
-        let parent = this.parent();
-        let widget = Reflect.apply(this.container[this.makerName], window, args);
-        widget.setId(this.getId());
-        this.replace(widget);
-
-        if (parent instanceof WPanel) {
-            parent.unwire(this);
-            parent.wire(widget);
-        }
+            let widget;
+            eval(`widget = ${makerName}(...args);`);
+            this.become(widget);
+        })();
     }
 });

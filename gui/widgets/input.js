@@ -32,33 +32,27 @@
  * The details of configuring and validating each specific type are performed
  * by each specific subclass.
 *****/
-register(class WInput extends WEditor {
+register(class WInput extends WEditable {
     constructor(type) {
         super('input');
         this.setAttribute('type', type);
         this.setWidgetStyle('input');
 
         this.on('dom.input', message => {
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'value',
-                widget: this,
-                value: message.event.target.value,
-            });
+            this.valueChanged(message.event.target.value);
         });
     }
 
-    getValue() {
-        return this.node.value;
-    }
-
-    isValid() {
+    subclassCheckValidity() {
         return this.node.checkValidity();
     }
 
-    setValue(value) {
+    subclassGetValue() {
+        return this.node.value;
+    }
+
+    subclassSetValue(value) {
         this.node.value = value;
-        return this;
     }
 });
 

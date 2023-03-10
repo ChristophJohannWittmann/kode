@@ -30,18 +30,10 @@
  * To be honest, another widget will be created to perform the user-elements
  * needed to navigate the stack.
 *****/
-register(class WStack extends WPanel {
+register(class WStack extends Widget {
     constructor(arg) {
         super(arg);
         this.setWidgetStyle('stack');
-    }
-
-    clear() {
-        super.clear();
-    }
-
-    contains(widget) {
-        return this.indexOf(widget) >= 0;
     }
 
     indexOf(widget) {
@@ -56,42 +48,44 @@ register(class WStack extends WPanel {
         return -1;
     }
 
-    length() {
-        return this.children().length;
-    }
-
     pop() {
-        this.saveFocus();
-        let children = this.children();
+        if (this.length()) {
+            let popped = this.top();
 
-        if (children.length) {
-            let top = children[children.length - 1];
-            top.remove();
+            if (popped) {
+                this.saveState(popped);
+                popped.remove();
+                let top = this.top();
 
-            if (children.length > 1) {
-                children[children.length - 2].reveal();
+                if (top) {
+                    top.reveal();
+                    this.restoreState(top);
+                }
+
+                this.send({
+                    messageName: 'Widget.Changed',
+                    type: 'pop',
+                    widget: this,
+                    popped: popped,
+                });
+
+                return popped
             }
-
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'pop',
-                widget: this,
-                removed: top,
-            });
-
-            return top;
         }
 
         return null;
     }
 
     promote(widget) {
-        for (let child of this) {
-            if (child.getId() == widget.getId()) {
-                this.saveFocus();
-                child.remove();
-                child.reveal();
-                this.push(child);
+        if (this.length() > 1) {
+            if (this.contains(widget)) {
+                let top = this.top();
+                this.saveState(top);
+                top.conceal();
+                widget.reveal();
+                widget.remove();
+                this.append(widget);
+                this.restoreState(widget);
                 return true;
             }
         }
@@ -100,43 +94,40 @@ register(class WStack extends WPanel {
     }
 
     push(widget) {
-        let child;
-        let index = 0;
-        this.saveFocus();
+        if (!this.contains(widget)) {
+            let top = this.top();
 
-        for (child of this) {
-            index++;
-
-            if (child.getId() == widget.getId()) {
-                return false;
+            if (top) {
+                this.saveState(top);
+                top.conceal();
             }
+
+            this.append(widget.reveal());
+            this.restoreState(widget);
+
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'push',
+                widget: this,
+                pushed: widget,
+            });
+
+            return true;
         }
 
-        child ? child.conceal() : false;
-        this.append(widget.reveal());
-
-        this.send({
-            messageName: 'Widget.Changed',
-            type: 'push',
-            widget: this,
-            added: widget,
-            index: index,
-        });
-
-        return true;
+        return false;
     }
 
-    async revert() {
+    restoreState(widget) {
+        //console.log(widget.searchDescendant({ type: 'flag', flagName: 'autofocus' }));
     }
 
-    saveFocus() {
-        //console.log(doc.getFocused());
+    saveState(widget) {
         return;
         let top = this.top();
 
-        if (top) {
-            let activeElement = doc.activeElement();
-            console.log(activeElement);
+        if (top && top instanceof WPanel) {
+            console.log(top.focused);
         }
     }
 
@@ -145,12 +136,6 @@ register(class WStack extends WPanel {
     }
 
     top() {
-        let children = this.children();
-
-        if (children.length) {
-            return children[children.length - 1];
-        }
-
-        return null;
+        return this.lastElementChild();
     }
 });

@@ -89,8 +89,11 @@
     const cacheKey = Symbol('cache-key');
 
     const internalUseOnly = mkStringSet(
+        'autofocus',
         'docNode',
         'flags',
+        'listeners',
+        'propagation',
         'widget',
     );
 
@@ -101,6 +104,7 @@
 
             if (!(cacheKey in node)) {
                 this.node[cacheKey] = {
+                    autofocus: null,
                     docNode: this,
                     flags: {},
                     listeners: {},
@@ -110,11 +114,64 @@
             }
         }
 
+        append(...args) {
+            for (let arg of args) {
+                this.node.appendChild(unwrapDocNode(arg));
+            }
+
+            return this;
+        }
+
         assignFlag(name, bool) {
             if (typeof bool == 'boolean') {
                 this.node[cacheKey].flags[name] = bool;
             }
 
+            return this;
+        }
+
+        become(docNode) {
+            if (docNode instanceof DocNode) {
+                let node = unwrapDocNode(docNode);
+
+                if (typeof node[cacheKey] == 'object') {
+                    let cache = node[cacheKey];
+                    cache.docNode = this;
+                    this.node[cacheKey] = cache;
+                    Reflect.setPrototypeOf(this, Reflect.getPrototypeOf(cache.docNode));
+
+                    while (node.childNodes.length) {
+                        let childNode = node.childNodes.item(0);
+                        this.node.appendChild(childNode);
+                    }
+
+                    for (let propertyName in Object.getOwnPropertyNames(cache.docNode)) {
+                        this[propertyName] = cache.docNode[propertyName];
+                    }
+                }
+            }
+
+            return this;
+        }
+
+        childAt(index) {
+            if (index >= 0 && index < this.node.childNodes.length) {
+                return wrapDocNode(this.node.childNodes.item(index));
+            }
+        }
+
+        children() {
+            let children = [];
+
+            for (let i = 0; i < this.node.childNodes.length; i++) {
+                children.push(wrapDocNode(this.node.childNodes.item(i)));
+            }
+
+            return children;
+        }
+
+        clear() {
+            this.node.replaceChildren();
             return this;
         }
 
@@ -131,6 +188,26 @@
             return this;
         }
 
+        contains(docNode) {
+            return this.node.contains(docNode.node);
+        }
+
+        descendants() {
+            let stack = [unwrapDocNode(this)];
+            let descendants = [];
+
+            while (stack.length) {
+                let node = stack.pop();
+                descendants.push(wrapDocNode(node));
+
+                for (let i = 0; i < node.childNodes.length; i++) {
+                    stack.push(node.childNodes.item(i));
+                }
+            }
+
+            return descendants;
+        }
+
         dir() {
             console.dir(this.node);
             return this;
@@ -144,6 +221,12 @@
             }
         }
 
+        firstChild() {
+            if (this.node.firstChild) {
+                return wrapDocNode(this.node.firstChild);
+            }
+        }
+
         getCache(name) {
             return this.node[cacheKey][name];
         }
@@ -153,17 +236,58 @@
             return (name in flags) ? flags[name] : false;
         }
 
+        getTextContent() {
+            return this.node.textContent;
+        }
+
         hasCache(name) {
             return (name in this.node[cacheKey]);
+        }
+
+        hasChildNodes() {
+            return this.node.hasChildNodes;
         }
 
         hasFlag(name) {
             return name in this.node[cacheKey].flags;
         }
 
+        insertAfter(...args) {
+            if (this.node.parentNode) {
+                let nextSibling = this.node.nextSibling;
+      
+                if (nextSibling) {
+                    for (let arg of args) {
+                        this.node.parentNode.insertBefore(unwrapDocNode(arg), nextSibling);
+                    }
+                }
+                else {
+                    for (let arg of args) {
+                        this.node.parentNode.appendChild(unwrapDocNode(arg));
+                    }
+                }
+            }
+      
+            return this;
+        }
+
+        insertBefore(...args) {
+            if (this.node.parentNode) {
+                for (let arg of args) {
+                    this.node.parentNode.insertBefore(unwrapDocNode(arg), this.node);
+                }
+            }
+
+            return this;
+        }
+
         invoke(func) {
             Reflect.apply(func, this, []);
             return this;
+        }
+
+        isConnected() {
+            return this.node.isConnected;
         }
 
         isElement() {
@@ -175,7 +299,7 @@
         }
       
         isSame(arg) {
-            return unwrapDocNode(arg).isSameNode(this.node);
+            return unwrapDocNode(arg) === this.node;
         }
 
         isText() {
@@ -184,6 +308,12 @@
 
         isWidget() {
             return this.node instanceof Widget;
+        }
+
+        lastChild() {
+            if (this.node.lastChild) {
+                return wrapDocNode(this.node.lastChild);
+            }
         }
 
         log() {
@@ -211,6 +341,10 @@
             }
         }
 
+        nodeName() {
+            return this.node.nodeName;
+        }
+
         nodeType() {
             return this.node.nodeType;
         }
@@ -229,6 +363,23 @@
             if (this.node.parentElement) {
                 return wrapDocNode(this.node.parentElement);
             }
+        }
+
+        prepend(...args) {
+            if (this.node.childNodes.length) {
+                let beforeChild = this.node.firstChild;
+
+                for (let arg of args) {
+                    this.node.insertBefore(unwrapDocNode(arg), beforeChild);
+                }
+            }
+            else {
+                for (let arg of args) {
+                    this.node.appendChild(unwrapDocNode(arg));
+                }
+            }
+
+            return this;
         }
       
         prevSibling() {
@@ -285,8 +436,13 @@
             return this;
         }
 
-        textContent() {
-            return this.node.textContent;
+        setTextContent(content) {
+            this.node.textContent = content;
+            return this;
+        }
+
+        [Symbol.iterator]() {
+            return this.children()[Symbol.iterator]();
         }
 
         toggleFlag(name) {
@@ -381,14 +537,6 @@
             console.log('TBD DocElement.animate()');
         }
 
-        append(...args) {
-            for (let arg of args) {
-                this.node.appendChild(unwrapDocNode(arg));
-            }
-
-            return this;
-        }
-
         checkAutofocus(...args) {
             let autofocus;
 
@@ -407,27 +555,6 @@
                 let wrapped = wrapDocNode(autofocus);
                 autofocus.setFlag('autofocus');
             }
-        }
-
-        childAt(index) {
-            if (index >= 0 && index < this.node.childNodes.length) {
-                return wrapDocNode(this.node.childNodes.item(index));
-            }
-        }
-
-        children() {
-            let children = [];
-
-            for (let i = 0; i < this.node.childNodes.length; i++) {
-                children.push(wrapDocNode(this.node.childNodes.item(i)));
-            }
-
-            return children;
-        }
-
-        clear() {
-            this.node.replaceChildren();
-            return this;
         }
 
         clearAttribute(name) {
@@ -461,22 +588,6 @@
             return this.node.clientWidth;
         }
 
-        descendants() {
-            let stack = [unwrapDocNode(this)];
-            let descendants = [];
-
-            while (stack.length) {
-                let node = stack.pop();
-                descendants.push(wrapDocNode(node));
-
-                for (let i = 0; i < node.childNodes.length; i++) {
-                    stack.push(node.childNodes.item(i));
-                }
-            }
-
-            return descendants;
-        }
-
         disable() {
             this.setAttribute('disabled');
             return this;
@@ -495,28 +606,6 @@
         enablePropagation(eventName) {
             this.setCache('propagation').set(eventName);
             return this;
-        }
-
-        enum() {
-            let array = [];
-            let stack = [this];
-
-            while(stack.length) {
-                let docNode = stack.shift();
-                array.push(docNode);
-
-                for (let child of docNode) {
-                    array.push(child);
-                }
-            }
-
-            return array;
-        }
-
-        firstChild() {
-            if (this.node.firstChild) {
-                return wrapDocNode(this.node.firstChild);
-            }
         }
 
         firstElementChild() {
@@ -594,47 +683,12 @@
             console.log('TBD DocElement.insertAdjacetnText()');
         }
 
-        insertAfter(...args) {
-            if (this.node.parentNode) {
-                let nextSibling = this.node.nextSibling;
-      
-                if (nextSibling) {
-                    for (let arg of args) {
-                        this.node.parentNode.insertBefore(unwrapDocNode(arg), nextSibling);
-                    }
-                }
-                else {
-                    for (let arg of args) {
-                        this.node.parentNode.appendChild(unwrapDocNode(arg));
-                    }
-                }
-            }
-      
-            return this;
-        }
-
-        insertBefore(...args) {
-            if (this.node.parentNode) {
-                for (let arg of args) {
-                    this.node.parentNode.insertBefore(unwrapDocNode(arg), this.node);
-                }
-            }
-
-            return this;
-        }
-
         isDisabled() {
             return this.hasAttribute('disabled');
         }
 
         isEnabled() {
             return !this.hasAttribute('disabled');
-        }
-
-        lastChild() {
-            if (this.node.lastChild) {
-                return wrapDocNode(this.node.lastChild);
-            }
         }
 
         lastElementChild() {
@@ -699,41 +753,6 @@
             }
 
             super.once(messageName, handler, filter);
-            return this;
-        }
-
-        owns(docNode) {
-            let stack = [docNode.node];
-
-            while(stack.length) {
-                let node = stack.pop();
-
-                for (let i = 0; i < this.node.childNodes.length; i++) {
-                    let node = this.node.childNodes.item(i);
-
-                    if (Object.is(cacheKey in node && node[cacheKey].docNode), docNode) {
-                        return true;
-                    }
-                }
-            }
-
-            return false
-        }
-
-        prepend(...args) {
-            if (this.node.childNodes.length) {
-                let beforeChild = this.node.firstChild;
-
-                for (let arg of args) {
-                    this.node.insertBefore(unwrapDocNode(arg), beforeChild);
-                }
-            }
-            else {
-                for (let arg of args) {
-                    this.node.appendChild(unwrapDocNode(arg));
-                }
-            }
-
             return this;
         }
       
@@ -818,10 +837,6 @@
         setOuterHtml(outerHtml) {
             this.node.outerHTML = outerHtml;
             return this;
-        }
-
-        [Symbol.iterator]() {
-            return this.children()[Symbol.iterator]();
         }
 
         tagName() {
