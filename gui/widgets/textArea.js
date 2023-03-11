@@ -31,7 +31,7 @@
  * integrates the textarea HTML element into the framework and provides an OO-
  * usability wrapper for the underlying textarea features.
 *****/
-register(class WTextArea extends Widget {
+register(class WTextArea extends WEditable {
     constructor(entryFilter) {
         super('textarea');
         this.setWidgetStyle('textarea');
@@ -131,10 +131,6 @@ register(class WTextArea extends Widget {
 
     getTabSize() {
         return this.tabSize;
-    }
-
-    getValue() {
-        return this.node.value;
     }
 
     hasEntryFilter() {
@@ -241,7 +237,15 @@ register(class WTextArea extends Widget {
         return this;
     }
 
-    setValue(text) {
+    subclassCheckValidity() {
+        return true;
+    }
+
+    subclassGetValue() {
+        return this.node.value;
+    }
+
+    subClassSetValue(text) {
         this.silence();
         let scrubbed = text.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
         this.node.value = scrubbed;

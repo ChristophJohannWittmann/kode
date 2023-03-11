@@ -27,6 +27,6 @@
 register(class SvgWidget extends Widget {
     constructor() {
         super('div');
-        this.append(mkMathElement('svg'));
+        this.append(mkSvgElement('svg'));
     }
 });

@@ -30,7 +30,7 @@
  * that the WSelect class implements the value-interface, which is needed for
  * binding a select element to an ActiveData instance.
 *****/
-register(class WSelect extends Widget {
+register(class WSelect extends WEditable {
     constructor() {
         super('select');
         this.setWidgetStyle('select');
@@ -151,24 +151,6 @@ register(class WSelect extends Widget {
         return array;
     }
 
-    getValue() {
-        if (this.hasAttribute('multiple')) {
-            let array = [];
-
-            for (let option of this.node.selectedOptions) {
-                array.push(option.getAttribute('value'));
-            }
-
-            return array;
-        }
-        else if (this.node.selectedOptions.length) {
-            return this.node.selectedOptions[0].getAttribute('value');
-        }
-        else {
-            return '';
-        }
-    }
-
     hasGroup(label) {
         for (let child of this.children()) {
             if (child instanceof HtmlElement) {
@@ -241,7 +223,25 @@ register(class WSelect extends Widget {
         return this;
     }
 
-    setValue(value, key) {
+    subclassGetValue() {
+        if (this.hasAttribute('multiple')) {
+            let array = [];
+
+            for (let option of this.node.selectedOptions) {
+                array.push(option.getAttribute('value'));
+            }
+
+            return array;
+        }
+        else if (this.node.selectedOptions.length) {
+            return this.node.selectedOptions[0].getAttribute('value');
+        }
+        else {
+            return '';
+        }
+    }
+
+    subClassSetValue(value, key) {
         this.silence();
 
         if (typeof value == 'object') {
