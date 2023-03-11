@@ -53,13 +53,13 @@ register(class WStack extends Widget {
             let popped = this.top();
 
             if (popped) {
-                this.saveState(popped);
+                //this.saveState(popped);
                 popped.remove();
                 let top = this.top();
 
                 if (top) {
                     top.reveal();
-                    this.restoreState(top);
+                    //this.restoreState(top);
                 }
 
                 this.send({
@@ -80,12 +80,12 @@ register(class WStack extends Widget {
         if (this.length() > 1) {
             if (this.contains(widget)) {
                 let top = this.top();
-                this.saveState(top);
+                //this.saveState(top);
                 top.conceal();
                 widget.reveal();
                 widget.remove();
                 this.append(widget);
-                this.restoreState(widget);
+                //this.restoreState(widget);
                 return true;
             }
         }
@@ -98,12 +98,12 @@ register(class WStack extends Widget {
             let top = this.top();
 
             if (top) {
-                this.saveState(top);
+                //this.saveState(top);
                 top.conceal();
             }
 
             this.append(widget.reveal());
-            this.restoreState(widget);
+            //this.restoreState(widget);
 
             this.send({
                 messageName: 'Widget.Changed',
@@ -119,16 +119,9 @@ register(class WStack extends Widget {
     }
 
     restoreState(widget) {
-        //console.log(widget.searchDescendant({ type: 'flag', flagName: 'autofocus' }));
     }
 
     saveState(widget) {
-        return;
-        let top = this.top();
-
-        if (top && top instanceof WPanel) {
-            console.log(top.focused);
-        }
     }
 
     [Symbol.iterator]() {

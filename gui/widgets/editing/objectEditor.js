@@ -69,7 +69,8 @@ register(class WObjectEditor extends WTable {
                                 mkWScalar(this.modifiable, property, opts)
                                 .on('Widget.Changed', message => this.onValueChanged(message))
                                 .on('Widget.Validity', message => this.onValidityChanged(message))
-                                .assignFlag('autofocus', opts.autofocus === true ? true : false)
+                                //.assignFlag('autofocus', opts.autofocus === true ? true : false)
+                                // TODO -- set autofocus with DocNode.invoke()
                             );
                         }
                     }
@@ -121,7 +122,8 @@ register(class WObjectEditor extends WTable {
                                 mkWScalar(this.modifiable, property, opts)
                                 .on('Widget.Changed', message => this.onValueChanged(message))
                                 .on('Widget.Validity', message => this.onValidityChanged(message))
-                                .assignFlag('autofocus', opts.autofocus === true ? true : false)
+                                //.assignFlag('autofocus', opts.autofocus === true ? true : false)
+                                // TODO -- set autofocus with DocNode.invoke()
                             );
                         }
                     }

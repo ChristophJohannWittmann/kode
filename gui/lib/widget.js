@@ -46,10 +46,9 @@
                 super(typeof arg == 'string' ? arg : 'div');
             }
 
-            this.setCache('id', nextId++);
+            this.setCacheInternal('id', nextId++);
             this.resetFlag('concealed');
-            this.setCache('styles', []);
-            this.setId(`widget${this.getCache('id')}`);
+            this.setId(`widget${this.getCacheInternal('id')}`);
             this.setWidgetStyle('widget');
             this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
         }
@@ -112,11 +111,6 @@
             return this;
         }
 
-        clearCache(name) {
-            delete super.getCache('widget')[name];
-            return this;
-        }
-
         clearClassName(className) {
             super.clearClassName(className);
 
@@ -167,7 +161,7 @@
             if (!this.getFlag('concealed')) {
                 this.silence();
                 this.setFlag('concealed');
-                this.setCache('display', this.getStyle('display'));
+                this.setCacheInternal('display', this.getStyle('display'));
                 this.setStyle('display', 'none');
                 this.resume();
             }
@@ -194,7 +188,7 @@
         }
 
         disablePropagation(eventName) {
-            this.getCache('propagation').clear(eventName);
+            this.getCacheInternal('propagation').clear(eventName);
             return this;
         }
 
@@ -215,16 +209,8 @@
             return this;
         }
 
-        getCache(name) {
-            return super.getCache('widget')[name];
-        }
-
         getWidgetStyle() {
             return this.getAttribute('widget-style');
-        }
-
-        hasCache(name) {
-            return super.getCache('widget')[name] !== undefined;
         }
 
         hasValue() {
@@ -252,11 +238,6 @@
                 widget: this,
             });
 
-            return this;
-        }
-
-        logWidget() {
-            console.log(this.getCache('widget'));
             return this;
         }
 
@@ -288,7 +269,7 @@
         }
 
         popStyle() {
-            let styleStack = this.getCache('styles');
+            let styleStack = this.getCacheInternal('styles');
 
             if (styleStack.length) {
                 let style = styleStack[styleStack.length - 1];
@@ -313,7 +294,7 @@
 
         pushStyle(styleObj) {
             let style = this.getStyle();
-            this.getCache('styles').push(style);
+            this.getCacheInternal('styles').push(style);
             style = clone(style);
 
             for (let key in styleObj) {
@@ -361,8 +342,8 @@
             if (this.getFlag('concealed')) {
                 this.silence();
                 this.resetFlag('concealed');
-                this.setStyle('display', this.getCache('display'));
-                this.clearCache('display');
+                this.setStyle('display', this.getCacheInternal('display'));
+                this.clearCacheInternal('display');
                 this.resume();
             }
 
@@ -444,11 +425,6 @@
                 value: this.getAttribute('class'),
             });
 
-            return this;
-        }
-
-        setCache(name, value) {
-            super.getCache('widget')[name] = value;
             return this;
         }
 

@@ -88,13 +88,16 @@
     *****/
     const cacheKey = Symbol('cache-key');
 
-    const internalUseOnly = mkStringSet(
-        'autofocus',
+    const restrictedCacheValues = mkStringSet(
+        'display',
         'docNode',
         'flags',
+        'focus',
+        'id',
         'listeners',
         'propagation',
-        'widget',
+        'state',
+        'styles',
     );
 
     register(class DocNode extends Emitter {
@@ -109,7 +112,8 @@
                     flags: {},
                     listeners: {},
                     propagation: {},
-                    widget: {},
+                    state: {},
+                    styles: [],
                 };
             }
         }
@@ -176,11 +180,19 @@
         }
 
         clearCache(name) {
-            if (!internalUseOnly.has(name)) {
+            if (!restrictedCacheValues.has(name)) {
                 delete this.node[cacheKey][name];
+            }
+            else {
+                throw new Error(`Attempt to modify restricted element cache name "${name}"`);
             }
 
             return this;
+        }
+
+        clearCacheInternal(name) {
+            delete this.node[cacheKey][name];
+            return;
         }
 
         clearFlag(name) {
@@ -228,6 +240,15 @@
         }
 
         getCache(name) {
+            if (!restrictedCacheValues.has(name)) {
+                return this.node[cacheKey][name];
+            }
+            else {
+                throw new Error(`Attempt to access restricted element cache name "${name}"`);
+            }
+        }
+
+        getCacheInternal(name) {
             return this.node[cacheKey][name];
         }
 
@@ -241,6 +262,15 @@
         }
 
         hasCache(name) {
+            if (!restrictedCacheValues.has(name)) {
+                return (name in this.node[cacheKey]);
+            }
+            else {
+                throw new Error(`Attempt to access restricted element cache name "${name}"`);
+            }
+        }
+
+        hasCacheInternal(name) {
             return (name in this.node[cacheKey]);
         }
 
@@ -424,10 +454,18 @@
         }
 
         setCache(name, value) {
-            if (!internalUseOnly.has(name)) {
+            if (!restrictedCacheValues.has(name)) {
                 this.node[cacheKey][name] = value;
             }
+            else {
+                throw new Error(`Attempt to modify restricted element cache name "${name}"`);
+            }
 
+            return this;
+        }
+
+        setCacheInternal(name, value) {
+            this.node[cacheKey][name] = value;
             return this;
         }
 
@@ -530,7 +568,7 @@
     register(class DocElement extends DocNode {
         constructor(node) {
             super(node);
-            this.setCache('propagation', mkStringSet());
+            this.setCacheInternal('propagation', mkStringSet());
         }
 
         animate() {
@@ -594,7 +632,7 @@
         }
 
         disablePropagation(eventName) {
-            this.getCache('propagation').clear(eventName);
+            this.getCacheInternal('propagation').clear(eventName);
             return this;
         }
 
@@ -604,7 +642,7 @@
         }
 
         enablePropagation(eventName) {
-            this.setCache('propagation').set(eventName);
+            this.setCacheInternal('propagation').set(eventName);
             return this;
         }
 

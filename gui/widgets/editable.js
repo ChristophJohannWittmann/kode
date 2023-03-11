@@ -23,6 +23,19 @@
 
 
 /*****
+ * An editable object is a base class for things that are user editable and
+ * want to plug into the client widget framework.  For the basic framework,
+ * the Input, WSelect, and WTextArea extend this class.  This class provides
+ * the bookeeping mechanism for editable objects.  The extending class or sub
+ * class need to override the following:
+ * 
+ *      subclassCheckValidity
+ *      subclassGetValue
+ *      subclassSetValue
+ * 
+ * In a sense, this base class provides the features or pattern for almost
+ * any imaginable GUI input widget.  Hence, to make complex input widgets fit
+ * into the framework, just develop them to extend WEditable.
 *****/
 register(class WEditable extends Widget {
     constructor(tagName) {
