@@ -28,18 +28,34 @@
     register(class SystemManager extends WEditor {
         constructor() {
             super();
-            this.append(new NetIfaceEditor('public'));
+
+            const iface = new NetIfaceEditor('public');
+            this.append(iface);
+            this.listen();
+
+            this.on('Widget.Modified', message => console.log(message));
+        }
+
+        async revert() {
+        }
+
+        async save() {
+            console.log('SystemManager.save()');
+            iface.save();
+        }
+
+        async update() {
         }
     });
 
 
     /*****
-     * A panel that's used for editing a network interface.  This panel is able to
-     * edit all aspects of a single network interface, whose data is stored in the
-     * server configuration file, kode.json.  All aspects of the network interface
-     * may modified with this panel.  System admin beware, if you deactivate the
-     * network interface you're currently using, the server will reboot without it
-     * being available.
+     * An editor that's used for editing a network interface.  This panel is able
+     * to edit all aspects of a single network interface, whose data is stored in
+     * the server configuration file, kode.json.  All aspects of the network
+     * interface may modified with this panel.  System admin beware, if you
+     * deactivate the network interface you're currently using, the server will
+     * reboot without it being available.
     *****/
     class NetIfaceEditor extends WEditor {
         constructor(ifaceName) {
@@ -144,6 +160,7 @@
                 });
 
                 this.append(this.editor.listen());
+                this.listen();
             })();
         }
 

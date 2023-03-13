@@ -67,10 +67,6 @@ register(class WEditable extends Widget {
         return this;
     }
 
-    async save() {
-        return this;
-    }
-
     setValue(value) {
         this.value = value;
         this.modified = false;

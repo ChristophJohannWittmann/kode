@@ -109,13 +109,53 @@ register(class WEditor extends Widget {
     }
 
     onChildModified(message) {
-        console.log(`${Reflect.getPrototypeOf(this).constructor.name} ${message.messageName}`);
-        message.modified ? this.modified++ : this.modified--;
+        if (message.modified) {
+            this.modified++;
+
+            if (this.modified == 1) {
+                this.send({
+                    messageName: 'Widget.Modified',
+                    modified: true,
+                    widget: this,
+                });
+            }
+        }
+        else {
+            this.modified--;
+
+            if (this.modified == 0) {
+                this.send({
+                    messageName: 'Widget.Modified',
+                    modified: false,
+                    widget: this,
+                });
+            }
+        }
     }
 
     onChildValidity(message) {
-        console.log(`${Reflect.getPrototypeOf(this).constructor.name} ${message.messageName}`);
-        message.valid ? this.invalid-- : this.invalid++;
+        if (message.valid) {
+            this.invalid--;
+
+            if (this.invalid == 0) {
+                this.send({
+                    messageName: 'Widget.Validity',
+                    valid: true,
+                    widget: this,
+                });
+            }
+        }
+        else {
+            this.invalid++;
+
+            if (this.invalid == 1) {
+                this.send({
+                    messageName: 'Widget.Validity',
+                    valid: false,
+                    widget: this,
+                });
+            }
+        }
     }
 
     onServerNotify(message) {

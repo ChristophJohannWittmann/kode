@@ -289,8 +289,8 @@
             return this;
         }
 
-        invoke(func, self) {
-            Reflect.apply(func, self ? self : this, []);
+        invoke(func) {
+            Reflect.apply(func, this, []);
             return this;
         }
 

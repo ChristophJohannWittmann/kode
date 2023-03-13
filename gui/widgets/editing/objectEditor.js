@@ -152,93 +152,6 @@ register(class WObjectEditor extends WEditor {
         return Object.entries(values).map(entry => ({ name: entry[0], value: entry[1] }));
     }
 
-    getScalar(name) {
-        return this.scalars[name];
-    }
-
-    getScalars() {
-        return this.scalars;
-    }
-
-    getValues(arg) {
-        return ActiveData.value(this.modifiable);
-    }
-
-    isModified() {
-        return !areEqual(this.unmodified, ActiveData.value(this.modifiable));
-    }
-
-    isValid() {
-        return this.invalid == 0;
-    }
-
-    onChanged(message) {
-        console.log(`${Reflect.getPrototypeOf(this).constructor.name} ${message.messageName}`);
-    }
-
-    onModified(message) {
-        console.log(`${Reflect.getPrototypeOf(this).constructor.name} ${message.messageName}`);
-        message.modified ? this.modified++ : this.modified--;
-    }
-
-    async onValidity(message) {
-        console.log(`${Reflect.getPrototypeOf(this).constructor.name} ${message.messageName}`);
-        message.valid ? this.invalid-- : this.invalid++;
-    }
-
-    /*
-    onChanged(message) {
-        let modified = this.isModified();
-
-        this.send({
-            messageName: 'Widget.Changed',
-            changed: message.widget,
-            widget: this,
-            type: 'value',
-            modified: modified,
-        });
-
-        if (modified != this.modified) {
-            this.modified = modified;
-            
-            this.send({
-                messageName: 'Widget.Modified',
-                widget: this,
-                modified: this.modified,
-            });
-        }
-    }
-
-    onModified(message) {
-    }
-
-    onValidity(message) {
-        console.log(message);
-        if (message.valid) {
-            this.invalid--;
-
-            if (this.invalid == 0) {
-                this.send({
-                    messageName: 'Widget.Validity',
-                    valid: true,
-                    widget: this,
-                });
-            }
-        }
-        else {
-            this.invalid++;
-
-            if (this.invalid == 1) {
-                this.send({
-                    messageName: 'Widget.Validity',
-                    valid: false,
-                    widget: this,
-                });
-            }
-        }
-    }
-    */
-
     async revert() {
         this.invalid = 0;
         this.modified = false;
@@ -259,18 +172,6 @@ register(class WObjectEditor extends WEditor {
                 valid: true,
                 widget: this,
             });
-        }
-
-        return this;
-    }
-
-    setValues(arg) {
-        if (typeof arg == 'object') {
-            for (let property in arg) {
-                if (property in this.modifiable) {
-                    this.modifiable[property] = arg[property];
-                }
-            }
         }
 
         return this;
