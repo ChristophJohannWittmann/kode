@@ -25,13 +25,10 @@
 (() => {
     /*****
     *****/
-    register(class SystemManager extends WPanel {
+    register(class SystemManager extends WEditor {
         constructor() {
-            super('div');
+            super();
             this.append(new NetIfaceEditor('public'));
-
-            this.on('Widget.Modified', message => console.log('modified'));
-            this.on('Widget.Validity', message => console.log('validity'));
         }
     });
 
@@ -44,9 +41,9 @@
      * network interface you're currently using, the server will reboot without it
      * being available.
     *****/
-    class NetIfaceEditor extends WPanel {
+    class NetIfaceEditor extends WEditor {
         constructor(ifaceName) {
-            super('form');
+            super();
             this.ifaceName = ifaceName;
 
             this.setRefreshers(
@@ -57,7 +54,11 @@
             );
 
             (async () => {
-                this.setTitle(`${txx.fwNetInterface} "${this.ifaceName}"`);
+                this.append(
+                    mkWidget('h3')
+                    .setInnerHtml(`${txx.fwNetInterface} "${this.ifaceName}"`)
+                );
+
                 this.editor = mkWObjectEditor();
 
                 this.iface = await queryServer({
@@ -142,7 +143,7 @@
                     },
                 });
 
-                this.append(this.editor);
+                this.append(this.editor.listen());
             })();
         }
 

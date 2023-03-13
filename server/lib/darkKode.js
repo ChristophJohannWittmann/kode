@@ -43,8 +43,21 @@ singleton(class DarkKode {
             for (let className in this.libs[libName]) {
                 let js =
 `register(class ${className} extends DarkWidget {
+    static downloaded = false;
+
     constructor(...args) {
-        super('${libName}', ...args)
+        super();
+
+        if (${className}.downloaded) {
+            return mk${className}(...args);
+        }
+        else {
+            return new Promise(async (ok, fail) => {
+                await this.download('${libName}');
+                ${className}.downloaded = true;
+                ok(mk${className}(...args));
+            });
+        }
     }
 });`;
 

@@ -34,32 +34,26 @@
  * with the fully functional widget.
 *****/
 register(class DarkWidget extends Widget {
-    constructor(libName, ...args) {
+    constructor() {
         super('div');
-        
-        (async () => {
-            const ctor = Reflect.getPrototypeOf(this).constructor;
-            const className = ctor.name;
-            const makerName = `mk${className}`;
-            const chain = ctor[chainKey];
-            const container = ctor[containerKey];
+    }
 
-            let darkCode = await queryServer({
-                messageName: 'SelfGetDarkWidget',
-                libName: libName,
-                className: className,
-            });
+    async download(libName) {
+        const ctor = Reflect.getPrototypeOf(this).constructor;
+        const className = ctor.name;
+        const container = ctor['#GetContainer']();
 
-            delete container[className];
-            delete container[makerName];
+        let darkCode = await queryServer({
+            messageName: 'SelfGetDarkWidget',
+            libName: libName,
+            className: className,
+        });
 
-            swap(container);
-            eval(mkBuffer(darkCode, 'base64').toString());
-            paws();
+        delete container[className];
+        delete container[`mk${className}`];
 
-            let widget;
-            eval(`widget = ${makerName}(...args);`);
-            this.become(widget);
-        })();
+        swap(container);
+        eval(mkBuffer(darkCode, 'base64').toString());
+        paws();
     }
 });

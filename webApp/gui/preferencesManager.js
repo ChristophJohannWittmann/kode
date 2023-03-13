@@ -24,7 +24,7 @@
 
 /*****
 *****/
-register(class PreferencesManager extends WPanel {
+register(class PreferencesManager extends Widget {
     constructor() {
         super('h1');
         this.setInnerHtml('FWPreferencesView').on('dom.click', message => console.log(message));

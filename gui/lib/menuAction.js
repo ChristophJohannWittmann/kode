@@ -113,7 +113,7 @@ register(class SingletonViewMenuAction extends MenuAction {
             this.view.promote(this.widget);
         }
         else {
-            this.widget = this.maker(this.args);
+            this.widget = await waitOn(this.maker(this.args));
             this.view.push(this.widget);
             this.menuItem.setOpen();
         }
@@ -150,7 +150,7 @@ register(class ToggleViewMenuAction extends MenuAction {
         await super.onClick(menuItem, message);
 
         if (!this.widget) {
-            this.widget = this.maker(this.args);
+            this.widget = await waitOn(this.maker(this.args));
             this.view.push(this.widget);
             this.menuItem.disable();
         }

@@ -24,7 +24,7 @@
 
 /*****
 *****/
-register(class PasswordManager extends WPanel {
+register(class PasswordManager extends Widget {
     constructor() {
         super('h1');
         this.setInnerHtml('FWSetPasswordView').on('dom.click', message => console.log(message));

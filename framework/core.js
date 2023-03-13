@@ -46,9 +46,8 @@
     let chain = '';
     let container = global;
     let swapped = null;
-    global['#CHAIN'] = '';
-    global.chainKey = Symbol('chain');
-    global.containerKey = Symbol('container');
+    chainKey = Symbol('chain');
+    containerKey = Symbol('container');
 
     global.getContainer = function(links) {
         if (links === undefined) {
@@ -142,6 +141,8 @@
             if (!(func.name in container)) {
                 func[chainKey] = chain;
                 func[containerKey] = container;
+                func['#GetChain'] = () => func[chainKey];
+                func['#GetContainer'] = () => func[containerKey];
 
                 if (func.toString().startsWith('class')) {
                     if (func.name.match(/^[A-Z]/)) {

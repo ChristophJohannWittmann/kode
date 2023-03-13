@@ -23,218 +23,224 @@
 
 
 /*****
- * The WView class extends WPanel to provide features associated with a view.
- * A view is an area of the window, or all of it, that's a WStack, on which
- * panels or views are pushed and popped.  What's really important about this
- * is the need to dynamically the WCtl objects in a WCtls panel in response to
- * events within the WStack and it's descendants.
 *****/
-register(class WView extends WPanel {
-    static internalNav = Symbol('Internal');
+(() => {
+    const navKey = Symbol('nav');
 
-    constructor(tagName, horz, fwd) {
-        super(tagName ? tagName : 'div');
-        this.nav = mkWNavBar();
-        this.stack = mkWStack();
-        this.append(this.nav);
-        this.append(mkHtmlElement('hr'));
-        this.append(this.stack);
+    register(class WView extends Widget {
+        constructor(tagName, horz, fwd) {
+            super(tagName ? tagName : 'div');
+            this.nav = mkWNavBar();
+            this.stack = mkWStack();
+            this.append(this.nav);
+            this.append(mkHtmlElement('hr'));
+            this.append(this.stack);
 
-        this.done =
-        mkWCtl()
-        .setInnerHtml(txx.fwNavDone)
-        .setWidgetStyle('ctls-horz-ctl')
-        .on('dom.click', async message => this.onDone(message));
+            this.done =
+            mkWCtl()
+            .setInnerHtml(txx.fwNavDone)
+            .setWidgetStyle('ctls-horz-ctl')
+            .on('dom.click', async message => this.onDone(message));
 
-        this.cancel =
-        mkWCtl()
-        .setInnerHtml(txx.fwNavCancel)
-        .setWidgetStyle('ctls-horz-ctl')
-        .on('dom.click', async message => this.onCancel(message));
-        this.on('Widget.Cancel', async message => await this.onCancel(message));
-        this.on('Widget.Done', async message => await this.onDone(message));
+            this.cancel =
+            mkWCtl()
+            .setInnerHtml(txx.fwNavCancel)
+            .setWidgetStyle('ctls-horz-ctl')
+            .on('dom.click', async message => this.onCancel(message));
 
-        this.done[WView.internalNav] = true;
-        this.cancel[WView.internalNav] = true;
-    }
+            this.on('Widget.Cancel', async message => await this.onCancel(message));
+            this.on('Widget.Done', async message => await this.onDone(message));
 
-    adjustCtls() {
-        let top = this.stack.top();
+            this.done[navKey] = true;
+            this.cancel[navKey] = true;
+        }
 
-        if (top) {
-            let lastExternal = this.getLastExternalCtl();
-            let valid = typeof top.isValid == 'function' ? top.isValid() : true;
-            let modified = typeof top.isModified == 'function' ? top.isModified() : false;
+        adjustCtls() {
+            let top = this.stack.top();
 
-            if (!this.done.parent()) {
-                if (lastExternal) {
-                    lastExternal.insertBefore(this.done);
+            if (top) {
+                let lastExternal = this.getLastExternalCtl();
+                let valid = typeof top.isValid == 'function' ? top.isValid() : true;
+                let modified = typeof top.isModified == 'function' ? top.isModified() : false;
+
+                if (!this.nav.contains(this.done)) {
+                    if (lastExternal) {
+                        lastExternal.insertBefore(this.done);
+                    }
+                    else {
+                        this.nav.ctls.prepend(this.done);
+                    }
+                }
+
+                if (modified) {
+                    if (!this.nav.contains(this.cancel)) {
+                        this.done.insertBefore(this.cancel);
+                    }
+
+                    if (valid) {
+                        top.getFlag('noclose') ? this.done.disable() : this.done.enable();
+                    }
+                    else {
+                        this.done.disable();
+                    }
                 }
                 else {
-                    this.nav.ctls.prepend(this.done);
-                }
-            }
-
-            if (modified) {
-                if (!this.cancel.parent()) {
-                    this.done.insertBefore(this.cancel);
-                }
-
-                if (valid) {
-                    top.remainOpen ? this.done.disable() : this.done.enable();
-                }
-                else {
-                    this.done.disable();
+                    this.cancel.remove();
+                    top.getFlag('noclose') ? this.done.disable() : this.done.enable();
                 }
             }
             else {
                 this.cancel.remove();
-                top.remainOpen ? this.done.disable() : this.done.enable();
+                this.done.remove();
             }
         }
-        else {
-            this.cancel.remove();
-            this.done.remove();
-        }
-    }
 
-    getLastExternalCtl() {
-        let lastExternal = null;
+        getLastExternalCtl() {
+            let lastExternal = null;
 
-        for (let ctl of this.nav.ctls.children().reverse()) {
-            if (ctl[WView.internalNav]) {
-                break;
+            for (let ctl of this.nav.ctls.children().reverse()) {
+                if (ctl[navKey]) {
+                    break;
+                }
+
+                lastExternal = ctl;
             }
 
-            lastExternal = ctl;
+            return lastExternal;
         }
 
-        return lastExternal;
-    }
-
-    getStack() {
-        return this.stack;
-    }
-
-    length() {
-        return this.stack.length;
-    }
-
-    async onCancel(message) {
-        if (this.isModified()) {
-            await this.revert();
-            this.adjustCtls();
+        ignore(widget) {
+            widget.off('Widget.Modified', widget.getCacheInternal('modifiedHandler'));
+            widget.off('Widget.Validity', widget.getCacheInternal('validityHandler'));
+            widget.clearCacheInternal('modifiedHandler');
+            widget.clearCacheInternal('validityHandler');
         }
 
-        return this;
-    }
+        listen(widget) {
+            widget.setCacheInternal('modifiedHandler', message => this.onModified(message));
+            widget.setCacheInternal('validityHandler', message => this.onValidity(message));
+            widget.on('Widget.Modified', widget.getCacheInternal('modifiedHandler'));
+            widget.on('Widget.Validity', widget.getCacheInternal('validityHandler'));
+        }
 
-    async onDone(message) {
-        if (this.isValid()) {
-            if (this.isModified()) {
-                await this.save();
+        async onCancel(message) {
+            let top = this.stack.top();
+
+            if (typeof top.isModified != 'function' || top.isModified()) {
+                await top.revert();
+                this.adjustCtls();
             }
 
-            this.pop();
-        }
-    }
-
-    async onModified(message) {
-        super.onModified(message);
-        this.adjustCtls();
-    }
-
-    async onValidity(message) {
-        await super.onValidity(message);
-        this.adjustCtls();
-    }
-
-    pop() {
-        if (this.stack.length()) {
-            let popped = this.stack.top();
-            this.stack.pop();
-            this.adjustCtls();
-
-            this.send({
-                messageName: 'View.Pop',
-                view: this,
-                popped: popped,
-            });
+            return this;
         }
 
-        return this;
-    }
+        async onDone(message) {
+            let top = this.stack.top();
 
-    promote(widget) {
-        if (this.stack.promote(widget)) {
-            this.adjustCtls();
+            if (typeof top.isValid != 'function' || top.isValid()) {
+                if (typeof top.isModified != 'function' || top.isModified()) {
+                    if (typeof top.save == 'function') {
+                        let result = top.save();
 
-            this.send({
-                messageName: 'View.Promote',
-                view: this,
-                widget: widget,
-            });
+                        if (result instanceof Promise) {
+                            await result;
+                        }
+                    }
+                }
+
+                this.pop();
+            }
+
+            return this;
         }
 
-        return this;
-    }
+        onModified(message) {
+            console.log('WView modified');
+        }
 
-    push(widget) {
-        if (this.stack.push(widget)) {
+        onValidity(message) {
+            console.log('WView validity');
+        }
+
+        pop() {
+            let popped = this.stack.pop();
+
+            if (popped) {
+                this.ignore(popped);
+                let top = this.stack.top();
+
+                if (top) {
+                    this.listen(top);
+                }
+
+                this.adjustCtls();
+
+                this.send({
+                    messageName: 'View.Pop',
+                    view: this,
+                    popped: popped,
+                    top: top,
+                });
+            }
+
+            return this;
+        }
+
+        promote(widget) {
+            let demoted = this.stack.promote(widget);
+
+            if (demoted) {
+                this.ignore(demoted);
+                this.listen(widget);
+                this.adjustCtls();
+
+                this.send({
+                    messageName: 'View.Promote',
+                    view: this,
+                    promoted: widget,
+                    demoted: demoted,
+                });
+            }
+
+            return this;
+        }
+
+        push(widget) {
+            let prior = this.stack.push(widget);
+
+            if (prior) {
+                this.ignore(prior);
+            }
+
+            if (prior || this.stack.length() == 1) {
+                this.listen(widget);
+            }
+
             this.adjustCtls();
 
             this.send({
                 messageName: 'View.Push',
                 view: this,
-                widget: widget,
+                pushed: widget,
+                prior: prior,
             });
+
+            return this;
         }
 
-        return this;
-    }
+        pushCtl(ctl) {
+            ctl[navKey] = false;
+            let lastExternal = this.getLastExternalCtl();
+            ctl.setWidgetStyle('ctls-horz-ctl');
 
-    pushCtl(ctl) {
-        ctl[WView.internalNav] = false;
-        let lastExternal = this.getLastExternalCtl();
-        ctl.setWidgetStyle('ctls-horz-ctl');
+            if (lastExternal) {
+                lastExternal.insertBefore(ctl);
+            }
+            else {
+                this.nav.ctls.prepend(ctl);
+            }
 
-        if (lastExternal) {
-            lastExternal.insertBefore(ctl);
+            return this;
         }
-        else {
-            this.nav.ctls.prepend(ctl);
-        }
-
-        return this;
-    }
-
-    async revert() {
-        super.revert();
-        let top = this.top();
-
-        if (top && typeof top.revert == 'function') {
-            await top.revert();
-        }
-    }
-
-    async save() {
-        let top = this.top();
-
-        if (top && typeof top.save == 'function') {
-            await top.save();
-        }
-    }
-
-    top() {
-        return this.stack.top();
-    }
-
-    async update() {
-        super.update();
-        let top = this.top();
-
-        if (top && typeof top.update == 'function') {
-            await top.update();
-        }
-    }
-});
+    });
+})();

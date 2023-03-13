@@ -57,10 +57,17 @@ register(class WEditable extends Widget {
         return this.subclassCheckValidity();
     }
 
-    revert() {
+    refresh() {
+    }
+
+    async revert() {
         this.subclassSetValue(this.value);
         this.modified = false;
         this.valid = this.isValid();
+        return this;
+    }
+
+    async save() {
         return this;
     }
 
@@ -91,6 +98,10 @@ register(class WEditable extends Widget {
     }
 
     subclassSetValue(value) {
+    }
+
+    async update() {
+        this.value = this.subclassGetValue();
     }
 
     valueChanged(value) {

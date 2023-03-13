@@ -32,9 +32,13 @@
  * each method accepts options data, which specifies editing and viewing options
  * for each field.
 *****/
-register(class WObjectEditor extends WTable {
+register(class WObjectEditor extends WEditor {
     constructor(readonly) {
         super();
+        this.table = mkWTable();
+        this.body = this.table.getBody();
+        this.append(this.table);
+
         this.invalid = 0;
         this.modified = false;
         this.unmodified = {};
@@ -63,14 +67,10 @@ register(class WObjectEditor extends WTable {
 
                             opts.type = opts.type ? opts.type : WScalar.selectType(this.modifiable[property]);
 
-                            this.getBody().mkRowAppend()
+                            this.body.mkRowAppend()
                             .mkCellAppend(opts.label ? opts.label : property)
                             .mkCellAppend(
                                 mkWScalar(this.modifiable, property, opts)
-                                .on('Widget.Changed', message => this.onValueChanged(message))
-                                .on('Widget.Validity', message => this.onValidityChanged(message))
-                                //.assignFlag('autofocus', opts.autofocus === true ? true : false)
-                                // TODO -- set autofocus with DocNode.invoke()
                             );
                         }
                     }
@@ -80,12 +80,10 @@ register(class WObjectEditor extends WTable {
                         let readonly = this.readonly || WScalar.dboReadonlyByDefault(property);
                         let opts = { readonly: this.readonly, type: WScalar.selectType(this.modifiable[property]) };
 
-                        this.getBody().mkRowAppend()
+                        this.body.mkRowAppend()
                         .mkCellAppend(property)
                         .mkCellAppend(
                             mkWScalar(this.modifiable, property, opts)
-                            .on('Widget.Changed', message => this.onValueChanged(message))
-                            .on('Widget.Validity', message => this.onValidityChanged(message))
                         );
                     }
                 }
@@ -116,14 +114,10 @@ register(class WObjectEditor extends WTable {
 
                             opts.type = opts.type ? opts.type : WScalar.selectType(this.modifiable[property]);
 
-                            this.getBody().mkRowAppend()
+                            this.body.mkRowAppend()
                             .mkCellAppend(opts.label ? opts.label : property)
                             .mkCellAppend(
                                 mkWScalar(this.modifiable, property, opts)
-                                .on('Widget.Changed', message => this.onValueChanged(message))
-                                .on('Widget.Validity', message => this.onValidityChanged(message))
-                                //.assignFlag('autofocus', opts.autofocus === true ? true : false)
-                                // TODO -- set autofocus with DocNode.invoke()
                             );
                         }
                     }
@@ -132,12 +126,10 @@ register(class WObjectEditor extends WTable {
                         this.modifiable[property] = value;
                         let opts = { readonly: this.readonly, type: WScalar.selectType(this.modifiable[property]) };
 
-                        this.getBody().mkRowAppend()
+                        this.body.mkRowAppend()
                         .mkCellAppend(property)
                         .mkCellAppend(
                             mkWScalar(this.modifiable, property, opts)
-                            .on('Widget.Changed', message => this.onValueChanged(message))
-                            .on('Widget.Validity', message => this.onValidityChanged(message))
                         );
                     }
                 }
@@ -180,7 +172,48 @@ register(class WObjectEditor extends WTable {
         return this.invalid == 0;
     }
 
-    onValidityChanged(message) {
+    onChanged(message) {
+        console.log(`${Reflect.getPrototypeOf(this).constructor.name} ${message.messageName}`);
+    }
+
+    onModified(message) {
+        console.log(`${Reflect.getPrototypeOf(this).constructor.name} ${message.messageName}`);
+        message.modified ? this.modified++ : this.modified--;
+    }
+
+    async onValidity(message) {
+        console.log(`${Reflect.getPrototypeOf(this).constructor.name} ${message.messageName}`);
+        message.valid ? this.invalid-- : this.invalid++;
+    }
+
+    /*
+    onChanged(message) {
+        let modified = this.isModified();
+
+        this.send({
+            messageName: 'Widget.Changed',
+            changed: message.widget,
+            widget: this,
+            type: 'value',
+            modified: modified,
+        });
+
+        if (modified != this.modified) {
+            this.modified = modified;
+            
+            this.send({
+                messageName: 'Widget.Modified',
+                widget: this,
+                modified: this.modified,
+            });
+        }
+    }
+
+    onModified(message) {
+    }
+
+    onValidity(message) {
+        console.log(message);
         if (message.valid) {
             this.invalid--;
 
@@ -204,28 +237,7 @@ register(class WObjectEditor extends WTable {
             }
         }
     }
-
-    onValueChanged(message) {
-        let modified = this.isModified();
-
-        this.send({
-            messageName: 'Widget.Changed',
-            changed: message.widget,
-            widget: this,
-            type: 'value',
-            modified: modified,
-        });
-
-        if (modified != this.modified) {
-            this.modified = modified;
-            
-            this.send({
-                messageName: 'Widget.Modified',
-                widget: this,
-                modified: this.modified,
-            });
-        }
-    }
+    */
 
     async revert() {
         this.invalid = 0;

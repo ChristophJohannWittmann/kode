@@ -62,13 +62,6 @@ register(class WStack extends Widget {
                     //this.restoreState(top);
                 }
 
-                this.send({
-                    messageName: 'Widget.Changed',
-                    type: 'pop',
-                    widget: this,
-                    popped: popped,
-                });
-
                 return popped
             }
         }
@@ -86,11 +79,11 @@ register(class WStack extends Widget {
                 widget.remove();
                 this.append(widget);
                 //this.restoreState(widget);
-                return true;
+                return top;
             }
         }
 
-        return false;
+        return null;
     }
 
     push(widget) {
@@ -105,17 +98,10 @@ register(class WStack extends Widget {
             this.append(widget.reveal());
             //this.restoreState(widget);
 
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'push',
-                widget: this,
-                pushed: widget,
-            });
-
-            return true;
+            return top;
         }
 
-        return false;
+        return null;
     }
 
     restoreState(widget) {

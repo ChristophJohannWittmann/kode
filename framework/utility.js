@@ -533,3 +533,18 @@ register(function waitFor(func, interval) {
         }, interval);
     });
 });
+
+
+/*****
+ * Use this function just to clean up syntax a bit.  By calling this function
+ * when the object or result is unknown, we can await a response without having
+ * any if's or other sorts of branching:  let x = await waitOn(obj);  Not a
+ * huge deal but it will clean up some syntax.
+*****/
+register(async function waitOn(obj) {
+    if (obj instanceof Promise) {
+        return await obj;
+    }
+
+    return obj;
+});

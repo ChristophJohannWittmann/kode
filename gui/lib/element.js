@@ -89,15 +89,17 @@
     const cacheKey = Symbol('cache-key');
 
     const restrictedCacheValues = mkStringSet(
+        'autofocus',
         'display',
         'docNode',
         'flags',
-        'focus',
         'id',
         'listeners',
+        'modifiedHandler',
         'propagation',
         'state',
         'styles',
+        'validityHandler',
     );
 
     register(class DocNode extends Emitter {
@@ -129,30 +131,6 @@
         assignFlag(name, bool) {
             if (typeof bool == 'boolean') {
                 this.node[cacheKey].flags[name] = bool;
-            }
-
-            return this;
-        }
-
-        become(docNode) {
-            if (docNode instanceof DocNode) {
-                let node = unwrapDocNode(docNode);
-
-                if (typeof node[cacheKey] == 'object') {
-                    let cache = node[cacheKey];
-                    cache.docNode = this;
-                    this.node[cacheKey] = cache;
-                    Reflect.setPrototypeOf(this, Reflect.getPrototypeOf(cache.docNode));
-
-                    while (node.childNodes.length) {
-                        let childNode = node.childNodes.item(0);
-                        this.node.appendChild(childNode);
-                    }
-
-                    for (let propertyName in Object.getOwnPropertyNames(cache.docNode)) {
-                        this[propertyName] = cache.docNode[propertyName];
-                    }
-                }
             }
 
             return this;
@@ -311,8 +289,8 @@
             return this;
         }
 
-        invoke(func) {
-            Reflect.apply(func, this, []);
+        invoke(func, self) {
+            Reflect.apply(func, self ? self : this, []);
             return this;
         }
 
@@ -344,6 +322,10 @@
             if (this.node.lastChild) {
                 return wrapDocNode(this.node.lastChild);
             }
+        }
+
+        length() {
+            return this.node.childNodes.length;
         }
 
         log() {
@@ -418,6 +400,10 @@
             }
         }
 
+        async refresh() {
+            return this;
+        }
+
         remove() {
             if (this.node.parentNode) {
                 this.node.parentNode.removeChild(this.node);
@@ -450,6 +436,10 @@
 
         resetFlag(name) {
             this.node[cacheKey].flags[name] = false;
+            return this;
+        }
+
+        revert() {
             return this;
         }
 
@@ -734,10 +724,6 @@
                 return wrapDocNode(this.node.lastElementChild);
             }
         }
-
-        length() {
-            return this.node.childNodes.length;
-        }
       
         nextElementSibling() {
             if (this.node.nextElementSibling) {
@@ -824,6 +810,22 @@
             }
 
             return null;
+        }
+
+        async refresh() {
+            for (let child of this) {
+                await child.refresh();
+            }
+
+            return this;
+        }
+
+        revert() {
+            for (let child of this) {
+                child.revert();
+            }
+
+            return this;
         }
 
         scroll() {

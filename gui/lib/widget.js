@@ -37,6 +37,12 @@
 (() => {
     let nextId = 1;
 
+    const wireNames = mkStringSet(
+        'Widget.Changed',
+        'Widget.Modified',
+        'Widget.Validity',
+    );
+
     register(class Widget extends HtmlElement {
         constructor(arg) {
             if (arg instanceof Node) {
@@ -51,6 +57,7 @@
             this.setId(`widget${this.getCacheInternal('id')}`);
             this.setWidgetStyle('widget');
             this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
+            this.refreshers = mkStringSet();
         }
 
         append(...args) {
@@ -136,6 +143,11 @@
                 value: null,
             });
 
+            return this;
+        }
+
+        clearRefreshers(...endpointNames) {
+            this.refreshers.clear(...endpointNames);
             return this;
         }
 
@@ -449,6 +461,11 @@
                 widget: this,
             });
 
+            return this;
+        }
+
+        setRefreshers(...endpointNames) {
+            this.refreshers.set(...endpointNames);
             return this;
         }
 
