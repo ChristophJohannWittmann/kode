@@ -34,7 +34,7 @@
      * organizaiton or an existing organization that was opened for editing.  This
      * view is also how all non-org users will find and navigate to an organization.
     *****/
-    register(class OrgManager extends WPanel {
+    register(class OrgManager extends Widget {
         constructor() {
             super();
             this.setTitle(txx.fwOrgManagerListTitle);
@@ -233,7 +233,7 @@
      * wise, it's just an object editor that connects to the back and updates the
      * properties of the organization.
     *****/
-    class OrgEditor extends WPanel {
+    class OrgEditor extends WEditor {
         constructor(dboOrg) {
             super('form');
             this.dboOrg = dboOrg;

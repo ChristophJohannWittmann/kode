@@ -26,12 +26,12 @@
  * The framework provides various different classes of navbars, some with hooks
  * for a specific look and feel and some that are expandable and customiablable.
  * Navbars may appear anywhere in the application.  The primary requirements for
- * a real navbar is that extends WPanel, which is the primary widget type that's
+ * a real navbar is that extends Widget, which is the primary widget type that's
  * a container for several child widgets.  The WNavBar01 is like a heading or
  * horizontal title bar at the top of some panel.  The left contains a title,
  * image or organization logo, while the right is a dedicated area for controls.
 *****/
-register(class WNavBar extends WPanel {
+register(class WNavBar extends Widget {
     constructor() {
         super();
         this.ctls = mkWCtls();

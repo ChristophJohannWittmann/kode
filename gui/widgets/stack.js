@@ -53,13 +53,13 @@ register(class WStack extends Widget {
             let popped = this.top();
 
             if (popped) {
-                //this.saveState(popped);
+                popped.storeState();
                 popped.remove();
                 let top = this.top();
 
                 if (top) {
                     top.reveal();
-                    //this.restoreState(top);
+                    top.restoreState();
                 }
 
                 return popped
@@ -73,12 +73,12 @@ register(class WStack extends Widget {
         if (this.length() > 1) {
             if (this.contains(widget)) {
                 let top = this.top();
-                //this.saveState(top);
+                top.storeState();
                 top.conceal();
                 widget.reveal();
                 widget.remove();
                 this.append(widget);
-                //this.restoreState(widget);
+                widget.restoreState();
                 return top;
             }
         }
@@ -91,23 +91,16 @@ register(class WStack extends Widget {
             let top = this.top();
 
             if (top) {
-                //this.saveState(top);
+                top.storeState();
                 top.conceal();
             }
 
             this.append(widget.reveal());
-            //this.restoreState(widget);
-
+            widget.restoreState();
             return top;
         }
 
         return null;
-    }
-
-    restoreState(widget) {
-    }
-
-    saveState(widget) {
     }
 
     [Symbol.iterator]() {

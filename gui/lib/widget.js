@@ -36,12 +36,8 @@
 *****/
 (() => {
     let nextId = 1;
-
-    const wireNames = mkStringSet(
-        'Widget.Changed',
-        'Widget.Modified',
-        'Widget.Validity',
-    );
+    let nextHandlerId = 1;
+    let handlerKey = Symbol('handler');
 
     register(class Widget extends HtmlElement {
         constructor(arg) {
@@ -57,6 +53,9 @@
             this.setId(`widget${this.getCacheInternal('id')}`);
             this.setWidgetStyle('widget');
             this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
+
+            // TODO .....
+            this.listened = {};
             this.refreshers = mkStringSet();
         }
 
@@ -229,6 +228,50 @@
             return this.hasAttribute('value');
         }
 
+        ignore(widget, messageName) {
+            if (widget) {
+                if (widget.getId() in this.listened) {
+                    let widgetEntry = this.listened[widget.getId()];
+
+                    if (messageName) {
+                        if (messageName in widgetEntry.messages) {
+                            let messageNameGroup = widgetEntry.messages[messageName];
+
+                            for (let handler of Object.values(messageNameGroup.handlers)) {
+                                widgetEntry.widget.off(messageNameGroup.messageName, handler);
+                            }
+
+                            messageNameGroup.handlers = {};
+                        }
+                    }
+                    else {
+                        for (let messageNameGroup of Object.values(widgetEntry.messages)) {
+                            for (let handler of Object.values(messageNameGroup.handlers)) {
+                                widgetEntry.widget.off(messageNameGroup.messageName, handler);
+                            }
+                        }
+
+                        widgetEntry.messages = {};
+                    }
+                }
+            }
+            else {
+                for (let widgetId in this.listened) {
+                    let widgetEntry = this.listened[widgetId];
+
+                    for (let messageNameGroup of Object.values(widgetEntry.messages)) {
+                        for (let handler of Object.values(messageNameGroup.handlers)) {
+                            widgetEntry.widget.off(messageNameGroup.messageName, handler);
+                        }
+                    }
+                }
+
+                this.listened = {};
+            }
+
+            return this;
+        }
+
         insertAfter(...args) {
             super.insertAfter(...args);
 
@@ -250,6 +293,48 @@
                 widget: this,
             });
 
+            return this;
+        }
+
+        listen(widget, messageName, handler) {
+            if (handlerKey in handler) {
+                var hid = handler[handlerKey];
+            }
+            else {
+                var hid = nextHandlerId++;
+                handler[handlerKey] = hid;
+            }
+
+            if (widget.getId() in this.listened) {
+                var widgetEntry = this.listened[widget.getId()];
+            }
+            else {
+                var widgetEntry = new Object({
+                    widget: widget,
+                    messages: {},
+                });
+
+                this.listened[widget.getId()] = widgetEntry;
+            }
+
+            if (messageName in widgetEntry.messages) {
+                var messageNameGroup = widgetEntry.messages[messageName];
+
+                if (hid in messageNameGroup.handlers) {
+                    return this;
+                }
+            }
+            else {
+                var messageNameGroup = {
+                    messageName: messageName,
+                    handlers: {}
+                };
+
+                widgetEntry.messages[messageName] = messageNameGroup;
+            }
+
+            messageNameGroup.handlers[hid] = handler;
+            widget.on(messageName, handler);
             return this;
         }
 
@@ -346,6 +431,20 @@
                     widget: parent,
                 });
             }
+
+            return this;
+        }
+
+        restoreState(milliseconds) {
+            milliseconds = typeof milliseconds == 'number' ? milliseconds : 50;
+
+            setTimeout(() => {
+                let focused = this.getCacheInternal('focus');
+
+                if (focused) {
+                    focused.focus();
+                }
+            }, milliseconds);
 
             return this;
         }
@@ -484,6 +583,10 @@
 
         setWidgetStyle(widgetStyle) {
             this.setAttribute('widget-style', widgetStyle);
+            return this;
+        }
+
+        storeState() {
             return this;
         }
 

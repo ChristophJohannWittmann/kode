@@ -25,7 +25,7 @@
 (() => {
     /*****
     *****/
-    register(class UserManager extends WPanel {
+    register(class UserManager extends WEdtior {
         constructor() {
             super('form');
             this.setTitle(txx.fwUserManagerTitle);
@@ -35,7 +35,7 @@
 
     /*****
     *****/
-    class UserCreator extends WPanel {
+    class UserCreator extends Widget {
         constructor() {
             super('form');
             this.setInnerHtml('U S E R    S E L E C T O R');
@@ -45,7 +45,7 @@
 
     /*****
     *****/
-    class UserSelector extends WPanel {
+    class UserSelector extends Widget {
         constructor() {
             super('form');
             this.setInnerHtml('U S E R    S E L E C T O R');
@@ -55,7 +55,7 @@
 
     /*****
     *****/
-    class UserList extends WPanel {
+    class UserList extends Widget {
         constructor() {
             super('form');
             this.setInnerHtml('U S E R    L I S T');

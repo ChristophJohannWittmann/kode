@@ -57,13 +57,28 @@ register(class WEditable extends Widget {
         return this.subclassCheckValidity();
     }
 
-    refresh() {
-    }
-
     async revert() {
-        this.subclassSetValue(this.value);
-        this.modified = false;
-        this.valid = this.isValid();
+        if (this.isModified()) {
+            this.modified = false;
+            this.subclassSetValue(this.value);
+
+            this.send({
+                messageName: 'Widget.Modified',
+                widget: this,
+                modified: false,
+            });
+
+            if (this.isValid() != this.valid) {
+                this.valid = !this.valid;
+
+                this.send({
+                    messageName: 'Widget.Validity',
+                    widget: this,
+                    valid: this.valid,
+                });
+            }
+        }
+
         return this;
     }
 
@@ -96,10 +111,6 @@ register(class WEditable extends Widget {
     subclassSetValue(value) {
     }
 
-    async update() {
-        this.value = this.subclassGetValue();
-    }
-
     valueChanged(value) {
         this.subclassSetValue(value);
 
@@ -125,8 +136,8 @@ register(class WEditable extends Widget {
 
             this.send({
                 messageName: 'Widget.Validity',
-                valid: true,
                 widget: this,
+                valid: this.valid,
             });
         }
     }

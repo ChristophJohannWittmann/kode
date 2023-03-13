@@ -89,7 +89,6 @@
     const cacheKey = Symbol('cache-key');
 
     const restrictedCacheValues = mkStringSet(
-        'autofocus',
         'display',
         'docNode',
         'flags',
@@ -97,7 +96,7 @@
         'listeners',
         'modifiedHandler',
         'propagation',
-        'state',
+        'focus',
         'styles',
         'validityHandler',
     );
@@ -109,12 +108,11 @@
 
             if (!(cacheKey in node)) {
                 this.node[cacheKey] = {
-                    autofocus: null,
+                    focus: null,
                     docNode: this,
                     flags: {},
                     listeners: {},
                     propagation: {},
-                    state: {},
                     styles: [],
                 };
             }
@@ -289,8 +287,8 @@
             return this;
         }
 
-        invoke(func) {
-            Reflect.apply(func, this, []);
+        invoke(func, ...args) {
+            Reflect.apply(func, null, [this].concat(args));
             return this;
         }
 
@@ -563,26 +561,6 @@
 
         animate() {
             console.log('TBD DocElement.animate()');
-        }
-
-        checkAutofocus(...args) {
-            let autofocus;
-
-            for (let arg of args) {
-                let bare = unwrapDocNode(arg);
-
-                if (bare[cacheKey] && bare[cacheKey].flags.autofocus === true) {
-                    if (typeof bare.focus == 'function') {
-                        autofocus = bare;
-                        break;
-                    }
-                }
-            }
-
-            if (autofocus) {
-                let wrapped = wrapDocNode(autofocus);
-                autofocus.setFlag('autofocus');
-            }
         }
 
         clearAttribute(name) {

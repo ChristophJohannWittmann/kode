@@ -121,7 +121,6 @@ register(class Webx extends Emitter {
                 'gui/widgets/input.js',
                 'gui/widgets/select.js',
                 'gui/widgets/textArea.js',
-                'gui/widgets/panel.js',
                 'gui/widgets/stack.js',
                 'gui/widgets',
             ], Config.debug)

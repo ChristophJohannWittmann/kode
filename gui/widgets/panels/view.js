@@ -23,6 +23,14 @@
 
 
 /*****
+ * A view is a standard framework widget used for framing the view on part of or
+ * all of an application or web extension.  The WView widgets has a navigation
+ * bar and a WStack for managing multiple widgets that can be viewed.  It's up
+ * to the specific application to provide a navigation widget for perusing or
+ * navigating the items in the WStack.  A typical application would display a
+ * popup menu that's configured to select which of the existing views to promote
+ * or whether to create and push a new view on the stack.  This is very much a
+ * top-level web app layout.
 *****/
 (() => {
     const navKey = Symbol('nav');
@@ -109,18 +117,9 @@
             return lastExternal;
         }
 
-        ignore(widget) {
-            widget.off('Widget.Modified', widget.getCacheInternal('modifiedHandler'));
-            widget.off('Widget.Validity', widget.getCacheInternal('validityHandler'));
-            widget.clearCacheInternal('modifiedHandler');
-            widget.clearCacheInternal('validityHandler');
-        }
-
         listen(widget) {
-            widget.setCacheInternal('modifiedHandler', message => this.onModified(message));
-            widget.setCacheInternal('validityHandler', message => this.onValidity(message));
-            widget.on('Widget.Modified', widget.getCacheInternal('modifiedHandler'));
-            widget.on('Widget.Validity', widget.getCacheInternal('validityHandler'));
+            super.listen(widget, 'Widget.Modified', message => this.onTopModified(message));
+            super.listen(widget, 'Widget.Validity', message => this.onTopValidity(message));
         }
 
         async onCancel(message) {
@@ -128,7 +127,6 @@
 
             if (typeof top.isModified != 'function' || top.isModified()) {
                 await top.revert();
-                this.adjustCtls();
             }
 
             return this;
@@ -140,11 +138,7 @@
             if (typeof top.isValid != 'function' || top.isValid()) {
                 if (typeof top.isModified != 'function' || top.isModified()) {
                     if (typeof top.save == 'function') {
-                        let result = top.save();
-
-                        if (result instanceof Promise) {
-                            await result;
-                        }
+                        return await top.save();
                     }
                 }
 
@@ -154,19 +148,19 @@
             return this;
         }
 
-        onModified(message) {
-            console.log('WView modified');
+        onTopModified(message) {
+            this.adjustCtls();
         }
 
-        onValidity(message) {
-            console.log('WView validity');
+        onTopValidity(message) {
+            this.adjustCtls();
         }
 
         pop() {
             let popped = this.stack.pop();
 
             if (popped) {
-                this.ignore(popped);
+                this.ignore();
                 let top = this.stack.top();
 
                 if (top) {
@@ -190,7 +184,7 @@
             let demoted = this.stack.promote(widget);
 
             if (demoted) {
-                this.ignore(demoted);
+                this.ignore();
                 this.listen(widget);
                 this.adjustCtls();
 
@@ -208,11 +202,8 @@
         push(widget) {
             let prior = this.stack.push(widget);
 
-            if (prior) {
-                this.ignore(prior);
-            }
-
             if (prior || this.stack.length() == 1) {
+                this.ignore();
                 this.listen(widget);
             }
 

@@ -35,38 +35,43 @@ register(class WEditor extends Widget {
         super('form');
         this.invalid = 0;
         this.modified = 0;
-        this.listening = [];
         this.setWidgetStyle('editor');
         global.on('#NotifyClient', message => this.onServerNotify(message));
     }
 
-    append(...args) {
-        super.append(...args);
-        return this;
-    }
+    enumerate() {
+        let widgets = [];
+        let stack = this.children();
 
-    clear() {
-        this.children().forEach(child => this.ignore(child));
-        super.clear();
-        return this;
+        while (stack.length) {
+            let docElement = stack.pop();
+
+            if (docElement instanceof Widget) {
+                if (docElement instanceof WEditor || docElement instanceof WEditable) {
+                    widgets.push(docElement);
+                }
+                else if (docElement instanceof WScalar) {
+                    widgets.push(docElement.editor);
+                }
+                else if (docElement instanceof Widget) {
+                    docElement.children().reverse().forEach(child => stack.push(child));
+                }
+            }
+        }
+
+        return widgets;
     }
 
     ignore() {
-        for (let listener of this.listening) {
-            listener.emitter.off(listener.messageName, listener.handler);
+        for (let widget of this.enumerate()) {
+            super.ignore(widget, 'Widget.Modified', message => this.onChildModified(message));
+            super.ignore(widget, 'Widget.Validity', message => this.onChildValidity(message));
+
+            if (widget instanceof WEditor) {
+                widget.ignore(widget, messageName);
+            }
         }
 
-        this.listening = {};
-        return this;
-    }
-
-    insertAfter(...args) {
-        super.insertAfter(...args);
-        return this;
-    }
-
-    insertBefore(...args) {
-        super.insertBefore(...args);
         return this;
     }
 
@@ -74,38 +79,21 @@ register(class WEditor extends Widget {
         return this.modified > 0;
     }
 
+    isValid() {
+        return this.invalid == 0;
+    }
+
     listen() {
-        let stack = this.children();
+        for (let widget of this.enumerate()) {
+            super.listen(widget, 'Widget.Modified', message => this.onChildModified(message));
+            super.listen(widget, 'Widget.Validity', message => this.onChildValidity(message));
 
-        while (stack.length) {
-            let item = stack.pop();
-
-            if (item instanceof WEditor || item instanceof WEditable) {
-                let modifiedHandler = message => this.onChildModified(message);
-                let validityHandler = message => this.onChildValidity(message);
-                item.on('Widget.Modified', modifiedHandler);
-                item.on('Widget.Validity', validityHandler);
-                this.listening.push({ messageName: 'Widget.Modified', emitter: item, handler: modifiedHandler });
-                this.listening.push({ messageName: 'Widget.Validity', emitter: item, handler: validityHandler });
-            }
-            else if (item instanceof WScalar) {
-                let modifiedHandler = message => this.onChildModified(message);
-                let validityHandler = message => this.onChildValidity(message);
-                item.editor.on('Widget.Modified', modifiedHandler);
-                item.editor.on('Widget.Validity', validityHandler);
-                this.listening.push({ messageName: 'Widget.Modified', emitter: item.editor, handler: modifiedHandler });
-                this.listening.push({ messageName: 'Widget.Validity', emitter: item.editor, handler: validityHandler });
-            }
-            else if (item instanceof Widget) {
-                item.children().forEach(child => stack.push(child));
+            if (widget instanceof WEditor) {
+                widget.listen();
             }
         }
 
         return this;
-    }
-
-    isValid() {
-        return this.invalid == 0;
     }
 
     onChildModified(message) {
@@ -164,28 +152,34 @@ register(class WEditor extends Widget {
         }
     }
 
-    prepend(...args) {
-        super.prepend(...args);
+    async refresh() {
+        this.invalid = 0;
+        this.modified = 0;
+
+        this.send({
+            messageName: 'Widget.Modified',
+            widget: this,
+            modified: false,
+        });
+
+        this.send({
+            messageName: 'Widget.Validity',
+            widget: this,
+            value: true,
+        });
+
         return this;
     }
 
-    revert() {
-        this.invalid = 0;
-        this.modified = 0;            
+    async revert() {
+        for (let widget of this.enumerate()) {
+            await widget.revert();
+        }
+
+        return this;
     }
 
     async save() {
         return this;
-    }
-
-    async update() {
-        this.invalid = 0;
-        this.modified = 0;
-
-        for (let docNode of this) {
-            if (docNode instanceof WEditor) {
-                await docNode.update();
-            }
-        }
     }
 });

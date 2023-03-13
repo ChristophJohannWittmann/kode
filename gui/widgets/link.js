@@ -56,11 +56,6 @@ register(class WLink extends Widget {
         .setAttribute('onclick', 'return false');
     }
 
-    clearAutoFocus() {
-        this.clearAttribute('autofocus');
-        return this;
-    }
-
     clearDownload() {
         this.clearAttribute('download');
         return this;
@@ -80,10 +75,6 @@ register(class WLink extends Widget {
     clearTarget() {
         this.clearAttribute('target');
         return this;
-    }
-
-    getAutoFocus() {
-        return this.hasAttribute('autofocus');
     }
 
     getDownload() {
@@ -136,11 +127,6 @@ register(class WLink extends Widget {
 
     getUsername() {
         return this.node.username;
-    }
-
-    setAutoFocus() {
-        this.setAttribute('autofocus');
-        return this;
     }
 
     setDownload() {

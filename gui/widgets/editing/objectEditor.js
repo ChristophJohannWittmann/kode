@@ -38,15 +38,13 @@ register(class WObjectEditor extends WEditor {
         this.table = mkWTable();
         this.body = this.table.getBody();
         this.append(this.table);
-
-        this.invalid = 0;
-        this.modified = false;
-        this.unmodified = {};
-        this.modifiable = mkActiveData();
+        this.fields = mkActiveData();
         this.readonly = readonly ? readonly : false;
     }
 
     addDbo(dbo, options) {
+        let editor = this;
+
         for (let property in dbo) {
             if (!property.startsWith('#')) {
                 let value = dbo[property];
@@ -58,32 +56,33 @@ register(class WObjectEditor extends WEditor {
                         let opts = options[property];
 
                         if (!opts.hidden) {
-                            this.unmodified[property] = value;
-                            this.modifiable[property] = value;
+                            this.fields[property] = value;
 
                             if ('readonly' in opts) {
                                 readonly = readonly || opts.readonly;
                             }
 
-                            opts.type = opts.type ? opts.type : WScalar.selectType(this.modifiable[property]);
+                            opts.type = opts.type ? opts.type : WScalar.selectType(this.fields[property]);
 
                             this.body.mkRowAppend()
                             .mkCellAppend(opts.label ? opts.label : property)
                             .mkCellAppend(
-                                mkWScalar(this.modifiable, property, opts)
+                                mkWScalar(this.fields, property, opts)
+                                .invoke((self, editor) => {
+                                    opts.focus === true ? editor.setCacheInternal('focus', self) : false;
+                                }, editor)
                             );
                         }
                     }
                     else {
-                        this.unmodified[property] = value;
-                        this.modifiable[property] = value;
+                        this.fields[property] = value;
                         let readonly = this.readonly || WScalar.dboReadonlyByDefault(property);
-                        let opts = { readonly: this.readonly, type: WScalar.selectType(this.modifiable[property]) };
+                        let opts = { readonly: this.readonly, type: WScalar.selectType(this.fields[property]) };
 
                         this.body.mkRowAppend()
                         .mkCellAppend(property)
                         .mkCellAppend(
-                            mkWScalar(this.modifiable, property, opts)
+                            mkWScalar(this.fields, property, opts)
                         );
                     }
                 }
@@ -94,6 +93,8 @@ register(class WObjectEditor extends WEditor {
     }
 
     addObj(obj, options) {
+        let editor = this;
+
         for (let property in obj) {
             if (!property.startsWith('#')) {
                 let value = obj[property];
@@ -105,31 +106,32 @@ register(class WObjectEditor extends WEditor {
                         let opts = options[property];
 
                         if (!opts.hidden) {
-                            this.unmodified[property] = value;
-                            this.modifiable[property] = value;
+                            this.fields[property] = value;
 
                             if ('readonly' in opts) {
                                 readonly = readonly || opts.readonly;
                             }
 
-                            opts.type = opts.type ? opts.type : WScalar.selectType(this.modifiable[property]);
+                            opts.type = opts.type ? opts.type : WScalar.selectType(this.fields[property]);
 
                             this.body.mkRowAppend()
                             .mkCellAppend(opts.label ? opts.label : property)
                             .mkCellAppend(
-                                mkWScalar(this.modifiable, property, opts)
+                                mkWScalar(this.fields, property, opts)
+                                .invoke((self, editor) => {
+                                    opts.focus === true ? editor.setCacheInternal('focus', self) : false;
+                                }, editor)
                             );
                         }
                     }
                     else {
-                        this.unmodified[property] = value;
-                        this.modifiable[property] = value;
-                        let opts = { readonly: this.readonly, type: WScalar.selectType(this.modifiable[property]) };
+                        this.fields[property] = value;
+                        let opts = { readonly: this.readonly, type: WScalar.selectType(this.fields[property]) };
 
                         this.body.mkRowAppend()
                         .mkCellAppend(property)
                         .mkCellAppend(
-                            mkWScalar(this.modifiable, property, opts)
+                            mkWScalar(this.fields, property, opts)
                         );
                     }
                 }
@@ -139,68 +141,24 @@ register(class WObjectEditor extends WEditor {
         return this;
     }
 
+    getActiveData() {
+        return this.fields;
+    }
+
     getField(name) {
-        for (let fieldName in ActiveData.value(this.modifiable)) {
+        for (let fieldName in ActiveData.value(this.fields)) {
             if (fieldName == name) {
-                return this.modifiable[fieldName];
+                return this.fields[fieldName];
             }
         }
     }
 
     getFields() {
-        const values = ActiveData.value(this.modifiable);
+        const values = ActiveData.value(this.fields);
         return Object.entries(values).map(entry => ({ name: entry[0], value: entry[1] }));
     }
 
-    async revert() {
-        this.invalid = 0;
-        this.modified = false;
-
-        for (let property in this.unmodified) {
-            this.modifiable[property] = this.unmodified[property];
-        }
-
-        this.send({
-            messageName: 'Widget.Modified',
-            widget: this,
-            modified: false,
-        });
-
-        if (this.invalid > 0) {
-            this.send({
-                messageName: 'Widget.Validity',
-                valid: true,
-                widget: this,
-            });
-        }
-
-        return this;
-    }
-
-    async update() {
-        this.invalid = 0;
-        this.modified = false;
-
-        for (let property in this.unmodified) {
-            this.unmodified[property] = this.modifiable[property];
-        }
-
-        this.send({
-            messageName: 'Widget.Modified',
-            widget: this,
-            modified: false,
-        });
-
-        this.send({
-            messageName: 'Widget.Validity',
-            valid: true,
-            widget: this,
-        });
-
-        return this;
-    }
-
-    value() {
-        return ActiveData.value(this.modifiable);
+    getValues() {
+        return ActiveData.value(this.fields);
     }
 });

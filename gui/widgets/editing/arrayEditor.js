@@ -24,13 +24,13 @@
 
 /*****
 *****/
-register(class WArrayEditor extends WTable {
+register(class WArrayEditor extends WEditor {
     constructor(readonly) {
         super();
-        this.invalid = 0;
-        this.modified = false;
-        this.unmodified = [];
-        this.modifiable = mkActiveData([]);
+        this.table = mkWTable();
+        this.body = this.table.getBody();
+        this.append(this.table);
         this.readonly = readonly ? readonly : false;
+        this.rows = mkActiveData([]);
     }
 });
