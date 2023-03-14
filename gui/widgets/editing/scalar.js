@@ -181,18 +181,12 @@ register(class WScalar extends Widget {
     }
 
     blur() {
-        if (this.editor.parent()) {
-            this.editor.blur();
-        }
-
+        this.editor.blur();
         return this;
     }
 
     focus() {
-        if (this.editor.parent()) {
-            this.editor.focus();
-        }
-        
+        this.editor.focus();
         return this;
     }
 

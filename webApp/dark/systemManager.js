@@ -36,6 +36,7 @@
                 'ConfigUpdateNetIface',
             );
 
+            this.setFlag('root');
             this.refresh();
         }
 
@@ -187,7 +188,8 @@
                 },
             });
 
-            this.append(this.editor);            
+            this.append(this.editor);
+            super.refresh();
         }
 
         async save() {

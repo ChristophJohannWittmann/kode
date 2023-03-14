@@ -37,7 +37,7 @@
 (() => {
     let nextId = 1;
     let nextHandlerId = 1;
-    let handlerKey = Symbol('handler');
+    const handlerKey = Symbol('handler');
 
     register(class Widget extends HtmlElement {
         constructor(arg) {
@@ -53,8 +53,6 @@
             this.setId(`widget${this.getCacheInternal('id')}`);
             this.setWidgetStyle('widget');
             this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
-
-            // TODO .....
             this.listened = {};
             this.refreshers = mkStringSet();
         }
@@ -435,17 +433,8 @@
             return this;
         }
 
-        restoreState(milliseconds) {
-            milliseconds = typeof milliseconds == 'number' ? milliseconds : 50;
-
-            setTimeout(() => {
-                let focused = this.getCacheInternal('focus');
-
-                if (focused) {
-                    focused.focus();
-                }
-            }, milliseconds);
-
+        restore(milliseconds) {
+            mkWidgetState(this).restore(milliseconds);
             return this;
         }
 
@@ -583,10 +572,6 @@
 
         setWidgetStyle(widgetStyle) {
             this.setAttribute('widget-style', widgetStyle);
-            return this;
-        }
-
-        storeState() {
             return this;
         }
 

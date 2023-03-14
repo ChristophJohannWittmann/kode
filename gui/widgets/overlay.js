@@ -98,9 +98,9 @@ register(class WOverlay extends Widget {
         return this;
     }
 
-    show(htmlElement) {
+    show(widget) {
         if (!this.overlaid) {
-            this.overlaid = mkHtmlElement(unwrapDocNode(htmlElement)).widget();
+            this.overlaid = widget;
             this.overlaid.append(this);
 
             this.adjustArea();

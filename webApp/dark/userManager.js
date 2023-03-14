@@ -28,6 +28,7 @@
     register(class UserManager extends WEdtior {
         constructor() {
             super('form');
+            this.setFlag('root');
             this.setTitle(txx.fwUserManagerTitle);
         }
     });

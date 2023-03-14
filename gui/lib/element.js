@@ -96,7 +96,6 @@
         'listeners',
         'modifiedHandler',
         'propagation',
-        'focus',
         'styles',
         'validityHandler',
     );

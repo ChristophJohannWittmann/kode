@@ -77,6 +77,12 @@ register(class WPopupMenu extends Widget {
             WPopupMenu.init();
             WPopupMenu.init = false;
         }
+
+        doc.on('dom.keydown', message => {
+            if (WPopupMenu.showing === this && message.event.key == 'Escape') {
+                this.close();
+            }
+        });
     }
 
     attach(widget, ...messageNames) {

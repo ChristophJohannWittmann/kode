@@ -43,8 +43,6 @@ register(class WObjectEditor extends WEditor {
     }
 
     addDbo(dbo, options) {
-        let editor = this;
-
         for (let property in dbo) {
             if (!property.startsWith('#')) {
                 let value = dbo[property];
@@ -68,9 +66,7 @@ register(class WObjectEditor extends WEditor {
                             .mkCellAppend(opts.label ? opts.label : property)
                             .mkCellAppend(
                                 mkWScalar(this.fields, property, opts)
-                                .invoke((self, editor) => {
-                                    opts.focus === true ? editor.setCacheInternal('focus', self) : false;
-                                }, editor)
+                                .invoke(self => opts.focus === true ? self.setFlag('focus') : false)
                             );
                         }
                     }
@@ -93,8 +89,6 @@ register(class WObjectEditor extends WEditor {
     }
 
     addObj(obj, options) {
-        let editor = this;
-
         for (let property in obj) {
             if (!property.startsWith('#')) {
                 let value = obj[property];
@@ -118,9 +112,7 @@ register(class WObjectEditor extends WEditor {
                             .mkCellAppend(opts.label ? opts.label : property)
                             .mkCellAppend(
                                 mkWScalar(this.fields, property, opts)
-                                .invoke((self, editor) => {
-                                    opts.focus === true ? editor.setCacheInternal('focus', self) : false;
-                                }, editor)
+                                .invoke(self => opts.focus === true ? self.setFlag('focus') : false)
                             );
                         }
                     }

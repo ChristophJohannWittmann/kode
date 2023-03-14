@@ -37,6 +37,7 @@
     register(class OrgManager extends Widget {
         constructor() {
             super();
+            this.setFlag('root');
             this.setTitle(txx.fwOrgManagerListTitle);
             this.setRefreshers('OrgCreateOrg', 'OrgModifyOrg');
 

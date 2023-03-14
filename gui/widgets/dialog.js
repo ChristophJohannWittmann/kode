@@ -44,14 +44,14 @@ register(class WDialog extends WOverlay {
 
         this.setWidgetStyle('dialog-content');
         doc.on('dom.keydown', message => message.event.key == 'Escape' ? this.hide() : false);
-        body.pushFilter({ blur: '6px' })
+        body.pushStyle({ filter: 'blur(6px)' });
 
         let overlayOpts = new Object();
         typeof opts.autoHide == 'number' ? overlayOpts.autoHide = opts.autoHide : false;
 
         this.shield = mkWOverlay(overlayOpts);
         this.shield.setWidgetStyle('dialog-shield');
-        this.shield.setClasses('alt-colors');
+        this.shield.setClassNames('alt-colors');
         this.shield.show(html);
 
         super.show(this.shield);
@@ -65,7 +65,7 @@ register(class WDialog extends WOverlay {
             this.hide = value => {
                 this.timeout ? clearTimeout(this.timeout) : false;
                 delete this.timeout;
-                body.popFilter();
+                body.popStyle();
                 this.shield.hide();
                 ok(value);
             }

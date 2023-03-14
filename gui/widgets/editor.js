@@ -168,6 +168,7 @@ register(class WEditor extends Widget {
             value: true,
         });
 
+        this.restore();
         return this;
     }
 
