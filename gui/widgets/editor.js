@@ -31,8 +31,8 @@
  * status and to perform actions such as update() or refert().
 *****/
 register(class WEditor extends Widget {
-    constructor() {
-        super('form');
+    constructor(tagName) {
+        super(tagName ? tagName : 'form');
         this.invalid = 0;
         this.modified = 0;
         this.setWidgetStyle('editor');
@@ -168,7 +168,7 @@ register(class WEditor extends Widget {
             value: true,
         });
 
-        this.restore();
+        this.restorePanelState();
         return this;
     }
 

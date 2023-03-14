@@ -180,16 +180,13 @@
         }
 
         descendants() {
-            let stack = [unwrapDocNode(this)];
+            let stack = this.children();
             let descendants = [];
 
             while (stack.length) {
-                let node = stack.pop();
-                descendants.push(wrapDocNode(node));
-
-                for (let i = 0; i < node.childNodes.length; i++) {
-                    stack.push(node.childNodes.item(i));
-                }
+                let docNode = stack.pop();
+                descendants.push(docNode);
+                docNode.children().reverse().forEach(child => stack.push(child));
             }
 
             return descendants;

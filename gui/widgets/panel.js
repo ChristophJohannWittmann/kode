@@ -23,40 +23,46 @@
 
 
 /*****
- * A WidgetState is defined by the flags and cache values set on that widget and
- * the flags set on it's dependants.  The concept being that for a branch of
- * nodes, the first one (i.e., depth-first search) marked with the "focus" flag
- * will be restored to having focus when the framework places that widget back
- * in view.  If another widget is focused, within the branch, that will take
- * over as having the focus when the branch is made visible again.
 *****/
-register(class WidgetState {  
-    constructor(widget) {
-        this.flags = {
-            focus: null,
-        };
+register(class WPanel extends WEditor {
+    constructor() {
+        super('div');
+        this.setFlag('VIEW');
+    }
+});
 
-        for (let descendant of widget.descendants()) {
-            for (let flagName in this.flags) {
-                if (this.flags[flagName] == null) {
-                    if (descendant.getFlag(flagName)) {
-                        this.flags[flagName] = descendant;
-                    }
-                }
-            }
+
+/*****
+*****/
+register(class PanelState {
+    constructor(widget) {
+        this.vars = {
+            focus: false,
+        };
+    }
+
+    get(name, value) {
+        if (name in this.vars) {
+            return this.vars[name];
         }
     }
 
+    set(name, value) {
+        if (name in this.vars) {
+            this.vars[name] = value;
+        }
+
+        return this;
+    }
+
     restore(timeout) {
+        /*
         setTimeout(() => {
             if (this.flags.focus) {
                 this.flags.focus.focus();
             }
         }, typeof timeout == 'number' ? timeout : 50);
-    }
-
-    [Symbol.iterator]() {
-        let flags = Object.entries(this.flags).map(entry => ({ name: entry[0], value: entry[1] }));
-        return flags[Symbol.iterator]();
+        */
+        return this;
     }
 });

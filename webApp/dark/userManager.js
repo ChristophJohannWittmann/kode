@@ -25,11 +25,11 @@
 (() => {
     /*****
     *****/
-    register(class UserManager extends WEdtior {
+    register(class UserManager extends WPanel {
         constructor() {
             super('form');
-            this.setFlag('root');
-            this.setTitle(txx.fwUserManagerTitle);
+            //this.setTitle(txx.fwUserManagerTitle);
+            this.setInnerHtml('HELLO   U S E R S    M A N A G E R')
         }
     });
 

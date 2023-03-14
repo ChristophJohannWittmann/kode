@@ -58,7 +58,7 @@ register(class WStack extends Widget {
 
                 if (top) {
                     top.reveal();
-                    top.restore();
+                    top.restorePanelState();
                 }
 
                 return popped
@@ -76,7 +76,7 @@ register(class WStack extends Widget {
                 widget.reveal();
                 widget.remove();
                 this.append(widget);
-                widget.restore();
+                widget.restorePanelState();
                 return top;
             }
         }
@@ -93,7 +93,7 @@ register(class WStack extends Widget {
             }
 
             this.append(widget.reveal());
-            widget.restore();
+            widget.restorePanelState();
             return top;
         }
 

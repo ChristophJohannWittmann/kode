@@ -34,10 +34,9 @@
      * organizaiton or an existing organization that was opened for editing.  This
      * view is also how all non-org users will find and navigate to an organization.
     *****/
-    register(class OrgManager extends Widget {
+    register(class OrgManager extends WPanel {
         constructor() {
             super();
-            this.setFlag('root');
             this.setTitle(txx.fwOrgManagerListTitle);
             this.setRefreshers('OrgCreateOrg', 'OrgModifyOrg');
 

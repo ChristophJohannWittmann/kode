@@ -25,7 +25,7 @@
 (() => {
     /*****
     *****/
-    register(class SystemManager extends WEditor {
+    register(class SystemManager extends WPanel {
         constructor() {
             super();
 
@@ -36,7 +36,6 @@
                 'ConfigUpdateNetIface',
             );
 
-            this.setFlag('root');
             this.refresh();
         }
 

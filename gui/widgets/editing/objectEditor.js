@@ -66,7 +66,7 @@ register(class WObjectEditor extends WEditor {
                             .mkCellAppend(opts.label ? opts.label : property)
                             .mkCellAppend(
                                 mkWScalar(this.fields, property, opts)
-                                .invoke(self => opts.focus === true ? self.setFlag('focus') : false)
+                                .setPanelState('focus', opts.focus)
                             );
                         }
                     }
@@ -112,7 +112,7 @@ register(class WObjectEditor extends WEditor {
                             .mkCellAppend(opts.label ? opts.label : property)
                             .mkCellAppend(
                                 mkWScalar(this.fields, property, opts)
-                                .invoke(self => opts.focus === true ? self.setFlag('focus') : false)
+                                .setPanelState('focus', opts.focus)
                             );
                         }
                     }

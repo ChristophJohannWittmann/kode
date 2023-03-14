@@ -53,8 +53,10 @@
             this.setId(`widget${this.getCacheInternal('id')}`);
             this.setWidgetStyle('widget');
             this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
+
             this.listened = {};
             this.refreshers = mkStringSet();
+            this.panelState = mkPanelState(this);
         }
 
         append(...args) {
@@ -433,8 +435,8 @@
             return this;
         }
 
-        restore(milliseconds) {
-            mkWidgetState(this).restore(milliseconds);
+        restorePanelState() {
+            // TODO
             return this;
         }
 
@@ -549,6 +551,11 @@
                 widget: this,
             });
 
+            return this;
+        }
+
+        setPanelState(name, value) {
+            // TODO
             return this;
         }
 
