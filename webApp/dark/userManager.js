@@ -28,8 +28,12 @@
     register(class UserManager extends WPanel {
         constructor() {
             super('form');
-            //this.setTitle(txx.fwUserManagerTitle);
-            this.setInnerHtml('HELLO   U S E R S    M A N A G E R')
+            this.setRefreshers('UserCreateUser', 'UserModifyUser');
+
+            this.append(
+                mkWidget('h3')
+                .setInnerHtml(txx.fwUserManagerListTitle)
+            );
         }
     });
 

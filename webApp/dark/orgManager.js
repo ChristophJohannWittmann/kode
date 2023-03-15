@@ -36,9 +36,13 @@
     *****/
     register(class OrgManager extends WPanel {
         constructor() {
-            super();
-            this.setTitle(txx.fwOrgManagerListTitle);
+            super('div');
             this.setRefreshers('OrgCreateOrg', 'OrgModifyOrg');
+
+            this.append(
+                mkWidget('h3')
+                .setInnerHtml(txx.fwOrgManagerListTitle)
+            );
 
             this.stm = mkWStateMachine(
                 this,
@@ -116,26 +120,26 @@
             });
 
             this.bind(this.controller, 'showList', this.updateResult);
-            this.setAt(1, 0,mkWidget().set(txx.fwOrgManagerSearch));
+            this.setAt(1, 0,mkWidget().setInnerHtml(txx.fwOrgManagerSearch));
 
             this.setAt(3, 0,
                 mkIText()
                 .setAttribute('autocomplete', 'off')
                 .on('dom.keyup', message => this.refresh())
-                .bind(this.controller, 'pattern')
-                .setFlag('autofocus')
+                .bind(this.controller, 'pattern', Binding.valueBinding)
+                .setPanelState('focus', true)
             );
 
             this.setAt(6, 0, 
                 mkWidget('span')
                 .append(
-                    mkICheckbox().bind(this.controller, 'showList')
+                    mkICheckbox().bind(this.controller, 'showList', Binding.valueBinding)
                     .setStyle({
                         height: '24px',
                         width: '24px',
                         marginRight: '12px',
                     }),
-                    mkWidget('span').set(txx.fwOrgManagerShowList),
+                    mkWidget('span').setInnerHtml(txx.fwOrgManagerShowList),
                 )
             );
 
@@ -219,7 +223,7 @@
                 this.setAt(8, 0, this.buildList());
             }
             else {
-                this.setAt(8, 0, mkWidget().set(`${this.found.length}&nbsp;&nbsp;${txx.fwOrgManagerFound}`));
+                this.setAt(8, 0, mkWidget().setInnerHtml(`${this.found.length}&nbsp;&nbsp;${txx.fwOrgManagerFound}`));
             }
         }
     }
@@ -233,12 +237,32 @@
      * wise, it's just an object editor that connects to the back and updates the
      * properties of the organization.
     *****/
-    class OrgEditor extends WEditor {
+    class OrgEditor extends WPanel {
         constructor(dboOrg) {
             super('form');
             this.dboOrg = dboOrg;
+            this.setFlag('transient');
             this.setRefreshers('OrgCreateOrg', 'OrgModifyOrg');
-            this.setTitle(txx.fwOrgManagerEditTitle);
+
+            this.append(
+                mkWidget('h3')
+                .setInnerHtml(txx.fwOrgManagerEditTitle)
+            );
+
+            this.refresh();
+        }
+
+        async refresh() {
+            if (this.dboOrg.oid > 0n) {
+                let org = await queryServer({ messageName: 'OrgGetOrg', orgOid: this.dboOrg.oid });
+
+                if (org.updated > this.dboOrg.updated) {
+                    this.dboOrg = org;
+                }
+            }
+            
+            this.ignore();
+            let orgEditor = this.orgEditor;
 
             this.orgEditor = mkWObjectEditor()
             .addDbo(
@@ -255,7 +279,7 @@
                     name: {
                         label: txx.fwOrgManagerEditorName,
                         readonly: false,
-                        autofocus: true,
+                        focus: true,
                     },
                     status: {
                         label: txx.fwOrgManagerEditorStatus,
@@ -277,17 +301,11 @@
                 }
             );
 
+            orgEditor ? orgEditor.remove() : false;
+            this.ignore();
             this.append(this.orgEditor);
-        }
-
-        async refresh() {
-            if (this.dboOrg.oid > 0n) {
-                console.log('reload org from server..');
-            }
-        }
-
-        async revert() {
-            this.orgEditor.revert();
+            this.listen();
+            super.refresh();
         }
 
         async save() {

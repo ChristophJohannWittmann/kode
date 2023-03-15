@@ -24,6 +24,28 @@
 
 (() => {
     /*****
+     * The nodeKey is a symbol that's used for accessing the DocElement object
+     * associated with the native browser implemented Node object.  We're just
+     * ensuring that no one outside of your code can replace or remove this
+     * value since we want our DocElement objects to be stateful.
+    *****/
+    const nodeKey = Symbol('node-key');
+    const cacheKey = Symbol('cache-key');
+
+    const restrictedCacheValues = mkStringSet(
+        'display',
+        'docNode',
+        'flags',
+        'id',
+        'listeners',
+        'modifiedHandler',
+        'propagation',
+        'styles',
+        'validityHandler',
+    );
+
+
+    /*****
      * Analyzes the argument type with and returns which DocNode or DocElement type
      * to return to the caller.  In any case, the returned value is always once of
      * the wrapper objects defined in this source file.  If we're unable to find
@@ -86,20 +108,6 @@
      * class for DocText and HtmlElement.  Methods in this class are applicable for
      * both types of derived object instances.
     *****/
-    const cacheKey = Symbol('cache-key');
-
-    const restrictedCacheValues = mkStringSet(
-        'display',
-        'docNode',
-        'flags',
-        'id',
-        'listeners',
-        'modifiedHandler',
-        'propagation',
-        'styles',
-        'validityHandler',
-    );
-
     register(class DocNode extends Emitter {
         constructor(node) {
             super();

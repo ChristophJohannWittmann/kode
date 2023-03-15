@@ -220,6 +220,22 @@
             return this;
         }
 
+        getConceal() {
+            return this.getFlag('conceal');
+        }
+
+        getPanel() {
+            return this.searchAncestor({ type: 'ctor', ctor: WPanel });
+        }
+
+        getReveal() {
+            return !this.getFlag('conceal');
+        }
+
+        getView() {
+            return this.searchAncestor({ type: 'ctor', ctor: WView });
+        }
+
         getWidgetStyle() {
             return this.getAttribute('widget-style');
         }

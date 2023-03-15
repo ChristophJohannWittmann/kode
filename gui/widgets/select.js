@@ -36,12 +36,7 @@ register(class WSelect extends WEditable {
         this.setWidgetStyle('select');
 
         this.on('dom.input', message => {
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'value',
-                widget: this,
-                value: message.event.target.value,
-            });
+            this.valueChanged(message.event.target.value);
         });
     }
 
@@ -241,7 +236,7 @@ register(class WSelect extends WEditable {
         }
     }
 
-    subClassSetValue(value, key) {
+    subclassSetValue(value, key) {
         this.silence();
 
         if (typeof value == 'object') {

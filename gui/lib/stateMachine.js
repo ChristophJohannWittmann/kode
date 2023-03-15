@@ -29,238 +29,231 @@
  * Once the machine is initialized, the owning widget will update dynamically
  * based on changes to the mode, i.e., state, or changes to the flags.
 *****/
-register(class WStateMachine extends Emitter {
-    static nameKey = Symbol('Name');
+(() => {
+    const nameKey = Symbol('name');
 
-    constructor(widget, modes, switchNames) {
-        super();
-        this.widgets = {};
-        this.namedWidgets = {};
-        this.switches = {};
-        this.mode = '';
-        this.modes = {};
-        this.autofocus = {};
-        this.updatesEnabled = true;
-
-        if (Array.isArray(modes)) {
-            modes.forEach(mode => {
-                this.modes[mode.trim()] = {};
-            });
-        }
-
-        this.owner = widget;
-        this.ownerRefresh = null;
-        this.owner.on('Widget.Changed', message => this.send(message));
-
-        if (typeof this.owner.refresh == 'function') {
-            this.ownerRefresh = this.owner.refresh;
-        }
-
-        this.owner.refresh = () => this.refresh();
-
-        if (Array.isArray(switchNames)) {
-            for (let switchName of switchNames) {
-                this.switches[switchName] = { 
-                    name: switchName,
-                    on: false,
-                };
-            }
-        }
-    }
-
-    addChild(widget, name, modes, switches) {
-        if (!(widget.getId() in this.widgets) && name.trim() && !(name.trim() in this.namedWidgets)) {
-            widget[WStateMachine.nameKey] = name.trim();
-            widget.getOwner = () => this.owner;
-            widget.getStateMachine = () => this;
-
-            this.widgets[widget.getId()] = {
-                widget: widget,
-                modes: mkStringSet((Array.isArray(modes) ? modes : []).filter(mode => (mode in this.modes))),
-                switches: mkStringSet((Array.isArray(switches) ? switches : []).filter(swName => swName in this.switches)),
-            }
-
-            this.namedWidgets[widget[WStateMachine.nameKey]] = this.widgets[widget.getId()];
-            return true;
-        }
-
-        return false;
-    }
-
-    appendChild(widget, name, modes, switches) {
-        if (this.addChild(widget, name, modes, switches)) {
-            this.owner.append(widget);
-            this.update();
-        }
-
-        return this;
-    }
-
-    clearswitches(switchName) {
-        if (switchName in this.switches) {
-            if (this.switches[switchName].on) {
-                this.switches[switchName].on = false;
-                this.update();
-            }
-        }
-
-        return this;
-    }
-
-    disableUpdates() {
-        this.updatesEnabled = false;
-        return this;
-    }
-
-    enableUpdates() {
-        if (!this.updatesEnabled) {
+    register(class WStateMachine extends Emitter {
+        constructor(widget, modes, switchNames) {
+            super();
+            this.widgets = {};
+            this.namedWidgets = {};
+            this.switches = {};
+            this.mode = '';
+            this.modes = {};
             this.updatesEnabled = true;
-            this.update();
-        }
 
-        return this;
-    }
+            if (Array.isArray(modes)) {
+                modes.forEach(mode => {
+                    this.modes[mode.trim()] = {};
+                });
+            }
 
-    getFlag(switchName) {
-        if (switchName in this.switches) {
-            return this.switches[switchName].on;
-        }
+            this.owner = widget;
+            this.ownerRefresh = null;
+            this.owner.on('Widget.Changed', message => this.send(message));
 
-        return false;
-    }
+            if (typeof this.owner.refresh == 'function') {
+                this.ownerRefresh = this.owner.refresh;
+            }
 
-    getMode() {
-        return this.mode;
-    }
+            this.owner.refresh = () => this.refresh();
 
-    getWidget(name) {
-        if (name in this.namedWidgets) {
-            return this.namedWidgets[name].widget;
-        }
-    }
-
-    insertAfter(widget, name, modes, switches) {
-        if (this.addChild(widget, name, modes, switches)) {
-            this.insertAfter(widget);
-            this.update();
-        }
-
-        return this;
-    }
-
-    insertBefore(widget, name, modes, switches) {
-        if (this.addChild(widget, name, modes, switches)) {
-            this.insertBefore(widget);
-            this.update();
-        }
-
-        return this;
-    }
-
-    prependChild(widget, name, modes, switches) {
-        if (this.addChild(widget, name, modes, switches)) {
-            this.owner.prepend(widget);
-            this.update();
-        }
-
-        return this;
-    }
-
-    refresh() {
-        for (let child of this.owner) {
-            if (typeof child.refresh == 'function') {
-                if (child instanceof Widget) {
-                    Reflect.apply(child.refresh, child, []);
+            if (Array.isArray(switchNames)) {
+                for (let switchName of switchNames) {
+                    this.switches[switchName] = { 
+                        name: switchName,
+                        on: false,
+                    };
                 }
             }
         }
 
-        this.ownerRefresh ? Reflect.apply(this.ownerRefresh, this.owner, []) : false;
-    }
+        addChild(widget, name, modes, switches) {
+            if (!(widget.getId() in this.widgets) && name.trim() && !(name.trim() in this.namedWidgets)) {
+                widget[nameKey] = name.trim();
+                widget.getOwner = () => this.owner;
+                widget.getStateMachine = () => this;
 
-    removeChild(widget) {
-        if (widget.getId() in this.widgets) {
-            delete widget.getOwner;
-            delete widget.getStateMachine;
-            delete this.namedWidgets[widget[WStateMachine.nameKey]];
-            delete this.widgets[widget.getId()];
-            widget.remove();
-            this.update();
-            return true;
+                this.widgets[widget.getId()] = {
+                    widget: widget,
+                    modes: mkStringSet((Array.isArray(modes) ? modes : []).filter(mode => (mode in this.modes))),
+                    switches: mkStringSet((Array.isArray(switches) ? switches : []).filter(swName => swName in this.switches)),
+                }
+
+                this.namedWidgets[widget[nameKey]] = this.widgets[widget.getId()];
+                return true;
+            }
+
+            return false;
         }
 
-        return false;
-    }
-
-    setFlag(switchName) {
-        if (switchName in this.switches) {
-            if (!this.switches[switchName].on) {
-                this.switches[switchName].on = true;
+        appendChild(widget, name, modes, switches) {
+            if (this.addChild(widget, name, modes, switches)) {
+                this.owner.append(widget);
                 this.update();
+            }
+
+            return this;
+        }
+
+        clearswitches(switchName) {
+            if (switchName in this.switches) {
+                if (this.switches[switchName].on) {
+                    this.switches[switchName].on = false;
+                    this.update();
+                }
+            }
+
+            return this;
+        }
+
+        disableUpdates() {
+            this.updatesEnabled = false;
+            return this;
+        }
+
+        enableUpdates() {
+            if (!this.updatesEnabled) {
+                this.updatesEnabled = true;
+                this.update();
+            }
+
+            return this;
+        }
+
+        getFlag(switchName) {
+            if (switchName in this.switches) {
+                return this.switches[switchName].on;
+            }
+
+            return false;
+        }
+
+        getMode() {
+            return this.mode;
+        }
+
+        getWidget(name) {
+            if (name in this.namedWidgets) {
+                return this.namedWidgets[name].widget;
             }
         }
 
-        return this;
-    }
+        insertAfter(widget, name, modes, switches) {
+            if (this.addChild(widget, name, modes, switches)) {
+                this.insertAfter(widget);
+                this.update();
+            }
 
-    setMode(mode) {
-        if (typeof mode == 'string' && (mode in this.modes) && mode != this.mode) {
-            this.mode = mode;
-            this.update();
+            return this;
         }
 
-        return this;
-    }
+        insertBefore(widget, name, modes, switches) {
+            if (this.addChild(widget, name, modes, switches)) {
+                this.insertBefore(widget);
+                this.update();
+            }
 
-    toggleFlag(switchName) {
-        if (switchName in this.switches) {
-            this.switches[switchName].on = !this.switches[switchName];
-            this.update();
+            return this;
         }
 
-        return this;
-    }
+        prependChild(widget, name, modes, switches) {
+            if (this.addChild(widget, name, modes, switches)) {
+                this.owner.prepend(widget);
+                this.update();
+            }
 
-    update() {
-        if (this.updatesEnabled) {
-            let autofocus;
+            return this;
+        }
 
-            for (let widgetInfo of Object.values(this.widgets)) {
-                if (widgetInfo.modes.has(this.mode)) {
-                    let reveal = true;
+        refresh() {
+            for (let child of this.owner) {
+                if (typeof child.refresh == 'function') {
+                    if (child instanceof Widget) {
+                        Reflect.apply(child.refresh, child, []);
+                    }
+                }
+            }
 
-                    for (let switchName in this.switches) {
-                        if (widgetInfo.switches.has(switchName) && !this.switches[switchName].on) {
-                            reveal = false;
-                            break;
+            this.ownerRefresh ? Reflect.apply(this.ownerRefresh, this.owner, []) : false;
+        }
+
+        removeChild(widget) {
+            if (widget.getId() in this.widgets) {
+                delete widget.getOwner;
+                delete widget.getStateMachine;
+                delete this.namedWidgets[widget[nameKey]];
+                delete this.widgets[widget.getId()];
+                widget.remove();
+                this.update();
+                return true;
+            }
+
+            return false;
+        }
+
+        setFlag(switchName) {
+            if (switchName in this.switches) {
+                if (!this.switches[switchName].on) {
+                    this.switches[switchName].on = true;
+                    this.update();
+                }
+            }
+
+            return this;
+        }
+
+        setMode(mode) {
+            if (typeof mode == 'string' && (mode in this.modes) && mode != this.mode) {
+                this.mode = mode;
+                this.update();
+            }
+
+            return this;
+        }
+
+        toggleFlag(switchName) {
+            if (switchName in this.switches) {
+                this.switches[switchName].on = !this.switches[switchName];
+                this.update();
+            }
+
+            return this;
+        }
+
+        update() {
+            if (this.updatesEnabled) {
+                for (let widgetInfo of Object.values(this.widgets)) {
+                    if (widgetInfo.modes.has(this.mode)) {
+                        let reveal = true;
+
+                        for (let switchName in this.switches) {
+                            if (widgetInfo.switches.has(switchName) && !this.switches[switchName].on) {
+                                reveal = false;
+                                break;
+                            }
+                        }
+
+                        if (reveal) {
+                            widgetInfo.widget.reveal();
+                            this.owner.restorePanelState();
+                            continue;
                         }
                     }
 
-                    if (reveal) {
-                        widgetInfo.widget.reveal();
-                        widgetInfo.widget.getRevealState = () => true;
-                        autofocus = autofocus ? autofocus : widgetInfo.widget.getAutofocus();
-                        continue;
-                    }
+                    widgetInfo.widget.conceal();
                 }
 
-                widgetInfo.widget.conceal();
-                widgetInfo.widget.getRevealState = () => false;
+                const switches = {};
+                Object.values(this.switches).forEach(Switch => switches[Switch.name] = Switch.on);
+
+                this.send({
+                    messageName: 'StateMachine',
+                    stm: this,
+                    mode: this.mode,
+                    switches: switches,
+                });
             }
-
-            const switches = {};
-            Object.values(this.switches).forEach(Switch => switches[Switch.name] = Switch.on);
-
-            if (autofocus) {
-                setTimeout(() => autofocus.focus(), 10);
-            }
-
-            this.send({
-                messageName: 'StateMachine',
-                stm: this,
-                mode: this.mode,
-                switches: switches,
-            });
         }
-    }
-});
+    });
+})();

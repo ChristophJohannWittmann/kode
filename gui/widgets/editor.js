@@ -68,7 +68,7 @@ register(class WEditor extends Widget {
             super.ignore(widget, 'Widget.Validity', message => this.onChildValidity(message));
 
             if (widget instanceof WEditor) {
-                widget.ignore(widget, messageName);
+                widget.ignore();
             }
         }
 

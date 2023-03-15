@@ -181,6 +181,12 @@
         }
 
         promote(widget) {
+            let top = this.stack.top();
+
+            if (top && top.getFlag('transient')) {
+                top.remove();
+            }
+
             let demoted = this.stack.promote(widget);
 
             if (demoted) {
@@ -201,6 +207,10 @@
 
         push(widget) {
             let prior = this.stack.push(widget);
+
+            if (prior && prior.getFlag('transient')) {
+                prior.remove();
+            }
 
             if (prior || this.stack.length() == 1) {
                 this.ignore();

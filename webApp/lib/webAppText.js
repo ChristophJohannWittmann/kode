@@ -203,7 +203,7 @@ exports = module.exports = {
     // ****************************************************************
     // User Manager
     // ****************************************************************
-    fwUserManagerTitle: {
+    fwUserManagerListTitle: {
         en: `Users`,
     },
 };
