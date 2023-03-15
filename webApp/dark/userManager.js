@@ -40,17 +40,7 @@
 
     /*****
     *****/
-    class UserCreator extends Widget {
-        constructor() {
-            super('form');
-            this.setInnerHtml('U S E R    S E L E C T O R');
-        }
-    }
-
-
-    /*****
-    *****/
-    class UserSelector extends Widget {
+    class UserAdministrator extends Widget {
         constructor() {
             super('form');
             this.setInnerHtml('U S E R    S E L E C T O R');
@@ -64,6 +54,21 @@
         constructor() {
             super('form');
             this.setInnerHtml('U S E R    L I S T');
+        }
+    }
+
+
+    /*****
+    *****/
+    class UserEditor extends WPanel {
+        constructor() {
+            super('form');
+        }
+
+        async refresh() {
+        }
+
+        async save() {
         }
     }
 })();

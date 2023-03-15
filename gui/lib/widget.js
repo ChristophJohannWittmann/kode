@@ -48,15 +48,17 @@
                 super(typeof arg == 'string' ? arg : 'div');
             }
 
-            this.setCacheInternal('id', nextId++);
-            this.resetFlag('concealed');
-            this.setId(`widget${this.getCacheInternal('id')}`);
-            this.setWidgetStyle('widget');
-            this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
-
+            this.id = nextId++;
             this.listened = {};
+            this.styleStack = [];
+            this.concealed = null;
             this.refreshers = mkStringSet();
             this.panelState = mkPanelState(this);
+
+            this.resetFlag('concealed');
+            this.setId(`widget${this.id}`);
+            this.setWidgetStyle('widget');
+            this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
         }
 
         append(...args) {
@@ -169,10 +171,9 @@
         }
 
         conceal() {
-            if (!this.getFlag('concealed')) {
+            if (typeof this.concealed != 'string') {
                 this.silence();
-                this.setFlag('concealed');
-                this.setCacheInternal('display', this.getStyle('display'));
+                this.concealed = this.getStyle('display');
                 this.setStyle('display', 'none');
                 this.resume();
             }
@@ -198,11 +199,6 @@
             return this;
         }
 
-        disablePropagation(eventName) {
-            this.getCacheInternal('propagation').clear(eventName);
-            return this;
-        }
-
         enable() {
             if (this.isDisabled()) {
                 super.enable();
@@ -218,10 +214,6 @@
             }
 
             return this;
-        }
-
-        getConceal() {
-            return this.getFlag('conceal');
         }
 
         getPanel() {
@@ -312,6 +304,10 @@
             return this;
         }
 
+        isConcealed() {
+            return this.concealed != null;
+        }
+
         listen(widget, messageName, handler) {
             if (handlerKey in handler) {
                 var hid = handler[handlerKey];
@@ -382,10 +378,8 @@
         }
 
         popStyle() {
-            let styleStack = this.getCacheInternal('styles');
-
-            if (styleStack.length) {
-                let style = styleStack[styleStack.length - 1];
+            if (this.styleStack.length) {
+                let style = this.styleStack[this.styleStack.length - 1];
                 this.clearStyle();
                 this.setStyle(style);
             }
@@ -407,7 +401,7 @@
 
         pushStyle(styleObj) {
             let style = this.getStyle();
-            this.getCacheInternal('styles').push(style);
+            this.styleStack.push(style);
             style = clone(style);
 
             for (let key in styleObj) {
@@ -457,11 +451,10 @@
         }
 
         reveal() {
-            if (this.getFlag('concealed')) {
+            if (typeof this.concealed == 'string') {
                 this.silence();
-                this.resetFlag('concealed');
-                this.setStyle('display', this.getCacheInternal('display'));
-                this.clearCacheInternal('display');
+                this.setStyle('display', this.concealed);
+                this.concealed = null;
                 this.resume();
             }
 
@@ -477,7 +470,12 @@
                 }
             }
             else if (opts.type == 'flag') {
-                while (parent && !parent.getFlag(opts.flagName)) {
+                while (parent && !parent.getFlag(opts.name)) {
+                    parent = parent.parent();
+                }
+            }
+            else if (opts.type == 'pin') {
+                while (parent && parent.getPin[opts.name] !== opts.value) {
                     parent = parent.parent();
                 }
             }
@@ -489,19 +487,32 @@
         }
 
         searchDescendant(opts) {
+            let hits = [];
             let stack = this.children();
 
             while (stack.length) {
                 let descendant = stack.pop();
 
-                if (opts.type == 'flag') {
-                    if (descendant.getFlag(opts.flagName)) {
-                        return descendant;
+                if (opts.type == 'ctor') {
+                    if (descendant instanceof (opts.ctor)) {
+                        hits.push(descendant);
+                    }
+                }
+                else if (opts.type == 'flag') {
+                    if (descendant.getFlag(opts.name)) {
+                        hits.push(descendant);
+                    }
+                }
+                else if (opts.type == 'pin') {
+                    if (descendant.getPin(opts.name) === opts.value) {
+                        hits.push(descendant);
                     }
                 }
 
                 descendant.children().reverse().forEach(descendant => stack.push(descendant));
             }
+
+            return hits;
         }
 
         setAttribute(name, value) {

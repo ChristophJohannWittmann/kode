@@ -30,19 +30,6 @@
      * value since we want our DocElement objects to be stateful.
     *****/
     const nodeKey = Symbol('node-key');
-    const cacheKey = Symbol('cache-key');
-
-    const restrictedCacheValues = mkStringSet(
-        'display',
-        'docNode',
-        'flags',
-        'id',
-        'listeners',
-        'modifiedHandler',
-        'propagation',
-        'styles',
-        'validityHandler',
-    );
 
 
     /*****
@@ -54,25 +41,25 @@
     *****/
     register(function wrapDocNode(arg) {
         if (arg instanceof Text) {
-            return arg[cacheKey] ? arg[cacheKey].docNode : mkDocText(arg);
+            return arg[nodeKey] ? arg[nodeKey] : mkDocText(arg);
         }
         else if (arg instanceof DocText) {
             return arg;
         }
         else if (arg instanceof HTMLElement) {
-            return arg[cacheKey] ? arg[cacheKey].docNode : mkHtmlElement(arg);
+            return arg[nodeKey] ? arg[nodeKey] : mkHtmlElement(arg);
         }
         else if (arg instanceof HtmlElement) {
             return arg;
         }
         else if (arg instanceof SVGElement) {
-            return arg[cacheKey] ? arg[cacheKey].docNode : mkSvgElement(arg);
+            return arg[nodeKey] ? arg[nodeKey] : mkSvgElement(arg);
         }
         else if (arg instanceof SvgElement) {
             return arg;
         }
         else if (arg instanceof MathMLElement) {
-            return arg[cacheKey] ? arg[cacheKey].docNode : mkMathElement(arg);
+            return arg[nodeKey] ? arg[nodeKey] : mkMathElement(arg);
         }
         else if (arg instanceof MathElement) {
             return arg;
@@ -112,16 +99,11 @@
         constructor(node) {
             super();
             this.node = node;
+            this.flags = {};
+            this.pinned = {};
 
-            if (!(cacheKey in node)) {
-                this.node[cacheKey] = {
-                    focus: null,
-                    docNode: this,
-                    flags: {},
-                    listeners: {},
-                    propagation: {},
-                    styles: [],
-                };
+            if (!(nodeKey in node)) {
+                this.node[nodeKey] = this;
             }
         }
 
@@ -135,7 +117,7 @@
 
         assignFlag(name, bool) {
             if (typeof bool == 'boolean') {
-                this.node[cacheKey].flags[name] = bool;
+                this.flags[name] = bool;
             }
 
             return this;
@@ -162,24 +144,13 @@
             return this;
         }
 
-        clearCache(name) {
-            if (!restrictedCacheValues.has(name)) {
-                delete this.node[cacheKey][name];
-            }
-            else {
-                throw new Error(`Attempt to modify restricted element cache name "${name}"`);
-            }
-
+        clearFlag(name) {
+            delete this.flags[name];
             return this;
         }
 
-        clearCacheInternal(name) {
-            delete this.node[cacheKey][name];
-            return;
-        }
-
-        clearFlag(name) {
-            delete this.node[cacheKey].flags[name];
+        clearPin(name) {
+            delete this.pins[name];
             return this;
         }
 
@@ -219,39 +190,16 @@
             }
         }
 
-        getCache(name) {
-            if (!restrictedCacheValues.has(name)) {
-                return this.node[cacheKey][name];
-            }
-            else {
-                throw new Error(`Attempt to access restricted element cache name "${name}"`);
-            }
-        }
-
-        getCacheInternal(name) {
-            return this.node[cacheKey][name];
-        }
-
         getFlag(name) {
-            let flags = this.node[cacheKey].flags;
-            return (name in flags) ? flags[name] : false;
+            return name in this.flags ? this.flags[name] : false;
+        }
+
+        getPin(name) {
+            return this.pins[name];
         }
 
         getTextContent() {
             return this.node.textContent;
-        }
-
-        hasCache(name) {
-            if (!restrictedCacheValues.has(name)) {
-                return (name in this.node[cacheKey]);
-            }
-            else {
-                throw new Error(`Attempt to access restricted element cache name "${name}"`);
-            }
-        }
-
-        hasCacheInternal(name) {
-            return (name in this.node[cacheKey]);
         }
 
         hasChildNodes() {
@@ -259,7 +207,11 @@
         }
 
         hasFlag(name) {
-            return name in this.node[cacheKey].flags;
+            return name in this.flags;
+        }
+
+        hasPin(name) {
+            return name in this.pins;
         }
 
         insertAfter(...args) {
@@ -335,13 +287,8 @@
             return this;
         }
 
-        logCache() {
-            console.log(this.node[cacheKey]);
-            return this;
-        }
-
         logFlags() {
-            console.log(this.node[cacheKey].flags);
+            console.log(this.flags);
             return this;
         }
 
@@ -437,7 +384,7 @@
         }
 
         resetFlag(name) {
-            this.node[cacheKey].flags[name] = false;
+            this.flags[name] = false;
             return this;
         }
 
@@ -445,24 +392,13 @@
             return this;
         }
 
-        setCache(name, value) {
-            if (!restrictedCacheValues.has(name)) {
-                this.node[cacheKey][name] = value;
-            }
-            else {
-                throw new Error(`Attempt to modify restricted element cache name "${name}"`);
-            }
-
-            return this;
-        }
-
-        setCacheInternal(name, value) {
-            this.node[cacheKey][name] = value;
-            return this;
-        }
-
         setFlag(name) {
-            this.node[cacheKey].flags[name] = true;
+            this.flags[name] = true;
+            return this;
+        }
+
+        setPin(name, value) {
+            this.pins[name] = value;
             return this;
         }
 
@@ -476,8 +412,11 @@
         }
 
         toggleFlag(name) {
-            if (name in this.node[cacheKey]) {
-                this.node[cacheKey].flags[name] = !this.node[cacheKey].flags[name];
+            if (name in this.flags) {
+                this.flags[name] = !this.flags[name];
+            }
+            else {
+                this.flags[name] = true;
             }
 
             return this;
@@ -560,7 +499,8 @@
     register(class DocElement extends DocNode {
         constructor(node) {
             super(node);
-            this.setCacheInternal('propagation', mkStringSet());
+            this.listeners = {};
+            this.propagation = mkStringSet();
         }
 
         animate() {
@@ -604,7 +544,7 @@
         }
 
         disablePropagation(eventName) {
-            this.getCacheInternal('propagation').clear(eventName);
+            this.propagation.clear(eventName);
             return this;
         }
 
@@ -614,7 +554,7 @@
         }
 
         enablePropagation(eventName) {
-            this.setCacheInternal('propagation').set(eventName);
+            this.propagation.set(eventName);
             return this;
         }
 
@@ -719,7 +659,7 @@
         }
 
         on(messageName, handler, filter) {
-            if (!(messageName in this.node[cacheKey].listeners)) {
+            if (!(messageName in this.listeners)) {
                 this.node.addEventListener(messageName.substr(4), event => {
                     this.send({
                         messageName: messageName,
@@ -727,7 +667,7 @@
                         event: mkElementEvent(event),
                     });
 
-                    let propagation = cacheKey in event.target ? event.target[cacheKey].propagation : false;
+                    let propagation = nodeKey in event.target ? event.target[nodeKey].propagation : false;
 
                     if (!propagation || !(event.type in propagation)) {
                         event.stopPropagation();
@@ -741,7 +681,7 @@
         }
 
         once(messageName, handler, filter) {
-            if (!(messageName in this.node[cacheKey].listeners)) {
+            if (!(messageName in this.listeners)) {
                 this.node.addEventListener(messageName.substr(4), event => {
                     this.send({
                         messageName: messageName,
@@ -749,7 +689,7 @@
                         event: mkElementEvent(event),
                     });
 
-                    let propagation = cacheKey in event.target ? event.target[cacheKey].propagation : false;
+                    let propagation = nodeKey in event.target ? event.target[nodeKey].propagation : false;
 
                     if (!propagation || !(event.type in propagation)) {
                         event.stopPropagation();

@@ -86,9 +86,6 @@ register(class UserEndpoints extends EndpointContainer {
         );
     }
     
-    async [ mkEndpoint('UserSignOut', 'user') ](trx) {
-    }
-    
     async [ mkEndpoint('UserVerify', 'user') ](trx) {
     }
 });
