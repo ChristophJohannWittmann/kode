@@ -24,94 +24,89 @@
 
 (() => {
     /*****
+     * The password manager is the panel used for setting a new password!  It's
+     * nothing all that different from any standard password manager.  The big
+     * difference here is that we use a verification form to send a verification
+     * code to the user's contact point, i.e., email or MMS, to verify identity.
+     * Once the verification code has been obtained, the user proceeds on to the
+     * EntryForm to input and repeat the new password.
     *****/
     register(class PasswordManager extends WPanel {
-        constructor(authorized, email) {
+        constructor() {
             super();
             this.setStyle({
                 marginLeft: '8px',
                 marginRight: '8px',
-            })
+            });
+
+            this.controller = mkActiveData({
+                code: '',
+                password1: '',
+                password2: '',
+            });
+
+            this.append(
+                (
+                    this.verifier = mkVerificationForm()
+                )
+                .on('Widget.Verified', message => {
+                    this.controller.verificationCode = message.verificationCode;
+                    this.verifier.remove();
+
+                    this.append(this.entryForm = new EntryForm(this))
+                    .listen();
+                })
+            );
+        }
+
+        async revert() {
+            this.entryForm ? this.entryForm.revert() : false;
+        }
+
+        async save() {
+            let reply = await queryServer({
+                messageName: 'SelfSetPassword',
+                verificationCode: this.controller.verificationCode,
+                password: this.controller.password1,
+            });
+
+            if (!reply) {
+                await mkWAlertDialog({ text: txx.fwPasswordError });
+            }
+
+            home.pop();
+        }
+    });
+
+
+    /*****
+     * The entry form is implemented as a single WEditable enclosing both the
+     * password and confirmation text boxes.  To do this, we created a complete
+     * implmentation of WEditable from scratch by extending WEditable and then
+     * overriding all of the WEditble methods to accomodate the functionality
+     * of the password/confirm editor.  By extending WEditable, the owing WPanel,
+     * WEditor, will automatically listen to Change, Modify, Validity messagess
+     * being sent by this form.
+    *****/
+    class EntryForm extends WEditable {
+        constructor(passwordManager) {
+            super();
+            this.passwordManager = passwordManager;
+            this.controller = this.passwordManager.controller;
 
             this.append(
                 mkWidget('h3')
                 .setInnerHtml(txx.fwPasswordTitle)
             );
 
-            this.controller = mkActiveData({
-                email: email,
-                authorization: '',
-                password1: '',
-                password2: '',
-            });
-
-            this.stm = mkWStateMachine(this, ['authorizing', 'entry']);
-            this.stm.disableUpdates();
-            this.stm.appendChild(new AuthForm(), 'Authorization', ['authorizing']);
-            this.stm.appendChild(new EntryForm(), 'Entry', ['entry']);
-            this.stm.setMode(authorized === true ? 'entry' : 'authorizing');
-            this.stm.enableUpdates();
-        }
-
-        async revert() {
-        }
-
-        async save() {
-        }
-    });
-
-
-    /*****
-    *****/
-    class AuthForm extends Widget {
-        constructor() {
-            super();
-        }
-
-        build() {
             this.append(
-                mkWidget()
-                .setStyle('margin-bottom', '16px')
-                .setInnerHtml(txx.fwPasswordStep1)
-            );
-
-            this.append(
-                mkWButton()
-                .setStyle('margin-right', '20px')
-                .setInnerHtml(txx.fwPasswordSendCode)
-                .on('dom.click', message => {
-                    this.append(this.step2a, this.step2b);
-                    this.step2b.focus();
-                })
-            );
-
-            this.append(
-                mkWidget('span')
-                .bind(this.getOwner().controller, 'email')
-            );
-
-            this.step2a = mkWidget()
-            .setStyle('margin-top', '30px')
-            .setInnerHtml(txx.fwPasswordStep2);
-
-            this.step2b = mkIDynamic(500)
-            .setStyle('margin-top', '16px')
-            .bind(this.getOwner().controller, 'authorization', Binding.valueBinding)
-            .on('Input.Pause', message => console.log(message))
-        }
-    }
-
-
-    /*****
-    *****/
-    class EntryForm extends WEditable {
-        constructor() {
-            super();
-
-            this.grid = mkWGrid({
-                rows: ['48px', '10px', '48px'],
-                cols: ['auto', '20px', 'auto'],
-            });
+                (
+                    this.grid = mkWGrid({
+                        rows: ['48px', '10px', '48px', '10px', '100px'],
+                        cols: ['auto', '20px', 'auto'],
+                    })
+                )
+            )
 
             this.grid.setAt(0, 0,
                 mkWidget('div')
@@ -119,31 +114,142 @@
                 .setInnerHtml(txx.fwPasswordEnter)
             );
 
+            this.password1 = this.grid.setAt(0, 2, 
+                mkIPassword()
+                .setClassNames('font-size-5 margin-right-8 flex-h-sc')
+                .bind(this.controller, 'password1', Binding.valueBinding)
+                .on('Widget.Changed', () => setTimeout(() => this.valueChanged(),10))
+            )
+
             this.grid.setAt(2, 0,
                 mkWidget('div')
                 .setClassNames('font-size-5 flex-h-sc')
                 .setInnerHtml(txx.fwPasswordConfirm)
             );
 
-            this.grid.setAt(0, 2, 
+            this.password2 = this.grid.setAt(2, 2, 
                 mkIPassword()
                 .setClassNames('font-size-5 margin-right-8 flex-h-sc')
-                //.bind(this.getOwner().controller.password1, 'password', Binding.valueBinding)
+                .bind(this.controller, 'password2', Binding.valueBinding)
+                .on('Widget.Changed', () => setTimeout(() => this.valueChanged(),10))
             )
 
-            this.grid.setAt(2, 2, 
-                mkIPassword()
-                .setClassNames('font-size-5 margin-right-8 flex-h-sc')
-                //.bind(this.getOwner().password2, 'confirm', Binding.valueBinding)
-            )
+            this.grid.setAt(4, 2, (
+                this.error = mkWFraming().conceal()
+            ));
         }
 
-        subclassCheckValidity() {
+        clearError() {
+            this.error.setInnerHtml('').conceal();
+            return this;
+        }
+
+        getValue() {
+            if (this.isValid()) {
+                return this.controller.password1;
+            }
+
+            return '';
+        }
+
+        isModified() {
+            if (this.controller.password1 == '' && this.controller.password2 == '') {
+                return false;
+            }
+
             return true;
         }
 
-        subclassGetValue() {
-            return this.value;
+        isValid() {
+            let p1 = this.controller.password1;
+            let p2 = this.controller.password2;
+
+            if (p1.length || p2.length) {
+                if (p1.length < 8) {
+                    this.setError(txx.fwPasswordErrorLength);
+                    return false;
+                }
+
+                if (!p1.match(/[0-9]/)) {
+                    this.setError(txx.fwPasswordErrorNumber);
+                    return false;
+                }
+
+                if (!p1.match(/[!@#$%^&*()_-]/)) {
+                    this.setError(txx.fwPasswordErrorSymbol);
+                    return false;
+                }
+
+                if (p1 !== p2) {
+                    this.setError(txx.fwPasswordErrorMatch);
+                    return false;
+                }
+            }
+
+            this.clearError();
+            return true;
+        }
+
+        revert() {
+            if (this.modified) {
+                this.modified = false;
+                this.controller.password1 = '';
+                this.controller.password2 = '';
+
+                this.send({
+                    messageName: 'Widget.Modified',
+                    widget: this,
+                    modified: false,
+                });
+
+                if (!this.valid) {
+                    this.valid = !this.valid;
+
+                    this.send({
+                        messageName: 'Widget.Validity',
+                        widget: this,
+                        valid: this.valid,
+                    });
+                }
+            }
+        }
+
+        setError(diagnostic) {
+            this.error.setInnerHtml(diagnostic).reveal();
+            return this;
+        }
+
+        setValue(value) {
+            return this;
+        }
+
+        valueChanged() {
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'value',
+                widget: this,
+                value: this.getValue(),
+            });
+
+            if (this.isModified() != this.modified) {
+                this.modified = !this.modified;
+
+                this.send({
+                    messageName: 'Widget.Modified',
+                    widget: this,
+                    modified: this.modified,
+                });
+            }
+
+            if (this.isValid() != this.valid) {
+                this.valid = !this.valid;
+
+                this.send({
+                    messageName: 'Widget.Validity',
+                    widget: this,
+                    valid: this.valid,
+                });
+            }
         }
     }
 })();

@@ -44,7 +44,7 @@ register(class MainMenu extends WPopupMenu {
 
             this.append(
                 mkWMenuItem(txx.fwMenuPassword, "Password")
-                    .setAction(mkSingletonViewMenuAction(home, mkPasswordManager, false, 'chris.wittmann@icloud.com'))
+                    .setAction(mkSingletonViewMenuAction(home, mkPasswordManager))
             );
 
             /*

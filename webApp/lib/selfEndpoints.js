@@ -105,6 +105,25 @@ register(class SelfEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('SelfSetPassword', undefined, { password: true }) ](trx) {
+        let dbc = await trx.connect();
+
+        let session = await Ipc.queryPrimary({
+            messageName: '#SessionManagerGetSession',
+            session: trx['#Session'],
+        });
+
+        let user = await Users.get(dbc, session.user.oid);
+
+        if (await Ipc.queryPrimary({
+            messageName: '#SessionManagerValidateVerificationCode',
+            session: trx['#Session'],
+            code: trx.verificationCode,
+        })) {
+            await user.setPassword(dbc, trx.password);
+            return true;
+        }
+
+        return false;
     }
     
     async [ mkEndpoint('SelfSignOut', undefined, { password: true, verify: true }) ](trx) {
@@ -114,6 +133,34 @@ register(class SelfEndpoints extends EndpointContainer {
         });
 
         return true;
+    }
+    
+    async [ mkEndpoint('SelfSendVerificationRequest', undefined, { unprotected: true }) ](trx) {
+        let code = await Ipc.queryPrimary({
+            messageName: '#SessionManagerCreateVerificationCode',
+            session: trx['#Session'],
+            length: 7,
+            milliseconds: 5*60*1000,
+        });
+
+        console.log(`Created code ${code}`);
+        return true;
+    }
+    
+    async [ mkEndpoint('SelfValidateVerificationDigits', undefined, { unprotected: true }) ](trx) {
+        let verification = await Ipc.queryPrimary({
+            messageName: '#SessionManagerValidateVerificationDigits',
+            session: trx['#Session'],
+            digits: trx.digits,
+        });
+
+        if (verification === false) {
+            await pauseFor(700);
+            return false;
+        }
+        else {
+            return verification;
+        }
     }
     
     async [ mkEndpoint('SelfVerifyEmail', undefined, { verify: true }) ](trx) {

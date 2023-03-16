@@ -203,23 +203,29 @@ exports = module.exports = {
     // ****************************************************************
     // Password
     // ****************************************************************
-    fwPasswordConfirmPassword: {
+    fwPasswordConfirm: {
         en: `Confirm Password`,
     },
     fwPasswordEnterAuthorization: {
         en: `Enter Authorization Code`,
     },
-    fwPasswordEnterPassword: {
+    fwPasswordEnter: {
         en: `Enter Password`,
     },
-    fwPasswordSendCode: {
-        en: `Send Code`,
+    fwPasswordError: {
+        en: `Password change could not be completed.`,
     },
-    fwPasswordStep1: {
-        en: `(1)&nbsp;&nbsp;Click "Send Code" to send a 7-digit authorization code to you email address.`,
+    fwPasswordErrorLength: {
+        en: `Must be at least 8 characters long.`,
     },
-    fwPasswordStep2: {
-        en: `(2)&nbsp;&nbsp;Enter the authorization code below to continue.`,
+    fwPasswordErrorMatch: {
+        en: `The password does not match the confirm value.`,
+    },
+    fwPasswordErrorSymbol: {
+        en: `Password must contain one or more symbols: !@#$%^&*()-_`,
+    },
+    fwPasswordErrorNumber: {
+        en: `Password must contain one or more digits: 0123456789`,
     },
     fwPasswordTitle: {
         en: `Set Password`,
@@ -230,5 +236,27 @@ exports = module.exports = {
     // ****************************************************************
     fwUserManagerListTitle: {
         en: `Users`,
+    },
+
+    // ****************************************************************
+    // Verification
+    // ****************************************************************
+    fwVerificationFailure: {
+        en: `Awaiting valid verification code`,
+    },
+    fwVerificationSendCode: {
+        en: `Send Code`,
+    },
+    fwVerificationStep1: {
+        en: `Click "Send Code" to receive a 7-digit code for verification.`,
+    },
+    fwVerificationStep2: {
+        en: `Enter the authorization code below to continue.`,
+    },
+    fwVerificationSuccess: {
+        en: `Verification code accepted`,
+    },
+    fwVerificationTitle: {
+        en: `Verification`,
     },
 };

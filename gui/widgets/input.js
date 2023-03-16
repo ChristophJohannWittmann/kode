@@ -272,8 +272,9 @@ register(class IIp extends IText {
 register(class IDynamic extends IText {
     constructor(milliseconds) {
         super();
+        this.setAttribute('autocomplete', 'off');
         this.timeout = null;
-        this.milliseconds = milliseconds;
+        this.milliseconds = milliseconds ? milliseconds : 800;
         this.on('dom.keyup', message => this.handleKeyUp());
     }
 

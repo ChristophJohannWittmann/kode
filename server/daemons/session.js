@@ -48,8 +48,16 @@ singleton(class SessionManager extends Daemon {
         Message.reply(message, { granted: false, user: { oid: 0n } });
     }
 
-    onClearSocket(message) {
-        let session = this.sessions[message.session];
+    async onClearVerificationCode(message) {
+        let session = this.byKey[message.session];
+
+        if (session) {
+            session.clearVerificationCode();
+        }
+    }
+
+    async onClearSocket(message) {
+        let session = this.byKey[message.session];
 
         if (session) {
             session.clearSocket();
@@ -93,6 +101,17 @@ singleton(class SessionManager extends Daemon {
 
         session.touch();
         Message.reply(message, session.key);
+    }
+
+    async onCreateVerificationCode(message) {
+        let session = this.byKey[message.session];
+
+        if (session) {
+            Message.reply(
+                message,
+                await session.createVerificationCode(message.length, message.milliseconds)
+            );
+        }
     }
 
     async onGetUserSessions(message) {
@@ -164,7 +183,7 @@ singleton(class SessionManager extends Daemon {
         Message.reply(message, false);
     }
 
-    onSetSocket(message) {
+    async onSetSocket(message) {
         let session = this.byKey[message.session];
 
         if (session) {
@@ -192,6 +211,22 @@ singleton(class SessionManager extends Daemon {
         }
 
         Message.reply(message, true);
+    }
+
+    async onValidateVerificationCode(message) {
+        let session = this.byKey[message.session];
+
+        if (session) {
+            Message.reply(message, await session.validateVerificationCode(message.code));
+        }
+    }
+
+    async onValidateVerificationDigits(message) {
+        let session = this.byKey[message.session];
+
+        if (session) {
+            Message.reply(message, await session.validateVerificationDigits(message.digits));
+        }
     }
 
     removeSession(session) {

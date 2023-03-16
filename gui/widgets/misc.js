@@ -89,3 +89,17 @@ register(class WSpace extends Widget {
         });
     }
 });
+
+
+/*****
+ * WFraming widget is usefule for formatting blocks of text on panels andd views
+ * that have a lot of text that needs to be visually appealing and organized.
+ * They will be implemented with a span with a display of inline-block and some
+ * other visually appealing borders.
+*****/
+register(class WFraming extends Widget {
+    constructor() {
+        super('div');
+        this.setWidgetStyle('framing');
+    }
+});

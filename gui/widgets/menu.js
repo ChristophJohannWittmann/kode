@@ -159,8 +159,8 @@ register(class WPopupMenu extends Widget {
     }
 
     position(x, y) {
-        let finalX = x;
-        let finalY = y;
+        let finalX = x + win.scrollX();
+        let finalY = y + win.scrollY();
         let rect = this.getOffset();
 
         if (rect.width > win.innerWidth()) {

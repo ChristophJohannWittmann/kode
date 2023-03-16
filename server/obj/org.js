@@ -43,10 +43,10 @@ singleton(class Orgs {
             filter.push('1=1');
         }
 
-        return await selectDboOrg(dbc, filter.join(' AND '), '_name ASC');
+        return await selectDboOrg(dbc, filter.join(' AND '), '_name ASC limit 20');
     }
 
     async search(dbc, pattern) {
-        return await selectDboOrg(dbc, `_name ~* '${pattern}'`, '_name ASC');
+        return await selectDboOrg(dbc, `_name ~* '${pattern}'`, '_name ASC limit 20');
     }
 });

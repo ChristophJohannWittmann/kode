@@ -111,7 +111,6 @@
                 cols: ['auto', 'auto'],
             });
 
-            this.timeout = null;
             this.found = [];
 
             this.controller = mkActiveData({
@@ -123,11 +122,11 @@
             this.setAt(1, 0,mkWidget().setInnerHtml(txx.fwOrgManagerSearch));
 
             this.setAt(3, 0,
-                mkIText()
+                mkIDynamic(500)
                 .setAttribute('autocomplete', 'off')
-                .on('dom.keyup', message => this.refresh())
                 .bind(this.controller, 'pattern', Binding.valueBinding)
                 .setPanelState('focus', true)
+                .on('Input.Pause', message => this.refreshList())
             );
 
             this.setAt(6, 0, 
@@ -183,27 +182,18 @@
             this.getView().push(new OrgEditor(dboOrg));
         }
 
-        async refresh() {
-            if (this.timeout) {
-                clearTimeout(this.timeout);
-                this.timeout = null;
+        async refreshList() {
+            if (this.controller.pattern.trim()) {
+                this.found = await queryServer({
+                    messageName: 'OrgSearchOrgs',
+                    pattern: this.controller.pattern.trim(),
+                });
+            }
+            else {
+                this.found = [];
             }
 
-            this.timeout = setTimeout(async () => {
-                this.timeout = null;
-
-                if (this.controller.pattern.trim()) {
-                    this.found = await queryServer({
-                        messageName: 'OrgSearchOrgs',
-                        pattern: this.controller.pattern.trim(),
-                    });
-                }
-                else {
-                    this.found = [];
-                }
-
-                this.updateResult();
-            }, 500);
+            this.updateResult();
         }
 
         async switchOrg(dboOrg) {

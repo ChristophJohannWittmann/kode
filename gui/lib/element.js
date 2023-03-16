@@ -588,7 +588,7 @@
         }
 
         getBoundingClientRect() {
-            return this.node.getClientBoundingRect()
+            return this.node.getBoundingClientRect()
         }
 
         getBoundingRects() {

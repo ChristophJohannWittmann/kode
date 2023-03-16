@@ -388,6 +388,18 @@ register(function parseMultipartFormData(text, boundary) {
 
 
 /*****
+ * This is a very simplistic function that's nice to have syntactically.  It
+ * makes for some very nice code:  await pauseFor(800).  The input interval is
+ * specified in milliseconds.
+*****/
+register(async function pauseFor(interval) {
+    return new Promise((ok, fail) => {
+        setTimeout(() => ok(), interval);
+    });
+});
+
+
+/*****
  * In general, it's useful to be able to convert characters between camelCase,
  * PascalCase, and snake_case.  In our world, PascalCase is just a special case
  * of camelCase.  This function takes a programming word and splits it apart

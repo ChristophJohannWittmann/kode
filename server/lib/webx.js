@@ -396,6 +396,11 @@ global.webxCssVars = {
         dialog_background_color: '#FFFFFF',
         dialog_border: 'solid 2px #B0C4DE',
         dialog_border_radius: '7px',
+
+        framing_color: '#2F4F5F',
+        framing_background_color: '#FBFBFB',
+        framing_border: 'solid 1px #E3E3E3',
+        framing_border_radius: '6px',
     },
     dark: {
         widget_border_width: '1px',
@@ -455,5 +460,10 @@ global.webxCssVars = {
         dialog_background_color: '#222222',
         dialog_border: 'solid 2px #4682B4',
         dialog_border_radius: '7px',
+
+        framing_color: '#FFFFFF',
+        framing_background_color: '#040404',
+        framing_border: 'solid 1px #0A0A0A',
+        framing_border_radius: '6px',
     }
 };

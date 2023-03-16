@@ -1347,3 +1347,21 @@ body {
 [widget-style=hr-lite] {
     border: solid 1px var(--widget-disabled-border-color);
 }
+
+
+/***********************************************
+ * Framing
+ ***********************************************/
+[widget-style=framing] {
+    display: inline-block;
+    color: var(--framing-color);
+    background-color: var(--framing-background-color);
+    border: var(--framing-border);
+    border-radius: var(--framing-border-radius);
+    padding-top: 15px;
+    padding-bottom: 12px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}

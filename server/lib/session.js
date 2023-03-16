@@ -40,6 +40,10 @@ register(class Session {
             this.pendingMessages = [];
             this.dbc = await dbConnect();
 
+            this.verificationCode = '';
+            this.verificationTime = null;
+            this.verificationTimeout = null;
+
             let seed = `${(new Date()).toString()}${this.user.userName}`;
             this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
 
@@ -79,6 +83,11 @@ register(class Session {
         return { granted: true, user: this.user };
     }
 
+    clearVerificationCode() {
+        this.verificationCode = '';
+        return this;
+    }
+
     clearSocket() {
         this.socketId = false;
         return this;
@@ -90,6 +99,32 @@ register(class Session {
         }
 
         SessionManager.removeSession(this);
+    }
+
+    async createVerificationCode(length, milliseconds) {
+        let digits = [];
+        this.verificationCode = '';
+
+        if (this.verificationTimeout) {
+            clearTimeout(this.verificationTimeout);
+            this.verificationTimeout = null;
+        }
+
+        for (let i = 0; i < length; i++) {
+            digits.push(Crypto.random(0, 9));
+        }
+
+        digits = digits.join('');
+        this.verificationTime = mkTime().toISOString();
+        this.verificationCode = await Crypto.digestUnsalted('sha512', `${digits}${this.key}${this.verificationTime}`);
+
+        this.verificationTimeout = setTimeout(() => {
+            this.verificationCode = '';
+            this.verificationTime = null;
+            this.verificationTimeout = null;
+        }, milliseconds);
+
+        return digits;
     }
 
     hasSocket() {
@@ -143,6 +178,32 @@ register(class Session {
         }
 
         this.timeout = setTimeout(() => this.close(), this.idleMinutes*60*1000);
+    }
+
+    async validateVerificationCode(code) {
+        let validated = code == this.verificationCode;
+
+        if (this.verificationTimeout) {
+            clearTimeout(this.verificationTimeout);
+            this.verificationTimeout = null;
+        }
+
+        this.verificationCode = '';
+        this.verificationTime = null;
+
+        return validated;
+    }
+
+    async validateVerificationDigits(digits) {
+        if (typeof digits == 'string' && this.verificationCode) {
+            let hash = await Crypto.digestUnsalted('sha512', `${digits}${this.key}${this.verificationTime}`);
+
+            if (hash === this.verificationCode) {
+                return this.verificationCode;
+            }
+        }
+
+        return false;
     }
 
     webSocketId() {
