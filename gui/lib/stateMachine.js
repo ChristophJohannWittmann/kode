@@ -81,6 +81,7 @@
                 }
 
                 this.namedWidgets[widget[nameKey]] = this.widgets[widget.getId()];
+                typeof widget.build == 'function' ? widget.build() : false;
                 return true;
             }
 

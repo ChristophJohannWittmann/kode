@@ -158,7 +158,7 @@ exports = module.exports = {
     },
 
     // ****************************************************************
-    // Org Manager
+    // Org
     // ****************************************************************
     fwOrgManagerAuthType: {
         en: `Authorization Type`,
@@ -201,7 +201,32 @@ exports = module.exports = {
     },
 
     // ****************************************************************
-    // User Manager
+    // Password
+    // ****************************************************************
+    fwPasswordConfirmPassword: {
+        en: `Confirm Password`,
+    },
+    fwPasswordEnterAuthorization: {
+        en: `Enter Authorization Code`,
+    },
+    fwPasswordEnterPassword: {
+        en: `Enter Password`,
+    },
+    fwPasswordSendCode: {
+        en: `Send Code`,
+    },
+    fwPasswordStep1: {
+        en: `(1)&nbsp;&nbsp;Click "Send Code" to send a 7-digit authorization code to you email address.`,
+    },
+    fwPasswordStep2: {
+        en: `(2)&nbsp;&nbsp;Enter the authorization code below to continue.`,
+    },
+    fwPasswordTitle: {
+        en: `Set Password`,
+    },
+
+    // ****************************************************************
+    // User
     // ****************************************************************
     fwUserManagerListTitle: {
         en: `Users`,

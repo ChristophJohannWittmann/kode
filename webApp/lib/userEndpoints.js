@@ -68,9 +68,6 @@ register(class UserEndpoints extends EndpointContainer {
     async [ mkEndpoint('UserRemovePhone', 'user', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('UserResetPassword', 'user', { notify: true }) ](trx) {
-    }
-    
     async [ mkEndpoint('UserSelectByEmail', 'user') ](trx) {
         return await Users.selectByEmail(
             await trx.connect(),

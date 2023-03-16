@@ -1,4 +1,4 @@
-/*****
+    /*****
  * Copyright (c) 2017-2023 Kode Programming
  * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
@@ -155,8 +155,8 @@
         }
 
         buildList() {
-            let table = mkWTable();
-            let body = table.getBody();
+            const table = mkWTable();
+            const body = table.getBody();
 
             for (let dboOrg of this.found) {
                 body.mkRowAppend()
