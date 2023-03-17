@@ -84,18 +84,25 @@ register(class WDialog extends WOverlay {
 *****/
 register(class WAlertDialog extends WDialog {
     constructor(opts) {
-        const body = (opts.content = mkWTable('dialog-table')).getBody();
-
-        body.mkRowAppend()
-        .mkCellAppend(typeof opts.text == 'string' ? opts.text : '[EMPTY]')
-        .getLastCell().setStyle('text-align', 'left');
-
-        body.mkRowAppend()
-        .mkCellAppend(
-            mkIButton()
-            .setValue(txx.fwMiscOk)
-            .on('dom.click', message => this.hide())
-        );
+        (opts.content = mkWTable())
+        .append(
+            mkWTableRow().append(
+                mkWTableCell()
+                .setStyle('text-align', 'left')
+                .setInnerHtml(typeof opts.text == 'string' ? opts.text : '[EMPTY]')
+            )
+        )
+        .append(
+            mkWTableRow().append(
+                mkWTableCell()
+                .append(
+                    mkIButton()
+                    .setValue(txx.fwMiscOk)
+                    .on('dom.click', message => this.hide())
+                )
+            )
+        )
+        .setWidgetStyle('dialog-table');
 
         super(opts);
         return this.promise;
@@ -118,24 +125,31 @@ register(class WAlertDialog extends WDialog {
 *****/
 register(class WConfirmDialog extends WDialog {
     constructor(opts) {
-        const body = (opts.content = mkWTable('dialog-table')).getBody();
-
-        body.mkRowAppend()
-        .mkCellAppend(typeof opts.text == 'string' ? opts.text : '[EMPTY]')
-        .getLastCell().setAttribute('colspan', 2)
-        .setStyle('text-align', 'left');
-
-        body.mkRowAppend()
-        .mkCellAppend(
-            mkIButton()
-            .setValue(txx.fwMiscOk)
-            .on('dom.click', message => this.hide(true))
+        (opts.content = mkWTable())
+        .append(
+            mkWTableRow().append(
+                mkWTableCell()
+                .setStyle('text-align', 'left')
+                .setInnerHtml(typeof opts.text == 'string' ? opts.text : '[EMPTY]')
+            )
         )
-        .mkCellAppend(
-            mkIButton()
-            .setValue(txx.fwMiscCancel)
-            .on('dom.click', message => this.hide(false))
-        );
+        .append(
+            mkWTableRow().append(
+                mkWTableCell()
+                .append(
+                    mkIButton()
+                    .setValue(txx.fwMiscOk)
+                    .on('dom.click', message => this.hide(true))
+                ),
+                mkWTableCell()
+                .append(
+                    mkIButton()
+                    .setValue(txx.fwMiscCancel)
+                    .on('dom.click', message => this.hide(false))
+                )
+            )
+        )
+        .setWidgetStyle('dialog-table');
 
         super(opts);
         return this.promise;

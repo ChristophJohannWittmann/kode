@@ -31,15 +31,19 @@
 register(class WTable extends Widget {
     constructor(widgetStyle) {
         super('table');
-        this.append(mkWTableSection('tbody', 'td'));
+        super.append(mkWTableBody());
         this.setWidgetStyle(widgetStyle ? widgetStyle : 'table-basic');
+    }
+
+    append(...args) {
+        this.getBody().append(...args);
+        return this;
     }
 
     createHead() {
         if (!this.hasHead()) {
             this.getBody().insertBefore(
-                mkTableHead('thead', 'th')
-                .setWidgetStyle(this.getWidgetStyle())
+                mkTableHead()
             );
         }
 
@@ -66,6 +70,11 @@ register(class WTable extends Widget {
         return this.getHead() != null;
     }
 
+    prepend(...args) {
+        this.getBody().prepend(...args);
+        return this;
+    }
+
     removeHead() {
         let head = this.getHead();
 
@@ -78,13 +87,42 @@ register(class WTable extends Widget {
 
     setWidgetStyle(widgetStyle) {
         super.setWidgetStyle(widgetStyle);
+        let stack = [this.getBody()];
 
-        if (this.getBody()) {
-            this.getBody().setWidgetStyle(widgetStyle);
+        while (stack.length) {
+            let node = stack.pop();
+
+            if (node instanceof WTableBody) {
+                node.setWidgetStyle(`${widgetStyle}-tbody`);
+                node.children().forEach(child => stack.push(child));
+            }
+            else if (node instanceof WTableRow) {
+                node.setWidgetStyle(`${widgetStyle}-tbody-tr`);
+                node.children().forEach(child => stack.push(child));
+            }
+            else if (node instanceof WTableCell) {
+                node.setWidgetStyle(`${widgetStyle}-td`);
+            }
         }
 
         if (this.getHead()) {
-            this.getHead().setWidgetStyle(widgetStyle);
+            let stack = [this.getHead()];
+
+            while (stack.length) {
+                let node = stack.pop();
+
+            if (node instanceof WTableHead) {
+                node.setWidgetStyle(`${widgetStyle}-thead`);
+                node.children().forEach(child => stack.push(child));
+            }
+            else if (node instanceof WTableRow) {
+                node.setWidgetStyle(`${widgetStyle}-thead-tr`);
+                node.children().forEach(child => stack.push(child));
+            }
+            else if (node instanceof WTableCell) {
+                node.setWidgetStyle(`${widgetStyle}-th`);
+            }
+            }
         }
 
         return this;
@@ -93,300 +131,50 @@ register(class WTable extends Widget {
 
 
 /*****
- * This class improves coding efficiency for tbody and thead elements associated
- * with the WTable instance.  The WTableSection creates rows, gets rows, deletes
- * rows and sorts them with clean API method calls.  Regardless of the rows'
- * content uniqueness, individual rows can be indentified with the widget.getId().
+ * Encapsulation of the tbody HTML element.
 *****/
-register(class WTableSection extends Widget {
-    constructor(sectionTag, cellTag) {
-        super(sectionTag);
-        this.sectionTag = sectionTag;
-        this.cellTag = cellTag;
-    }
-
-    getLastRow() {
-        let rows = this.children();
-
-        if (rows.length) {
-            return rows[rows.length - 1];
-        }
-    }
-
-    getRowAt(index) {
-        if (typeof index == 'number') {
-            let rows = this.children();
-
-            if (index >= 0 && index < rows.length) {
-                return rows[index];
-            }
-        }
-    }
-
-    getRows(index0, index1) {
-        let selected = [];
-
-        if (typeof index0 == 'number' && typeof indez1 == 'number') {
-            let rows = this.children();
-
-            if (index0 >= 0 && index0 < rows.length) {
-                if (index1 >= index0 && index1 < rows.length) {
-                    for (let i = index0; i <= index1; i++) {
-                        selected.push(rows[i]);
-                    }
-                }
-            }
-        }
-
-        return selected;
-    }
-
-    getWidgetStyle() {
-        return super.getWidgetStyle().replace(`-${this.sectionTag}`, '');
-    }
-
-    mkRowAfter(index) {
-        if (typeof index == 'number' && index >= 0 && index < this.length()) {
-            let row = mkWTableRow(this.sectionTag, this.cellTag).setWidgetStyle(this.getWidgetStyle());
-            this.childAt(index).insertAfter(row);
-            return row;
-        }
-    }
-
-    mkRowAppend() {
-        let row = mkWTableRow(this.sectionTag, this.cellTag).setWidgetStyle(this.getWidgetStyle());
-        this.append(row);
-        return row;
-    }
-
-    mkRowBefore(index) {
-        if (typeof index == 'number' && index >= 0 && index < this.length()) {
-            let row = mkWTableRow(this.sectionTag, this.cellTag).setWidgetStyle(this.getWidgetStyle());
-            this.childAt(index).insertBefore(row);
-            return row;
-        }
-    }
-
-    mkRowPrepend() {
-        let row = mkWTableRow(this.sectionTag, this.cellTag).setWidgetStyle(this.getWidgetStyle());
-        this.prepend(row);
-        return row;
-    }
-
-    removeRowAt(index) {
-        if (typeof index == 'number' && index >= 0 && index < this.length()) {
-            this.childAt(index).remove();
-        }
-
-        return this;
-    }
-
-    removeRows(index0, index1) {
-        if (typeof index0 == 'number' && typeof indez1 == 'number') {
-            let rows = this.children();
-
-            if (index0 >= 0 && index0 < this.rows.length) {
-                if (index1 >= index0 && index1 < this.rows.length) {
-                    for (let i = index0; i <= index1; i++) {
-                        this.childAt(index0).remove();
-                    }
-                }
-            }
-        }
-
-        return this;
-    }
-
-    replaceRowAt(index, ...newRows) {
-        if (typeof index == 'number') {
-            let rows = this.children();
-
-            if (index >= 0 && index < this.rows.length) {
-                rows[index].replace(...newRows);
-            }
-        }
-
-        return this;
-    }
-
-    replaceRows(index0, index1, ...newRows) {
-        if (typeof index0 == 'number' && typeof indez1 == 'number') {
-            let rows = this.children();
-
-            if (index0 >= 0 && index0 < this.rows.length) {
-                if (index1 >= index0 && index1 < this.rows.length) {
-                    for (let i = index0; i < index1; i++) {
-                        rows[index0].remove();
-                    }
-
-                    rows[index0].replace(...newRows);
-                }
-            }
-        }
-
-        return this;
-    }
-
-    setWidgetStyle(widgetStyle) {
-        super.setWidgetStyle(`${widgetStyle}-${this.sectionTag}`);
-
-        for (let row of this) {
-            row.setWidgetStyle(widgetStyle);
-        }
-
-        return this;
+register(class WTableBody extends Widget {
+    constructor(arg) {
+        super(arg instanceof Node ? arg : 'tbody');
     }
 });
 
 
 /*****
- * This class improves coding efficiency for table row, tr, elements associated
- * with the WTable instance.  The WTableRow creates cells, gets cells, deletes
- * cells and sorts them with clean API method calls.  Regardless of the cells'
- * content uniqueness, individual cells can be indentified with the widget.getId().
+ * Encapsulation of the tr HTML element.
 *****/
 register(class WTableRow extends Widget {
-    constructor(sectionTag, cellTag) {
-        super('tr');
-        this.sectionTag = sectionTag;
-        this.cellTag = cellTag;
+    constructor(arg) {
+        super(arg instanceof Node ? arg : 'tr');
     }
+});
 
-    getCellAt(index) {
-        if (typeof index == 'number') {
-            let cells = this.children();
 
-            if (index >= 0 && index < cells.length) {
-                return cells[index];
-            }
-        }
+/*****
+ * Encapsulation of the td HTML element.
+*****/
+register(class WTableCell extends Widget {
+    constructor(arg) {
+        super(arg instanceof Node ? arg : 'td');
     }
+});
 
-    getCells(index0, index1) {
-        let selected = [];
 
-        if (typeof index0 == 'number' && typeof indez1 == 'number') {
-            let cells = this.children();
-
-            if (index0 >= 0 && index0 < cells.length) {
-                if (index1 >= index0 && index1 < cells.length) {
-                    for (let i = index0; i <= index1; i++) {
-                        selected.push(cells[i]);
-                    }
-                }
-            }
-        }
-
-        return selected;
+/*****
+ * Encapsulation of the thead HTML element.
+*****/
+register(class WTableHead extends Widget {
+    constructor(arg) {
+        super(arg instanceof Node ? arg : 'thead');
     }
+});
 
-    getLastCell() {
-        let cells = this.children();
 
-        if (cells.length) {
-            return cells[cells.length - 1];
-        }
-    }
-
-    getWidgetStyle() {
-        return super.getWidgetStyle().replace(`-${this.sectionTag}-tr`, '');
-    }
-
-    mkCellAfter(index) {
-        if (typeof index == 'number' && index >= 0 && index < this.length()) {
-            let cell = mkWidget(this.cellTag);
-            cell.setWidgetStyle(`${this.getWidgetStyle()}-${this.cellTag}`);
-            this.childAt(index).insertAfter(cell);
-            return this;
-        }
-    }
-
-    mkCellAppend(value) {
-        let cell = mkWidget(this.cellTag);
-        cell.setWidgetStyle(`${this.getWidgetStyle()}-${this.cellTag}`);
-        cell.append(value);
-        this.append(cell);
-        return this;
-    }
-
-    mkCellAfter(index) {
-        if (typeof index == 'number' && index >= 0 && index < this.length()) {
-            let cell = mkWidget(this.cellTag);
-            cell.setWidgetStyle(`${this.getWidgetStyle()}-${this.cellTag}`);
-            this.childAt(index).insertBefore(cell);
-            return this;
-        }
-    }
-
-    mkCellPrepend(value) {
-        let cell = mkWidget(this.cellTag);
-        cell.setWidgetStyle(`${this.getWidgetStyle()}-${this.cellTag}`);
-        cell.append(value);
-        this.append(cell);
-        return cell;
-    }
-
-    removeCellAt(index) {
-        if (typeof index == 'number' && index >= 0 && index < this.length()) {
-            this.childAt(index).remove();
-        }
-
-        return this;
-    }
-
-    removeCells(index0, index1) {
-        if (typeof index0 == 'number' && typeof indez1 == 'number') {
-            let rows = this.children();
-
-            if (index0 >= 0 && index0 < this.rows.length) {
-                if (index1 >= index0 && index1 < this.rows.length) {
-                    for (let i = index0; i <= index1; i++) {
-                        this.childAt(index0).remove();
-                    }
-                }
-            }
-        }
-
-        return this;
-    }
-
-    replaceCellAt(index, ...newCells) {
-        if (typeof index == 'number') {
-            let rows = this.children();
-
-            if (index >= 0 && index < this.rows.length) {
-                rows[index].replace(...newCells);
-            }
-        }
-
-        return this;
-    }
-
-    replaceCells(index0, index1, ...newCells) {
-        if (typeof index0 == 'number' && typeof indez1 == 'number') {
-            let rows = this.children();
-
-            if (index0 >= 0 && index0 < this.rows.length) {
-                if (index1 >= index0 && index1 < this.rows.length) {
-                    for (let i = index0; i < index1; i++) {
-                        rows[index0].remove();
-                    }
-
-                    rows[index0].replace(...newCells);
-                }
-            }
-        }
-
-        return this;
-    }
-
-    setWidgetStyle(widgetStyle) {
-        super.setWidgetStyle(`${widgetStyle}-${this.sectionTag}-tr`);
-
-        for (let cell of this) {
-            cell.setWidgetStyle(widgetStyle);
-        }
-
-        return this;
+/*****
+ * Encapsulation of the th HTML element.
+*****/
+register(class WTableHeadCell extends Widget {
+    constructor(arg) {
+        super(arg instanceof Node ? arg : 'th');
     }
 });

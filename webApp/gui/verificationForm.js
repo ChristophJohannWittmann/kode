@@ -43,10 +43,8 @@ register(class VerificationForm extends Widget {
 
         this.append(
             mkWidget('h3')
-            .setInnerHtml(txx.fwVerificationTitle)
-        );
+            .setInnerHtml(txx.fwVerificationTitle),
 
-        this.append(
             mkWidget().append(
                 mkWFraming().append(
                     mkWidget()
@@ -58,48 +56,33 @@ register(class VerificationForm extends Widget {
                     .setStyle('margin-bottom', '12px')
                     .on('dom.click', message => this.requestCode()),
                 )
-            )
-        );
+            ),
 
-        this.append(
-            (
-                this.step2 = mkWidget().append(
-                    mkWFraming()
-                    .append(
-                        (
-                            this.step2a = mkWidget()
-                            .setStyle('margin-bottom', '15px')
-                            .setInnerHtml(txx.fwVerificationStep2)
-                        ),
-                        (
-                            this.step2b = mkIDynamic(900)
-                            .setStyle('margin-bottom', '12px')
-                            .bind(this.controller, 'digits', Binding.valueBinding)
-                            .on('Input.Pause', message => this.validateCode())
-                        )
-                    )
+            (this.step2 = mkWidget()).append(
+                mkWFraming().append(
+                    (this.step2a = mkWidget())
+                    .setStyle('margin-bottom', '15px')
+                    .setInnerHtml(txx.fwVerificationStep2),
+                    
+                    (this.step2b = mkIDynamic(900))
+                    .setStyle('margin-bottom', '12px')
+                    .bind(this.controller, 'digits', Binding.valueBinding)
+                    .on('Input.Pause', message => this.validateCode()),
                 )
-                .conceal()
             )
-        );
+            .conceal(),
 
-        this.append(
-            (
-                this.feedback = mkWidget().append(
-                    mkWFraming().append(
-                        (
-                            this.failure = mkWidget()
-                            .setInnerHtml(txx.fwVerificationFailure)
-                            .conceal()
-                        ),
-                        (
-                            this.success = mkWidget()
-                            .setInnerHtml(txx.fwVerificationSuccess)
-                            .conceal()
-                        )
-                    )
-                ).conceal()
-            )
+            (this.feedback = mkWidget()).append(
+                mkWFraming().append(
+                    this.failure = mkWidget()
+                    .setInnerHtml(txx.fwVerificationFailure)
+                    .conceal(),
+
+                    this.success = mkWidget()
+                    .setInnerHtml(txx.fwVerificationSuccess)
+                    .conceal(),
+                )
+            ).conceal()
         );
     }
 

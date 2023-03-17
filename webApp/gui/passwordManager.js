@@ -46,9 +46,7 @@
             });
 
             this.append(
-                (
-                    this.verifier = mkVerificationForm()
-                )
+                this.verifier = mkVerificationForm()
                 .on('Widget.Verified', message => {
                     this.controller.verificationCode = message.verificationCode;
                     this.verifier.remove();
@@ -96,28 +94,22 @@
 
             this.append(
                 mkWidget('h3')
-                .setInnerHtml(txx.fwPasswordTitle)
-            );
+                .setInnerHtml(txx.fwPasswordTitle),
 
-            this.append(
-                (
-                    this.grid = mkWGrid({
-                        rows: ['48px', '10px', '48px', '10px', '100px'],
-                        cols: ['auto', '20px', 'auto'],
-                    })
-                )
+                mkWGrid({
+                    rows: ['48px', '10px', '48px', '10px', '100px'],
+                    cols: ['auto', '20px', 'auto'],
+                })
                 .setAt(0, 0,
                     mkWidget('div')
                     .setClassNames('font-size-5 flex-h-sc')
                     .setInnerHtml(txx.fwPasswordEnter)
                 )
                 .setAt(0, 2,
-                    (
-                        this.password1 = mkIPassword()
-                        .setClassNames('font-size-5 margin-right-8 flex-h-sc')
-                        .bind(this.controller, 'password1', Binding.valueBinding)
-                        .on('Widget.Changed', () => setTimeout(() => this.valueChanged(),10))
-                    )
+                    (this.password1 = mkIPassword())
+                    .setClassNames('font-size-5 margin-right-8 flex-h-sc')
+                    .bind(this.controller, 'password1', Binding.valueBinding)
+                    .on('Widget.Changed', () => setTimeout(() => this.valueChanged(),10))
                 )
                 .setAt(2, 0,
                     mkWidget('div')
@@ -125,15 +117,13 @@
                     .setInnerHtml(txx.fwPasswordConfirm)
                 )
                 .setAt(2, 2,
-                    (
-                        this.password2 = mkIPassword()
-                        .setClassNames('font-size-5 margin-right-8 flex-h-sc')
-                        .bind(this.controller, 'password2', Binding.valueBinding)
-                        .on('Widget.Changed', () => setTimeout(() => this.valueChanged(),10))
-                    )
+                    (this.password2 = mkIPassword())
+                    .setClassNames('font-size-5 margin-right-8 flex-h-sc')
+                    .bind(this.controller, 'password2', Binding.valueBinding)
+                    .on('Widget.Changed', () => setTimeout(() => this.valueChanged(),10))
                 )
-                .setAt(4, 2, this.error = mkWFraming().conceal())
-            )
+                .setAt(4, 2, this.error = mkWFraming().conceal()),
+            );
         }
 
         clearError() {

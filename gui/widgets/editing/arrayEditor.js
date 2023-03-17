@@ -28,7 +28,6 @@ register(class WArrayEditor extends WEditor {
     constructor(readonly) {
         super();
         this.table = mkWTable();
-        this.body = this.table.getBody();
         this.append(this.table);
         this.readonly = readonly ? readonly : false;
         this.columns = [];

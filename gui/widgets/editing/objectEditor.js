@@ -36,7 +36,6 @@ register(class WObjectEditor extends WEditor {
     constructor(readonly) {
         super();
         this.table = mkWTable();
-        this.body = this.table.getBody();
         this.append(this.table);
         this.fields = mkActiveData();
         this.readonly = readonly ? readonly : false;
@@ -62,12 +61,15 @@ register(class WObjectEditor extends WEditor {
 
                             opts.type = opts.type ? opts.type : WScalar.selectType(this.fields[property]);
 
-                            this.body.mkRowAppend()
-                            .mkCellAppend(opts.label ? opts.label : property)
-                            .mkCellAppend(
-                                mkWScalar(this.fields, property, opts)
-                                .setPanelState('focus', opts.focus)
-                            );
+                            this.table.append(
+                                mkWTableRow().append(
+                                    mkWTableCell()
+                                    .setInnerHtml(opts.label ? opts.label : property),
+                                    mkWTableCell()
+                                    .setPanelState('focus', opts.focus)
+                                    .append(mkWScalar(this.fields, property, opts))
+                                )
+                            )
                         }
                     }
                     else {
@@ -75,11 +77,14 @@ register(class WObjectEditor extends WEditor {
                         let readonly = this.readonly;;
                         let opts = { readonly: this.readonly, type: WScalar.selectType(this.fields[property]) };
 
-                        this.body.mkRowAppend()
-                        .mkCellAppend(property)
-                        .mkCellAppend(
-                            mkWScalar(this.fields, property, opts)
-                        );
+                        this.table.append(
+                            mkWTableRow().append(
+                                mkWTableCell()
+                                .setInnerHtml(property),
+                                mkWTableCell()
+                                .append(mkWScalar(this.fields, property, opts))
+                            )
+                        )
                     }
                 }
             }
@@ -108,23 +113,29 @@ register(class WObjectEditor extends WEditor {
 
                             opts.type = opts.type ? opts.type : WScalar.selectType(this.fields[property]);
 
-                            this.body.mkRowAppend()
-                            .mkCellAppend(opts.label ? opts.label : property)
-                            .mkCellAppend(
-                                mkWScalar(this.fields, property, opts)
-                                .setPanelState('focus', opts.focus)
-                            );
+                            this.table.append(
+                                mkWTableRow().append(
+                                    mkWTableCell()
+                                    .setInnerHtml(opts.label ? opts.label : property),
+                                    mkWTableCell()
+                                    .setPanelState('focus', opts.focus)
+                                    .append(mkWScalar(this.fields, property, opts))
+                                )
+                            )
                         }
                     }
                     else {
                         this.fields[property] = value;
                         let opts = { readonly: this.readonly, type: WScalar.selectType(this.fields[property]) };
 
-                        this.body.mkRowAppend()
-                        .mkCellAppend(property)
-                        .mkCellAppend(
-                            mkWScalar(this.fields, property, opts)
-                        );
+                        this.table.append(
+                            mkWTableRow().append(
+                                mkWTableCell()
+                                .setInnerHtml(property),
+                                mkWTableCell()
+                                .append(mkWScalar(this.fields, property, opts))
+                            )
+                        )
                     }
                 }
             }

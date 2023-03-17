@@ -37,16 +37,16 @@ register(class FWSignInView extends WGrid {
             cols: ['auto', '400px', 'auto'],
         });
 
-        this.data = mkActiveData({
+        this.controller = mkActiveData({
             mode: 'Authenticate',
             username: '',
             password: '',
         });
 
         this.setAt(1, 1, mkWidget('div')
-            .bind(this.data, 'mode', {
-                'Authenticate': new AuthenticateForm(this.data).on('SignIn', message => this.signIn(message)),
-                'ForgotPassword': new ForgotCredentialsForm(this.data).on('ResetPassword', message => this.resetPassword(message)),
+            .bind(this.controller, 'mode', {
+                'Authenticate': new AuthenticateForm(this.controller).on('SignIn', message => this.signIn(message)),
+                'ForgotPassword': new ForgotCredentialsForm(this.controller).on('ResetPassword', message => this.resetPassword(message)),
             })
         );
     }
@@ -54,17 +54,17 @@ register(class FWSignInView extends WGrid {
     async resetPassword(message) {
         await mkHttp().query({
             messageName: 'PublicResetPassword',
-            username: this.data.username,
+            username: this.controller.username,
         });
 
-        setTimeout(() => this.data.mode = 'Authenticate', 2000);
+        setTimeout(() => this.controller.mode = 'Authenticate', 2000);
     }
 
     async signIn(message) {
         let rsp = await queryServer({
             messageName: 'PublicSignIn',
-            username: this.data.username,
-            password: this.data.password,
+            username: this.controller.username,
+            password: this.controller.password,
         });
 
         if (rsp) {
@@ -88,25 +88,25 @@ register(class FWSignInView extends WGrid {
  * single-factor authentication.
 *****/
 class AuthenticateForm extends WGrid {
-    constructor(data) {
+    constructor(controller) {
         super({
             tagName: 'form',
             rows: ['2fr', 'auto', '3px', 'auto', '8px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
             cols: ['350px'],
         });
 
-        this.data = data;
+        this.controller = controller;
         this.setClassNames('flex-h-cc alt-colors border-style-solid border-width-2 border-radius-2');
 
         this.setAt(1, 0, mkWidget('div').setInnerHtml(txx.fwSignInUsername).setClassNames('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(3, 0, mkIEmail()
-        .bind(this.data, 'username', Binding.valueBinding))
+        .bind(this.controller, 'username', Binding.valueBinding))
         .setAttribute('autofocus')
         .setAttribute('autocomplete', 'email');
 
         this.setAt(5, 0, mkWidget('div').setInnerHtml(txx.fwSignInPassword).setClassNames('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(7, 0, mkIPassword()
-        .bind(this.data, 'password', Binding.valueBinding))
+        .bind(this.controller, 'password', Binding.valueBinding))
         .setAttribute('autocomplete', 'current-password');
 
         this.setAt(9, 0,
@@ -118,7 +118,7 @@ class AuthenticateForm extends WGrid {
         this.setAt(11, 0,
             mkIButton()
             .setAttribute('value', txx.fwSignInForgotPassword)
-            .on('dom.click', message => this.data.mode = 'ForgotPassword')
+            .on('dom.click', message => this.controller.mode = 'ForgotPassword')
         )
     }
 }
@@ -132,21 +132,21 @@ class AuthenticateForm extends WGrid {
  * the password page.
 *****/
 class ForgotCredentialsForm extends WGrid {
-    constructor(data) {
+    constructor(controller) {
         super({
             tagName: 'form',
             rows: ['2fr', 'auto', '20px', 'auto', '3px', 'auto', '25px', 'auto', '8px', 'auto', '2fr'],
             cols: ['350px'],
         });
 
-        this.data = data;
+        this.controller = controller;
         this.setClassNames('flex-h-cc alt-colors border-style-solid border-width-1 border-radius-2');
 
         this.setAt(1, 0, mkWidget('div').setInnerHtml(txx.fwForgotInstructions));
 
         this.setAt(3, 0, mkWidget('div').setInnerHtml(txx.fwForgotEmail).setClassNames('flex-h-sc font-weight-bold font-size-4'));
         this.setAt(5, 0, mkIEmail()
-        .bind(this.data, 'username', Binding.valueBinding))
+        .bind(this.controller, 'username', Binding.valueBinding))
         .setAttribute('autofocus')
         .setAttribute('autocomplete', 'email');
 
@@ -159,7 +159,7 @@ class ForgotCredentialsForm extends WGrid {
         this.setAt(9, 0,
             mkIButton()
             .setAttribute('value', txx.fwForgotSignIn)
-            .on('dom.click', message => this.data.mode = 'Authenticate')
+            .on('dom.click', message => this.controller.mode = 'Authenticate')
         )
     }
 }
