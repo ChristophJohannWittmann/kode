@@ -233,12 +233,6 @@
             this.dboOrg = dboOrg;
             this.setFlag('transient');
             this.setRefreshers('OrgCreateOrg', 'OrgModifyOrg');
-
-            this.append(
-                mkWidget('h3')
-                .setInnerHtml(txx.fwOrgManagerEditTitle)
-            );
-
             this.refresh();
         }
 
@@ -252,6 +246,13 @@
             }
             
             this.ignore();
+            this.clear();
+
+            this.append(
+                mkWidget('h3')
+                .setInnerHtml(txx.fwOrgManagerEditTitle)
+            );
+            
             let orgEditor = this.orgEditor;
 
             this.orgEditor = mkWObjectEditor()

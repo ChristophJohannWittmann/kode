@@ -36,7 +36,6 @@ register(class WEditor extends Widget {
         this.invalid = 0;
         this.modified = 0;
         this.setWidgetStyle('editor');
-        global.on('#NotifyClient', message => this.onServerNotify(message));
     }
 
     enumerate() {
@@ -143,12 +142,6 @@ register(class WEditor extends Widget {
                     widget: this,
                 });
             }
-        }
-    }
-
-    onServerNotify(message) {
-        if (this.refreshers.has(message.endpoint)) {
-            this.refresh();
         }
     }
 

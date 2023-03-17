@@ -138,7 +138,7 @@ register(class WGrid extends Widget {
         let index = this.calcIndex(rowIndex, colIndex);
         this.cells[index].replace(widget);
         this.cells[index] = widget
-        return widget;
+        return this;
     }
 
     setColGap(gap) {

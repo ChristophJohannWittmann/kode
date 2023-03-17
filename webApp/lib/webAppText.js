@@ -234,7 +234,25 @@ exports = module.exports = {
     // ****************************************************************
     // User
     // ****************************************************************
-    fwUserManagerListTitle: {
+    fwUserEditorFirstName: {
+        en: `First Name`,
+    },
+    fwUserEditorLastName: {
+        en: `Last Name`,
+    },
+    fwUserEditorSuffix: {
+        en: `Suffix`,
+    },
+    fwUserEditorTitle: {
+        en: `User`,
+    },
+    fwUserEditorUserTitle: {
+        en: `Title`,
+    },
+    fwUserManagerCreateUser: {
+        en: `Create User`,
+    },
+    fwUserManagerTitle: {
         en: `Users`,
     },
 

@@ -29,9 +29,6 @@ register(class UserEndpoints extends EndpointContainer {
         super(webapp);
     }
 
-    async [ mkEndpoint('UserActivate', 'user', { notify: true }) ](trx) {
-    }
-
     async [ mkEndpoint('UserAddAddress', 'user', { notify: true }) ](trx) {
     }
 
@@ -41,10 +38,10 @@ register(class UserEndpoints extends EndpointContainer {
     async [ mkEndpoint('UserAddPhone', 'user', { notify: true }) ](trx) {
     }
 
-    async [ mkEndpoint('UserDeactivate', 'user', { notify: true }) ](trx) {
+    async [ mkEndpoint('UserCreateUser', 'user', { notify: true }) ](trx) {
     }
 
-    async [ mkEndpoint('UserModify', 'user', { notify: true }) ](trx) {
+    async [ mkEndpoint('UserGetUser', 'user', { notify: true }) ](trx) {
     }
 
     async [ mkEndpoint('UserModifyAddress', 'user', { notify: true }) ](trx) {
@@ -56,7 +53,7 @@ register(class UserEndpoints extends EndpointContainer {
     async [ mkEndpoint('UserModifyPhone', 'user', { notify: true }) ](trx) {
     }
 
-    async [ mkEndpoint('UserRemove', 'user', { notify: true }) ](trx) {
+    async [ mkEndpoint('UserModifyUser', 'user', { notify: true }) ](trx) {
     }
 
     async [ mkEndpoint('UserRemoveAddress', 'user', { notify: true }) ](trx) {
@@ -68,19 +65,29 @@ register(class UserEndpoints extends EndpointContainer {
     async [ mkEndpoint('UserRemovePhone', 'user', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('UserSelectByEmail', 'user') ](trx) {
-        return await Users.selectByEmail(
-            await trx.connect(),
-            trx.email
-        );
-    }
-    
-    async [ mkEndpoint('UserSelectByName', 'user') ](trx) {
-        return await Users.selectByName(
-            await trx.connect(),
-            trx.firstName,
-            trx.lastName,
-        );
+    async [ mkEndpoint('UserSearch', 'user') ](trx) {
+        if (trx.criterion == 'email') {
+            return await Users.selectByEmail(
+                await trx.connect(),
+                trx.email
+            );
+        }
+        else if (trx.criterion == 'name') {
+            return await Users.selectByName(
+                await trx.connect(),
+                trx.firstName,
+                trx.lastName,
+            );
+        }
+        else if (trx.criterion == 'search') {
+            return await Users.search(
+                await trx.connect(),
+                trx.pattern,
+            );
+        }
+        else {
+            return [];
+        }
     }
     
     async [ mkEndpoint('UserVerify', 'user') ](trx) {

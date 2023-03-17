@@ -31,6 +31,86 @@ register(class WArrayEditor extends WEditor {
         this.body = this.table.getBody();
         this.append(this.table);
         this.readonly = readonly ? readonly : false;
-        this.rows = mkActiveData([]);
+        this.columns = [];
+        this.objects = mkActiveData([]);
+    }
+
+    appendColumns(...columns) {
+        cols.forEach(column => this.columns.push(column));
+        return this;
+    }
+
+    append(...objects) {
+        for (let object of objects) {
+            let row = this.mkRow(object);
+            this.objects.push(object);
+            this.body.append(row);
+        }
+
+        return this;
+    }
+
+    changeColumns(...columnNames) {
+    }
+
+    clearColumns(...columnNames) {
+        if (columnNames.length) {
+            for (let columnName of columnNames) {
+                for (let i = 0; i < this.columsn.length; i++) {
+
+                }
+            }
+        }
+        else {
+            this.columns = [];
+        }
+
+        return this;
+    }
+
+    getActiveData() {
+        return this.rows;
+    }
+
+    getObjectAt(index) {
+        return clone(this.objects[index]);
+    }
+
+    getObjects() {
+        return clone(this.objects);
+    }
+
+    insertAfter(...objects) {
+        return this;
+    }
+
+    insertAfter(...objects) {
+        return this;
+    }
+
+    length() {
+        return this.objects.length;
+    }
+
+    mkRow(object) {
+    }
+
+    prepend(...objects) {
+        return this;
+    }
+
+    async refresh() {
+        this.ignore();
+        this.clear();
+
+        this.listen();
+    }
+
+    removeObjects(...objects) {
+        return this;
+    }
+
+    removeObjectsAt(from, to) {
+        return this;
     }
 });

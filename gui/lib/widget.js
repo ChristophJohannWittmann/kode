@@ -59,6 +59,7 @@
             this.setId(`widget${this.id}`);
             this.setWidgetStyle('widget');
             this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
+            global.on('#NotifyClient', message => this.onServerNotify(message));
         }
 
         append(...args) {
@@ -377,6 +378,12 @@
             }
         }
 
+        onServerNotify(message) {
+            if (this.refreshers.has(message.endpoint)) {
+                this.refresh();
+            }
+        }
+
         popStyle() {
             if (this.styleStack.length) {
                 let style = this.styleStack[this.styleStack.length - 1];
@@ -411,6 +418,9 @@
             this.clearStyle();
             this.setStyle(style);
             return this;
+        }
+
+        async refresh() {
         }
 
         remove() {

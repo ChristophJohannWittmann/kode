@@ -72,7 +72,7 @@ register(class WObjectEditor extends WEditor {
                     }
                     else {
                         this.fields[property] = value;
-                        let readonly = this.readonly || WScalar.dboReadonlyByDefault(property);
+                        let readonly = this.readonly;;
                         let opts = { readonly: this.readonly, type: WScalar.selectType(this.fields[property]) };
 
                         this.body.mkRowAppend()
