@@ -40,13 +40,8 @@ register(class WTable extends Widget {
         return this;
     }
 
-    createHead() {
-        if (!this.hasHead()) {
-            this.getBody().insertBefore(
-                mkTableHead()
-            );
-        }
-
+    appendHead(thead) {
+        super.append(thead);
         return this;
     }
 
@@ -75,13 +70,8 @@ register(class WTable extends Widget {
         return this;
     }
 
-    removeHead() {
-        let head = this.getHead();
-
-        if (head) {
-            head.remove();
-        }
-
+    prependHead(thead) {
+        super.prepend(thead);
         return this;
     }
 
@@ -111,17 +101,17 @@ register(class WTable extends Widget {
             while (stack.length) {
                 let node = stack.pop();
 
-            if (node instanceof WTableHead) {
-                node.setWidgetStyle(`${widgetStyle}-thead`);
-                node.children().forEach(child => stack.push(child));
-            }
-            else if (node instanceof WTableRow) {
-                node.setWidgetStyle(`${widgetStyle}-thead-tr`);
-                node.children().forEach(child => stack.push(child));
-            }
-            else if (node instanceof WTableCell) {
-                node.setWidgetStyle(`${widgetStyle}-th`);
-            }
+                if (node instanceof WTableHead) {
+                    node.setWidgetStyle(`${widgetStyle}-thead`);
+                    node.children().forEach(child => stack.push(child));
+                }
+                else if (node instanceof WTableRow) {
+                    node.setWidgetStyle(`${widgetStyle}-thead-tr`);
+                    node.children().forEach(child => stack.push(child));
+                }
+                else if (node instanceof WTableCell) {
+                    node.setWidgetStyle(`${widgetStyle}-th`);
+                }
             }
         }
 

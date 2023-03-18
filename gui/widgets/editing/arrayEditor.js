@@ -25,91 +25,135 @@
 /*****
 *****/
 register(class WArrayEditor extends WEditor {
-    constructor(readonly) {
+    static properties = {
+        property: true,
+        label: true,
+        readonly: false,
+        width: false,
+    };
+
+    constructor(messages, columns) {
         super();
         this.table = mkWTable();
-        this.append(this.table);
-        this.readonly = readonly ? readonly : false;
+        super.append(this.table);
         this.columns = [];
+        this.messages = messages;
         this.objects = mkActiveData([]);
-    }
+        this.proxy = mkMessageProxy(this);
 
-    appendColumns(...columns) {
-        cols.forEach(column => this.columns.push(column));
-        return this;
+        this.table.appendHead(
+            (this.head = mkWTableHead())
+            .conceal()
+        );
+
+        if (Array.isArray(columns)) {
+            for (let column of columns) {
+                if (typeof column == 'object') {
+                    for (let key in column) {
+                        if (!(key in WArrayEditor.properties)) {
+                            throw new Error(`WArrayEditor column definition contains unknwon property: "${key}"`);
+                        }
+                    }
+
+                    for (let key in WArrayEditor.properties) {
+                        if (WArrayEditor.properties[key] && !(key in column)) {
+                            throw new Error(`WArrayEditor column definition missing required property: "${key}"`);
+                        }
+                    }
+
+                    this.columns.push(column);
+                }
+                else {
+                    throw new Error(`WArrayEditor column definition NOT of type "object".`);
+                }
+            }
+        }
+
+
+        for (let column of this.columns) {
+            if (column.label) {
+                this.head.append(mkWTableHeadCell().setInnerHtml(column.label));
+            }
+            else {
+                this.head.append(mkWTableHeadCell().setInnerHtml(column.property));
+            }
+        }
     }
 
     append(...objects) {
         for (let object of objects) {
-            let row = this.mkRow(object);
             this.objects.push(object);
-            this.body.append(row);
+            this.table.append(this.mkRow(this.objects.length - 1));
         }
 
         return this;
     }
 
-    changeColumns(...columnNames) {
+    clear() {
+        this.table.getBody().clear();
+        ActiveData.clear(this.objects);
     }
 
-    clearColumns(...columnNames) {
-        if (columnNames.length) {
-            for (let columnName of columnNames) {
-                for (let i = 0; i < this.columsn.length; i++) {
+    concealHead() {
+        this.head.conceal();
+    }
 
-                }
-            }
-        }
-        else {
-            this.columns = [];
-        }
-
+    createHead() {
         return this;
     }
 
     getActiveData() {
-        return this.rows;
+        return this.objects;
     }
 
-    getObjectAt(index) {
+    /*
+    getObject(index) {
         return clone(this.objects[index]);
     }
 
-    getObjects() {
-        return clone(this.objects);
-    }
-
-    insertAfter(...objects) {
+    insertAfter(index, ...objects) {
         return this;
     }
 
-    insertAfter(...objects) {
+    insertAfter(index, ...objects) {
         return this;
     }
+    */
 
     length() {
         return this.objects.length;
     }
 
-    mkRow(object) {
+    mkRow(index) {
+        let tr = mkWTableRow();
+        let object = this.objects[index];
+
+        for (let column of this.columns) {
+            if (column.property in object) {
+                tr.append(
+                    mkWTableCell()
+                    .setInnerHtml(object[column.property])
+                );
+            }
+            else {
+                tr.append(mkWTableCell());
+            }
+        }
+
+        return tr;
     }
 
+    /*
     prepend(...objects) {
         return this;
     }
 
-    async refresh() {
-        this.ignore();
-        this.clear();
-
-        this.listen();
-    }
-
-    removeObjects(...objects) {
+    removeObject(index) {
         return this;
     }
+    */
 
-    removeObjectsAt(from, to) {
-        return this;
+    revealHead() {
+        this.head.reveal();
     }
 });

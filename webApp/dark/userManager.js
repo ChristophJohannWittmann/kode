@@ -48,50 +48,67 @@
         }
 
         async refresh() {
-            this.ignore();
             this.clear();
 
             this.append(
                 mkWidget('h3')
-                .setInnerHtml(txx.fwUserManagerTitle)
-            );
+                .setInnerHtml(txx.fwUserManagerTitle),
 
-            this.append(
-                (
-                    this.creator = mkWGrid({
-                        rows: ['30px', '48px', '30px'],
-                        cols: ['0px', '200px', 'auto'],
-                    })
-                    .setAt(1, 1,
-                        mkIButton()
-                        .setValue(txx.fwUserManagerCreateUser)
-                        .on('dom.click', message => this.createUser())
-                    )
+                mkWGrid({
+                        rows: ['12px', '48px', '12px'],
+                        cols: ['12px', '150px', 'auto'],
+                })
+                .setAt(1, 1,
+                    mkIButton()
+                    .setValue(txx.fwUserManagerCreateUser)
+                    .on('dom.click', message => this.createUser())
+                ),
+
+                mkWGrid({
+                        rows: ['12px', 'auto', '12px', '48px', '24px', 'auto'],
+                        cols: ['12px', 'minmax(350px, 90%)', 'auto'],
+                })
+                .setAt(1, 1,
+                    mkWidget()
+                    .setClassNames('font-size-4')
+                    .setInnerHtml(txx.fwUserManagerSearch)
+                )
+                .setAt(3, 1,
+                    mkIDynamic(500)
+                    .setPanelState('focus', true)
+                    .bind(this.controller, 'pattern', Binding.valueBinding)
+                    .on('Input.Pause', message => this.refreshList())
+                )
+                .setAt(5, 1,
+                    (this.matching = mkWArrayEditor(
+                        ['dom.click'],
+                        [
+                            { property: 'firstName', label: txx.fwUserEditorFirstName, readonly: true },
+                            { property: 'lastName', label: txx.fwUserEditorLastName, readonly: true },
+                            { property: 'email', label: txx.fwUserEditorEmail, readonly: true },
+                        ]
+                    ))
+                    .on('dom.click', message => console.log(message))
                 )
             );
-
-            this.append(
-                (
-                    this.selector = mkWGrid({
-                        rows: ['30px', '24px', '8px', '48px', '8px', 'auto'],
-                        cols: ['auto', 'auto'],
-                    })
-                    .setAt(3, 0,
-                        mkIDynamic(500)
-                        .bind(this.controller, 'pattern', Binding.valueBinding)
-                        .setPanelState('focus', true)
-                        .on('Input.Pause', message => this.refreshList())
-                    )
-                    .setAt(5, 0,
-                        mkWidget().setInnerHtml('User List Placeholder')
-                    )
-                )
-            );
-
-            this.listen();
         }
 
         async refreshList() {
+            let userArray = await queryServer({
+                messageName: 'UserSearch',
+                criterion: 'search',
+                pattern: this.controller.searchPattern
+            });
+
+            this.matching.clear();
+            this.matching.append(...userArray);
+
+            if (this.matching.length) {
+                this.matching.revealHead();
+            }
+            else {
+                this.matching.concealHead();
+            }
         }
     });
 
@@ -109,7 +126,6 @@
         }
 
         async refresh() {
-            this.ignore();
             this.clear();
 
             if (this.dboUser.oid > 0n) {
@@ -138,6 +154,12 @@
                         updated: {
                             hidden: true,
                         },
+                        emailOid: {
+                            hidden: true,
+                        },
+                        orgOid: {
+                            hidden: true,
+                        },
                         title: {
                             label: txx.fwUserEditorUserTitle,
                         },
@@ -151,12 +173,35 @@
                         suffix: {
                             label: txx.fwUserEditorSuffix,
                         },
+                        status: {
+                            label: txx.fwUserEditorStatus,
+                            type: ScalarEnum,
+                            choices: [
+                                { value: 'active', text: txx.fwUserEditorStatusActive },
+                                { value: 'inactive', text: txx.fwUserEditorStatusInactive },
+                            ],
+                        },
+                        authType: {
+                            readonly: true,
+                            label: txx.fwUserEditorAuthorizationType,
+                        },
+                        verified: {
+                            readonly: true,
+                            label: txx.fwUserEditorVerified,
+                        },
+                        password: {
+                            readonly: true,
+                            label: txx.fwUserEditorPassword,
+                        },
+                        failures: {
+                            readonly: true,
+                            label: txx.fwUserEditorSignInFailures,
+                        },
                     })
                 )
-                .listen()
             )
 
-            this.listen();
+            super.refresh();
         }
 
         async save() {

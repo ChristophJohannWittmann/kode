@@ -210,6 +210,33 @@ register(class ActiveData {
         return ActiveData;
     }
 
+    static clear(proxy, key) {
+        if (typeof proxy == 'object' && proxy[ActiveData.nakedKey] !== undefined) {
+            let naked = proxy[ActiveData.nakedKey];
+
+            if (key) {
+                 if (Array.isArray(naked[key])) {
+                    naked[key].splice(0, naked[key].length);
+                }
+                else if (typeof naked[key] == 'object') {
+                    for (let propertyName in naked[key]) {
+                        delete naked[key][propertyName];
+                    }
+                }
+            }
+            else {
+                 if (Array.isArray(naked)) {
+                    naked.splice(0, naked.length);
+                }
+                else if (typeof naked == 'object') {
+                    for (let propertyName in naked) {
+                        delete naked[propertyName];
+                    }
+                }
+            }
+        }
+    }
+
     static id(proxy) {
         if (typeof proxy == 'object' && proxy[ActiveData.nakedKey] !== undefined) {
             return proxy[ActiveData.nakedKey][ActiveData.idKey];

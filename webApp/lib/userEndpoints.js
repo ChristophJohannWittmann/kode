@@ -41,6 +41,9 @@ register(class UserEndpoints extends EndpointContainer {
     async [ mkEndpoint('UserCreateUser', 'user', { notify: true }) ](trx) {
     }
 
+    async [ mkEndpoint('UserGetEmail', 'user', { notify: true }) ](trx) {
+    }
+
     async [ mkEndpoint('UserGetUser', 'user', { notify: true }) ](trx) {
     }
 
@@ -80,10 +83,16 @@ register(class UserEndpoints extends EndpointContainer {
             );
         }
         else if (trx.criterion == 'search') {
+            /*
             return await Users.search(
                 await trx.connect(),
                 trx.pattern,
             );
+            */
+            return [
+                { oid: 0, firstName: 'Tommy', lastName: 'Bahama', email: 'tb@bahama.com' },
+                { oid: 0, firstName: 'David', lastName: 'Sinclair', email: 'sinclair@harvard.edu' },
+            ];
         }
         else {
             return [];

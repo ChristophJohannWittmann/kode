@@ -38,24 +38,22 @@
         constructor() {
             super('div');
             this.setRefreshers('OrgCreateOrg', 'OrgModifyOrg');
+            this.refresh();
+        }
+
+        async refresh() {
+            this.clear();
 
             this.append(
                 mkWidget('h3')
                 .setInnerHtml(txx.fwOrgManagerListTitle)
             );
 
-            this.stm = mkWStateMachine(
-                this,
-                ['select'],
-                ['editor'],
-            );
+            if ('org' in webAppSettings.grants()) {
+                this.append(new OrgCreator(this));
+            }
 
-            this.stm.disableUpdates();
-            this.stm.appendChild(new OrgCreator(), 'creator', ['select'], ['editor']);
-            this.stm.appendChild(new OrgSelector(), 'selector', ['select'], []);
-            ('org' in webAppSettings.grants()) ? this.stm.setFlag('editor') : false;
-            this.stm.setMode('select');
-            this.stm.enableUpdates();
+            this.append(new OrgSelector(this));
         }
     });
 
@@ -68,11 +66,13 @@
      * to be in 'edit' mode.
     *****/
     class OrgCreator extends WGrid {
-        constructor() {
+        constructor(orgManager) {
             super({
-                rows: ['30px', '48px', '30px'],
-                cols: ['0px', '200px', 'auto'],
+                rows: ['12px', '48px', '12px'],
+                cols: ['12px', 'minmax(150px, 200px)', 'auto'],
             });
+
+            this.orgManager = orgManager;
 
             this.setAt(1, 1,
                 mkIButton()
@@ -105,13 +105,14 @@
      * to open that organization for editing.
     *****/
     class OrgSelector extends WGrid {
-        constructor() {
+        constructor(orgManager) {
             super({
-                rows: ['30px', '24px', '8px', '48px', '30px', '8px', '48px', '8px', 'auto'],
-                cols: ['auto', 'auto'],
+                rows: ['12px', '24px', '8px', '48px', '12px', '8px', '48px', '8px', 'auto'],
+                cols: ['12px', 'minmax(350px, 90%)', 'auto'],
             });
 
             this.found = [];
+            this.orgManager = orgManager;
 
             this.controller = mkActiveData({
                 pattern: '',
@@ -119,9 +120,9 @@
             });
 
             this.bind(this.controller, 'showList', this.updateResult);
-            this.setAt(1, 0,mkWidget().setInnerHtml(txx.fwOrgManagerSearch));
+            this.setAt(1, 1,mkWidget().setInnerHtml(txx.fwOrgManagerSearch));
 
-            this.setAt(3, 0,
+            this.setAt(3, 1,
                 mkIDynamic(500)
                 .setAttribute('autocomplete', 'off')
                 .bind(this.controller, 'pattern', Binding.valueBinding)
@@ -129,7 +130,7 @@
                 .on('Input.Pause', message => this.refreshList())
             );
 
-            this.setAt(6, 0, 
+            this.setAt(6, 1, 
                 mkWidget('span')
                 .append(
                     mkICheckbox().bind(this.controller, 'showList', Binding.valueBinding)
@@ -154,14 +155,16 @@
         }
 
         buildList() {
-            const table = mkWTable();
-            const body = table.getBody();
+            let table = mkWTable();
 
             for (let dboOrg of this.found) {
-                body.mkRowAppend()
-                .mkCellAppend(
-                    mkWHotSpot().setValue(dboOrg.name)
-                    .on('dom.click', message => this.clickOrg(dboOrg, message.event))
+                table.append(
+                    mkWTableRow()
+                    .append(
+                        mkWTableCell()
+                        .append(mkWHotSpot().setValue(dboOrg.name))
+                        .on('dom.click', message => this.clickOrg(dboOrg, message.event))
+                    )
                 )
             }
 
@@ -210,10 +213,10 @@
 
         updateResult() {
             if (this.controller.showList && this.found.length < 20) {
-                this.setAt(8, 0, this.buildList());
+                this.setAt(8, 1, this.buildList());
             }
             else {
-                this.setAt(8, 0, mkWidget().setInnerHtml(`${this.found.length}&nbsp;&nbsp;${txx.fwOrgManagerFound}`));
+                this.setAt(8, 1, mkWidget().setInnerHtml(`${this.found.length}&nbsp;&nbsp;${txx.fwOrgManagerFound}`));
             }
         }
     }
@@ -250,51 +253,46 @@
 
             this.append(
                 mkWidget('h3')
-                .setInnerHtml(txx.fwOrgManagerEditTitle)
-            );
-            
-            let orgEditor = this.orgEditor;
+                .setInnerHtml(txx.fwOrgManagerEditTitle),
 
-            this.orgEditor = mkWObjectEditor()
-            .addDbo(
-                this.dboOrg, {
-                    oid: {
-                        hidden: true,
-                    },
-                    created: {
-                        hidden: true,
-                    },
-                    updated: {
-                        hidden: true,
-                    },
-                    name: {
-                        label: txx.fwOrgManagerEditorName,
-                        readonly: false,
-                        focus: true,
-                    },
-                    status: {
-                        label: txx.fwOrgManagerEditorStatus,
-                        readonly: false,
-                        type: ScalarEnum,
-                        choices: [
-                            { value: 'active',   text: txx.fwMiscActive },
-                            { value: 'inactive', text: txx.fwMiscInactive },
-                        ]
-                    },
-                    note: {
-                        label: txx.fwOrgManagerEditorNote,
-                        readonly: false,
-                    },
-                    authType: {
-                        label: txx.fwOrgManagerAuthType,
-                        readonly: true,
-                    },
-                }
+                (this.orgEditor = mkWObjectEditor())
+                .addDbo(
+                    this.dboOrg, {
+                        oid: {
+                            hidden: true,
+                        },
+                        created: {
+                            hidden: true,
+                        },
+                        updated: {
+                            hidden: true,
+                        },
+                        name: {
+                            label: txx.fwOrgManagerEditorName,
+                            readonly: false,
+                            focus: true,
+                        },
+                        status: {
+                            label: txx.fwOrgManagerEditorStatus,
+                            readonly: false,
+                            type: ScalarEnum,
+                            choices: [
+                                { value: 'active',   text: txx.fwMiscActive },
+                                { value: 'inactive', text: txx.fwMiscInactive },
+                            ]
+                        },
+                        note: {
+                            label: txx.fwOrgManagerEditorNote,
+                            readonly: false,
+                        },
+                        authType: {
+                            label: txx.fwOrgManagerAuthType,
+                            readonly: true,
+                        },
+                    }
+                ),
             );
 
-            orgEditor ? orgEditor.remove() : false;
-            this.ignore();
-            this.append(this.orgEditor);
             this.listen();
             super.refresh();
         }

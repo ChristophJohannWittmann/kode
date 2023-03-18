@@ -76,8 +76,8 @@
      * editor or viewer type.
     *****/
     define('ScalarBool', {
-        mkViewer: opts => mkICheckbox().setWidgetStyle('scalarcheckbox').setAttribute('disabled', true),
-        mkEditor: opts => mkICheckbox().setWidgetStyle('scalarcheckbox'),
+        mkViewer: opts => mkICheckbox().setAttribute('disabled', true),
+        mkEditor: opts => mkICheckbox(),
     });
 
     define('ScalarColor', {

@@ -234,11 +234,35 @@ exports = module.exports = {
     // ****************************************************************
     // User
     // ****************************************************************
+    fwUserEditorAuthorizationType: {
+        en: `Authorization Type`,
+    },
+    fwUserEditorEmail: {
+        en: `Email`,
+    },
+    fwUserEditorVerified: {
+        en: `Email Verified`,
+    },
     fwUserEditorFirstName: {
         en: `First Name`,
     },
     fwUserEditorLastName: {
         en: `Last Name`,
+    },
+    fwUserEditorPassword: {
+        en: `Password Valid`,
+    },
+    fwUserEditorSignInFailures: {
+        en: `Sign In Failures`,
+    },
+    fwUserEditorStatus: {
+        en: `User Status`,
+    },
+    fwUserEditorStatusActive: {
+        en: `Active`,
+    },
+    fwUserEditorStatusInactive: {
+        en: `Inactive`,
     },
     fwUserEditorSuffix: {
         en: `Suffix`,
@@ -251,6 +275,9 @@ exports = module.exports = {
     },
     fwUserManagerCreateUser: {
         en: `Create User`,
+    },
+    fwUserManagerSearch: {
+        en: `Search`,
     },
     fwUserManagerTitle: {
         en: `Users`,

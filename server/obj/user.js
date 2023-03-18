@@ -84,8 +84,17 @@ singleton(class Users {
         return await selectOneDboEmailAddress(dbc, `_owner_type='DboUser' AND _owner_oid='${oid}'`);
     }
 
+    async search(dbc, pattern) {
+        let query = [
+            `SELECT _first_name, _last_name FROM _user WHERE _first_name ~* '${pattern}'`
+        ];
+
+        console.log(query)
+        return [];
+    }
+
     async selectByEmail(dbc, email) {
-        let dboEmailAddress = await selectOneDboEmailAddress(dbc, `_addr='${email}'`);
+        let dboEmailAddress = await selectOneDboEmailAddress(dbc, `_addr ~* '${email}'`);
 
         if (dboEmailAddress && dboEmailAddress.ownerType == 'DboUser') {
             let user = await getDboUser(dbc, dboEmailAddress.ownerOid);
@@ -103,14 +112,14 @@ singleton(class Users {
 
         if (firstName) {
             if (lastName) {
-                return await selectDboUser(dbc, `_first_name ilike '${firstName.toLowerCase()}' AND _last_name ilike '${lastName.toLowerCase()}`);
+                return await selectDboUser(dbc, `_first_name ~* '${firstName.toLowerCase()}' AND _last_name ~* '${lastName.toLowerCase()}`);
             }
             else {
-                return await selectDboUser(dbc, `_first_name ilike '${firstName}'`);
+                return await selectDboUser(dbc, `_first_name ~* '${firstName}'`);
             }
         }
         else if (lastName) {
-            return await selectDboUser(dbc, `_last_name ilike '${lastName.toLowerCase()}'`);
+            return await selectDboUser(dbc, `_last_name ~* '${lastName.toLowerCase()}'`);
         }
 
         return selected.map(user => mkUserObject(user));
