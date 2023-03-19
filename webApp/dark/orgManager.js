@@ -111,7 +111,6 @@
                 cols: ['12px', 'minmax(350px, 90%)', 'auto'],
             });
 
-            this.found = [];
             this.orgManager = orgManager;
 
             this.controller = mkActiveData({
@@ -119,7 +118,7 @@
                 showList: false,
             });
 
-            this.bind(this.controller, 'showList', this.updateResult);
+            this.bind(this.controller, 'showList', this.refresh);
             this.setAt(1, 1,mkWidget().setInnerHtml(txx.fwOrgManagerSearch));
 
             this.setAt(3, 1,
@@ -127,7 +126,7 @@
                 .setAttribute('autocomplete', 'off')
                 .bind(this.controller, 'pattern', Binding.valueBinding)
                 .setPanelState('focus', true)
-                .on('Input.Pause', message => this.refreshList())
+                .on('Input.Pause', message => this.refresh())
             );
 
             this.setAt(6, 1, 
@@ -146,77 +145,58 @@
             this.orgSelectMenu = mkWPopupMenu()
             .append(
                 mkWMenuItem(txx.fwOrgManagerSelectorEdit, 'Edit')
-                .setAction(mkFunctionMenuAction(home, (menuItem, message) => this.editOrg(menuItem.getMenu().dboOrg))),
+                .setAction(mkFunctionMenuAction(home, (menuItem, message) => this.editOrg(menuItem.getMenu().getAnchor().getActiveData()))),
                 mkWMenuItem(txx.fwOrgManagerSelectorSwitch, 'Switch')
-                .setAction(mkFunctionMenuAction(home, (menuItem, message) => this.switchOrg(menuItem.getMenu().dboOrg))),
+                .setAction(mkFunctionMenuAction(home, (menuItem, message) => this.switchOrg(menuItem.getMenu().getAnchor().getActiveData()))),
             );
 
-            this.updateResult();
+            this.resultTable = mkWArrayEditor(
+                ['dom.click'],
+
+                [{
+                    property: 'name',
+                    label: txx.fwOrgManagerEditorName,
+                    readonly: true,
+                    menu: this.orgSelectMenu,
+                }],
+            );
+
+            this.refresh();
         }
 
-        buildList() {
-            let table = mkWTable();
-
-            for (let dboOrg of this.found) {
-                table.append(
-                    mkWTableRow()
-                    .append(
-                        mkWTableCell()
-                        .append(mkWHotSpot().setValue(dboOrg.name))
-                        .on('dom.click', message => this.clickOrg(dboOrg, message.event))
-                    )
-                )
-            }
-
-            return table;
+        editOrg(orgInfo) {
+            this.getView().push(new OrgEditor(orgInfo));
         }
 
-        clickOrg(dboOrg, event) {
-            if ('org' in webAppSettings.grants()) {
-                this.orgSelectMenu.dboOrg = dboOrg;
-                this.orgSelectMenu.open(null, event.x, event.y);
-            }
-            else {
-                this.switchOrg(dboOrg);
-            }
-        }
+        async refresh() {
+            this.resultTable.clear();
 
-        editOrg(dboOrg) {
-            this.getView().push(new OrgEditor(dboOrg));
-        }
-
-        async refreshList() {
             if (this.controller.pattern.trim()) {
-                this.found = await queryServer({
+                this.resultTable.push(...await queryServer({
                     messageName: 'OrgSearchOrgs',
                     pattern: this.controller.pattern.trim(),
-                });
+                }));
+            }
+
+            if (this.controller.showList) {
+                this.setAt(8, 1, this.resultTable);
             }
             else {
-                this.found = [];
+                this.setAt(8, 1,
+                    mkWidget().setInnerHtml(`${this.resultTable.length()}&nbsp;&nbsp;${txx.fwOrgManagerFound}`)
+                );
             }
-
-            this.updateResult();
         }
 
-        async switchOrg(dboOrg) {
+        async switchOrg(orgInfo) {
             let org = await queryServer({
                 messageName: 'SelfSetOrg',
-                orgOid: dboOrg.oid,
+                orgOid: orgInfo.oid,
             });
 
             if (typeof org == 'object' || org === null) {
                 webAppSettings.org = () => org;
                 send({ messageName: '#RefreshClient' });
-            }
-        }
-
-        updateResult() {
-            if (this.controller.showList && this.found.length < 20) {
-                this.setAt(8, 1, this.buildList());
-            }
-            else {
-                this.setAt(8, 1, mkWidget().setInnerHtml(`${this.found.length}&nbsp;&nbsp;${txx.fwOrgManagerFound}`));
             }
         }
     }
@@ -256,17 +236,8 @@
                 .setInnerHtml(txx.fwOrgManagerEditTitle),
 
                 (this.orgEditor = mkWObjectEditor())
-                .addDbo(
+                .add(
                     this.dboOrg, {
-                        oid: {
-                            hidden: true,
-                        },
-                        created: {
-                            hidden: true,
-                        },
-                        updated: {
-                            hidden: true,
-                        },
                         name: {
                             label: txx.fwOrgManagerEditorName,
                             readonly: false,

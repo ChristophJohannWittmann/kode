@@ -148,6 +148,11 @@
             return this;
         }
 
+        clearMenu(menu) {
+            menu ? menu.detach(this) : false;
+            return this;
+        }
+
         clearRefreshers(...endpointNames) {
             this.refreshers.clear(...endpointNames);
             return this;
@@ -576,6 +581,11 @@
                 widget: this,
             });
 
+            return this;
+        }
+
+        setMenu(menu) {
+            menu ? menu.attach(this) : false;
             return this;
         }
 

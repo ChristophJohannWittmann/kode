@@ -39,7 +39,8 @@ register(class WInput extends WEditable {
         this.setWidgetStyle('input');
 
         this.on('dom.input', message => {
-            this.valueChanged(message.event.target.value);
+            let docNode = wrapDocNode(message.event.target);
+            this.valueChanged(docNode.getValue());
         });
     }
 

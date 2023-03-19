@@ -66,6 +66,7 @@ register(class WPopupMenu extends Widget {
         super('div');
         this.widgets = {};
         this.setWidgetStyle('popup-menu');
+        this.anchor = null;
 
         this.setStyle({
             display: 'none',
@@ -108,12 +109,18 @@ register(class WPopupMenu extends Widget {
 
     close() {
         if (WPopupMenu.showing.getId() == this.getId()) {
-            this.setStyle('display', 'none')
-            delete this.anchor;
+            this.setStyle('display', 'none');
             WPopupMenu.showing = null;
         }
 
         return this;
+    }
+
+    static hide() {
+        if (WPopupMenu.showing) {
+            WPopupMenu.showing.close();
+            WPopupMenu.showing = null;
+        }
     }
 
     detach(widget) {
@@ -133,6 +140,10 @@ register(class WPopupMenu extends Widget {
         return this;
     }
 
+    getAnchor() {
+        return this.anchor;
+    }
+
     getItem(tag) {
         return this.queryOne(`[menu-item-tag=${tag}]`);
     }
@@ -142,7 +153,7 @@ register(class WPopupMenu extends Widget {
         }
         else {
             if (WPopupMenu.showing) {
-                this.close();
+                WPopupMenu.showing.close();
             }
 
             this.anchor = widget;

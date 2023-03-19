@@ -101,7 +101,7 @@
             });
 
             this.matching.clear();
-            this.matching.append(...userArray);
+            this.matching.push(...userArray);
 
             if (this.matching.length) {
                 this.matching.revealHead();
@@ -144,7 +144,8 @@
             this.append(
                 (
                     this.userEditor = mkWObjectEditor()
-                    .addDbo(this.dboUser, {
+                    .add(this.dboUser, {
+                        /*
                         oid: {
                             readonly: true,
                         },
@@ -160,6 +161,7 @@
                         orgOid: {
                             hidden: true,
                         },
+                        */
                         title: {
                             label: txx.fwUserEditorUserTitle,
                         },

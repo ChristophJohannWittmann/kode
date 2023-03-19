@@ -23,28 +23,32 @@
 
 
 /*****
+ * The WArrayEditor is the array analog to WObjectEditor for objects.  This class
+ * creates a table of rows, each of which presents for a single object.  Hence,
+ * the WArrayEditor contains an array objects, that are displayed and perhaps
+ * manipulated or edited in place.  Liek the WObjectEditor, each displayed cell
+ * is an encapsulating WScalar object.  Each cell of the table may have its own
+ * specified pop mneu associated with it.  The WArrayEditor provides management
+ * methods to change the set of objects currently being displayed and edited.
 *****/
 register(class WArrayEditor extends WEditor {
     static properties = {
+        className: false,
         property: true,
         label: true,
+        menu: false,
         readonly: false,
+        type: false,
         width: false,
     };
 
     constructor(messages, columns) {
         super();
-        this.table = mkWTable();
-        super.append(this.table);
         this.columns = [];
         this.messages = messages;
         this.objects = mkActiveData([]);
         this.proxy = mkMessageProxy(this);
-
-        this.table.appendHead(
-            (this.head = mkWTableHead())
-            .conceal()
-        );
+        this.append(this.table = mkWTable());
 
         if (Array.isArray(columns)) {
             for (let column of columns) {
@@ -72,21 +76,12 @@ register(class WArrayEditor extends WEditor {
 
         for (let column of this.columns) {
             if (column.label) {
-                this.head.append(mkWTableHeadCell().setInnerHtml(column.label));
+                this.table.getHead().append(mkWTableHeadCell().setInnerHtml(column.label));
             }
             else {
-                this.head.append(mkWTableHeadCell().setInnerHtml(column.property));
+                this.table.getHead().append(mkWTableHeadCell().setInnerHtml(column.property));
             }
         }
-    }
-
-    append(...objects) {
-        for (let object of objects) {
-            this.objects.push(object);
-            this.table.append(this.mkRow(this.objects.length - 1));
-        }
-
-        return this;
     }
 
     clear() {
@@ -95,65 +90,103 @@ register(class WArrayEditor extends WEditor {
     }
 
     concealHead() {
-        this.head.conceal();
-    }
-
-    createHead() {
-        return this;
+        this.table.getHead().conceal();
     }
 
     getActiveData() {
         return this.objects;
     }
 
-    /*
-    getObject(index) {
-        return clone(this.objects[index]);
+    getObjectAt(index) {
+        if (index >= 0 && index < this.objects.length) {
+            return this.objects[index];
+        }
     }
-
-    insertAfter(index, ...objects) {
-        return this;
-    }
-
-    insertAfter(index, ...objects) {
-        return this;
-    }
-    */
 
     length() {
         return this.objects.length;
     }
 
-    mkRow(index) {
+    mkRow(activeObject) {
         let tr = mkWTableRow();
-        let object = this.objects[index];
 
         for (let column of this.columns) {
-            if (column.property in object) {
-                tr.append(
-                    mkWTableCell()
-                    .setInnerHtml(object[column.property])
-                );
+            let value = activeObject[column.property];
+
+            if (value !== undefined && value !== null && !column.hidden) {
+                if (typeof value != 'object' || value instanceof Time || value instanceof Date) {
+                    let opts = {};
+                    opts.menu = column.menu;
+                    opts.readonly = column.readonly === true;
+                    opts.type = column.type ? column.type : WScalar.selectType(value);
+
+                    tr.append(
+                        mkWTableCell()
+                        .append(
+                            mkWScalar(activeObject, column.property, opts)
+                            .setMenu(opts.menu)
+                            .setClassName(column.className)
+                        )
+                    );
+
+                    continue;
+                }
             }
-            else {
-                tr.append(mkWTableCell());
-            }
+
+            tr.append(mkWTableCell());
         }
 
         return tr;
     }
 
-    /*
-    prepend(...objects) {
+    pop() {
+        if (this.objects.length) {
+            this.objects.pop();
+            this.childAt(this.objects.length).remove();
+        }
+
         return this;
     }
 
-    removeObject(index) {
+    push(...objects) {
+        for (let object of objects) {
+            let activeObject = mkActiveData(object);
+            this.objects.push(activeObject);
+            this.table.getBody().append(this.mkRow(activeObject));
+        }
+
         return this;
     }
-    */
+
+    removeObjectAt(index) {
+        if (index >= 0 && index < this.objects.length) {
+            this.objects.splice(index, 1);
+            this.childAt(index).remove();
+        }
+
+        return this;
+    }
 
     revealHead() {
-        this.head.reveal();
+        this.table.getHead().reveal();
+    }
+
+    shift() {
+        if (this.objects.length) {
+            this.objects.shift();
+            this.childAt(0).remove();
+        }
+
+        return this;
+    }
+
+    unshift(...objects) {
+        for (let object of objects) {
+            let activeObject = mkActiveData(object);
+            this.objects.unshift(activeObject);
+            this.table.getBody().prepend(this.mkRow(activeObject));
+        }
+
+        return this;
     }
 });

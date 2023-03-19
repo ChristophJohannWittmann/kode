@@ -164,6 +164,8 @@
 register(class WScalar extends Widget {
     constructor(activeData, key, opts) {
         super('div');
+        this.activeKey = key;
+        this.activeData = activeData;
         this.viewer = opts.type.mkViewer(opts).bind(activeData, key, Binding.valueBinding);
         this.editor = opts.type.mkEditor(opts).bind(activeData, key, Binding.valueBinding);
         opts.readonly ? this.setReadOnly() : this.setReadWrite();
@@ -188,6 +190,14 @@ register(class WScalar extends Widget {
     focus() {
         this.editor.focus();
         return this;
+    }
+
+    getActiveData() {
+        return this.activeData;
+    }
+
+    getActiveKey() {
+        return this.activeKey;
     }
 
     isReadonly() {

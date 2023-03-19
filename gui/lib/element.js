@@ -778,12 +778,18 @@
         }
 
         setClassName(className) {
-            this.node.classList.add(className);
+            if (className) {
+                this.node.classList.add(className);
+            }
+
             return this;
         }
 
         setClassNames(classNames) {
-            this.node.className = classNames;
+            if (classNames) {
+                this.node.className = classNames;
+            }
+
             return this;
         }
 

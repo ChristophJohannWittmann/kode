@@ -31,53 +31,22 @@
 register(class WTable extends Widget {
     constructor(widgetStyle) {
         super('table');
-        super.append(mkWTableBody());
+        this.append((this.head = mkWTableHead()).conceal());
+        this.append(this.body = mkWTableBody());
         this.setWidgetStyle(widgetStyle ? widgetStyle : 'table-basic');
     }
 
-    append(...args) {
-        this.getBody().append(...args);
-        return this;
-    }
-
-    appendHead(thead) {
-        super.append(thead);
-        return this;
-    }
-
     getBody() {
-        for (let child of this) {
-            if (child.tagName() == 'tbody') {
-                return child;
-            }
-        }
+        return this.body;
     }
 
     getHead() {
-        for (let child of this) {
-            if (child.tagName() == 'thead') {
-                return child;
-            }
-        }
-    }
-
-    hasHead() {
-        return this.getHead() != null;
-    }
-
-    prepend(...args) {
-        this.getBody().prepend(...args);
-        return this;
-    }
-
-    prependHead(thead) {
-        super.prepend(thead);
-        return this;
+        return this.head;
     }
 
     setWidgetStyle(widgetStyle) {
         super.setWidgetStyle(widgetStyle);
-        let stack = [this.getBody()];
+        let stack = [this.body];
 
         while (stack.length) {
             let node = stack.pop();
@@ -96,7 +65,7 @@ register(class WTable extends Widget {
         }
 
         if (this.getHead()) {
-            let stack = [this.getHead()];
+            let stack = [this.head];
 
             while (stack.length) {
                 let node = stack.pop();

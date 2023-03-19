@@ -171,8 +171,10 @@
             webSocket = null;
         }
 
+        WPopupMenu.hide();
         stack.clear();
         stack.push(mkFWSignInView());
+        
         window.home = null;
         webAppSettings.veryify = () => false;
         webAppSettings.password = () => false;

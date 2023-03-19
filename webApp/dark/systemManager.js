@@ -138,7 +138,7 @@
                 .bind(this.editor.getActiveData(), 'privateKey', (mi, value) => value == '[NONE]' ? mi.disable() : mi.enable())
             );
 
-            this.editor.addObj(this.iface, {
+            this.editor.add(this.iface, {
                 address: {
                     label: txx.fwNetAddress,
                     readonly: false,

@@ -38,102 +38,29 @@ register(class WObjectEditor extends WEditor {
         this.table = mkWTable();
         this.append(this.table);
         this.fields = mkActiveData();
-        this.readonly = readonly ? readonly : false;
     }
 
-    addDbo(dbo, options) {
-        for (let property in dbo) {
-            if (!property.startsWith('#')) {
-                let value = dbo[property];
+    add(obj, options) {
+        for (let property in options) {
+            let opts = Object.assign(new Object(), options[property]);
 
-                if (typeof value != 'object' || value instanceof Time || value instanceof Date) {
-                    let readonly = this.readonly;
-
-                    if (options && options[property]) {
-                        let opts = options[property];
-
-                        if (!opts.hidden) {
-                            this.fields[property] = value;
-
-                            if ('readonly' in opts) {
-                                readonly = readonly || opts.readonly;
-                            }
-
-                            opts.type = opts.type ? opts.type : WScalar.selectType(this.fields[property]);
-
-                            this.table.append(
-                                mkWTableRow().append(
-                                    mkWTableCell()
-                                    .setInnerHtml(opts.label ? opts.label : property),
-                                    mkWTableCell()
-                                    .setPanelState('focus', opts.focus)
-                                    .append(mkWScalar(this.fields, property, opts))
-                                )
-                            )
-                        }
-                    }
-                    else {
-                        this.fields[property] = value;
-                        let readonly = this.readonly;;
-                        let opts = { readonly: this.readonly, type: WScalar.selectType(this.fields[property]) };
-
-                        this.table.append(
-                            mkWTableRow().append(
-                                mkWTableCell()
-                                .setInnerHtml(property),
-                                mkWTableCell()
-                                .append(mkWScalar(this.fields, property, opts))
-                            )
-                        )
-                    }
-                }
-            }
-        }
-
-        return this;
-    }
-
-    addObj(obj, options) {
-        for (let property in obj) {
-            if (!property.startsWith('#')) {
+            if (property in obj) {
                 let value = obj[property];
 
                 if (typeof value != 'object' || value instanceof Time || value instanceof Date) {
-                    let readonly = this.readonly;
-
-                    if (options && options[property]) {
-                        let opts = options[property];
-
-                        if (!opts.hidden) {
-                            this.fields[property] = value;
-
-                            if ('readonly' in opts) {
-                                readonly = readonly || opts.readonly;
-                            }
-
-                            opts.type = opts.type ? opts.type : WScalar.selectType(this.fields[property]);
-
-                            this.table.append(
-                                mkWTableRow().append(
-                                    mkWTableCell()
-                                    .setInnerHtml(opts.label ? opts.label : property),
-                                    mkWTableCell()
-                                    .setPanelState('focus', opts.focus)
-                                    .append(mkWScalar(this.fields, property, opts))
-                                )
-                            )
-                        }
-                    }
-                    else {
+                    if (!opts.hidden) {
                         this.fields[property] = value;
-                        let opts = { readonly: this.readonly, type: WScalar.selectType(this.fields[property]) };
+                        opts.readonly = opts.readonly === true;
+                        opts.type = opts.type ? opts.type : WScalar.selectType(value);
 
                         this.table.append(
                             mkWTableRow().append(
                                 mkWTableCell()
-                                .setInnerHtml(property),
+                                .setInnerHtml(opts.label ? opts.label : property),
                                 mkWTableCell()
+                                .setPanelState('focus', opts.focus)
                                 .append(mkWScalar(this.fields, property, opts))
+                                .setMenu(opts.menu)
                             )
                         )
                     }
