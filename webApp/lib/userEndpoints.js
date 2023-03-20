@@ -69,10 +69,16 @@ register(class UserEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('UserSearch', 'user') ](trx) {
+        let session = await Ipc.queryPrimary({
+            messageName: '#SessionManagerGetSession',
+            session: trx['#Session'],
+        });
+
         if (trx.criterion == 'email') {
             return await Users.selectByEmail(
                 await trx.connect(),
-                trx.email
+                trx.email,
+                session.user.orgOid,
             );
         }
         else if (trx.criterion == 'name') {
@@ -80,19 +86,15 @@ register(class UserEndpoints extends EndpointContainer {
                 await trx.connect(),
                 trx.firstName,
                 trx.lastName,
+                session.user.orgOid,
             );
         }
         else if (trx.criterion == 'search') {
-            /*
             return await Users.search(
                 await trx.connect(),
                 trx.pattern,
+                session.user.orgOid,
             );
-            */
-            return [
-                { oid: 0, firstName: 'Tommy', lastName: 'Bahama', email: 'tb@bahama.com' },
-                { oid: 0, firstName: 'David', lastName: 'Sinclair', email: 'sinclair@harvard.edu' },
-            ];
         }
         else {
             return [];

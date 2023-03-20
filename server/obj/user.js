@@ -84,17 +84,22 @@ singleton(class Users {
         return await selectOneDboEmailAddress(dbc, `_owner_type='DboUser' AND _owner_oid='${oid}'`);
     }
 
-    async search(dbc, pattern) {
-        let query = [
-            `SELECT _first_name, _last_name FROM _user WHERE _first_name ~* '${pattern}'`
-        ];
+    async search(dbc, pattern, orgOid) {
+        let sql = `
+        SELECT u._first_name, u._last_name, e._addr
+        FROM _user u
+        JOIN _email_address e
+        ON u._email_oid = e._oid
+        WHERE u._org_oid = ${orgOid}
+        AND (u._first_name ~* '${pattern}'
+        OR u._last_name ~* '${pattern}'
+        OR e._addr ~* '${pattern}')`;
 
-        console.log(query)
-        return [];
+        return (await dbc.query(sql)).data;
     }
 
-    async selectByEmail(dbc, email) {
-        let dboEmailAddress = await selectOneDboEmailAddress(dbc, `_addr ~* '${email}'`);
+    async selectByEmail(dbc, email, orgOid) {
+        let dboEmailAddress = await selectOneDboEmailAddress(dbc, `_addr ~* '${email}' AND _org_oid = ${orgOid}`);
 
         if (dboEmailAddress && dboEmailAddress.ownerType == 'DboUser') {
             let user = await getDboUser(dbc, dboEmailAddress.ownerOid);
@@ -107,19 +112,19 @@ singleton(class Users {
         return null;
     }
 
-    async selectByName(dbc, firstName, lastName) {
+    async selectByName(dbc, firstName, lastName, orgOid) {
         let selected = [];
 
         if (firstName) {
             if (lastName) {
-                return await selectDboUser(dbc, `_first_name ~* '${firstName.toLowerCase()}' AND _last_name ~* '${lastName.toLowerCase()}`);
+                return await selectDboUser(dbc, `_first_name ~* '${firstName.toLowerCase()}' AND _last_name ~* '${lastName.toLowerCase()} AND _org_oid = ${orgOid}`);
             }
             else {
-                return await selectDboUser(dbc, `_first_name ~* '${firstName}'`);
+                return await selectDboUser(dbc, `_first_name ~* '${firstName}' AND _org_oid = ${orgOid}`);
             }
         }
         else if (lastName) {
-            return await selectDboUser(dbc, `_last_name ~* '${lastName.toLowerCase()}'`);
+            return await selectDboUser(dbc, `_last_name ~* '${lastName.toLowerCase()}' AND _org_oid = ${orgOid}`);
         }
 
         return selected.map(user => mkUserObject(user));

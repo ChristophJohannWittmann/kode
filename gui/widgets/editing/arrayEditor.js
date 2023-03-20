@@ -34,6 +34,7 @@
 register(class WArrayEditor extends WEditor {
     static properties = {
         className: false,
+        disabled: false,
         property: true,
         label: true,
         menu: false,
@@ -48,7 +49,11 @@ register(class WArrayEditor extends WEditor {
         this.messages = messages;
         this.objects = mkActiveData([]);
         this.proxy = mkMessageProxy(this);
-        this.append(this.table = mkWTable());
+
+        this.append(
+            (this.table = mkWTable())
+            .setStyle('border-collapse', 'collapse')
+        );
 
         if (Array.isArray(columns)) {
             for (let column of columns) {
@@ -118,6 +123,7 @@ register(class WArrayEditor extends WEditor {
                     let opts = {};
                     opts.menu = column.menu;
                     opts.readonly = column.readonly === true;
+                    opts.disabled = column.disabled === true;
                     opts.type = column.type ? column.type : WScalar.selectType(value);
 
                     tr.append(

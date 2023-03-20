@@ -81,72 +81,72 @@
     });
 
     define('ScalarColor', {
-        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
         mkEditor: opts => mkIColor().setWidgetStyle('scalar'),
     });
 
     define('ScalarDate', {
-        mkViewer: opts => opts.menu ? mkWHotSpot(dateStr) : mkWColdSpot(dateStr),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot(dateStr) : mkWColdSpot(dateStr),
         mkEditor: opts => mkIDate().setWidgetStyle('scalar'),
     });
 
     define('ScalarDateTime', {
-        mkViewer: opts => opts.menu ? mkWHotSpot(dateTimeStr) : mkWColdSpot(dateTimeStr),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot(dateTimeStr) : mkWColdSpot(dateTimeStr),
         mkEditor: opts => mkIDateTime().setWidgetStyle('scalar'),
     });
 
     define('ScalarEmail', {
-        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
         mkEditor: opts => mkIEmail().setWidgetStyle('scalar'),
     });
 
     define('ScalarEnum', {
-        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
         mkEditor: opts => mkWSelect().setWidgetStyle('scalarselect').setOptions(opts.choices),
     });
 
     define('ScalarHost', {
-        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
         mkEditor: opts => mkIHost().setWidgetStyle('scalar'),
     });
 
     define('ScalarIp', {
-        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
         mkEditor: opts => mkIIp().setWidgetStyle('scalar'),
     });
 
     define('ScalarMonth', {
-        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
         mkEditor: opts => mkIMonth().setWidgetStyle('scalar'),
     });
 
     define('ScalarNumber', {
-        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
         mkEditor: opts => mkINumber().setWidgetStyle('scalar'),
     });
 
     define('ScalarTel', {
-        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
         mkEditor: opts => mkITel().setWidgetStyle('scalar'),
     });
 
     define('ScalarText', {
-        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
         mkEditor: opts => mkIText().setWidgetStyle('scalar'),
     });
 
     define('ScalarTime', {
-        mkViewer: opts => opts.menu ? mkWHotSpot(timeStr) : mkWColdSpot(timeStr),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot(timeStr) : mkWColdSpot(timeStr),
         mkEditor: opts => mkITime().setWidgetStyle('scalar'),
     });
 
     define('ScalarUrl', {
-        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
         mkEditor: opts => mkIUrl().setWidgetStyle('scalar'),
     });
 
     define('ScalarWeek', {
-        mkViewer: opts => opts.menu ? mkWHotSpot() : mkWColdSpot(),
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
         mkEditor: opts => mkIWeek().setWidgetStyle('scalar'),
     });
 })();

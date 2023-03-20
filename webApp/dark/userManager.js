@@ -76,16 +76,16 @@
                 .setAt(3, 1,
                     mkIDynamic(500)
                     .setPanelState('focus', true)
-                    .bind(this.controller, 'pattern', Binding.valueBinding)
+                    .bind(this.controller, 'searchPattern', Binding.valueBinding)
                     .on('Input.Pause', message => this.refreshList())
                 )
                 .setAt(5, 1,
                     (this.matching = mkWArrayEditor(
                         ['dom.click'],
                         [
-                            { property: 'firstName', label: txx.fwUserEditorFirstName, readonly: true },
-                            { property: 'lastName', label: txx.fwUserEditorLastName, readonly: true },
-                            { property: 'email', label: txx.fwUserEditorEmail, readonly: true },
+                            { property: '_first_name', label: txx.fwUserEditorFirstName, readonly: true },
+                            { property: '_last_name', label: txx.fwUserEditorLastName, readonly: true },
+                            { property: '_addr', label: txx.fwUserEditorEmail, readonly: true },
                         ]
                     ))
                     .on('dom.click', message => console.log(message))
@@ -94,16 +94,21 @@
         }
 
         async refreshList() {
-            let userArray = await queryServer({
-                messageName: 'UserSearch',
-                criterion: 'search',
-                pattern: this.controller.searchPattern
-            });
+            if (this.controller.searchPattern.trim()) {
+                var userArray = await queryServer({
+                    messageName: 'UserSearch',
+                    criterion: 'search',
+                    pattern: this.controller.searchPattern.trim(),
+                });
+            }
+            else {
+                var userArray = [];
+            }
 
             this.matching.clear();
             this.matching.push(...userArray);
 
-            if (this.matching.length) {
+            if (userArray.length) {
                 this.matching.revealHead();
             }
             else {
@@ -145,23 +150,6 @@
                 (
                     this.userEditor = mkWObjectEditor()
                     .add(this.dboUser, {
-                        /*
-                        oid: {
-                            readonly: true,
-                        },
-                        created: {
-                            hidden: true,
-                        },
-                        updated: {
-                            hidden: true,
-                        },
-                        emailOid: {
-                            hidden: true,
-                        },
-                        orgOid: {
-                            hidden: true,
-                        },
-                        */
                         title: {
                             label: txx.fwUserEditorUserTitle,
                         },

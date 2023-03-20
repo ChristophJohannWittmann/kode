@@ -51,6 +51,7 @@ register(class WObjectEditor extends WEditor {
                     if (!opts.hidden) {
                         this.fields[property] = value;
                         opts.readonly = opts.readonly === true;
+                        opts.disabled = opts.disabled === true;
                         opts.type = opts.type ? opts.type : WScalar.selectType(value);
 
                         this.table.append(
