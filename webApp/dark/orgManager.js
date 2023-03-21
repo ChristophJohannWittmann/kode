@@ -140,9 +140,9 @@
             this.orgSelectMenu = mkWPopupMenu()
             .append(
                 mkWMenuItem(txx.fwOrgManagerSelectorEdit, 'Edit')
-                .setAction(mkFunctionMenuAction(home, (menuItem, message) => this.editOrg(menuItem.getMenu().getAnchor().getActiveData()))),
+                .setAction(mkFunctionMenuAction((menuItem, message) => this.editOrg(menuItem.getMenu().getAnchor().getActiveData()))),
                 mkWMenuItem(txx.fwOrgManagerSelectorSwitch, 'Switch')
-                .setAction(mkFunctionMenuAction(home, (menuItem, message) => this.switchOrg(menuItem.getMenu().getAnchor().getActiveData()))),
+                .setAction(mkFunctionMenuAction((menuItem, message) => this.switchOrg(menuItem.getMenu().getAnchor().getActiveData()))),
             );
 
             this.resultTable = mkWArrayEditor(

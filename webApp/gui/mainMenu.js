@@ -38,38 +38,38 @@ register(class MainMenu extends WPopupMenu {
             if (webAppSettings.user().orgOid == 0) {
                 this.append(
                     mkWMenuItem(txx.fwMenuOrgs, "Orgs")
-                    .setAction(mkSingletonViewMenuAction(home, mkOrgManager))
+                    .setAction(mkSingletonViewMenuAction(mkOrgManager))
                 );
             }
 
             this.append(
                 mkWMenuItem(txx.fwMenuPassword, "Password")
-                    .setAction(mkSingletonViewMenuAction(home, mkPasswordManager))
+                    .setAction(mkSingletonViewMenuAction(mkPasswordManager))
             );
 
             this.append(
                 mkWMenuItem(txx.fwMenuPreferences, "Preferences")
-                    .setAction(mkSingletonViewMenuAction(home, mkPreferencesManager))
+                    .setAction(mkSingletonViewMenuAction(mkPreferencesManager))
             );
 
             if ('system' in grants) {
                 this.append(
                     mkWMenuItem(txx.fwMenuSystem, "System")
-                    .setAction(mkSingletonViewMenuAction(home, mkSystemManager))
+                    .setAction(mkSingletonViewMenuAction(mkSystemManager))
                 );
             }
 
             if ('template' in grants) {
                 this.append(
                     mkWMenuItem(txx.fwMenuTemplate, "Templates")
-                    .setAction(mkSingletonViewMenuAction(home, mkTemplateManager))
+                    .setAction(mkSingletonViewMenuAction(mkTemplateManager))
                 );
             }
 
             if ('user' in grants) {
                 this.append(
                     mkWMenuItem(txx.fwMenuUsers, "Users")
-                    .setAction(mkSingletonViewMenuAction(home, mkUserManager))
+                    .setAction(mkSingletonViewMenuAction(mkUserManager))
                 );
             }
 
@@ -80,7 +80,7 @@ register(class MainMenu extends WPopupMenu {
             this.append(
                 mkWMenuItem(txx.fwMenuSignOut, "SignOut")
                 .setAction(
-                    mkFunctionMenuAction(home, async (menuItem, message) => {
+                    mkFunctionMenuAction(async (menuItem, message) => {
                         await queryServer({ messageName: 'SelfSignOut' });
                         signOut();
                     })

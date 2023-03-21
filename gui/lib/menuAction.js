@@ -31,13 +31,50 @@
  * make the user-requested action happen.
 *****/
 register(class MenuAction {
-    constructor(view) {
-        this.view = view;
+    constructor() {
+        this.view = null;
         this.menuItem = null;
+        this.popHandler = null;
+    }
+
+    clearView() {
+        if (this.view) {
+            this.view.off('View.Pop', this.popHandler);
+            this.view = null;
+            this.popHandler = null;
+        }
+
+        return this;
+    }
+
+    getView() {
+        return this.view;
+    }
+
+    hasView() {
+        return this.view !== null;
     }
 
     async onClick(menuItem, message) {
         this.menuItem = menuItem;
+        this.setView(menuItem.getView());
+    }
+
+    async onPop(message) {
+    }
+
+    setView(view) {
+        if (!Object.is(view, this.view)) {
+            if (this.view) {
+                this.clearView();
+            }
+
+            this.view = view;
+            this.popHandler = message => this.onPop(message);
+            this.view.on('View.Pop', this.popHandler);
+        }
+
+        return this;
     }
 });
 
@@ -49,8 +86,8 @@ register(class MenuAction {
  * provided function.
 *****/
 register(class FunctionMenuAction extends MenuAction {
-    constructor(view, func) {
-        super(view);
+    constructor(func) {
+        super();
         this.func = func;
     }
 
@@ -69,23 +106,22 @@ register(class FunctionMenuAction extends MenuAction {
  * as the menu item is available.
 *****/
 register(class FixedViewMenuAction extends MenuAction {
-    constructor(view, widget) {
-        super(view);
+    constructor(widget) {
+        super();
         this.widget = widget;
     }
 
     async onClick(menuItem, message) {
         await super.onClick(menuItem, message);
 
-        if (this.widget.parent()) {
-            this.view.promote(this.widget);
+        if (this.view) {
+            if (this.widget.parent()) {
+                this.view.promote(this.widget);
+            }
+            else {
+                this.view.push(this.widget);
+            }
         }
-        else {
-            this.view.push(this.widget);
-        }
-    }
-
-    async onPop(message) {
     }
 });
 
@@ -98,24 +134,25 @@ register(class FixedViewMenuAction extends MenuAction {
  * the top of the view stack.  When the panel is closed, it's instance if freed.
 *****/
 register(class SingletonViewMenuAction extends MenuAction {
-    constructor(view, maker, ...args) {
-        super(view);
+    constructor(maker, ...args) {
+        super();
         this.maker = maker;
         this.args = args;
         this.widget = null;
-        this.view.on('View.Pop', message => this.onPop(message));
     }
 
     async onClick(menuItem, message) {
         await super.onClick(menuItem, message);
 
-        if (this.widget) {
-            this.view.promote(this.widget);
-        }
-        else {
-            this.widget = await waitOn(this.maker(...this.args));
-            this.view.push(this.widget);
-            this.menuItem.setOpen();
+        if (this.view) {
+            if (this.widget) {
+                this.view.promote(this.widget);
+            }
+            else {
+                this.widget = await waitOn(this.maker(...this.args));
+                this.view.push(this.widget);
+                this.menuItem.setOpen();
+            }
         }
     }
 
@@ -130,20 +167,18 @@ register(class SingletonViewMenuAction extends MenuAction {
 
 /*****
  * Similar in nature to the singleton action, this version allows only a single
- * instanceo of a panel on a view.  The big difference is that menuItem itself
+ * instance of a panel on a view.  The big difference is that menuItem itself
  * is disabled as long as the panel is still on the stack.  Hence, this version
- * provides no mechanism for moving an existing panel to the surface of a view.
- * This may be useful where there's a dependency between a panel and something
- * else higher up on the stack.
+ * provides no mechanism for promoting an existing panel to the top. This may be
+ * useful where there's a dependency between a panel and something else higher
+ * up on the stack.
 *****/
 register(class ToggleViewMenuAction extends MenuAction {
-    constructor(view, maker, ...args) {
+    constructor(maker, ...args) {
         super(view);
         this.maker = maker;
         this.args = args;
         this.widget = null;
-        this.menuItem = null;
-        this.view.on('View.Pop', message => this.onPop(message));
     }
 
     async onClick(menuItem, message) {

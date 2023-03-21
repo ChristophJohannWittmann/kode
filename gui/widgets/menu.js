@@ -67,6 +67,7 @@ register(class WPopupMenu extends Widget {
         this.widgets = {};
         this.setWidgetStyle('popup-menu');
         this.anchor = null;
+        this.mostRecentWidget = null;
 
         this.setStyle({
             display: 'none',
@@ -93,6 +94,7 @@ register(class WPopupMenu extends Widget {
                 this.widgets[widget.getId()] = widgetEntry;
 
                 widgetEntry.handler = message => {
+                    this.mostRecentWidget = widget;
                     let ev = message.event.rawEvent();
                     this.open(widget, ev.x, ev.y);
                 };
@@ -146,6 +148,14 @@ register(class WPopupMenu extends Widget {
 
     getItem(tag) {
         return this.queryOne(`[menu-item-tag=${tag}]`);
+    }
+
+    getView() {
+        if (this.mostRecentWidget) {
+            return this.mostRecentWidget.getView();
+        }
+
+        return null;
     }
 
     open(widget, x, y) {
@@ -274,6 +284,14 @@ register(class WMenuItem extends Widget {
 
     getPermanent() {
         return this.permanent;
+    }
+
+    getView() {
+        if (this.getMenu()) {
+            return this.getMenu().getView();
+        }
+
+        return null;
     }
 
     onEnter(message) {
