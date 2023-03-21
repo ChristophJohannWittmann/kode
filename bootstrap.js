@@ -467,6 +467,11 @@ async function developmentHook() {
     let dbc = await dbConnect();
 
     /*
+    let user = await Users.get(dbc, 1n);
+    await user.setGrant(dbc, { permission: 'template' });
+    */
+
+    /*
     let link = await mkLink(dbc, {
         reason: 'test',
         limit: 4,

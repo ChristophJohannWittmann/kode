@@ -25,8 +25,8 @@
 /*****
 *****/
 register(class SvgWidget extends Widget {
-    constructor() {
-        super('div');
+    constructor(tagName) {
+        super(tagName ? tagName : 'div');
         this.append(mkSvgElement('svg'));
     }
 });

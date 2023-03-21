@@ -76,6 +76,34 @@ singleton(class Users {
         return false;
     }
 
+    async createUser(dbc, userData) {
+        if (!userData.email.trim()) {
+            return { ok: false, feedback: 'fwUserEditorNoEmail' };
+        }
+
+        if (!userData.firstName.trim() || !userData.lastName.trim()) {
+            return { ok: false, feedback: 'fwUserEditorNoName' };
+        }
+
+        let user = mkDboUser(userData);
+        let email = await EmailAddresses.ensureFromAddr(dbc, userData.email);
+
+        if (email.ownerOid > 0n) {
+            return { ok: false, feedback: 'fwUserEditorEmailInUse' };
+        }
+
+        user.emailOid = email.oid;
+        await user.save(dbc);
+
+        if (user.oid > 0n) {
+            email.ownerType = 'DboUser';
+            email.ownerOid = user.oid;
+            await email.save(dbc);
+        }
+
+        return { ok: true, userOid: user.oid };
+    }
+
     async get(dbc, oid) {
         return mkUserObject(await getDboUser(dbc, oid));
     }
@@ -84,18 +112,37 @@ singleton(class Users {
         return await selectOneDboEmailAddress(dbc, `_owner_type='DboUser' AND _owner_oid='${oid}'`);
     }
 
-    async search(dbc, pattern, orgOid) {
-        let sql = `
-        SELECT u._first_name, u._last_name, e._addr
-        FROM _user u
-        JOIN _email_address e
-        ON u._email_oid = e._oid
-        WHERE u._org_oid = ${orgOid}
-        AND (u._first_name ~* '${pattern}'
-        OR u._last_name ~* '${pattern}'
-        OR e._addr ~* '${pattern}')`;
+    async getUserData(dbc, oid) {
+        let dboUser = await getDboUser(dbc, oid);
 
-        return (await dbc.query(sql)).data;
+        if (dboUser) {
+            let userData = Object.assign(new Object(), dboUser);
+            let emailAddr = await getDboEmailAddress(dbc, userData.emailOid);
+            userData.email = emailAddr.addr;
+            userData.emailOid = emailAddr.oid;
+            userData.phones = await selectDboPhone(dbc, `_owner_type='DboUser' AND _owner_oid=${userData.oid}`);
+            userData.addresses = await selectDboAddress(dbc, `_owner_type='DboUser' AND _owner_oid=${userData.oid}`);
+            userData.altEmails = await selectDboEmailAddress(dbc, `_owner_type='DboUser' AND _owner_oid=${userData.oid} AND _oid <> ${userData.emailOid}`);
+            return userData;
+        }
+
+        return null;
+    }
+
+    async modifyUser(dbc, userData) {
+    }
+
+    async search(dbc, pattern, orgOid) {
+        return (await dbc.query(`
+            SELECT u._oid AS "oid", u._first_name AS "firstName", u._last_name AS "lastName", e._addr as "email"
+            FROM _user u
+            JOIN _email_address e
+            ON u._email_oid = e._oid
+            WHERE u._org_oid = ${orgOid}
+            AND (u._first_name ~* '${pattern}'
+            OR u._last_name ~* '${pattern}'
+            OR e._addr ~* '${pattern}')
+        `)).data;
     }
 
     async selectByEmail(dbc, email, orgOid) {

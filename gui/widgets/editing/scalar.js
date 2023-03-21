@@ -168,23 +168,27 @@ register(class WScalar extends Widget {
         this.activeData = activeData;
         this.viewer = opts.type.mkViewer(opts).bind(activeData, key, Binding.valueBinding);
         this.editor = opts.type.mkEditor(opts).bind(activeData, key, Binding.valueBinding);
+        this.append(this.viewer, this.editor);
         opts.readonly ? this.setReadOnly() : this.setReadWrite();
 
         if (opts.menu instanceof WPopupMenu) {
             opts.menu.attach(this, 'dom.click');
         }
 
-        mkMessageProxy(this)
-        .route(this.viewer, 'dom.click')
-        .route(this.editor, 'dom.click')
-        .route(this.editor, 'Widget.Changed')
-        .route(this.editor, 'Widget.Modified')
-        .route(this.editor, 'Widget.Validity');
+        for (let messageName of ['dom.click', 'Widget.Change', 'Widget.Modified', 'Widget.Validity']) {
+            this.editor.on(messageName, message => this.bubble(message));
+            this.viewer.on(messageName, message => this.bubble(message));
+        }
     }
 
     blur() {
         this.editor.blur();
         return this;
+    }
+
+    bubble(message) {
+        message.htmlElement = this;
+        this.send(message);
     }
 
     focus() {
@@ -233,14 +237,14 @@ register(class WScalar extends Widget {
     }
 
     setReadOnly() {
-        this.clear();
-        this.append(this.viewer);
+        this.editor.conceal();
+        this.viewer.reveal();
         return this;
     }
 
     setReadWrite() {
-        this.clear();
-        this.append(this.editor);
+        this.viewer.conceal();
+        this.editor.reveal();
         return this;
     }
 });

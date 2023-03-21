@@ -82,7 +82,20 @@ register(class ICheckbox extends WInput {
 
     setValue(bool) {
         this.node.checked = bool;
+        super.setValue(bool);
         return this;
+    }
+
+    subclassCheckValidity() {
+        return true;
+    }
+
+    subclassGetValue() {
+        return this.node.checked;
+    }
+
+    subclassSetValue(value) {
+        this.node.checked = value;
     }
 });
 
@@ -176,7 +189,20 @@ register(class IRadio extends WInput {
 
     setValue(bool) {
         this.node.checked = bool;
+        super.setValue(bool);
         return this;
+    }
+
+    subclassCheckValidity() {
+        return true;
+    }
+
+    subclassGetValue() {
+        return this.node.checked;
+    }
+
+    subclassSetValue(value) {
+        this.node.checked = value;
     }
 });
 

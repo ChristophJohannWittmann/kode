@@ -35,21 +35,6 @@
                 searchPattern: '',
             });
 
-            this.refresh();
-        }
-
-        createUser() {
-            let dboUser = mkDboUser({
-                status: 'active',
-                authType: 'simple',
-            });
-
-            this.getView().push(new UserEditor(dboUser));
-        }
-
-        async refresh() {
-            this.clear();
-
             this.append(
                 mkWidget('h3')
                 .setInnerHtml(txx.fwUserManagerTitle),
@@ -61,7 +46,9 @@
                 .setAt(1, 1,
                     mkIButton()
                     .setValue(txx.fwUserManagerCreateUser)
-                    .on('dom.click', message => this.createUser())
+                    .on('dom.click', message => {
+                        this.getView().push(new UserEditor(this, 0n));
+                    })
                 ),
 
                 mkWGrid({
@@ -81,14 +68,29 @@
                 )
                 .setAt(5, 1,
                     (this.matching = mkWArrayEditor(
-                        ['dom.click'],
-                        [
-                            { property: '_first_name', label: txx.fwUserEditorFirstName, readonly: true },
-                            { property: '_last_name', label: txx.fwUserEditorLastName, readonly: true },
-                            { property: '_addr', label: txx.fwUserEditorEmail, readonly: true },
-                        ]
+                        {
+                            property: 'firstName',
+                            label: txx.fwUserEditorFirstName,
+                            readonly: true,
+                            messages: ['dom.click'],
+                        },
+                        {
+                            property: 'lastName',
+                            label: txx.fwUserEditorLastName,
+                            readonly: true,
+                            messages: ['dom.click'],
+                        },
+                        {
+                            property: 'email',
+                            label: txx.fwUserEditorEmail,
+                            readonly: true,
+                            messages: ['dom.click'],
+                        },
                     ))
-                    .on('dom.click', message => console.log(message))
+                    .on('dom.click', message => {
+                        let userOid = message.htmlElement.getPinned('data').oid;
+                        this.getView().push(new UserEditor(this, userOid));
+                    })
                 )
             );
         }
@@ -121,9 +123,10 @@
     /*****
     *****/
     class UserEditor extends WPanel {
-        constructor(dboUser) {
+        constructor(userManager, userOid) {
             super('form');
-            this.dboUser = dboUser;
+            this.userOid = userOid;
+            this.userManager = userManager;
             this.setFlag('transient');
             this.setAttribute('autocomplete', 'off');
             this.setRefreshers('UserModifyUser');
@@ -131,15 +134,44 @@
         }
 
         async refresh() {
-            this.clear();
+            if (this.userOid > 0n) {
+                var userData = await queryServer({ messageName: 'UserGetUserData', oid: this.userOid });
 
-            if (this.dboUser.oid > 0n) {
-                let user = await queryServer({ messageName: 'UserGetUser', userOid: this.userOrg.oid });
-
-                if (user.updated > this.dboUser.updated) {
-                    this.dboUser = user;
+                if (this.userEditor) {
+                    if (userData && userData.updated.isLE(this.userEditor.getField('updated'))) {
+                        return;
+                    }
                 }
             }
+            else {
+                if (this.userEditor) {
+                    return;
+                }
+                else {
+                    var userData = new Object({
+                        oid: 0n,
+                        created: mkTime(),
+                        updated: mkTime(),
+                        email: '',
+                        emailOid: 0n,
+                        title: '',
+                        firstName: '',
+                        lastName: '',
+                        suffix: '',
+                        status: 'active',
+                        authType: 'simple',
+                        verified: false,
+                        password: false,
+                        failures: 0,
+                        phones: [],
+                        addresses: [],
+                        altEmails: [],
+                    });
+                }
+            }
+
+            this.ignore();
+            this.clear();
 
             this.append(
                 mkWidget('h3')
@@ -147,54 +179,86 @@
             );
 
             this.append(
-                (
-                    this.userEditor = mkWObjectEditor()
-                    .add(this.dboUser, {
-                        title: {
-                            label: txx.fwUserEditorUserTitle,
-                        },
-                        firstName: {
-                            label: txx.fwUserEditorFirstName,
-                            focus: true,
-                        },
-                        lastName: {
-                            label: txx.fwUserEditorLastName,
-                        },
-                        suffix: {
-                            label: txx.fwUserEditorSuffix,
-                        },
-                        status: {
-                            label: txx.fwUserEditorStatus,
-                            type: ScalarEnum,
-                            choices: [
-                                { value: 'active', text: txx.fwUserEditorStatusActive },
-                                { value: 'inactive', text: txx.fwUserEditorStatusInactive },
-                            ],
-                        },
-                        authType: {
-                            readonly: true,
-                            label: txx.fwUserEditorAuthorizationType,
-                        },
-                        verified: {
-                            readonly: true,
-                            label: txx.fwUserEditorVerified,
-                        },
-                        password: {
-                            readonly: true,
-                            label: txx.fwUserEditorPassword,
-                        },
-                        failures: {
-                            readonly: true,
-                            label: txx.fwUserEditorSignInFailures,
-                        },
-                    })
-                )
+                (this.userEditor = mkWObjectEditor())
+                .add(userData, {
+                    email: {
+                        label: txx.fwUserEditorEmail,
+                        type: ScalarEmail,
+                        focus: true,
+                    },
+                    title: {
+                        label: txx.fwUserEditorUserTitle,
+                    },
+                    firstName: {
+                        label: txx.fwUserEditorFirstName,
+                    },
+                    lastName: {
+                        label: txx.fwUserEditorLastName,
+                    },
+                    suffix: {
+                        label: txx.fwUserEditorSuffix,
+                    },
+                    status: {
+                        label: txx.fwUserEditorStatus,
+                        type: ScalarEnum,
+                        choices: [
+                            { value: 'active', text: txx.fwUserEditorStatusActive },
+                            { value: 'inactive', text: txx.fwUserEditorStatusInactive },
+                        ],
+                    },
+                    authType: {
+                        readonly: true,
+                        label: txx.fwUserEditorAuthorizationType,
+                        type: ScalarEnum,
+                        choices: [
+                            { value: 'simple', text: 'simple' }
+                        ]
+                    },
+                    verified: {
+                        readonly: true,
+                        label: txx.fwUserEditorVerified,
+                        type: ScalarBool,
+                    },
+                    password: {
+                        readonly: true,
+                        label: txx.fwUserEditorPassword,
+                        type: ScalarBool,
+                    },
+                    failures: {
+                        readonly: true,
+                        label: txx.fwUserEditorSignInFailures,
+                        type: ScalarNumber,
+                    },
+                })
             )
 
+            this.listen();
             super.refresh();
         }
 
         async save() {
+            let userData = this.userEditor.getValues();
+
+            if (userData.oid == 0n) {
+                let result = await queryServer({
+                    messageName: 'UserCreateUser',
+                    userData: userData,
+                });
+
+                if (!result.ok) {
+                    await mkWAlertDialog({ text: txx[result.feedback] });
+                    return;
+                }
+            }
+            else {
+                await queryServer({
+                    messageName: 'UserModifyUser',
+                    userData: userData,
+                });
+            }
+
+            this.userManager.refreshList();
+            this.getView().pop();
         }
     }
 })();

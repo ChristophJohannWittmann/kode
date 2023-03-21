@@ -43,29 +43,36 @@ register(class WObjectEditor extends WEditor {
     add(obj, options) {
         for (let property in options) {
             let opts = Object.assign(new Object(), options[property]);
+            let value = '';
 
             if (property in obj) {
-                let value = obj[property];
-
-                if (typeof value != 'object' || value instanceof Time || value instanceof Date) {
-                    if (!opts.hidden) {
-                        this.fields[property] = value;
-                        opts.readonly = opts.readonly === true;
-                        opts.disabled = opts.disabled === true;
-                        opts.type = opts.type ? opts.type : WScalar.selectType(value);
-
-                        this.table.append(
-                            mkWTableRow().append(
-                                mkWTableCell()
-                                .setInnerHtml(opts.label ? opts.label : property),
-                                mkWTableCell()
-                                .setPanelState('focus', opts.focus)
-                                .append(mkWScalar(this.fields, property, opts))
-                                .setMenu(opts.menu)
-                            )
-                        )
-                    }
+                if (typeof obj[property] != 'object' || obj[property] instanceof Time || obj[property] instanceof Date) {
+                    value = obj[property];
                 }
+            }
+
+            if (!opts.hidden) {
+                this.fields[property] = value;
+                opts.readonly = opts.readonly === true;
+                opts.disabled = opts.disabled === true;
+                opts.type = opts.type ? opts.type : WScalar.selectType(value);
+
+                this.table.append(
+                    mkWTableRow().append(
+                        mkWTableCell()
+                        .setInnerHtml(opts.label ? opts.label : property),
+                        mkWTableCell()
+                        .setPanelState('focus', opts.focus)
+                        .append(mkWScalar(this.fields, property, opts))
+                        .setMenu(opts.menu)
+                    )
+                )
+            }
+        }
+
+        for (let property in obj) {
+            if (!(property in options)) {
+                this.fields[property] = obj[property];
             }
         }
 

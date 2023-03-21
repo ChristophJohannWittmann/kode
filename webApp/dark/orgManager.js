@@ -38,11 +38,6 @@
         constructor() {
             super('div');
             this.setRefreshers('OrgCreateOrg', 'OrgModifyOrg');
-            this.refresh();
-        }
-
-        async refresh() {
-            this.clear();
 
             this.append(
                 mkWidget('h3')
@@ -53,7 +48,7 @@
                 this.append(new OrgCreator(this));
             }
 
-            this.append(new OrgSelector(this));
+            this.append((this.orgSelector = new OrgSelector(this)));
         }
     });
 
@@ -89,7 +84,7 @@
                 authType: 'simple',
             });
 
-            this.getView().push(new OrgEditor(dboOrg));
+            this.getView().push(new OrgEditor(this.orgManager, dboOrg));
         }
     }
 
@@ -151,21 +146,19 @@
             );
 
             this.resultTable = mkWArrayEditor(
-                ['dom.click'],
-
-                [{
+                {
                     property: 'name',
                     label: txx.fwOrgManagerEditorName,
                     readonly: true,
                     menu: this.orgSelectMenu,
-                }],
+                },
             );
 
             this.refresh();
         }
 
         editOrg(orgInfo) {
-            this.getView().push(new OrgEditor(orgInfo));
+            this.getView().push(new OrgEditor(this.orgManager, orgInfo));
         }
 
         async refresh() {
@@ -211,9 +204,10 @@
      * properties of the organization.
     *****/
     class OrgEditor extends WPanel {
-        constructor(dboOrg) {
+        constructor(orgManager, dboOrg) {
             super('form');
             this.dboOrg = dboOrg;
+            this.orgManager = orgManager;
             this.setFlag('transient');
             this.setRefreshers('OrgCreateOrg', 'OrgModifyOrg');
             this.refresh();
@@ -281,6 +275,9 @@
                     dboOrg: mkDboOrg(this.orgEditor.getValues()),
                 });
             }
+
+            this.orgManager.orgSelector.refresh();
+            this.getView().pop();
         }
     }
 })();

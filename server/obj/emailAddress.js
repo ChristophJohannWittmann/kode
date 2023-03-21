@@ -46,9 +46,6 @@ singleton(class EmailAddresses {
             await emailAddress.save(dbc);
         }
 
-        emailAddress.ownerType = 'DboUser';
-        emailAddress.ownerOid = 2n;
-
         return this.pin(dbc, emailAddress);
     }
 

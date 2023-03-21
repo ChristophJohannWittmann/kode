@@ -85,6 +85,7 @@ register(class WDialog extends WOverlay {
 register(class WAlertDialog extends WDialog {
     constructor(opts) {
         (opts.content = mkWTable())
+        .getBody()
         .append(
             mkWTableRow().append(
                 mkWTableCell()
@@ -101,8 +102,8 @@ register(class WAlertDialog extends WDialog {
                     .on('dom.click', message => this.hide())
                 )
             )
-        )
-        .setWidgetStyle('dialog-table');
+        );
+        opts.content.setWidgetStyle('dialog-table');
 
         super(opts);
         return this.promise;
@@ -126,6 +127,7 @@ register(class WAlertDialog extends WDialog {
 register(class WConfirmDialog extends WDialog {
     constructor(opts) {
         (opts.content = mkWTable())
+        .getBody()
         .append(
             mkWTableRow().append(
                 mkWTableCell()
@@ -148,8 +150,8 @@ register(class WConfirmDialog extends WDialog {
                     .on('dom.click', message => this.hide(false))
                 )
             )
-        )
-        .setWidgetStyle('dialog-table');
+        );
+        opts.content.setWidgetStyle('dialog-table');
 
         super(opts);
         return this.promise;

@@ -149,8 +149,8 @@
             return this;
         }
 
-        clearPin(name) {
-            delete this.pins[name];
+        clearPinned(name) {
+            delete this.pinned[name];
             return this;
         }
 
@@ -194,8 +194,8 @@
             return name in this.flags ? this.flags[name] : false;
         }
 
-        getPin(name) {
-            return this.pins[name];
+        getPinned(name) {
+            return this.pinned[name];
         }
 
         getTextContent() {
@@ -210,8 +210,8 @@
             return name in this.flags;
         }
 
-        hasPin(name) {
-            return name in this.pins;
+        hasPinned(name) {
+            return name in this.pinned;
         }
 
         insertAfter(...args) {
@@ -397,8 +397,8 @@
             return this;
         }
 
-        setPin(name, value) {
-            this.pins[name] = value;
+        setPinned(name, value) {
+            this.pinned[name] = value;
             return this;
         }
 

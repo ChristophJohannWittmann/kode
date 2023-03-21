@@ -47,17 +47,22 @@ register(class MainMenu extends WPopupMenu {
                     .setAction(mkSingletonViewMenuAction(home, mkPasswordManager))
             );
 
-            /*
             this.append(
                 mkWMenuItem(txx.fwMenuPreferences, "Preferences")
                     .setAction(mkSingletonViewMenuAction(home, mkPreferencesManager))
             );
-            */
 
             if ('system' in grants) {
                 this.append(
                     mkWMenuItem(txx.fwMenuSystem, "System")
                     .setAction(mkSingletonViewMenuAction(home, mkSystemManager))
+                );
+            }
+
+            if ('template' in grants) {
+                this.append(
+                    mkWMenuItem(txx.fwMenuTemplate, "Templates")
+                    .setAction(mkSingletonViewMenuAction(home, mkTemplateManager))
                 );
             }
 

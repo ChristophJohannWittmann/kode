@@ -24,9 +24,13 @@
 
 /*****
 *****/
-register(class PreferencesManager extends Widget {
+register(class PreferencesManager extends WPanel {
     constructor() {
-        super('h1');
-        this.setInnerHtml('FWPreferencesView').on('dom.click', message => console.log(message));
+        super('div');
+
+        this.append(
+            mkWidget('h3')
+            .setInnerHtml(txx.fwPreferencesTitle)
+        );
     }
 });

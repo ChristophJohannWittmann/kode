@@ -31,168 +31,180 @@
  * specified pop mneu associated with it.  The WArrayEditor provides management
  * methods to change the set of objects currently being displayed and edited.
 *****/
-register(class WArrayEditor extends WEditor {
-    static properties = {
-        className: false,
-        disabled: false,
-        property: true,
-        label: true,
-        menu: false,
-        readonly: false,
-        type: false,
-        width: false,
-    };
+(() => {
+    register(class WArrayEditor extends WEditor {
+        static properties = {
+            className: false,
+            disabled: false,
+            property: true,
+            label: true,
+            menu: false,
+            messages: false,
+            readonly: false,
+            type: false,
+            width: false,
+        };
 
-    constructor(messages, columns) {
-        super();
-        this.columns = [];
-        this.messages = messages;
-        this.objects = mkActiveData([]);
-        this.proxy = mkMessageProxy(this);
+        constructor(...columns) {
+            super();
+            this.columns = [];
+            this.objects = mkActiveData([]);
+            this.proxy = mkMessageProxy(this);
 
-        this.append(
-            (this.table = mkWTable())
-            .setStyle('border-collapse', 'collapse')
-        );
+            this.append(
+                (this.table = mkWTable())
+                .setStyle('border-collapse', 'collapse')
+            );
 
-        if (Array.isArray(columns)) {
-            for (let column of columns) {
-                if (typeof column == 'object') {
-                    for (let key in column) {
-                        if (!(key in WArrayEditor.properties)) {
-                            throw new Error(`WArrayEditor column definition contains unknwon property: "${key}"`);
+            if (Array.isArray(columns)) {
+                for (let column of columns) {
+                    if (typeof column == 'object') {
+                        for (let key in column) {
+                            if (!(key in WArrayEditor.properties)) {
+                                throw new Error(`WArrayEditor column definition contains unknwon property: "${key}"`);
+                            }
                         }
-                    }
 
-                    for (let key in WArrayEditor.properties) {
-                        if (WArrayEditor.properties[key] && !(key in column)) {
-                            throw new Error(`WArrayEditor column definition missing required property: "${key}"`);
+                        for (let key in WArrayEditor.properties) {
+                            if (WArrayEditor.properties[key] && !(key in column)) {
+                                throw new Error(`WArrayEditor column definition missing required property: "${key}"`);
+                            }
                         }
-                    }
 
-                    this.columns.push(column);
+                        this.columns.push(column);
+                    }
+                    else {
+                        throw new Error(`WArrayEditor column definition NOT of type "object".`);
+                    }
+                }
+            }
+
+
+            for (let column of this.columns) {
+                if (column.label) {
+                    this.table.getHead().append(mkWTableHeadCell().setInnerHtml(column.label));
                 }
                 else {
-                    throw new Error(`WArrayEditor column definition NOT of type "object".`);
+                    this.table.getHead().append(mkWTableHeadCell().setInnerHtml(column.property));
                 }
             }
         }
 
+        clear() {
+            this.table.getBody().clear();
+            ActiveData.clear(this.objects);
+        }
 
-        for (let column of this.columns) {
-            if (column.label) {
-                this.table.getHead().append(mkWTableHeadCell().setInnerHtml(column.label));
-            }
-            else {
-                this.table.getHead().append(mkWTableHeadCell().setInnerHtml(column.property));
+        concealHead() {
+            this.table.getHead().conceal();
+        }
+
+        getActiveData() {
+            return this.objects;
+        }
+
+        getObjectAt(index) {
+            if (index >= 0 && index < this.objects.length) {
+                return this.objects[index];
             }
         }
-    }
 
-    clear() {
-        this.table.getBody().clear();
-        ActiveData.clear(this.objects);
-    }
-
-    concealHead() {
-        this.table.getHead().conceal();
-    }
-
-    getActiveData() {
-        return this.objects;
-    }
-
-    getObjectAt(index) {
-        if (index >= 0 && index < this.objects.length) {
-            return this.objects[index];
+        length() {
+            return this.objects.length;
         }
-    }
 
-    length() {
-        return this.objects.length;
-    }
+        mkRow(activeObject) {
+            let tr = mkWTableRow();
 
-    mkRow(activeObject) {
-        let tr = mkWTableRow();
+            for (let column of this.columns) {
+                let value = activeObject[column.property];
 
-        for (let column of this.columns) {
-            let value = activeObject[column.property];
+                if (value !== undefined && value !== null && !column.hidden) {
+                    if (typeof value != 'object' || value instanceof Time || value instanceof Date) {
+                        let scalar;
+                        let opts = {};
+                        opts.menu = column.menu;
+                        opts.readonly = column.readonly === true;
+                        opts.disabled = column.disabled === true;
+                        opts.type = column.type ? column.type : WScalar.selectType(value);
 
-            if (value !== undefined && value !== null && !column.hidden) {
-                if (typeof value != 'object' || value instanceof Time || value instanceof Date) {
-                    let opts = {};
-                    opts.menu = column.menu;
-                    opts.readonly = column.readonly === true;
-                    opts.disabled = column.disabled === true;
-                    opts.type = column.type ? column.type : WScalar.selectType(value);
+                        tr.append(
+                            mkWTableCell()
+                            .append(
+                                (scalar = mkWScalar(activeObject, column.property, opts))
+                                .setMenu(opts.menu)
+                                .setClassName(column.className)
+                            )
+                        );
 
-                    tr.append(
-                        mkWTableCell()
-                        .append(
-                            mkWScalar(activeObject, column.property, opts)
-                            .setMenu(opts.menu)
-                            .setClassName(column.className)
-                        )
-                    );
+                        scalar.setPinned('data', activeObject);
+                        scalar.setPinned('column', column);
 
-                    continue;
+                        if (Array.isArray(column.messages)) {
+                            for (let messageName of column.messages) {
+                                this.proxy.route(scalar, messageName);
+                            }
+                        }
+
+                        continue;
+                    }
                 }
+
+                tr.append(mkWTableCell());
             }
 
-            tr.append(mkWTableCell());
+            return tr;
         }
 
-        return tr;
-    }
+        pop() {
+            if (this.objects.length) {
+                this.objects.pop();
+                this.childAt(this.objects.length).remove();
+            }
 
-    pop() {
-        if (this.objects.length) {
-            this.objects.pop();
-            this.childAt(this.objects.length).remove();
+            return this;
         }
 
-        return this;
-    }
+        push(...objects) {
+            for (let object of objects) {
+                let activeObject = mkActiveData(object);
+                this.objects.push(activeObject);
+                this.table.getBody().append(this.mkRow(activeObject));
+            }
 
-    push(...objects) {
-        for (let object of objects) {
-            let activeObject = mkActiveData(object);
-            this.objects.push(activeObject);
-            this.table.getBody().append(this.mkRow(activeObject));
+            return this;
         }
 
-        return this;
-    }
+        removeObjectAt(index) {
+            if (index >= 0 && index < this.objects.length) {
+                this.objects.splice(index, 1);
+                this.childAt(index).remove();
+            }
 
-    removeObjectAt(index) {
-        if (index >= 0 && index < this.objects.length) {
-            this.objects.splice(index, 1);
-            this.childAt(index).remove();
+            return this;
         }
 
-        return this;
-    }
-
-    revealHead() {
-        this.table.getHead().reveal();
-    }
-
-    shift() {
-        if (this.objects.length) {
-            this.objects.shift();
-            this.childAt(0).remove();
+        revealHead() {
+            this.table.getHead().reveal();
         }
 
-        return this;
-    }
+        shift() {
+            if (this.objects.length) {
+                this.objects.shift();
+                this.childAt(0).remove();
+            }
 
-    unshift(...objects) {
-        for (let object of objects) {
-            let activeObject = mkActiveData(object);
-            this.objects.unshift(activeObject);
-            this.table.getBody().prepend(this.mkRow(activeObject));
+            return this;
         }
 
-        return this;
-    }
-});
+        unshift(...objects) {
+            for (let object of objects) {
+                let activeObject = mkActiveData(object);
+                this.objects.unshift(activeObject);
+                this.table.getBody().prepend(this.mkRow(activeObject));
+            }
+
+            return this;
+        }
+    });
+})();

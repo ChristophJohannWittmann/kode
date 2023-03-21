@@ -100,6 +100,9 @@ exports = module.exports = {
     fwMenuSystem: {
         en: `System`,
     },
+    fwMenuTemplate: {
+        en: `Template`,
+    },
     fwMenuUsers: {
         en: `Users`,
     },
@@ -232,6 +235,20 @@ exports = module.exports = {
     },
 
     // ****************************************************************
+    // Preferences
+    // ****************************************************************
+    fwPreferencesTitle: {
+        en: `Preferences`,
+    },
+
+    // ****************************************************************
+    // Template
+    // ****************************************************************
+    fwTemplateTitle: {
+        en: `Templates`,
+    },
+
+    // ****************************************************************
     // User
     // ****************************************************************
     fwUserEditorAuthorizationType: {
@@ -243,11 +260,20 @@ exports = module.exports = {
     fwUserEditorVerified: {
         en: `Email Verified`,
     },
+    fwUserEditorEmailInUse: {
+        en: `The provided email address is already assigned to another account.`,
+    },
     fwUserEditorFirstName: {
         en: `First Name`,
     },
     fwUserEditorLastName: {
         en: `Last Name`,
+    },
+    fwUserEditorNoEmail: {
+        en: `You need to provide a valid email address to proceed.`,
+    },
+    fwUserEditorNoName: {
+        en: `You need to provide a first and last name to proceed.`,
     },
     fwUserEditorPassword: {
         en: `Password Valid`,

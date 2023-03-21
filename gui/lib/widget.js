@@ -490,7 +490,7 @@
                 }
             }
             else if (opts.type == 'pin') {
-                while (parent && parent.getPin[opts.name] !== opts.value) {
+                while (parent && parent.getPinned([opts.name]) !== opts.value) {
                     parent = parent.parent();
                 }
             }
@@ -519,7 +519,7 @@
                     }
                 }
                 else if (opts.type == 'pin') {
-                    if (descendant.getPin(opts.name) === opts.value) {
+                    if (descendant.getPinned(opts.name) === opts.value) {
                         hits.push(descendant);
                     }
                 }

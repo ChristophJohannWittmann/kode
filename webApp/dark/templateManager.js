@@ -1,4 +1,4 @@
-/*****
+    /*****
  * Copyright (c) 2017-2023 Kode Programming
  * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
@@ -22,11 +22,17 @@
 *****/
 
 
-/*****
-*****/
-register(class MathWidget extends Widget {
-    constructor(tagName) {
-        super(tagName ? tagName : 'div');
-        this.append(mkMathElement('math'));
-    }
-});
+(() => {
+    /*****
+    *****/
+    register(class TemplateManager extends WPanel {
+        constructor() {
+            super('div');
+
+            this.append(
+                mkWidget('h3')
+                .setInnerHtml(txx.fwTemplateTitle)
+            );
+        }
+    });
+})();

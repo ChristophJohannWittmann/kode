@@ -64,23 +64,21 @@ register(class WTable extends Widget {
             }
         }
 
-        if (this.getHead()) {
-            let stack = [this.head];
+        stack = [this.head];
 
-            while (stack.length) {
-                let node = stack.pop();
+        while (stack.length) {
+            let node = stack.pop();
 
-                if (node instanceof WTableHead) {
-                    node.setWidgetStyle(`${widgetStyle}-thead`);
-                    node.children().forEach(child => stack.push(child));
-                }
-                else if (node instanceof WTableRow) {
-                    node.setWidgetStyle(`${widgetStyle}-thead-tr`);
-                    node.children().forEach(child => stack.push(child));
-                }
-                else if (node instanceof WTableCell) {
-                    node.setWidgetStyle(`${widgetStyle}-th`);
-                }
+            if (node instanceof WTableHead) {
+                node.setWidgetStyle(`${widgetStyle}-thead`);
+                node.children().forEach(child => stack.push(child));
+            }
+            else if (node instanceof WTableRow) {
+                node.setWidgetStyle(`${widgetStyle}-thead-tr`);
+                node.children().forEach(child => stack.push(child));
+            }
+            else if (node instanceof WTableCell) {
+                node.setWidgetStyle(`${widgetStyle}-th`);
             }
         }
 

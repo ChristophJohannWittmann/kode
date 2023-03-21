@@ -39,12 +39,23 @@ register(class UserEndpoints extends EndpointContainer {
     }
 
     async [ mkEndpoint('UserCreateUser', 'user', { notify: true }) ](trx) {
+        let session = await Ipc.queryPrimary({
+            messageName: '#SessionManagerGetSession',
+            session: trx['#Session'],
+        });
+
+        trx.userData.orgOid = session.orgOid;
+        return await Users.createUser(await trx.connect(), trx.userData);
     }
 
     async [ mkEndpoint('UserGetEmail', 'user', { notify: true }) ](trx) {
     }
 
     async [ mkEndpoint('UserGetUser', 'user', { notify: true }) ](trx) {
+    }
+
+    async [ mkEndpoint('UserGetUserData', 'user', { notify: true }) ](trx) {
+        return Users.getUserData(await trx.connect(), trx.oid);
     }
 
     async [ mkEndpoint('UserModifyAddress', 'user', { notify: true }) ](trx) {
@@ -57,6 +68,9 @@ register(class UserEndpoints extends EndpointContainer {
     }
 
     async [ mkEndpoint('UserModifyUser', 'user', { notify: true }) ](trx) {
+        console.log('UserModifyUser');
+        return false;
+        return await Users.modifyUser(await trx.connect(), trx.userData);
     }
 
     async [ mkEndpoint('UserRemoveAddress', 'user', { notify: true }) ](trx) {
