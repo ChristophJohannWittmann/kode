@@ -34,6 +34,7 @@
 (() => {
     register(class WArrayEditor extends WEditor {
         static properties = {
+            choices: false,
             className: false,
             disabled: false,
             property: true,
@@ -127,6 +128,7 @@
                         opts.readonly = column.readonly === true;
                         opts.disabled = column.disabled === true;
                         opts.type = column.type ? column.type : WScalar.selectType(value);
+                        opts.choices = column.choices ? column.choices : [];
 
                         tr.append(
                             mkWTableCell()
@@ -195,6 +197,10 @@
             }
 
             return this;
+        }
+
+        [Symbol.iterator]() {
+            return this.objects[Symbol.iterator]();
         }
 
         unshift(...objects) {

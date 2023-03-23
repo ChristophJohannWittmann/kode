@@ -37,27 +37,30 @@ register(class WTextArea extends WEditable {
         this.setWidgetStyle('textarea');
         this.tabSize = 4;
         this.maxSize = 20000;
-        this.setEntryFilter(entryFilter);
+        this.setEntryFilter(entryFilter ? entryFilter : mkEssayEntryFilter());
 
         doc.on('dom.keydown', message => {
-            if (this.entryFilter) {
-                this.entryFilter.handle(event, this);
+            let widget = wrapDocNode(doc.activeElement());
+
+            if (widget instanceof Widget && widget.getId() == this.getId()) {
+                if (this.entryFilter) {
+                    this.entryFilter.handle(event, this);
+                }
             }
         });
 
         doc.on('dom.keyup', message => {
-            if (this.entryFilter) {
-                this.entryFilter.handle(event, this);
+            let widget = wrapDocNode(doc.activeElement());
+
+            if (widget instanceof Widget && widget.getId() == this.getId()) {
+                if (this.entryFilter) {
+                    this.entryFilter.handle(event, this);
+                }
             }
         });
 
         this.on('dom.input', message => {
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'value',
-                widget: this,
-                value: message.event.target.value,
-            });
+            this.valueChanged(this.getValue());            
         });
     }
 
@@ -68,6 +71,12 @@ register(class WTextArea extends WEditable {
 
     clearSelection() {
         this.node.selectionEnd = this.node.selectionStart;
+        return this;
+    }
+
+    deleteAt(index, count) {
+        console.log(index);
+        console.log(count);
         return this;
     }
 
@@ -99,7 +108,7 @@ register(class WTextArea extends WEditable {
 
     getRows(index) {
         let rows = [0];
-        let content = this.get();
+        let content = this.getValue();
 
         for (let i = 0; i < content.length; i++) {
             if (content[i] == '\n') {
@@ -120,13 +129,6 @@ register(class WTextArea extends WEditable {
         else {
             return null;
         }
-    }
-
-    getTabOut(char) {
-        let col = this.getCaretPosition().col;
-        let count = col % this.tabSize;
-        char = char ? char : ' ';
-        return fillWithChar(this.tabSize - count, char);
     }
 
     getTabSize() {
@@ -245,7 +247,7 @@ register(class WTextArea extends WEditable {
         return this.node.value;
     }
 
-    subClassSetValue(text) {
+    subclassSetValue(text) {
         this.silence();
         let scrubbed = text.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
         this.node.value = scrubbed;

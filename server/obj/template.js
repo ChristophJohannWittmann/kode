@@ -23,20 +23,16 @@
 
 
 /*****
- * The Orgs object is a helper to provide functions for scanning, searching, and
- * manipulating org objects.  Commonly used algorithms are implemented here and
- * should be used throughout the server-side framework code.
 *****/
-singleton(class Orgs {
-    async list(dbc, name, status) {
+singleton(class Templates {
+    async getTemplate(dbc, oid) {
+    }
+
+    async list(dbc, name) {
         let filter = [];
 
         if (name !== undefined) {
             filter.push(`_name='${name}'`)
-        }
-
-        if (status !== undefined) {
-            filter.push(`_status='${status}'`)
         }
 
         if (filter.length == 0) {
@@ -46,8 +42,48 @@ singleton(class Orgs {
         return await selectDboOrg(dbc, filter.join(' AND '), '_name ASC limit 20');
     }
 
-    async search(dbc, pattern) {
-        pattern = pattern.indexOf('*') >= 0 ? '' : pattern.trim();
-        return await selectDboOrg(dbc, `_name ~* '${pattern}'`, '_name ASC limit 20');
+    async search(dbc, orgOid, pattern) {
+        /*
+        return [
+            mkTemplateObject({
+                oid: 3n,
+                orgOid: 2n,
+                ownerType: 'DboOrg',
+                ownerOid: 2n,
+                name: 'User Verify',
+                parts: [
+                    { name: 'body', mime: 'text/html', b64: 'PGh0bWw+CiAgICA8aGVhZD4KICAgIDwvaGVhZD4KICAgIDxib2R5PgogICAgICAgIDxoMT5QbGVhc2UgVmVyaWZ5IFlvdXJzZWxmPC9oMT4KICAgIDwvYm9keT8KPC9odG1sPg==' },
+                    { name: 'subject', mime: 'text/plain', b64: `PGh0bWw+CiAgICA8aGVhZD4KICAgIDwvaGVhZD4KICAgIDxib2R5PgogICAgICAgIDxoMT5QbGVhc2UgVmVyaWZ5IFlvdXJzZWxmPC9oMT4KICAgIDwvYm9keT8KPC9odG1sPg==` },
+                ]
+            })
+        ];
+        */
+
+        let matches = (await selectDboTemplate(dbc, `_name ~* '${pattern}' AND _org_oid=${orgOid}`, '_name ASC limit 20'))
+        .map(dboTemplate => mkTemplateObject(dboTemplate));
+
+        console.log(matches);
+        return matches;
+    }
+});
+
+
+/*****
+*****/
+register(class TemplateObject extends DboTemplate {
+    constructor(properties) {
+        super(properties);
+    }
+
+    getName() {
+        return this.name;
+    }
+
+    getPartNames() {
+        return Object.keys(this.parts);
+    }
+
+    [Symbol.iterator]() {
+
     }
 });

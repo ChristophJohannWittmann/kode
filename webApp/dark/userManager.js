@@ -24,6 +24,12 @@
 
 (() => {
     /*****
+     * There are two primary panels for managing users: (1) UserManager and (2)
+     * UserEditor.  The UserManager searches for users based on provided keyboard
+     * input and provides links to open individual users in the UserEditor.  The
+     * UserManager also provides a button for creating a new user.  The layout of
+     * this panel has three sections: (a) create user button, (2) dynamic search
+     * input, and (3) table of search results.
     *****/
     register(class UserManager extends WPanel {
         constructor() {
@@ -121,6 +127,14 @@
 
 
     /*****
+     * There are two primary panels for managing users: (1) UserManager and (2)
+     * UserEditor.  The UserEditor is the core panel used for entering user
+     * properties, modifying user properties, and for saving those properties.
+     * The UserEditor is a transient panel, meaning that once yoiu change the
+     * stack via a push, pop, or promote, it will go away and leave any remaining
+     * work undone.  The UserEditor is most an arrayngement of WObjectEditors and
+     * WArrayEditors providing access to the user record and other additional
+     * supporting DBMS records.
     *****/
     class UserEditor extends WPanel {
         constructor(userManager, userOid) {
@@ -175,10 +189,8 @@
 
             this.append(
                 mkWidget('h3')
-                .setInnerHtml(txx.fwUserEditorTitle)
-            );
+                .setInnerHtml(txx.fwUserEditorTitle),
 
-            this.append(
                 (this.userEditor = mkWObjectEditor())
                 .add(userData, {
                     email: {
@@ -229,8 +241,8 @@
                         label: txx.fwUserEditorSignInFailures,
                         type: ScalarNumber,
                     },
-                })
-            )
+                }),
+            );
 
             this.listen();
             super.refresh();

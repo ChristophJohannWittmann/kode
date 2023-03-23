@@ -50,22 +50,8 @@ register(class EntryFilter {
         let handler = this.handlers[key];
 
         if (handler) {
-            Reflect.apply(handler, this, [{
-                    event: event,
-                    widget: widget,
-                }]
-            );
-
-            switch (widget.bindingType) {
-                case 'innerHtml':
-                    widget.valueChanged(widget.get());
-                    break;
-
-                case 'value':
-                    widget.valueChanged(widget.getValue());
-                    break;
-            }
-
+            Reflect.apply(handler, this, [event, wrapDocNode(event.target)]);
+            widget.valueChanged(widget.getValue());
             event.preventDefault();
         }
     }

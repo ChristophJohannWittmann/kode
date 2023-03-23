@@ -101,7 +101,7 @@ exports = module.exports = {
         en: `System`,
     },
     fwMenuTemplate: {
-        en: `Template`,
+        en: `Templates`,
     },
     fwMenuUsers: {
         en: `Users`,
@@ -244,8 +244,38 @@ exports = module.exports = {
     // ****************************************************************
     // Template
     // ****************************************************************
+    fwTemplateEditorCreateSection: {
+        en: `Create Section`,
+    },
+    fwTemplateEditorCreateTemplate: {
+        en: `Create Template`,
+    },
+    fwTemplateEditorName: {
+        en: `Template Name`,
+    },
+    fwTemplateEditorTitle: {
+        en: `Template`,
+    },
+    fwTemplateEditorSectionMime: {
+        en: `Mime`,
+    },
+    fwTemplateEditorSectionName: {
+        en: `Name`,
+    },
+    fwTemplateEditorSectionTypeCss: {
+        en: `Style Sheet`,
+    },
+    fwTemplateEditorSectionTypeHtml: {
+        en: `HTML`,
+    },
+    fwTemplateEditorSectionTypeText: {
+        en: `Text`,
+    },
     fwTemplateTitle: {
         en: `Templates`,
+    },
+    fwTemplateSearch: {
+        en: `Search`,
     },
 
     // ****************************************************************

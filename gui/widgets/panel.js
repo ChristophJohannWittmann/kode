@@ -25,9 +25,8 @@
 /*****
 *****/
 register(class WPanel extends WEditor {
-    constructor() {
-        super('div');
-        this.setFlag('VIEW');
+    constructor(tagName) {
+        super(typeof tagName == 'string' ? tagName : 'div');
     }
 });
 

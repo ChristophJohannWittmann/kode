@@ -269,6 +269,7 @@ mkDbSchema(
             { name: 'content',     type: dbText, size:   0 },
         ],
         indexes: [
+            'name:asc',
             'orgOid:asc',
             'ownerType:asc, ownerOid:asc',
         ]

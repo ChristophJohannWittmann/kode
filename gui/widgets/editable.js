@@ -43,6 +43,7 @@ register(class WEditable extends Widget {
         this.value = '';
         this.valid = true;
         this.modified = false;
+        this.setAttribute('tabindex', 0);
     }
 
     getValue() {

@@ -33,6 +33,7 @@
 register(class MenuAction {
     constructor() {
         this.view = null;
+        this.fixed = false;
         this.menuItem = null;
         this.popHandler = null;
     }
@@ -41,6 +42,7 @@ register(class MenuAction {
         if (this.view) {
             this.view.off('View.Pop', this.popHandler);
             this.view = null;
+            this.fixed = false;
             this.popHandler = null;
         }
 
@@ -57,21 +59,23 @@ register(class MenuAction {
 
     async onClick(menuItem, message) {
         this.menuItem = menuItem;
-        this.setView(menuItem.getView());
+        this.setView(menuItem.getView(), true);
     }
 
     async onPop(message) {
     }
 
-    setView(view) {
-        if (!Object.is(view, this.view)) {
-            if (this.view) {
-                this.clearView();
-            }
+    setView(view, auto) {
+        if (!this.fixed || !auto) {
+            if (!Object.is(view, this.view)) {
+                if (this.view) {
+                    this.clearView();
+                }
 
-            this.view = view;
-            this.popHandler = message => this.onPop(message);
-            this.view.on('View.Pop', this.popHandler);
+                this.view = view;
+                this.popHandler = message => this.onPop(message);
+                this.view.on('View.Pop', this.popHandler);
+            }
         }
 
         return this;

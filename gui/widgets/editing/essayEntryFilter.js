@@ -35,19 +35,29 @@ singleton(class EssayEntryFilter extends EntryFilter {
 
         for (let filterPoint of [
             [ true, '****', 'Enter' ],
+            [ true, '****', 'Escape' ],
             [ true, '****', 'Tab' ],
         ]) {
             this.registerFilterPoint(filterPoint);
         }
     }
 
-    onEnterDown(action) {
-        action.widget.insertAfterCaret('\n');
+    onEnterDown(evt, ta) {
+        ta.insertAfterCaret('\n');
     }
 
-    onTabDown(action) {
-        let index = action.widget.getCaretIndex();
-        let spaces = action.widget.getTabOut(' ');
-        action.widget.insertAfterCaret(spaces);
+    onEscapeDown(evt, ta) {
+        ta.blur();
+    }
+
+    onTabDown(evt, ta) {
+        let col = ta.getCaretPosition().col;
+        let count = col % ta.getTabSize();
+
+        if (evt.shiftKey) {
+        }
+        else {
+            ta.insertAfterCaret(fillWithChar(ta.getTabSize() - count, ' '));
+        }
     }
 });

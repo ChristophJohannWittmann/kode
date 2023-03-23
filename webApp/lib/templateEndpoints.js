@@ -29,15 +29,24 @@ register(class TemplateEndpoints extends EndpointContainer {
         super(webapp);
     }
     
-    async [ mkEndpoint('CreateTemplate', 'template', { notify: true }) ](trx) {
+    async [ mkEndpoint('TemplateCreateTemplate', 'template', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('EraseTemplate', 'template', { notify: true }) ](trx) {
+    async [ mkEndpoint('TemplateEraseTemplate', 'template', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('GetTemplate', 'template') ](trx) {
+    async [ mkEndpoint('TemplateGetTemplate', 'template') ](trx) {
     }
     
-    async [ mkEndpoint('SaveTemplate', 'template', { notify: true }) ](trx) {
+    async [ mkEndpoint('TemplateModifyTemplate', 'template', { notify: true }) ](trx) {
+    }
+    
+    async [ mkEndpoint('TemplateSearchTemplates', 'template', { notify: true }) ](trx) {
+        let session = await Ipc.queryPrimary({
+            messageName: '#SessionManagerGetSession',
+            session: trx['#Session'],
+        });
+
+        return await Templates.search(await trx.connect(), session.orgOid, trx.pattern);
     }
 });

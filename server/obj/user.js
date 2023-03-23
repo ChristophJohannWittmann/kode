@@ -133,6 +133,8 @@ singleton(class Users {
     }
 
     async search(dbc, pattern, orgOid) {
+        pattern = pattern.indexOf('*') >= 0 ? '' : pattern.trim();
+        
         return (await dbc.query(`
             SELECT u._oid AS "oid", u._first_name AS "firstName", u._last_name AS "lastName", e._addr as "email"
             FROM _user u
