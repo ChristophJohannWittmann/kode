@@ -192,9 +192,6 @@ register(class ActiveData {
  
         return activeData[ActiveData.proxyKey];
     }
-
-    static activate(proxy, key) {
-    }
  
     static assign(proxy, arg) {
         if (typeof proxy == 'object' && proxy[ActiveData.nakedKey] !== undefined) {

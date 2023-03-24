@@ -216,10 +216,6 @@ register(class WScalar extends Widget {
         return this.editor.node.checkValidity();
     }
 
-    revert() {
-        console.log('revert');
-    }
-
     static selectType(value) {
         if (typeof value == 'object') {
             if (value instanceof Date || value instanceof Time) {

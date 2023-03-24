@@ -64,6 +64,13 @@ register(class WEditable extends Widget {
             this.subclassSetValue(this.value);
 
             this.send({
+                messageName: 'Widget.Changed',
+                type: 'value',
+                widget: this,
+                value: this.value,
+            });
+
+            this.send({
                 messageName: 'Widget.Modified',
                 widget: this,
                 modified: false,

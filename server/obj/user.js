@@ -134,17 +134,22 @@ singleton(class Users {
 
     async search(dbc, pattern, orgOid) {
         pattern = pattern.indexOf('*') >= 0 ? '' : pattern.trim();
-        
-        return (await dbc.query(`
-            SELECT u._oid AS "oid", u._first_name AS "firstName", u._last_name AS "lastName", e._addr as "email"
-            FROM _user u
-            JOIN _email_address e
-            ON u._email_oid = e._oid
-            WHERE u._org_oid = ${orgOid}
-            AND (u._first_name ~* '${pattern}'
-            OR u._last_name ~* '${pattern}'
-            OR e._addr ~* '${pattern}')
-        `)).data;
+
+        try {
+            return (await dbc.query(`
+                SELECT u._oid AS "oid", u._first_name AS "firstName", u._last_name AS "lastName", e._addr as "email"
+                FROM _user u
+                JOIN _email_address e
+                ON u._email_oid = e._oid
+                WHERE u._org_oid = ${orgOid}
+                AND (u._first_name ~* '${pattern}'
+                OR u._last_name ~* '${pattern}'
+                OR e._addr ~* '${pattern}')
+            `)).data;
+        }
+        catch (e) {
+            return [];
+        }
     }
 
     async selectByEmail(dbc, email, orgOid) {

@@ -47,7 +47,16 @@ singleton(class Orgs {
     }
 
     async search(dbc, pattern) {
-        pattern = pattern.indexOf('*') >= 0 ? '' : pattern.trim();
-        return await selectDboOrg(dbc, `_name ~* '${pattern}'`, '_name ASC limit 20');
+        try {
+            if (pattern.indexOf('*') >= 0) {
+                return await selectDboOrg(dbc, '', '_name ASC limit 20');
+            }
+            else {
+                return await selectDboOrg(dbc, `_name ~* '${pattern}'`, '_name ASC limit 20');
+            }
+        }
+        catch (e) {
+            return [];
+        }
     }
 });

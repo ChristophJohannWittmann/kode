@@ -59,11 +59,19 @@ singleton(class Templates {
         ];
         */
 
-        let matches = (await selectDboTemplate(dbc, `_name ~* '${pattern}' AND _org_oid=${orgOid}`, '_name ASC limit 20'))
-        .map(dboTemplate => mkTemplateObject(dboTemplate));
-
-        console.log(matches);
-        return matches;
+        try {
+            if (pattern.indexOf('*') >= 0) {
+                return (await selectDboTemplate(dbc, `_org_oid=${orgOid}`, '_name ASC limit 20'))
+                .map(dboTemplate => mkTemplateObject(dboTemplate));
+            }
+            else {
+                return (await selectDboTemplate(dbc, `_name ~* '${pattern}' AND _org_oid=${orgOid}`, '_name ASC limit 20'))
+                .map(dboTemplate => mkTemplateObject(dboTemplate));
+            }
+        }
+        catch (e) {
+            return [];
+        }
     }
 });
 

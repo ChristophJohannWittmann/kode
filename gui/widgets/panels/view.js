@@ -61,6 +61,13 @@
 
             this.done[navKey] = true;
             this.cancel[navKey] = true;
+            /*
+            doc.on('dom.keydown', message => {
+                if (message.event.code == 'Escape') {
+                    console.log(message);
+                }
+            });
+            */
         }
 
         adjustCtls() {

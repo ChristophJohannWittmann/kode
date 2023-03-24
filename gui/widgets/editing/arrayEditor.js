@@ -179,7 +179,7 @@
 
         push(...objects) {
             for (let object of objects) {
-                let activeObject = mkActiveData(object);
+                let activeObject = ActiveData.isActiveData(object) ? object : mkActiveData(object);
                 this.objects.push(activeObject);
                 this.table.getBody().append(this.mkRow(activeObject));
             }
@@ -216,7 +216,7 @@
 
         unshift(...objects) {
             for (let object of objects) {
-                let activeObject = mkActiveData(object);
+                let activeObject = ActiveData.isActiveData(object) ? object : mkActiveData(object);
                 this.objects.unshift(activeObject);
                 this.table.getBody().prepend(this.mkRow(activeObject));
             }

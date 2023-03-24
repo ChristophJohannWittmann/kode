@@ -215,7 +215,7 @@
                     },
                 ))
                 .revealHead()
-                .push(...this.templateData.sections)
+                .push(...this.templateEditor.getActiveData().sections)
                 .on('dom.focusin', message => {
                     let editor = this.editorMap[ActiveData.id(message.htmlElement.pinned.data)];
 
@@ -276,11 +276,10 @@
 
     /*****
     *****/
-    class TemplateContentEditor extends Widget {
+    class TemplateContentEditor extends WPanel {
         constructor(sectionData) {
             super('div');
-            this.sectionData = sectionData;
-            this.sectionData.text = mkBuffer(this.sectionData.b64, 'base64').toString();
+            sectionData.text = mkBuffer(sectionData.b64, 'base64').toString();
 
             this.append(
                 (this.controlPanel = mkWGrid({
@@ -293,12 +292,12 @@
                     backgroundColor: 'ghostwhite',
                 })
                 .setAt(1, 1,
-                    mkWidget('span')
+                    (this.name = mkWidget('span'))
                     .setStyle({
                         textAlign: 'left',
                         fontWeight: 'bold',
                     })
-                    .bind(this.sectionData, 'name')
+                    .bind(sectionData, 'name')
                 )
                 .setAt(1, 2,
                     mkWidget('span').append(
@@ -317,7 +316,7 @@
                 ),
 
                 (this.editBox = mkWTextArea(EssayEntryFilter))
-                .bind(this.sectionData, 'text', Binding.valueBinding)
+                .bind(sectionData, 'text', Binding.valueBinding)
                 .setStyle({
                     marginLeft: '3px',
                     width: 'calc(100% - 19px)',
@@ -333,6 +332,8 @@
                 marginLeft: '6px',
                 marginRight: '6px',
             });
+
+            this.listen();
         }
 
         getEditBox() {
