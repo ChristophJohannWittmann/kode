@@ -544,26 +544,10 @@ singleton(class Languages {
 
         for (let language of languages) {
             if (language.iso1) {
-                if (language.iso1 in this.iso1) {
-                    if (language.iso != this.iso1[language.iso1].iso && !CLUSTER.isPrimary) {
-                        console.log('\n*** Language List Duplicate IOS-1 ***');
-                        console.log(language);
-                        console.log(this.iso1[language.iso1]);
-                    }
-                }
-                else {
-                    this.iso1[language.iso1] = language;
-                }
+                this.iso1[language.iso1] = language;
             }
 
-            if (language.iso2 in this.iso2 && CLUSTER.isPrimary) {
-                console.log('\n*** Language List Duplicate IOS-2 ***');
-                console.log(language);
-                console.log(this.iso2[language.iso1]);                
-            }
-            else {
-                this.iso2[language.iso2] = language;
-            }
+            this.iso2[language.iso2] = language;
 
             if (language.iso1 && !(language.iso1 in this.all)) {
                 this.all[language.iso1] = language;
@@ -588,5 +572,25 @@ singleton(class Languages {
     get639_2(code) {
         let lang = this.iso2[code.toLowerCase()];
         return lang ? clone(lang) : null;
+    }
+
+    listIso1() {
+        return clone(this.iso1);
+    }
+
+    listAll() {
+        return clone(this.all);
+    }
+
+    selectIso1(stringSet) {
+        let languages = {};
+
+        for (let iso1 of stringSet) {
+            if (iso1 in this.iso1) {
+                languages[iso1] = clone(this.iso1[iso1]);
+            }
+        }
+
+        return languages;
     }
 });

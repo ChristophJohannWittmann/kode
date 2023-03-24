@@ -37,6 +37,7 @@ register(class WTextArea extends WEditable {
         this.setWidgetStyle('textarea');
         this.tabSize = 4;
         this.maxSize = 20000;
+        this.autoHeight = false;
         this.setEntryFilter(entryFilter ? entryFilter : mkEssayEntryFilter());
 
         doc.on('dom.keydown', message => {
@@ -64,6 +65,20 @@ register(class WTextArea extends WEditable {
         });
     }
 
+    adjustHeight() {
+        if (this.autoHeight) {
+            this.setStyle('height', '0px');
+            this.setStyle('height', `${this.scrollHeight()}px`);
+        }
+
+        return this;
+    }
+
+    clearAutoHeight() {
+        this.autoHeight = false;
+        return this;
+    }
+
     clearEntryFilter() {
         this.entryFilter = null;
         return this;
@@ -75,9 +90,13 @@ register(class WTextArea extends WEditable {
     }
 
     deleteAt(index, count) {
-        console.log(index);
-        console.log(count);
+        let value = this.getValue();
+        this.valueChanged(value.substring(0, index) + value.substring(index + count));
         return this;
+    }
+
+    getAutoHeight() {
+        return this.autoHeight;
     }
 
     getCaretIndex() {
@@ -92,47 +111,122 @@ register(class WTextArea extends WEditable {
         return this.entryFilter;
     }
 
+    getIndex(row, col) {
+        let index = 0;
+        let rows = this.getRowStarts();
+
+        for (let i = 0; i < row; i++) {
+            index + rows[i];
+        }
+
+        return index + col;
+    }
+
     getLength() {
         return this.node.textLength;
     }
 
     getPosition(index) {
-        let rows = this.getRows(index);
-        let rowStart = rows[rows.length - 1];
+        let i;
+        let rows = this.getRowStarts(index);
+
+        for (i = 1; i < rows.length; i++) {
+            if (index < rows[i]) {
+                break;
+            }
+        }
 
         return {
-            row: rows.length - 1,
-            col: this.node.selectionStart - rowStart,
+            row: i - 1,
+            col: index - rows[i - 1],
         };
     }
 
-    getRows(index) {
+    getRowIndex(index) {
+        let currentRow = 0;
+        let content = this.node.value;
+
+        for (let i = 0; i < content.length; i++) {
+            if (i >= index) {
+                return currentRow;
+            }
+
+            if (content[i] == '\n') {
+                currentRow++;
+            }
+        }
+
+        if (index == content.length) {
+            return currentRow;
+        }
+
+        return -1;
+    }
+
+    getRowStarts(index) {
         let rows = [0];
-        let content = this.getValue();
+        let content = this.node.value;
 
         for (let i = 0; i < content.length; i++) {
             if (content[i] == '\n') {
-                rows.push(i);
+                rows.push(i+1);
             }
         }
 
         return rows;
     }
 
-    getSelection() {
-        if (this.node.selectionStart != this.node.selectionEnd) {
-            return {
-                start: this.node.selectionStart,
-                end: this.node.selectionEnd,
-            };
+    getSelectedRows() {
+        let rows = [];
+        let selection = this.getSelection();
+
+        if (selection) {
+            rows.push(this.getRowIndex(selection.start));
+            rows.push(this.getRowIndex(selection.end));
         }
         else {
-            return null;
+            let row = this.getRowIndex(selection.start)
+            rows.push(row);
+            rows.push(row);
         }
+
+        return rows;
+    }
+
+    getSelectedText() {
+        return this.getText(this.node.selectionStart, this.node.selectionEnd);
+    }
+
+    getSelection() {
+        return {
+            start: this.node.selectionStart,
+            end: this.node.selectionEnd,
+        };
+    }
+
+    getSelectionEnd() {
+        return this.node.selectionEnd;
+    }
+
+    getSelectionLength() {
+        return this.node.selectionEnd - this.node.selectionStart;
+    }
+
+    getSelectionStart() {
+        return this.node.selectionStart;
     }
 
     getTabSize() {
         return this.tabSize;
+    }
+
+    getText(index0, index1) {
+        if (typeof index1 != 'number' || index1 < index0) {
+            return this.node.value.substring(index0, index0 + 1);
+        }
+        else {
+            return this.node.value.substring(index0, index1);
+        }
     }
 
     hasEntryFilter() {
@@ -153,7 +247,7 @@ register(class WTextArea extends WEditable {
         let revisedValue = value.substring(0, index) + text + value.substring(index);
         let revisedStart = this.node.selectionStart + text.length;
         let revisedEnd = this.node.selectionEnd + text.length;
-        this.node.value = revisedValue;
+        this.valueChanged(revisedValue);
         this.node.setSelectionRange(revisedStart, revisedEnd);
         return this;
     }
@@ -161,6 +255,11 @@ register(class WTextArea extends WEditable {
     insertBeforeCaret(text) {
         this.insertAt(this.node.selectionStart + 1, text);
         return this;
+    }
+
+    isSelectionMultiRow() {
+        let selectedRowRange = this.getSelectedRows();
+        return selectedRowRange[0] < selectedRowRange[1];
     }
 
     isValid() {
@@ -173,7 +272,7 @@ register(class WTextArea extends WEditable {
     }
 
     moveCaretEndOfLine() {
-        let rows = this.getRows(this.node.selectionStart);
+        let rows = this.getRowStarts(this.node.selectionStart);
         let index = rows[rows.length - 1];
 
         while (index < this.node.textLength && this.node.value[index] != '\n') {
@@ -191,9 +290,20 @@ register(class WTextArea extends WEditable {
     }
 
     moveCaretStartOfLine() {
-        let rows = this.getRows(this.node.selectionStart);
+        let rows = this.getRowStarts(this.node.selectionStart);
         this.node.selectionStart = rows[rows.length - 1];
         this.node.selectionEnd = rows[rows.length - 1];
+        return this;
+    }
+
+    revert() {
+        super.revert();
+        this.adjustHeight();
+    }
+
+    setAutoHeight() {
+        this.autoHeight = true;
+        this.adjustHeight();
         return this;
     }
 
@@ -239,8 +349,13 @@ register(class WTextArea extends WEditable {
         return this;
     }
 
+    setValue(value) {
+        super.setValue(value);
+        this.adjustHeight();
+    }
+
     subclassCheckValidity() {
-        return true;
+        return this.entryFilter ? this.entryFilter.checkValidity(this) : true;
     }
 
     subclassGetValue() {
@@ -253,5 +368,10 @@ register(class WTextArea extends WEditable {
         this.node.value = scrubbed;
         this.resume();
         return this;
+    }
+
+    valueChanged(value) {
+        this.adjustHeight();
+        super.valueChanged(value);
     }
 });

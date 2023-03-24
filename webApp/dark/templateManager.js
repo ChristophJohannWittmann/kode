@@ -146,8 +146,8 @@
                         name: '',
                         //sections: [],
                         sections: [
-                            { name: 'Body', mime: 'text/html', b64: 'PGh0bWw+CiAgICA8aGVhZD4KICAgIDwvaGVhZD4KICAgIDxib2R5PgogICAgICAgIDxoMT5QbGVhc2UgVmVyaWZ5IFlvdXJzZWxmPC9oMT4KICAgIDwvYm9keT8KPC9odG1sPg==' },
-                            { name: 'Subject', mime: 'text/plain', b64: `UGxlYXNlIHZlcmlmeSB5b3VyIGVtYWlsIGFkZHJlc3M=` },
+                            { name: 'Body', mime: 'text/html', lang: 'en', b64: 'PGh0bWw+CiAgICA8aGVhZD4KICAgIDwvaGVhZD4KICAgIDxib2R5PgogICAgICAgIDxoMT5QbGVhc2UgVmVyaWZ5IFlvdXJzZWxmPC9oMT4KICAgIDwvYm9keT8KPC9odG1sPg==' },
+                            { name: 'Subject', mime: 'text/plain', lang: 'en', b64: `UGxlYXNlIHZlcmlmeSB5b3VyIGVtYWlsIGFkZHJlc3M=` },
                         ],
                     });
                 }
@@ -204,19 +204,22 @@
                     let editor = this.editorMap[ActiveData.id(message.htmlElement.pinned.data)];
 
                     if (!Object.is(editor, this.showing)) {
+                        this.ignore();
+
                         if (this.showing) {
-                            this.showing.conceal();
+                            this.showing.remove();
                         }
 
                         this.showing = editor;
-                        this.showing.reveal();
+                        this.append(this.showing);
+                        this.showing.adjustHeight();
+                        this.listen();
                     }
                 }),
             );
 
             for (let sectionData of this.sectionArray) {
-                let editor = new TemplateContentEditor(sectionData).conceal();
-                this.append(editor);
+                let editor = new TemplateContentEditor(sectionData).setAutoHeight();
                 this.editorMap[ActiveData.id(sectionData)] = editor;
             }
 
@@ -264,9 +267,12 @@
 
             this.setStyle({
                 marginLeft: '3px',
-                height: '1000px',
                 width: 'calc(100% - 19px)',
+                fontFamily: 'courier',
+                fontSize: '14px',
             });
+
+            console.log(Languages.selectIso1(mkStringSet('en', 'de', 'fr', 'es')));
         }
     }
 })();

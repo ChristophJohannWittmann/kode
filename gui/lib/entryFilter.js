@@ -31,61 +31,84 @@
  * set.  We want the final text editing instances to be singletons to increase
  * WTextArea construction performance.
 *****/
-register(class EntryFilter {
-    constructor() {
-        this.handlers = {};
-    }
+(()  => {
+    const types = {
+        keydown: 'Down',
+        keyup: 'Up',
+    };
 
-    handle(event, widget) {
-        let key = [
-            event.type == 'keydown' ? 'd' : 'u',
-            event.altKey ? 'S' : 'U',
-            event.ctrlKey ? 'S' : 'U',
-            event.metaKey ? 'S' : 'U',
-            event.shiftKey ? 'S' : 'U',
-            event.key
-
-        ].join('');
-
-        let handler = this.handlers[key];
-
-        if (handler) {
-            Reflect.apply(handler, this, [event, wrapDocNode(event.target)]);
-            widget.valueChanged(widget.getValue());
-            event.preventDefault();
+    register(class EntryFilter {
+        constructor() {
         }
-    }
 
-    registerFilterPoint(filterPoint) {
-        let [ down, prefix, keyName ] = filterPoint;
-        const prefixes = [down ? 'd' : 'u'];
-        const method = this[`on${keyName}${down ? 'Down' : 'Up'}`];
+        checkValidity(ta) {
+            return true;
+        }
 
-        for (let i = 0; i < 4; i++) {
-            let char = prefix[i];
+        handle(evt, ta) {
+            if (evt.type in types) {
+                let method = this[`on${evt.code}${types[evt.type]}`];
 
-            if (char == '*') {
-                let length = prefixes.length;
-
-                for (let j = 0; j < length; j++) {
-                    prefixes.push(`${prefixes[j]}U`);
-                    prefixes[j] = `${prefixes[j]}S`;
+                if (!method && evt.code.startsWith('Key')) {
+                    method = this[`onKey${types[evt.type]}`];
                 }
-            }
-            else if (char == 't') {
-                for (let j = 0; j < prefixes.length; j++) {
-                    prefixes[j] = `${prefixes[j]}S`;
-                }
-            }
-            else if (char == 'f') {
-                for (let j = 0; j < prefixes.length; j++) {
-                    prefixes[j] = `${prefixes[j]}N`;
+
+                if (method) {
+                    Reflect.apply(method, this, [evt, wrapDocNode(evt.target)]);
+                    evt.preventDefault();
                 }
             }
         }
 
-        for (let prefix of prefixes) {
-            this.handlers[`${prefix}${keyName}`] = method;
+        tabSelectionLeft(ta, delta) {
+            ta.silence();
+            let removed = 0;
+            let rows = ta.getRowStarts();
+            let selectedRows = ta.getSelectedRows();
+            let selection = ta.getSelection();
+
+            for (let i = selectedRows[0]; i <= selectedRows[1]; i++) {
+                let count = 0;
+                let index = rows[i] - removed;
+
+                for (let j = 0; j < ta.getTabSize(); j++) {
+                    let char = ta.getText(index);
+
+                    if (char && char.match(/[ \t]/)) {
+                        count++;
+                    }
+                }
+
+                ta.deleteAt(index, count);
+                removed += count;
+            }
+
+            ta.setSelection(
+                selection.start - ta.getTabSize(),
+                selection.end - removed
+            );
+
+            ta.resume();
         }
-    }
-});
+
+        tabSelectionRight(ta, delta) {
+            ta.silence();
+            let added = 0;
+            let rows = ta.getRowStarts();
+            let selectedRows = ta.getSelectedRows();
+            let fill = fillWithChar(delta, ' ');
+
+            for (let i = selectedRows[0]; i <= selectedRows[1]; i++) {
+                ta.insertAt(rows[i] + added, fill);
+                added += fill.length;
+            }
+
+            ta.setSelection(
+                ta.getSelectionStart() - added + ta.getTabSize(),
+                ta.getSelectionEnd()
+            );
+
+            ta.resume();
+        }
+    });
+})();

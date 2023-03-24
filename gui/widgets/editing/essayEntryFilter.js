@@ -32,15 +32,15 @@
 singleton(class EssayEntryFilter extends EntryFilter {
     constructor() {
         super();
-
-        for (let filterPoint of [
-            [ true, '****', 'Enter' ],
-            [ true, '****', 'Escape' ],
-            [ true, '****', 'Tab' ],
-        ]) {
-            this.registerFilterPoint(filterPoint);
-        }
     }
+
+    /*
+    onBracketLeftDown(evt, ta) {
+    }
+
+    onBracketRightDown(evt, ta) {
+    }
+    */
 
     onEnterDown(evt, ta) {
         ta.insertAfterCaret('\n');
@@ -51,13 +51,21 @@ singleton(class EssayEntryFilter extends EntryFilter {
     }
 
     onTabDown(evt, ta) {
-        let col = ta.getCaretPosition().col;
-        let count = col % ta.getTabSize();
+        if (ta.getSelectionLength() > 0) {
+            if (evt.shiftKey) {
+                this.tabSelectionLeft(ta, ta.getTabSize());
+            }
+            else {
+                this.tabSelectionRight(ta, ta.getTabSize());
+            }
 
-        if (evt.shiftKey) {
+            ta.resume();
         }
         else {
-            ta.insertAfterCaret(fillWithChar(ta.getTabSize() - count, ' '));
+            let caretAt = ta.getCaretPosition();
+            let rem = caretAt.col % ta.getTabSize();
+            let fill = ta.getTabSize() - rem;
+            ta.insertAfterCaret(fillWithChar(fill, ' '));
         }
     }
 });
