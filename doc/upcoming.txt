@@ -1,0 +1,30 @@
+/******************************************************************************
+ *** List of Pinned/Pending Framework Issues
+******************************************************************************/
+
+** User Management -- Complete the entire lifecycle for user management processes
+including but not limited to verification, password reset, email changes, grants,
+grant plugins.
+
+** Mail Gun Convig -- Complete a full Mail Gun configuration in order to complete
+full lifecycle testing for SMTP messaging.
+
+** WPanel State Management -- Add code to restore WPanel state management when
+restoreState() is called.  Also need to maintain the Wpanel's state value as focus
+shifts between descendents.
+
+** Implement SMTP Filters -- Right now, the orginally factored SMTP filters are
+sitting there in server/obj/smtp as comments.  They need to be refactored and added
+back into the SMTP messaging algorithms.
+
+** Websocket permessage-deflat -- The hook is there, we need to add in permessage-
+deflate to the Websocket class.  Note that nodeJS ZLIB doesn't work so do a search
+to determine which NPM will work for us.
+
+** Create Organization DBMS -- If so configured in kode.json, create a new org
+database when an organization is created.  If so configured, check exiting orgs
+during boot to ensure they all have their own database.
+
+** Scrub widget.css, webxStyles.js -- These two files form the bases for all styling
+of framework widgets.  This needs a 2-week intensive scrubbing and color update
+(for the framework).

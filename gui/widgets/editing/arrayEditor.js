@@ -35,7 +35,7 @@
     register(class WArrayEditor extends WEditor {
         static properties = {
             choices: false,
-            className: false,
+            classNames: false,
             disabled: false,
             property: true,
             label: true,
@@ -83,10 +83,18 @@
 
             for (let column of this.columns) {
                 if (column.label) {
-                    this.table.getHead().append(mkWTableHeadCell().setInnerHtml(column.label));
+                    this.table.getHead().append(
+                        mkWTableHeadCell()
+                        .setInnerHtml(column.label)
+                        .setClassNames(column.classNames)
+                    );
                 }
                 else {
-                    this.table.getHead().append(mkWTableHeadCell().setInnerHtml(column.property));
+                    this.table.getHead().append(
+                        mkWTableHeadCell()
+                        .setInnerHtml(column.property)
+                        .setClassNames(column.classNames)
+                    );
                 }
             }
         }
@@ -94,10 +102,12 @@
         clear() {
             this.table.getBody().clear();
             ActiveData.clear(this.objects);
+            return this;
         }
 
         concealHead() {
             this.table.getHead().conceal();
+            return this;
         }
 
         getActiveData() {
@@ -135,7 +145,7 @@
                             .append(
                                 (scalar = mkWScalar(activeObject, column.property, opts))
                                 .setMenu(opts.menu)
-                                .setClassName(column.className)
+                                .setClassNames(column.classNames)
                             )
                         );
 
@@ -188,6 +198,7 @@
 
         revealHead() {
             this.table.getHead().reveal();
+            return this;
         }
 
         shift() {

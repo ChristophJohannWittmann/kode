@@ -121,15 +121,17 @@
         }
 
         clearClassName(className) {
-            super.clearClassName(className);
+            if (className) {
+                super.clearClassName(className);
 
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'attribute',
-                widget: this,
-                name: 'class',
-                value: null,
-            });
+                this.send({
+                    messageName: 'Widget.Changed',
+                    type: 'attribute',
+                    widget: this,
+                    name: 'class',
+                    value: null,
+                });
+            }
 
             return this;
         }
@@ -545,29 +547,33 @@
         }
 
         setClassName(className) {
-            super.setClassName(className);
+                if (className) {
+                super.setClassName(className);
 
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'attribute',
-                widget: this,
-                name: 'class',
-                value: this.getAttribute('class'),
-            });
+                this.send({
+                    messageName: 'Widget.Changed',
+                    type: 'attribute',
+                    widget: this,
+                    name: 'class',
+                    value: this.getAttribute('class'),
+                });
+            }
 
             return this;
         }
 
         setClassNames(classNames) {
-            super.setClassNames(classNames);
+            if (classNames) {
+                super.setClassNames(classNames);
 
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'attribute',
-                widget: this,
-                name: 'class',
-                value: this.getAttribute('class'),
-            });
+                this.send({
+                    messageName: 'Widget.Changed',
+                    type: 'attribute',
+                    widget: this,
+                    name: 'class',
+                    value: this.getAttribute('class'),
+                });
+            }
 
             return this;
         }

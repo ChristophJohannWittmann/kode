@@ -143,7 +143,8 @@
                         orgOid: webAppSettings.org() ? webAppSettings.org().oid : 0n,
                         ownerType: 'DboOrg',
                         ownerOid: webAppSettings.org() ? webAppSettings.org().oid : 0n,
-                        name: '',
+                        name: 'The Good Template',
+                        deflang: 'en',
                         //sections: [],
                         sections: [
                             { name: 'Body', mime: 'text/html', lang: 'en', b64: 'PGh0bWw+CiAgICA8aGVhZD4KICAgIDwvaGVhZD4KICAgIDxib2R5PgogICAgICAgIDxoMT5QbGVhc2UgVmVyaWZ5IFlvdXJzZWxmPC9oMT4KICAgIDwvYm9keT8KPC9odG1sPg==' },
@@ -167,10 +168,15 @@
                         label: txx.fwTemplateEditorName,
                         focus: true,
                     },
+                    deflang: {
+                        label: txx.fwTemplateEditorDefaultLanguage,
+                        type: ScalarEnum,
+                        choices: Languages.getChoices(),
+                    },
                 }),
 
                 mkWGrid({
-                    rows: ['12px', '48px', '12px'],
+                    rows: ['24px', '48px', '24px'],
                     cols: ['6px', '150px', 'auto'],
                 })
                 .setAt(1, 1,
@@ -196,9 +202,19 @@
                             { value: 'text/css',    text: txx.fwTemplateEditorSectionTypeCss },
                             { value: 'text/html',   text: txx.fwTemplateEditorSectionTypeHtml },
                             { value: 'text/plain',  text: txx.fwTemplateEditorSectionTypeText },
-                        ]
+                        ],
+                        classNames: 'screen-l',
+                    },
+                    {
+                        property: 'lang',
+                        label: txx.fwTemplateEditorSectionLanguage,
+                        messages: ['dom.focusin'],
+                        type: ScalarEnum,
+                        choices: Languages.getChoices(),
+                        classNames: 'screen-l',
                     },
                 ))
+                .revealHead()
                 .push(...this.templateData.sections)
                 .on('dom.focusin', message => {
                     let editor = this.editorMap[ActiveData.id(message.htmlElement.pinned.data)];
@@ -212,14 +228,15 @@
 
                         this.showing = editor;
                         this.append(this.showing);
-                        this.showing.adjustHeight();
+                        this.showing.getEditBox().adjustHeight();
                         this.listen();
                     }
                 }),
             );
 
             for (let sectionData of this.sectionArray) {
-                let editor = new TemplateContentEditor(sectionData).setAutoHeight();
+                let editor = new TemplateContentEditor(sectionData);
+                editor.getEditBox().setAutoHeight();
                 this.editorMap[ActiveData.id(sectionData)] = editor;
             }
 
@@ -259,20 +276,67 @@
 
     /*****
     *****/
-    class TemplateContentEditor extends WTextArea {
+    class TemplateContentEditor extends Widget {
         constructor(sectionData) {
-            super(EssayEntryFilter);
-            sectionData.text = mkBuffer(sectionData.b64, 'base64').toString();
-            this.bind(sectionData, 'text', Binding.valueBinding);
+            super('div');
+            this.sectionData = sectionData;
+            this.sectionData.text = mkBuffer(this.sectionData.b64, 'base64').toString();
+
+            this.append(
+                (this.controlPanel = mkWGrid({
+                    rows: [ '4px', '24px', '4px' ],
+                    cols: [ '12px', 'auto', 'auto', '12px']
+                }))
+                .setStyle({
+                    height: '35px',
+                    width: '100%',
+                    backgroundColor: 'ghostwhite',
+                })
+                .setAt(1, 1,
+                    mkWidget('span')
+                    .setStyle({
+                        textAlign: 'left',
+                        fontWeight: 'bold',
+                    })
+                    .bind(this.sectionData, 'name')
+                )
+                .setAt(1, 2,
+                    mkWidget('span').append(
+                        mkIButton()
+                        .setValue(txx.fwTemplateEditorSectionCopy)
+                        .setWidgetStyle('button-small'),
+
+                        mkIButton()
+                        .setValue(txx.fwTemplateEditorSectionDelete)
+                        .setWidgetStyle('button-small')
+                        .setStyle('margin-left', '12px'),
+                    )
+                    .setStyle({
+                        textAlign: 'right',
+                    })
+                ),
+
+                (this.editBox = mkWTextArea(EssayEntryFilter))
+                .bind(this.sectionData, 'text', Binding.valueBinding)
+                .setStyle({
+                    marginLeft: '3px',
+                    width: 'calc(100% - 19px)',
+                    fontFamily: 'courier',
+                    fontSize: '14px',
+                    border: 'none',
+                }),
+            );
 
             this.setStyle({
-                marginLeft: '3px',
-                width: 'calc(100% - 19px)',
-                fontFamily: 'courier',
-                fontSize: '14px',
+                border: 'solid black 1px',
+                borderRadius: '6px',
+                marginLeft: '6px',
+                marginRight: '6px',
             });
+        }
 
-            console.log(Languages.selectIso1(mkStringSet('en', 'de', 'fr', 'es')));
+        getEditBox() {
+            return this.editBox;
         }
     }
 })();

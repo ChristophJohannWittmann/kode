@@ -244,6 +244,9 @@ exports = module.exports = {
     // ****************************************************************
     // Template
     // ****************************************************************
+    fwTemplateEditorDefaultLanguage: {
+        en: `Default Language`,
+    },
     fwTemplateEditorCreateSection: {
         en: `Create Section`,
     },
@@ -255,6 +258,15 @@ exports = module.exports = {
     },
     fwTemplateEditorTitle: {
         en: `Template`,
+    },
+    fwTemplateEditorSectionCopy: {
+        en: `Copy Section`,
+    },
+    fwTemplateEditorSectionDelete: {
+        en: `Delete Section`,
+    },
+    fwTemplateEditorSectionLanguage: {
+        en: `Language`,
     },
     fwTemplateEditorSectionMime: {
         en: `Mime`,

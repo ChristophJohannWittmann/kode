@@ -95,6 +95,7 @@ register(class WebApp extends Webx {
             '            user: () => null,',
             `            websocket: () => ${this.reference.webSocket},`,
             '            grants: () => {},',
+            `            lang: () => '${language}',`,
             '        };',
             `        const txx = ${appText};`,
             '        Object.freeze(txx);',

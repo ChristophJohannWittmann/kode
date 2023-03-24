@@ -234,7 +234,7 @@ mkDbSchema(
             { name: 'mms',          type: dbBool              },
             { name: 'verified',     type: dbBool              },
             { name: 'lastVerified', type: dbTime              },
-            { name: 'error',        type: dbText, size: 1000  },
+            { name: 'error',        type: dbText, size:  1000 },
         ],
         indexes: [
             'ownerType:asc, ownerOid:asc',
@@ -266,6 +266,7 @@ mkDbSchema(
             { name: 'ownerType',   type: dbText, size:  20 },
             { name: 'ownerOid',    type: dbInt64           },
             { name: 'name',        type: dbText, size: 100 },
+            { name: 'deflang',     type: dbText, size:   5 },
             { name: 'content',     type: dbText, size:   0 },
         ],
         indexes: [
