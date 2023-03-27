@@ -23,6 +23,7 @@
 
 (() => {
     const languages = [
+        {iso1: '**', iso2: '',    iso: "None",                      local: "None"},
         {iso1: 'aa', iso2: 'aar', iso: "Afar",                      local: "Afaraf"},
         {iso1: 'ab', iso2: 'abk', iso: "Abkhazian",                 local: "аҧсуа бызшәа, аҧсшәа"},
         {iso1: '',   iso2: 'ace', iso: "Achinese",                  local: ""},

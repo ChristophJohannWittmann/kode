@@ -55,7 +55,6 @@
             this.refreshers = mkStringSet();
             this.panelState = mkPanelState(this);
 
-            this.resetFlag('concealed');
             this.setId(`widget${this.id}`);
             this.setWidgetStyle('widget');
             this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);

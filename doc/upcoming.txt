@@ -6,8 +6,11 @@
 including but not limited to verification, password reset, email changes, grants,
 grant plugins.
 
-** Mail Gun Convig -- Complete a full Mail Gun configuration in order to complete
+** Mail Gun Config -- Complete a full Mail Gun configuration in order to complete
 full lifecycle testing for SMTP messaging.
+
+** WArrayEditor auto sort -- Set up auto sort and then on any change, go ahead and
+perform a sort of its rows.
 
 ** WPanel State Management -- Add code to restore WPanel state management when
 restoreState() is called.  Also need to maintain the Wpanel's state value as focus

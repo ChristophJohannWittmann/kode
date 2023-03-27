@@ -24,6 +24,11 @@
 
 (() => {
     /*****
+     * The TemplateManager is the entry point for editing/managing framework
+     * templates.  The manager is the standard search-box-and-create-button type
+     * of view.  Most of the hard work occurs within the template editor object.
+     * Clicking on one of the searched/displayed templates will open an instance
+     * of the TemplateEditor panel, which is flagged as 'transient'.
     *****/
     register(class TemplateManager extends WPanel {
         constructor() {
@@ -83,6 +88,10 @@
             this.refreshList();
         }
 
+        async revert() {
+            super.revert();
+        }
+
         async refreshList() {
             if (this.controller.searchPattern.trim()) {
                 var templateArray = await queryServer({
@@ -101,10 +110,34 @@
 
 
     /*****
+     * The exhaustive list of choices of MIME types that are supported by the
+     * TemplateEditor class.
+    *****/
+    const mimeChoices = [
+        { value: '*/*',                         text: txx.fwTemplateEditorSectionMime },
+        { value: 'text/css',                    text: txx.fwMimeCss },
+        { value: 'text/html',                   text: txx.fwMimeHtml },
+        { value: 'image/bmp',                   text: txx.fwMimeImageBitmap },
+        { value: 'image/gif',                   text: txx.fwMimeImageGif },
+        { value: 'image/jpeg',                  text: txx.fwMimeImageJpeg },
+        { value: 'image/vnd.microsoft.icon',    text: txx.fwMimeImageMsIcon },
+        { value: 'image/png',                   text: txx.fwMimeImagePng },
+        { value: 'image/svg+xml',               text: txx.fwMimeImageSvg },
+        { value: 'text/plain',                  text: txx.fwMimeText },
+    ];
+
+
+    /*****
+     * The TemplateEditor is the panel used for editing the entire contet of a
+     * framework template object.  It's rather complex.  In addition to its own
+     * scalar properties, each template has an array of sections, each of which
+     * are displayed as a table, are modifiable, and are displayed/editoed with
+     * a supporting class called TemplateSectionEditor.  All of these features
+     * are crammed in to support the WEditor feature set.
     *****/
     class TemplateEditor extends WPanel {
         constructor(templateManager, templateOid) {
-            super('div');
+            super('form');
             this.templateManager = templateManager;
             this.templateOid = templateOid;
             this.setFlag('transient');
@@ -112,6 +145,20 @@
             this.setRefreshers('TemplateModifyTemplate');
             this.showing = null;
             this.refresh();
+        }
+
+        async createSection() {
+            let sectionData = {
+                name: '',
+                mime: '*/*',
+                lang: '**',
+                b64: '',
+            };
+
+            this.sectionArray.pushNew(sectionData);
+            this.sectionArray.revealHead();
+            this.ignore();
+            this.listen();
         }
 
         async refresh() {
@@ -143,13 +190,9 @@
                         orgOid: webAppSettings.org() ? webAppSettings.org().oid : 0n,
                         ownerType: 'DboOrg',
                         ownerOid: webAppSettings.org() ? webAppSettings.org().oid : 0n,
-                        name: 'The Good Template',
-                        deflang: 'en',
-                        //sections: [],
-                        sections: [
-                            { name: 'Body', mime: 'text/html', lang: 'en', b64: 'PGh0bWw+CiAgICA8aGVhZD4KICAgIDwvaGVhZD4KICAgIDxib2R5PgogICAgICAgIDxoMT5QbGVhc2UgVmVyaWZ5IFlvdXJzZWxmPC9oMT4KICAgIDwvYm9keT8KPC9odG1sPg==' },
-                            { name: 'Subject', mime: 'text/plain', lang: 'en', b64: `UGxlYXNlIHZlcmlmeSB5b3VyIGVtYWlsIGFkZHJlc3M=` },
-                        ],
+                        name: '',
+                        deflang: webAppSettings.lang(),
+                        sections: [],
                     });
                 }
             }
@@ -182,9 +225,7 @@
                 .setAt(1, 1,
                     mkIButton()
                     .setValue(txx.fwTemplateEditorCreateSection)
-                    .on('dom.click', message => {
-                        console.log('clicked CREATE SECTION BUTTON.')
-                    })
+                    .on('dom.click', message => this.createSection())
                 ),
 
                 (this.sectionArray = mkWArrayEditor(
@@ -195,14 +236,10 @@
                     },
                     {
                         property: 'mime',
-                        label: txx.fwTemplateEditorSectionMime,
+                        label: txx.fwMimeMime,
                         messages: ['dom.focusin'],
                         type: ScalarEnum,
-                        choices: [
-                            { value: 'text/css',    text: txx.fwTemplateEditorSectionTypeCss },
-                            { value: 'text/html',   text: txx.fwTemplateEditorSectionTypeHtml },
-                            { value: 'text/plain',  text: txx.fwTemplateEditorSectionTypeText },
-                        ],
+                        choices: mimeChoices,
                         classNames: 'screen-l',
                     },
                     {
@@ -214,7 +251,6 @@
                         classNames: 'screen-l',
                     },
                 ))
-                .revealHead()
                 .push(...this.templateEditor.getActiveData().sections)
                 .on('dom.focusin', message => {
                     let editor = this.editorMap[ActiveData.id(message.htmlElement.pinned.data)];
@@ -231,7 +267,8 @@
                         this.showing.getEditBox().adjustHeight();
                         this.listen();
                     }
-                }),
+                })
+                .on('Widget.Changed', message => this.onWidgetChanged(message)),
             );
 
             for (let sectionData of this.sectionArray) {
@@ -240,8 +277,28 @@
                 this.editorMap[ActiveData.id(sectionData)] = editor;
             }
 
+            this.sectionArray.length() ? this.sectionArray.revealHead() : this.sectionArray.concealHead();
             this.listen();
             super.refresh();
+        }
+
+        onWidgetChanged(message) {
+            if (message.type == 'array') {
+                if (message.action == 'remove') {
+                    let id = ActiveData.id(message.object);
+                    let templateContentEditor = this.editorMap[id];
+                    delete this.editorMap[id];
+                    templateContentEditor.remove();
+                    this.sectionArray.length() ? false : this.sectionArray.concealHead();
+                }
+                else if (message.action == 'add') {
+                    let id = ActiveData.id(message.object);
+                    let editor = new TemplateContentEditor(message.object);
+                    editor.getEditBox().setAutoHeight();
+                    this.editorMap[ActiveData.id(message.object)] = editor;
+                    this.sectionArray.revealHead();
+                }
+            }
         }
 
         async save() {
@@ -275,44 +332,43 @@
 
 
     /*****
+     * The TemplateContentEditor is what's displayed at the bottom of the window
+     * for the selected template section.  For text types, it enables entry and
+     * editing of the text values.  For image types, it displays the image, which
+     * can be deleted via the "Delete" GUI button.  For SVG images, it provides an
+     * editor for modifying image path.  SVG images are a framework widget.  Not
+     * any old SVG class may be viewed or edited here.
     *****/
     class TemplateContentEditor extends WPanel {
         constructor(sectionData) {
             super('div');
+            this.setClassName('fmwk-container');
             sectionData.text = mkBuffer(sectionData.b64, 'base64').toString();
 
             this.append(
-                (this.controlPanel = mkWGrid({
-                    rows: [ '4px', '24px', '4px' ],
-                    cols: [ '12px', 'auto', 'auto', '12px']
-                }))
-                .setStyle({
-                    height: '35px',
-                    width: '100%',
-                    backgroundColor: 'ghostwhite',
-                })
-                .setAt(1, 1,
-                    (this.name = mkWidget('span'))
-                    .setStyle({
-                        textAlign: 'left',
-                        fontWeight: 'bold',
-                    })
+                (this.controlPanel = mkWNavBar())
+                .setInfo(
+                    mkWidget('span')
                     .bind(sectionData, 'name')
                 )
-                .setAt(1, 2,
-                    mkWidget('span').append(
+                .push(
+                    mkWCtl()
+                    .append(
                         mkIButton()
                         .setValue(txx.fwTemplateEditorSectionCopy)
-                        .setWidgetStyle('button-small'),
-
+                        .setWidgetStyle('button-small')
+                        .on('dom.click', message => console.log(message))
+                    )
+                )
+                .push(
+                    mkWCtl()
+                    .append(
                         mkIButton()
                         .setValue(txx.fwTemplateEditorSectionDelete)
                         .setWidgetStyle('button-small')
-                        .setStyle('margin-left', '12px'),
+                        .setStyle('margin-left', '12px')
+                        .on('dom.click', message => console.log(message))
                     )
-                    .setStyle({
-                        textAlign: 'right',
-                    })
                 ),
 
                 (this.editBox = mkWTextArea(EssayEntryFilter))
@@ -325,13 +381,6 @@
                     border: 'none',
                 }),
             );
-
-            this.setStyle({
-                border: 'solid black 1px',
-                borderRadius: '6px',
-                marginLeft: '6px',
-                marginRight: '6px',
-            });
 
             this.listen();
         }

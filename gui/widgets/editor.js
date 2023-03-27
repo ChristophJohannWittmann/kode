@@ -170,6 +170,7 @@ register(class WEditor extends Widget {
             await widget.revert();
         }
 
+        this.modified = 0;
         return this;
     }
 

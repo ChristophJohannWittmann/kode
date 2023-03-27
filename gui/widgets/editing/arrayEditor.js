@@ -32,6 +32,8 @@
  * methods to change the set of objects currently being displayed and edited.
 *****/
 (() => {
+    const newRowKey = Symbol('new-row');
+
     register(class WArrayEditor extends WEditor {
         static properties = {
             choices: false,
@@ -51,6 +53,7 @@
             this.columns = [];
             this.objects = mkActiveData([]);
             this.proxy = mkMessageProxy(this);
+            this.rowMap = new Object();
 
             this.append(
                 (this.table = mkWTable())
@@ -105,13 +108,60 @@
             return this;
         }
 
+        clearNew(...indices) {
+            if (indices.length) {
+                for (let index of indices) {
+                    if (index >= 0 && index < this.length()) {
+                        delete this.objects[index][newRowKey];
+                    }
+                }
+            }
+            else {
+                for (let object of this.objects) {
+                    delete object[index][newRowKey];
+                }                
+            }
+
+            return this;
+        }
+
         concealHead() {
             this.table.getHead().conceal();
             return this;
         }
 
+        countNew() {
+            return this.objects.reduce(
+                (sum, value) => sum + value[newRowKey] ? 1 : 0,
+                0
+            );
+        }
+
+        countOld() {
+            return this.objects.reduce(
+                (sum, value) => sum + value[newRowKey] ? 0 : 1,
+                0
+            );
+        }
+
         getActiveData() {
             return this.objects;
+        }
+
+        getFirstObject() {
+            if (this.objects.length) {
+                return this.objects[0];
+            }
+        }
+
+        getLastObject() {
+            if (this.objects.length) {
+                return this.objects[this.objects.length - 1];
+            }
+        }
+
+        getNewObjects() {
+            return this.objects.filter(row => row[newRowKey] === true);
         }
 
         getObjectAt(index) {
@@ -126,6 +176,7 @@
 
         mkRow(activeObject) {
             let tr = mkWTableRow();
+            this.rowMap[ActiveData.id(activeObject)] = tr;
 
             for (let column of this.columns) {
                 let value = activeObject[column.property];
@@ -165,13 +216,20 @@
                 tr.append(mkWTableCell());
             }
 
+            this.send({
+                messageName: 'Widget.Changed',
+                type: 'array',
+                action: 'add',
+                object: activeObject,
+                tr: tr,
+            });
+
             return tr;
         }
 
         pop() {
             if (this.objects.length) {
-                this.objects.pop();
-                this.childAt(this.objects.length).remove();
+                this.removeObjectAt(0);
             }
 
             return this;
@@ -179,18 +237,60 @@
 
         push(...objects) {
             for (let object of objects) {
-                let activeObject = ActiveData.isActiveData(object) ? object : mkActiveData(object);
+                const activeObject = mkActiveData(object);
                 this.objects.push(activeObject);
+
+                if (object[newRowKey]) {
+                    activeObject[newRowKey] = true;
+                }
+
                 this.table.getBody().append(this.mkRow(activeObject));
+                this.modified++;
+
+                if (this.modified == 1) {
+                    this.send({
+                        messageName: 'Widget.Modified',
+                        modified: true,
+                        widget: this,
+                    });
+                }
             }
 
+            this.ignore();
+            this.listen();
             return this;
+        }
+
+        pushNew(...objects) {
+            objects.forEach(object => object[newRowKey] = true);
+            return this.push(...objects);
         }
 
         removeObjectAt(index) {
             if (index >= 0 && index < this.objects.length) {
-                this.objects.splice(index, 1);
-                this.childAt(index).remove();
+                let object = this.objects[index];
+                let oid = ActiveData.id(object);
+                let tr = this.rowMap[oid];
+                delete this.rowMap[oid];
+                tr.remove();
+
+                delete this.objects[index];
+
+                this.send({
+                    messageName: 'Widget.Changed',
+                    type: 'array',
+                    action: 'remove',
+                    object: object,
+                    tr: tr,
+                });
+
+                if (this.modified == 0) {
+                    this.send({
+                        messageName: 'Widget.Modified',
+                        modified: false,
+                        widget: this,
+                    });
+                }
             }
 
             return this;
@@ -201,10 +301,28 @@
             return this;
         }
 
+        async revert() {
+            await super.revert();
+            let done = false;
+
+            while (!done) {
+                done = true;
+
+                for (let i = 0; i < this.objects.length; i++) {
+                    if (this.objects[i][newRowKey]) {
+                        done = false;
+                        this.removeObjectAt(i);
+                    }
+                }
+            }
+
+            this.ignore();
+            this.listen();
+        }
+
         shift() {
             if (this.objects.length) {
-                this.objects.shift();
-                this.childAt(0).remove();
+                this.removeObjectAt(this.objects.length - 1);
             }
 
             return this;
@@ -216,12 +334,33 @@
 
         unshift(...objects) {
             for (let object of objects) {
-                let activeObject = ActiveData.isActiveData(object) ? object : mkActiveData(object);
+                const activeObject = mkActiveData(object);
                 this.objects.unshift(activeObject);
+
+                if (object[newRowKey]) {
+                    activeObject[newRowKey] = true;
+                }
+
                 this.table.getBody().prepend(this.mkRow(activeObject));
+                this.modified++;
+
+                if (this.modified == 1) {
+                    this.send({
+                        messageName: 'Widget.Modified',
+                        modified: true,
+                        widget: this,
+                    });
+                }
             }
 
+            this.ignore();
+            this.listen();
             return this;
+        }
+
+        unshiftNew(...objects) {
+            objects.forEach(object => object[newRowKey] = true);
+            return this.unshift(...objects);
         }
     });
 })();

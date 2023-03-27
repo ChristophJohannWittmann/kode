@@ -65,9 +65,9 @@ register(class Emitter extends NonJsonable {
         return messageName in this.handlers;
     }
   
-    length(messageName) {
+    listening(messageName) {
         if (messageName in this.handlers) {
-            return Object.keys(this.handlers[messageName]).length;
+            return this.handlers[messageName].thunks.length;
         }
   
         return 0;

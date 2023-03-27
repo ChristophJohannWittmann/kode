@@ -55,6 +55,10 @@ global.webxCssVars = {
         widget_error_background_color: '#FFF9F9',
         widget_error_border_color: '#DC143C',
 
+        nav_color: '#4682B4',
+        nav_background_color: '#F2F2F2',
+        nav_border: 'solid 1px #DDDDDD',
+
         menu_color: '#2F4F5F',
         menu_background_color: '#F9F9F9',
         menu_hover_color: '#2F4F5F',

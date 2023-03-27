@@ -108,6 +108,40 @@ exports = module.exports = {
     },
 
     // ****************************************************************
+    // MIME
+    // ****************************************************************
+    fwMimeMime: {
+        en: `Mime`,
+    },
+    fwMimeCss: {
+        en: `Style Sheet`,
+    },
+    fwMimeHtml: {
+        en: `HTML`,
+    },
+    fwMimeImageBitmap: {
+        en: `Bitmap Image`,
+    },
+    fwMimeImageGif: {
+        en: `GIF Image`,
+    },
+    fwMimeImageJpeg: {
+        en: `JPEG Image`,
+    },
+    fwMimeImageMsIcon: {
+        en: `Microsoft Icon`,
+    },
+    fwMimeImagePng: {
+        en: `PNG Image`,
+    },
+    fwMimeImageSvg: {
+        en: `SVG Image`,
+    },
+    fwMimeText: {
+        en: `Text`,
+    },
+
+    // ****************************************************************
     // Nav
     // ****************************************************************
     fwNavCancel: {
@@ -260,28 +294,19 @@ exports = module.exports = {
         en: `Template`,
     },
     fwTemplateEditorSectionCopy: {
-        en: `Copy Section`,
+        en: `Copy`,
     },
     fwTemplateEditorSectionDelete: {
-        en: `Delete Section`,
+        en: `Delete`,
     },
     fwTemplateEditorSectionLanguage: {
         en: `Language`,
     },
     fwTemplateEditorSectionMime: {
-        en: `Mime`,
+        en: `Select Format`,
     },
     fwTemplateEditorSectionName: {
         en: `Name`,
-    },
-    fwTemplateEditorSectionTypeCss: {
-        en: `Style Sheet`,
-    },
-    fwTemplateEditorSectionTypeHtml: {
-        en: `HTML`,
-    },
-    fwTemplateEditorSectionTypeText: {
-        en: `Text`,
     },
     fwTemplateTitle: {
         en: `Templates`,
