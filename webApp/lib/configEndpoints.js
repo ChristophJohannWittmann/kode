@@ -29,7 +29,7 @@ register(class ConfigEndpoints extends EndpointContainer {
         super(webapp);
     }
     
-    async [ mkEndpoint('ConfigCertifyIface', 'system') ](trx) {
+    async [ mkEndpoint('ConfigCertifyIface', 'system', { notify: true }) ](trx) {
         let acme = await mkAcmeProvider(trx.ifaceName);
         await acme.establishSession();
         await acme.checkAccount();
@@ -40,7 +40,7 @@ register(class ConfigEndpoints extends EndpointContainer {
         return true;
     }
     
-    async [ mkEndpoint('ConfigClearCrypto', 'system') ](trx) {
+    async [ mkEndpoint('ConfigClearCrypto', 'system', { notify: true }) ](trx) {
         let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
         iface.tls.publicKey = null;
@@ -59,14 +59,12 @@ register(class ConfigEndpoints extends EndpointContainer {
     async [ mkEndpoint('ConfigCreateAcmeProvider', 'system') ](trx) {
     }
     
-    async [ mkEndpoint('ConfigCreateCertificate', 'system') ](trx) {
-    }
-    
-    async [ mkEndpoint('ConfigCreateKeyPair', 'system') ](trx) {
+    async [ mkEndpoint('ConfigCreateKeyPair', 'system', { notify: true }) ](trx) {
         let config = await loadConfigFile();
         let iface = config.network[trx.ifaceName];
         let keyPair = await Crypto.generateKeyPair();
 
+        iface.tls = iface.tls ? iface.tls : new Object();
         iface.tls.publicKey = keyPair.publicKey;
         iface.tls.privateKey = keyPair.privateKey;
         iface.tls.cert = null;
@@ -76,19 +74,19 @@ register(class ConfigEndpoints extends EndpointContainer {
         return true;
     }
     
-    async [ mkEndpoint('ConfigCreateNetIface', 'system') ](trx) {
+    async [ mkEndpoint('ConfigCreateNetIface', 'system', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('ConfigDeleteAcmeProvider', 'system') ](trx) {
+    async [ mkEndpoint('ConfigDeleteAcmeProvider', 'system', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('ConfigDeleteCertificate', 'system') ](trx) {
+    async [ mkEndpoint('ConfigDeleteCertificate', 'system', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('ConfigDeleteKeyPair', 'system') ](trx) {
+    async [ mkEndpoint('ConfigDeleteKeyPair', 'system', { notify: true }) ](trx) {
     }
     
-    async [ mkEndpoint('ConfigDeleteNetIface', 'system') ](trx) {
+    async [ mkEndpoint('ConfigDeleteNetIface', 'system', { notify: true }) ](trx) {
     }
     
     async [ mkEndpoint('ConfigGetNetIface', 'system') ](trx) {
@@ -99,20 +97,18 @@ register(class ConfigEndpoints extends EndpointContainer {
             address: iface.address,
             domain: iface.domain,
             host: iface.host,
-            acme: iface.tls.acme
+            acme: iface.tls ? iface.tls.acme : '',
         };
 
         if ('tls' in iface) {
             data.privateKey = iface.tls.privateKey ? '[Private Key]' : '[NONE]';
             data.publicKey = iface.tls.publicKey ? '[Public Key]' : '[NONE]';
             data.cert = iface.tls.cert ? '[Certificate]' : '[NONE]';
-            data.certExpires = iface.tls.cert.expires ? iface.tls.cert.expires.toISOString() : '[NA]';
         }
         else {
             data.privateKey = '[NONE]';
             data.publicKey = '[NONE]';
             data.cert = '[NONE]';
-            data.certExpires = '[NONE]';
         }
 
         return data;

@@ -117,7 +117,7 @@
             let keyMenu = mkWPopupMenu()
             .append(
                 mkWMenuItem(txx.fwNetCreateKeyPair, 'CreateKeys')
-                .setAction(() => this.createKeyPair())
+                .setAction(mkFunctionMenuAction(() => this.createKeyPair()))
             );
 
             let publicKeyMenu = mkWPopupMenu()
@@ -128,13 +128,13 @@
             )
             .append(
                 mkWMenuItem(txx.fwNetCreateKeyPair, 'CreateKeys')
-                .setAction(() => this.createKeyPair())
+                .setAction(mkFunctionMenuAction(() => this.createKeyPair()))
             );
 
             let certMenu = mkWPopupMenu()
             .append(
                 mkWMenuItem(txx.fwNetCertify, 'Certify')
-                .setAction(() => this.certify())
+                .setAction(mkFunctionMenuAction(() => this.certify()))
                 .bind(this.editor.getActiveData(), 'privateKey', (mi, value) => value == '[NONE]' ? mi.disable() : mi.enable())
             );
 
@@ -178,13 +178,7 @@
                     readonly: true,
                     type: ScalarText,
                     menu: certMenu,
-                },
-                certExpires: {
-                    label: txx.fwNetCertExpires,
-                    readonly: true,
-                    type: ScalarText,
-                    menu: certMenu,
-                },
+                }
             });
 
             this.append(this.editor);
