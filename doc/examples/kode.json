@@ -37,7 +37,12 @@
             "address": "0.0.0.0",
             "domain": "somedomain.com",
             "host": "www.somedomain.com",
-            "tls": { "#NULL": 0 }
+            "tls": {
+                "acme": "letsEncryptStaging",
+                "privateKey": { "#NULL": 0 },
+                "publicKey": { "#NULL": 0 },
+                "cert": false
+            }
         }
     },
     "databases": {
