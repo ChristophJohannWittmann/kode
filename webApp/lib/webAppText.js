@@ -281,11 +281,20 @@ exports = module.exports = {
     fwTemplateEditorDefaultLanguage: {
         en: `Default Language`,
     },
+    fwTemplateEditorDuplicateSectionName: {
+        en: `Duplicate section name / language discovered`,
+    },
+    fwTemplateEditorDuplicateTemplateName: {
+        en: `Duplicate template name.`,
+    },
     fwTemplateEditorCreateSection: {
         en: `Create Section`,
     },
     fwTemplateEditorCreateTemplate: {
         en: `Create Template`,
+    },
+    fwTemplateEditorErrorWrongEndpoint: {
+        en: `Connection was made to the wrong enpoint.`,
     },
     fwTemplateEditorName: {
         en: `Template Name`,

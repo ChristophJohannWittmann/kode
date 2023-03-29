@@ -142,9 +142,13 @@
             this.templateOid = templateOid;
             this.setFlag('transient');
             this.setAttribute('autocomplete', 'off');
-            this.setRefreshers('TemplateModifyTemplate');
+            this.setRefreshers('TemplateCreateTemplate', 'TemplateModifyTemplate');
             this.showing = null;
             this.refresh();
+        }
+
+        copySection(sectionData) {
+            console.log(sectionData);
         }
 
         async createSection() {
@@ -153,6 +157,7 @@
                 mime: '*/*',
                 lang: '**',
                 b64: '',
+                text: '',
             };
 
             this.sectionArray.pushNew(sectionData);
@@ -161,13 +166,17 @@
             this.listen();
         }
 
+        eraseSection(sectionData) {
+            console.log(sectionData);
+        }
+
         async refresh() {
             if (this.templateOid > 0n) {
                 let templateData = await queryServer({ messageName: 'TemplateGetTemplate', oid: this.templateOid });
 
                 if (templateData) {
                     if (this.templateData) {
-                        if (templateData.updated.isLE(this.templateData.getField('updated'))) {
+                        if (templateData.updated.isLE(this.templateData.updated)) {
                             return;
                         }
                     }
@@ -192,10 +201,21 @@
                         ownerOid: webAppSettings.org() ? webAppSettings.org().oid : 0n,
                         name: '',
                         deflang: webAppSettings.lang(),
-                        sections: [],
+                        content: '',
                     });
                 }
             }
+
+            let sections = (() => {
+                if (this.templateData.content.length) {
+                    let array = fromJson(mkBuffer(this.templateData.content, 'base64'));
+                    array.forEach(section => section.text = mkBuffer(section.b64, 'base64').toString());
+                    return array;
+                }
+                else {
+                    return [];
+                }
+            })();
 
             this.ignore();
             this.clear();
@@ -251,7 +271,7 @@
                         classNames: 'screen-l',
                     },
                 ))
-                .push(...this.templateEditor.getActiveData().sections)
+                .push(...sections)
                 .on('dom.focusin', message => {
                     let editor = this.editorMap[ActiveData.id(message.htmlElement.pinned.data)];
 
@@ -272,7 +292,7 @@
             );
 
             for (let sectionData of this.sectionArray) {
-                let editor = new TemplateContentEditor(sectionData);
+                let editor = new TemplateContentEditor(this, sectionData);
                 editor.getEditBox().setAutoHeight();
                 this.editorMap[ActiveData.id(sectionData)] = editor;
             }
@@ -293,7 +313,7 @@
                 }
                 else if (message.action == 'add') {
                     let id = ActiveData.id(message.object);
-                    let editor = new TemplateContentEditor(message.object);
+                    let editor = new TemplateContentEditor(this, message.object);
                     editor.getEditBox().setAutoHeight();
                     this.editorMap[ActiveData.id(message.object)] = editor;
                     this.sectionArray.revealHead();
@@ -302,14 +322,18 @@
         }
 
         async save() {
-            console.log('SAVE...');
-            /*
-            let userData = this.userEditor.getValues();
+            let templateData = this.templateEditor.getValues();
 
-            if (userData.oid == 0n) {
+            templateData.content = mkBuffer(toJson(this.sectionArray.getValues().map(section => {
+                section.b64 = mkBuffer(section.text).toString('base64');
+                delete section.text;
+                return section;
+            }))).toString('base64');
+
+            if (templateData.oid == 0n) {
                 let result = await queryServer({
-                    messageName: 'UserCreateUser',
-                    userData: userData,
+                    messageName: 'TemplateCreateTemplate',
+                    templateData: templateData,
                 });
 
                 if (!result.ok) {
@@ -318,15 +342,19 @@
                 }
             }
             else {
-                await queryServer({
-                    messageName: 'UserModifyUser',
-                    userData: userData,
+                let result = await queryServer({
+                    messageName: 'TemplateModifyTemplate',
+                    templateData: templateData,
                 });
+
+                if (!result.ok) {
+                    await mkWAlertDialog({ text: txx[result.feedback] });
+                    return;
+                }
             }
 
-            this.userManager.refreshList();
+            this.templateManager.refreshList();
             this.getView().pop();
-            */
         }
     }
 
@@ -340,10 +368,10 @@
      * any old SVG class may be viewed or edited here.
     *****/
     class TemplateContentEditor extends WPanel {
-        constructor(sectionData) {
+        constructor(templateEditor, sectionData) {
             super('div');
             this.setClassName('fmwk-container');
-            sectionData.text = mkBuffer(sectionData.b64, 'base64').toString();
+            this.templateEditor = templateEditor;
 
             this.append(
                 (this.controlPanel = mkWNavBar())
@@ -357,7 +385,7 @@
                         mkIButton()
                         .setValue(txx.fwTemplateEditorSectionCopy)
                         .setWidgetStyle('button-small')
-                        .on('dom.click', message => console.log(message))
+                        .on('dom.click', message => this.templateEditor.copySection(sectionData))
                     )
                 )
                 .push(
@@ -367,7 +395,7 @@
                         .setValue(txx.fwTemplateEditorSectionDelete)
                         .setWidgetStyle('button-small')
                         .setStyle('margin-left', '12px')
-                        .on('dom.click', message => console.log(message))
+                        .on('dom.click', message => this.templateEditor.eraseSection(sectionData))
                     )
                 ),
 

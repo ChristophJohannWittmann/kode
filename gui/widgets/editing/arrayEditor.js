@@ -170,6 +170,10 @@
             }
         }
 
+        getValues() {
+            return ActiveData.value(this.objects);
+        }
+
         length() {
             return this.objects.length;
         }
@@ -229,7 +233,7 @@
 
         pop() {
             if (this.objects.length) {
-                this.removeObjectAt(0);
+                this.rmObjectAt(0);
             }
 
             return this;
@@ -245,15 +249,6 @@
                 }
 
                 this.table.getBody().append(this.mkRow(activeObject));
-                this.modified++;
-
-                if (this.modified == 1) {
-                    this.send({
-                        messageName: 'Widget.Modified',
-                        modified: true,
-                        widget: this,
-                    });
-                }
             }
 
             this.ignore();
@@ -263,10 +258,44 @@
 
         pushNew(...objects) {
             objects.forEach(object => object[newRowKey] = true);
+            this.modified++;
+
+            if (this.modified == 1) {
+                this.send({
+                    messageName: 'Widget.Modified',
+                    modified: true,
+                    widget: this,
+                });
+            }
+
             return this.push(...objects);
         }
 
-        removeObjectAt(index) {
+        revealHead() {
+            this.table.getHead().reveal();
+            return this;
+        }
+
+        async revert() {
+            await super.revert();
+            let done = false;
+
+            while (!done) {
+                done = true;
+
+                for (let i = 0; i < this.objects.length; i++) {
+                    if (this.objects[i][newRowKey]) {
+                        done = false;
+                        this.rmObjectAt(i);
+                    }
+                }
+            }
+
+            this.ignore();
+            this.listen();
+        }
+
+        rmObjectAt(index) {
             if (index >= 0 && index < this.objects.length) {
                 let object = this.objects[index];
                 let oid = ActiveData.id(object);
@@ -296,33 +325,9 @@
             return this;
         }
 
-        revealHead() {
-            this.table.getHead().reveal();
-            return this;
-        }
-
-        async revert() {
-            await super.revert();
-            let done = false;
-
-            while (!done) {
-                done = true;
-
-                for (let i = 0; i < this.objects.length; i++) {
-                    if (this.objects[i][newRowKey]) {
-                        done = false;
-                        this.removeObjectAt(i);
-                    }
-                }
-            }
-
-            this.ignore();
-            this.listen();
-        }
-
         shift() {
             if (this.objects.length) {
-                this.removeObjectAt(this.objects.length - 1);
+                this.rmObjectAt(this.objects.length - 1);
             }
 
             return this;
@@ -342,15 +347,6 @@
                 }
 
                 this.table.getBody().prepend(this.mkRow(activeObject));
-                this.modified++;
-
-                if (this.modified == 1) {
-                    this.send({
-                        messageName: 'Widget.Modified',
-                        modified: true,
-                        widget: this,
-                    });
-                }
             }
 
             this.ignore();
@@ -360,6 +356,16 @@
 
         unshiftNew(...objects) {
             objects.forEach(object => object[newRowKey] = true);
+            this.modified++;
+
+            if (this.modified == 1) {
+                this.send({
+                    messageName: 'Widget.Modified',
+                    modified: true,
+                    widget: this,
+                });
+            }
+
             return this.unshift(...objects);
         }
     });

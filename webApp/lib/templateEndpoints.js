@@ -23,6 +23,11 @@
 
 
 /*****
+ * Templates are at the heart of external person and system communications.  A
+ * template provides a name, and a content section with mulitple sections.  The
+ * content is actually base64 encoding of a js array.  This package of endpoints
+ * provides the means for managing templates for the user's current organization
+ * setting.
 *****/
 register(class TemplateEndpoints extends EndpointContainer {
     constructor(webapp) {
@@ -30,15 +35,71 @@ register(class TemplateEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('TemplateCreateTemplate', 'template', { notify: true }) ](trx) {
+        if (trx.templateData.oid == 0n) {
+            let session = await Ipc.queryPrimary({
+                messageName: '#SessionManagerGetSession',
+                session: trx['#Session'],
+            });
+
+            let dbc = await trx.connect();
+            let template = mkTemplateObject(trx.templateData, session);
+
+            if (await template.validate(dbc) !== true) {
+                return { ok: false, feedback: template.feedback };
+            }
+
+            await template.save(dbc);
+            return { ok: true };
+        }
+
+        return { ok: false, feedback: 'fwTemplateEditorErrorWrongEndpoint' };
     }
     
     async [ mkEndpoint('TemplateEraseTemplate', 'template', { notify: true }) ](trx) {
+        if (trx.templateData.oid > 0n) {
+            let session = await Ipc.queryPrimary({
+                messageName: '#SessionManagerGetSession',
+                session: trx['#Session'],
+            });
+
+            let template = mkTemplateObject(trx.templateData, session);
+
+            if (template.ownerType == 'DboOrg' && template.ownerOid == session.orgOid) {
+                await template(await trx.connect());
+            }
+        }
+
+        return { ok: true };
     }
     
     async [ mkEndpoint('TemplateGetTemplate', 'template') ](trx) {
+        let session = await Ipc.queryPrimary({
+            messageName: '#SessionManagerGetSession',
+            session: trx['#Session'],
+        });
+
+        return await Templates.getTemplate(await trx.connect(), session.orgOid, trx.oid);
     }
     
     async [ mkEndpoint('TemplateModifyTemplate', 'template', { notify: true }) ](trx) {
+        if (trx.templateData.oid > 0n) {
+            let session = await Ipc.queryPrimary({
+                messageName: '#SessionManagerGetSession',
+                session: trx['#Session'],
+            });
+
+            let dbc = await trx.connect();
+            let template = mkTemplateObject(trx.templateData, session);
+
+            if (await template.validate(dbc) !== true) {
+                return { ok: false, feedback: template.feedback };
+            }
+
+            await template.save(dbc);
+            return { ok: true };
+        }
+
+        return { ok: false, feedback: 'fwTemplateEditorErrorWrongEndpoint' };
     }
     
     async [ mkEndpoint('TemplateSearchTemplates', 'template', { notify: true }) ](trx) {

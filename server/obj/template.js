@@ -23,9 +23,20 @@
 
 
 /*****
+ * The single object used for searching and otherwise managing groups of tempate
+ * objects.  One of the main features is that the Templates and TemplateObject
+ * classes switch between the "content" format an "sections" format.  Contents
+ * is a base64 string containing the content as an array of sections.  Each
+ * section is an object with the "b64" property being the base64 representation
+ * of the content value, whether that value is interpreted as text or as binary.
 *****/
 singleton(class Templates {
-    async getTemplate(dbc, oid) {
+    async getTemplate(dbc, orgOid, oid) {
+        let dboTemplate = await getDboTemplate(dbc, oid);
+
+        if (dboTemplate && dboTemplate.ownerOid == orgOid) {
+            return mkTemplateObject(dboTemplate);
+        }
     }
 
     async list(dbc, name) {
@@ -43,29 +54,13 @@ singleton(class Templates {
     }
 
     async search(dbc, orgOid, pattern) {
-        /*
-        return [
-            mkTemplateObject({
-                oid: 3n,
-                orgOid: 2n,
-                ownerType: 'DboOrg',
-                ownerOid: 2n,
-                name: 'User Verify',
-                parts: [
-                    { name: 'body', mime: 'text/html', b64: 'PGh0bWw+CiAgICA8aGVhZD4KICAgIDwvaGVhZD4KICAgIDxib2R5PgogICAgICAgIDxoMT5QbGVhc2UgVmVyaWZ5IFlvdXJzZWxmPC9oMT4KICAgIDwvYm9keT8KPC9odG1sPg==' },
-                    { name: 'subject', mime: 'text/plain', b64: `PGh0bWw+CiAgICA8aGVhZD4KICAgIDwvaGVhZD4KICAgIDxib2R5PgogICAgICAgIDxoMT5QbGVhc2UgVmVyaWZ5IFlvdXJzZWxmPC9oMT4KICAgIDwvYm9keT8KPC9odG1sPg==` },
-                ]
-            })
-        ];
-        */
-
         try {
             if (pattern.indexOf('*') >= 0) {
                 return (await selectDboTemplate(dbc, `_org_oid=${orgOid}`, '_name ASC limit 20'))
                 .map(dboTemplate => mkTemplateObject(dboTemplate));
             }
             else {
-                return (await selectDboTemplate(dbc, `_name ~* '${pattern}' AND _org_oid=${orgOid}`, '_name ASC limit 20'))
+                return (await selectDboTemplate(dbc, `_name ~* '${DboTemplate.toDbmsValue(dbc, 'oid', pattern)}' AND _org_oid=${orgOid}`, '_name ASC limit 20'))
                 .map(dboTemplate => mkTemplateObject(dboTemplate));
             }
         }
@@ -77,21 +72,73 @@ singleton(class Templates {
 
 
 /*****
+ * TemplateObject extends DboTemplate and helps with the management of section
+ * values.  The TemplateObject's content is a blob of b64, which is JSON text
+ * of an array of sections.  Each section has some properties, including "b64",
+ * which is the base64 encoding of the section's content.  This encoding is
+ * applied for both text and binary template content.
 *****/
 register(class TemplateObject extends DboTemplate {
-    constructor(properties) {
+    constructor(properties, session) {
         super(properties);
+        this.feedback = '';
+
+        if (this.oid == 0n) {
+            if (session) this.orgOid = session.orgOid;
+            if (session) this.ownerOid = session.orgOid;
+            this.created = mkTime();
+        }
+
+        this.updated = mkTime();
     }
 
     getName() {
         return this.name;
     }
 
-    getPartNames() {
-        return Object.keys(this.parts);
+    getSection(name) {
+        return this.getSections().filter(section => section.name == name)[0];
+    }
+
+    getSectionContent(name) {
+        let section = this.getSections().filter(section => section.name == name)[0];
+        return section ? mkBuffer(section.b64, 'base64').toString() : '';
+    }
+
+    getSections() {
+        return fromJson(mkBuffer(this.content, 'base64').toString());
+    }
+
+    getSectionNames() {
+        return this.getSections().map(section => section.name);
     }
 
     [Symbol.iterator]() {
+        this.getSections()[Symbol.iterator]();
+    }
 
+    async validate(dbc) {
+        let dups = await selectDboTemplate(dbc, `_org_oid=${this.orgOid} AND _name=${this.toDbms(dbc, 'name')}`);
+
+        if (dups.length == 1 && dups[0].oid != this.oid) {
+            this.feedback = 'fwTemplateEditorDuplicateTemplateName';
+            return false;
+        }
+
+        let sectionNames = mkStringSet();
+
+        for (let section of this.getSections()) {
+            if (sectionNames.has(section.name)) {
+                if (section.lang == this.lang) {
+                    this.feedback = 'fwTemplateEditorDuplicateSectionName';
+                    return false;
+                }
+            }
+            else {
+                sectionNames.set(section.name);
+            }
+        }
+
+        return true;
     }
 });
