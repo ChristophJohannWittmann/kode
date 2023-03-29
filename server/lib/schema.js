@@ -299,7 +299,7 @@ mkDbSchema(
         ]
     },
     {
-        name: 'userSetting',
+        name: 'userPreference',
         columns: [
             { name: 'userOid',     type: dbInt64            },
             { name: 'name',        type: dbText, size:   50 },
