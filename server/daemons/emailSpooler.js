@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017-2022 Kode Programming
+ * Copyright (c) 2017-2023 Kode Programming
  * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy

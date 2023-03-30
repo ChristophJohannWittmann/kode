@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2017-2022 Kode Programming
+ * Copyright (c) 2017-2023 Kode Programming
  * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -120,33 +120,31 @@ async function loadOrgPreference(dbc) {
     let preference = await selectOneDboPreference(dbc, `_name='Orgs'`);
 
     if (!preference) {
-        preference = mkDboPreference({
-            name: 'Orgs',
-            value: {}
-        });
+        if (typeof Config.orgs == 'object') {
+            preference = mkDboPreference({
+                name: 'Orgs',
+                value: Config.orgs,
+            });
+
+            let config = await loadConfigFile();
+            delete config.orgs;
+            await config.save();
+        }
+        else {
+            preference = mkDboPreference({
+                name: 'Orgs',
+                value: {
+                    on: false,
+                    dbms: 'org_${fillNumber(5, oid)}',
+                }
+            });
+        }
 
         await preference.save(dbc);
     }
 
-    if (typeof preference.value.active == 'boolean') {
-        env.orgs = preference.value.active;
-    }
-    else if (typeof Config.orgs == 'boolean') {
-        env.orgs = Config.orgs;
-        preference.value.active = env.orgs;
-        await preference.save(dbc);
-    }
-    else {
-        throw new Error(`Expecting single-use boolean value called "orgs" in "${env.configPath}"!`);
-    }
-
-    if ('orgs' in Config) {
-        let config = await loadConfigFile();
-        delete config.orgs;
-        await config.save();
-    }
-
-    logPrimary(`    Server is operating in "${env.orgs ? 'Org' : 'non-Org'}" mode.`);
+    env.orgs = preference.value;
+    logPrimary(`    Orgs mode: ${JSON.stringify(env.orgs)}`);
 }
 
 
@@ -466,60 +464,6 @@ async function seedUser(dbc) {
 *****/
 async function developmentHook() {
     let dbc = await dbConnect();
-
-    /*
-    let user = await Users.get(dbc, 1n);
-    await user.setGrant(dbc, { permission: 'template' });
-    */
-
-    /*
-    let link = await mkLink(dbc, {
-        reason: 'test',
-        limit: 4,
-        expires: mkTime(2023, 2, 28),
-        action: {
-            type: 'redirect',
-            url: 'http://google.com',
-        }
-    });
-    console.log(link);
-    */
-
-    /*
-    setTimeout(async () => {
-        let dbc = await dbConnect();
-
-        let response = await Ipc.queryPrimary({
-            messageName: '#EmailSpoolerSpool',
-            bulk: false,
-            reason: 'ResetPassword',
-            reasonType: 'DboUser',
-            reasonOid: 4743n,
-            from: { addr: 'charlie@infosearchtest.com', name: 'Charlie Root' },
-            subject: 'Welcome back my friends.',
-            to: { addr: 'chris.wittmann@icloud.com', name: 'Christoph Wittmann' },
-            text: 'TEST MESSAGE!',
-        });
-
-        await dbc.commit();
-        await dbc.free();
-
-        console.log(response);
-    }, 1000);
-    */
-
-    /*
-    let url = '/test/url/dog';
-    let hook = mkWebBlob(url, 'text/plain', 'Hello Value');
-    await hook.register(true);
-
-    setTimeout(async () => {
-        console.log(`awaiting ${url}`);
-        await Ipc.queryPrimary({ messageName: '#WebLibraryWait', url: url });
-        console.log('ACCEPTED');
-        hook.deregister();
-    }, 100);
-    */
 
     await dbc.commit();
     await dbc.free();

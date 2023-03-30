@@ -48,6 +48,10 @@ register(class SelfEndpoints extends EndpointContainer {
         return DarkKode.getClass(trx.libName, trx.className);
     }
     
+    async [ mkEndpoint('SelfGetOrgsPreference') ](trx) {
+        return (await selectOneDboPreference(await trx.connect(), `_name='Orgs'`)).value.on;
+    }
+    
     async [ mkEndpoint('SelfListGrants') ](trx) {
         return await Ipc.queryPrimary({
             messageName: '#SessionManagerListGrants',

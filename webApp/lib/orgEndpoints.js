@@ -41,8 +41,7 @@ register(class OrgEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('OrgGetOrg', 'org', { notify: false }) ](trx) {
-        let org = await getDboOrg(await trx.connect(), trx.orgOid);
-        return org;
+        return await getDboOrg(await trx.connect(), trx.orgOid);
     }
     
     async [ mkEndpoint('OrgListOrgs', 'org', { notify: false }) ](trx) {

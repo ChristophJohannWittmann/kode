@@ -1,5 +1,5 @@
 /*****
- * Copyright (c) 2017-2022 Kode Programming
+ * Copyright (c) 2017-2023 Kode Programming
  * https://github.com/KodeProgramming/kode/blob/main/LICENSE
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -266,6 +266,35 @@ register(function copy(src) {
     }
 
     return copy;
+});
+
+
+/*****
+ * This utility attempts to provide an accurate fixed-width numberic value based
+ * on the provided width parameter.  If the number is wider thant width, a value
+ * of all asterisks will be returned.  Other wise, the number is returned and
+ * will be zero-padded as necessary to hit the width specified in the call.
+*****/
+register(function fillNumber(n, width) {
+    if (typeof n == 'number' || typeof n == 'bigint') {
+        let text = n.toString();
+        let len = text.length;
+
+        if (l == width) {
+            return text;
+        }
+        else if (l > width) {
+            return fillWithChar(width, '*');
+        }
+        else {
+            return [
+                fillWithChar(len - width, '0'),
+                text,
+            ].join('');
+        }
+    }
+
+    return '';
 });
 
 

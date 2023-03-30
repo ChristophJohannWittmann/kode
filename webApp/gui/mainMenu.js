@@ -35,11 +35,13 @@ register(class MainMenu extends WPopupMenu {
         global.mainMenu = this;
 
         return new Promise(async (ok, fail) => {
-            if (webAppSettings.user().orgOid == 0) {
-                this.append(
-                    mkWMenuItem(txx.fwMenuOrgs, "Orgs")
-                    .setAction(mkSingletonViewMenuAction(mkOrgManager))
-                );
+            if (await queryServer({ messageName: 'SelfGetOrgsPreference' })) {
+                if (webAppSettings.user().orgOid == 0) {
+                    this.append(
+                        mkWMenuItem(txx.fwMenuOrgs, "Orgs")
+                        .setAction(mkSingletonViewMenuAction(mkOrgManager))
+                    );
+                }
             }
 
             this.append(

@@ -49,19 +49,21 @@ register(class Thunk {
     }
 
     async loadClient() {
-        let paths = this.opts.client.map(path => this.mkPath(path));
-        let clientCode = await buildClientCode(paths);
-        clientCode = `setContainer('${this.opts.container}');\n` + clientCode;
-        clientCode = Config.debug ? clientCode : await minifyJs(script);
+        if (this.opts.container) {
+            let paths = this.opts.client.map(path => this.mkPath(path));
+            let clientCode = await buildClientCode(paths);
+            clientCode = `setContainer('${this.opts.container}');\n` + clientCode;
+            clientCode = Config.debug ? clientCode : await minifyJs(script);
 
-        if (clientCode) {
-            this.clientCodeUrl = `/${this.opts.container}/CLIENTCODE.js`;
+            if (clientCode) {
+                this.clientCodeUrl = `/${this.opts.container}/CLIENTCODE.js`;
 
-            await mkWebBlob(
-                this.clientCodeUrl,
-                'text/javascript',
-                clientCode,
-            ).register();
+                await mkWebBlob(
+                    this.clientCodeUrl,
+                    'text/javascript',
+                    clientCode,
+                ).register();
+            }
         }
 
         return this;

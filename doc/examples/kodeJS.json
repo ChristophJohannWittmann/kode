@@ -1,5 +1,8 @@
 {
-    "orgs": true,
+    "orgs": {
+        "on": false,
+        "dbms": "org_${fillNumber(5, oid)}"
+    },
     "debug": true,
     "cache": false,
     "cacheMB": 10,
