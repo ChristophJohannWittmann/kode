@@ -30,12 +30,12 @@
  * that's a host that's not on a client application.
 *****/
 register(class Session {
-    constructor(user, workerId, idleMinutes) {
+    constructor(user, idleMinutes) {
         return new Promise(async (ok, fail) => {
             this.timeout = null;
+            this.workerId = 0;
             this.socketId = false;
             this.user = mkUserObject(user);
-            this.workerId = workerId;
             this.idleMinutes = idleMinutes;
             this.pendingMessages = [];
             this.dbc = await dbConnect();
@@ -157,8 +157,9 @@ register(class Session {
         return false;
     }
 
-    setSocket(webSocketId) {
+    setSocket(webSocketId, workerId) {
         this.socketId = webSocketId;
+        this.workerId = workerId;
         return this;
     }
 

@@ -89,7 +89,7 @@ singleton(class SessionManager extends Daemon {
     }
 
     async onCreateSession(message) {
-        let session = await mkSession(message.user, message['#Worker'], message.idleMinutes);
+        let session = await mkSession(message.user, message.idleMinutes);
         this.byKey[session.key] = session;
 
         if (session.user.oid in this.byUser) {
@@ -187,7 +187,7 @@ singleton(class SessionManager extends Daemon {
         let session = this.byKey[message.session];
 
         if (session) {
-            session.setSocket(message.socketId);
+            session.setSocket(message.socketId, message.workerId);
         }
     }
 

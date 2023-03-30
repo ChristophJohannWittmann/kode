@@ -53,7 +53,7 @@ register(class WebSocket extends Emitter {
         super();
         this.socket = socket;
         this.workerId = CLUSTER.isWorker ? CLUSTER.worker.id : '';
-        this.socketId = `${PROC.pid}/${this.workerId}/${WebSocket.nextSocketNumber++}`;
+        this.socketId = `${PROC.pid}.${WebSocket.nextSocketNumber++}`;
         WebSocket.webSockets[this.socketId] = this;
         this.socket.setTimeout(0);
         this.socket.setNoDelay();

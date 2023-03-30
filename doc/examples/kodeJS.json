@@ -23,13 +23,6 @@
             "account": { "#NULL": 0 },
             "publicKey": { "#NULL": 0 },
             "privateKey": { "#NULL": 0 }
-        },
-        "letsEncryptStaging": {
-            "name": "Let's Encrypt Staging",
-            "url": "https://acme-staging-v02.api.letsencrypt.org/directory",
-            "account": { "#NULL": 0 },
-            "publicKey": { "#NULL": 0 },
-            "privateKey": { "#NULL": 0 }
         }
     },
     "network": {

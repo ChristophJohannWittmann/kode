@@ -38,7 +38,6 @@
 register(class WebApp extends Webx {
     constructor(thunk, reference) {
         super(thunk, reference);
-        this.webSockets = {};
 
         if (Array.isArray(this.reference.text)) {
             this.reference.text.unshift(PATH.join(env.kodePath, 'webApp/lib/webAppText.js'));
@@ -226,12 +225,12 @@ register(class WebApp extends Webx {
 
                 if (message.messageName == '#SocketSession') {
                     let sessionKey = message['#Session'];
-                    this.webSockets[sessionKey] = webSocket;
 
                     Ipc.sendPrimary({
                         messageName: '#SessionManagerSetSocket',
                         session: sessionKey,
                         socketId: webSocket.socketId,
+                        workerId: CLUSTER.worker.id,
                     });
                 }
                 else if (message.messageName == '#Ping') {
