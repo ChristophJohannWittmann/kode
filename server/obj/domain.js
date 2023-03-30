@@ -33,7 +33,7 @@ singleton(class Domains {
 
     async ensureFromName(dbc, name) {
         let normal = name.toLowerCase().trim();
-        let domain = await selectOneDboDomain(dbc, `_name='${normal}'`);
+        let domain = await selectOneDboDomain(dbc, `_name=${dbc.str(dbText, normal)}`);
 
         if (!domain) {
             let segments = normal.split('.');
@@ -52,7 +52,7 @@ singleton(class Domains {
 
     async getFromName(dbc, name) {
         let normal = name.toLowerCase().trim();
-        return await selectOneDboDomain(dbc, `_name='${normal}'`);
+        return await selectOneDboDomain(dbc, `_name=${dbc.str(dbText, normal)}`);
     }
 
     async getFromOid(dbc, oid) {

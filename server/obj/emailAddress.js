@@ -33,7 +33,7 @@ singleton(class EmailAddresses {
 
     async ensureFromAddr(dbc, addr) {
         const normal = addr.toLowerCase().trim();
-        let emailAddress = await selectOneDboEmailAddress(dbc, `_addr='${normal}'`);
+        let emailAddress = await selectOneDboEmailAddress(dbc, `_addr=${dbc.str(dbText, normal)}`);
 
         if (!emailAddress) {
             let domainName;
@@ -51,7 +51,7 @@ singleton(class EmailAddresses {
 
     async getFromAddr(dbc, addr) {
         const normal = addr.toLowerCase().trim();
-        return await this.pin(dbc, await selectOneDboEmailAddress(dbc, `_addr='${normal}'`));
+        return await this.pin(dbc, await selectOneDboEmailAddress(dbc, `_addr=${dbc.str(dbText, normal)}`));
     }
 
     async getFromOid(dbc, oid) {

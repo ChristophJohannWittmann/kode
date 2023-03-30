@@ -2,4 +2,71 @@
  *** kodeJS Application Quickstart Guide
 ******************************************************************************/
 
-( 1)  sdlfkjsdf
+( 1)  Determine the installation directory on the host.
+
+( 2)  Use git to download and checkout the appropriate version of kodeJS.  In
+      the following example, use checkout to get the "steelblue" branch:
+
+            # git clone https://github.com/KodeProgramming/kodeJS <path>/kodeJS
+
+            # git checkout steelblue
+
+( 3)  Ensure your application modules have been copied to the appropriate directory.
+
+( 4)  Create a server configuration file by copying the example kodeJS.json file
+      from <kode-path>/doc/examples/kodeJS.json.
+
+( 5)  Before you run the kode framework for the first time, ensure you have your
+      organization settings configured.
+
+            "orgs": {
+                "on": false,
+                "dbms": "org_${fillNumber(5, oid)}"
+            },
+
+        "on" indicates whether the features pertaining to individual organizations
+        will be enabled.  If on !== true, all server users will have not associated
+        organization.
+
+( 6)  Set the following flags:
+
+        debug: debug mode disables browser file minification for debugging.
+
+        cache: true to enable servers to cache data, false is for debuggings.
+
+        cacheMB: If caching is enabled, limits the size of content to be cached.
+
+        logging: "console" is primarily for development and troubleshooting.  Use
+                 "dbms" for standard higher volumne operations.
+
+        operator: this is where you put in your entity informatiaon for creating
+                  a certification signing request (CSR).
+
+        administrators: array of name and email addresses who are the system admins.
+
+        network: enter your IP address, domain, and hostname.
+
+        servers.http: To get a basic web application running, use the default settings
+                      for the http server.
+
+        smtp: The default should be set to "null", meaning the empty or black hole
+              SMTP sending and receiving agent.
+
+        modules: an array of paths, either relative or absolute, for application
+                 modules that will be started by the kodeJS server.
+
+( 7)  To start you system in developer mode, i.e., not as a service/daemon, become
+      a privileged user and start the kode server:
+
+            # sudo su
+
+            # clear; node <path-to-kodeJS>/kodeJS/bootstrap.js /<path-to-kode.json>/kode.json
+
+( 8)  For the first server start, you'll notice a number of messages pertaining to a
+      database and database tables that were created.
+
+( 9)  A user with the email of "charlie@kodeprogramming.org" is seeded into the application
+      database in the user table.  The initial password is set to "password".  If you have
+      started an application module with a web application, you will now be able to sign in
+      as "charlie@kodeprogramming.org".
+

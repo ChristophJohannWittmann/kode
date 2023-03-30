@@ -169,26 +169,6 @@ register(function defineDboType(schemaTable) {
             }
         }
 
-        toDbms(dbc, propertyName) {
-            if (propertyName in fwdMap) {
-                let dbcTypes = dbc.dbClass().dbTypes();
-                let propertyMeta = fwdMap[propertyName];
-                return dbcTypes[propertyMeta.type.name()].encode(this[propertyName])
-            }
-
-            return 'NULL';
-        }
-
-        static toDbmsValue(dbc, propertyName, value) {
-            if (propertyName in fwdMap) {
-                let dbcTypes = dbc.dbClass().dbTypes();
-                let propertyMeta = fwdMap[propertyName];
-                return dbcTypes[propertyMeta.type.name()].encode(value)
-            }
-
-            return 'NULL';
-        }
-
         async update(dbc) {
             this.updated = mkTime();
 

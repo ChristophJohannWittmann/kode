@@ -59,6 +59,7 @@ function escape(raw) {
 *****/
 const pgTypes = {
     dbBin: {
+        name: () => 'dbBin',
         type: () => 'bytea',
         fmwk: () => global.dbBin,
         encode: value => `E'\\x${value.toString('hex')}'`,
@@ -66,6 +67,7 @@ const pgTypes = {
     },
 
     dbBool: {
+        name: () => 'dbBool',
         type: () => 'bool',
         fmwk: () => global.dbBool,
         encode: value => value === true ? 'true' : 'false',
@@ -73,6 +75,7 @@ const pgTypes = {
     },
 
     dbFloat32: {
+        name: () => 'dbFloat32',
         type: () => 'float4',
         fmwk: () => global.dbFloat32,
         encode: value => value.toString(),
@@ -80,6 +83,7 @@ const pgTypes = {
     },
 
     dbFloat64: {
+        name: () => 'dbFloat64',
         type: () => 'float8',
         fmwk: () => global.dbFloat64,
         encode: value => value.toString(),
@@ -87,6 +91,7 @@ const pgTypes = {
     },
 
     dbInt16: {
+        name: () => 'dbInt16',
         type: () => 'int2',
         fmwk: () => global.dbInt16,
         encode: value => value.toString(),
@@ -94,6 +99,7 @@ const pgTypes = {
     },
 
     dbInt32: {
+        name: () => 'dbInt32',
         type: () => 'int4',
         fmwk: () => global.dbInt32,
         encode: value => value.toString(),
@@ -101,6 +107,7 @@ const pgTypes = {
     },
 
     dbInt64: {
+        name: () => 'dbInt64',
         type: () => 'int8',
         fmwk: () => global.dbInt64,
         encode: value => value.toString(),
@@ -108,6 +115,7 @@ const pgTypes = {
     },
 
     dbJson: {
+        name: () => 'dbJson',
         type: () => 'json',
         fmwk: () => dbJson,
         encode: value => `'${escape(toJson(value))}'`,
@@ -115,6 +123,7 @@ const pgTypes = {
     },
 
     dbKey: {
+        name: () => 'dbKey',
         type: () => 'bigserial primary key',
         fmwk: () => global.dbKey,
         encode: value => value.toString(),
@@ -122,6 +131,7 @@ const pgTypes = {
     },
 
     dbText: {
+        name: () => 'dbText',
         type: () => 'varchar',
         fmwk: () => global.dbText,
         encode: value => `'${escape(value)}'`,
@@ -129,6 +139,7 @@ const pgTypes = {
     },
 
     dbTime: {
+        name: () => 'dbTime',
         type: () => 'timestamp',
         fmwk: () => global.dbTime,
         encode: value => `'${value.toISOString()}'`,
@@ -136,6 +147,7 @@ const pgTypes = {
     },
   
     dbBinArray: {
+        name: () => 'dbBinArray',
         type: () => '_bytea',
         fmwk: () => global.dbBinArray,
         encode: array => `ARRAY[E:'\\x${array.map(el => el.toString("hex")).join("',E:'\\x")}']::bytea[]`,
@@ -143,6 +155,7 @@ const pgTypes = {
     },
   
     dbBoolArray: {
+        name: () => 'dbBoolArray',
         type: () => '_bool',
         fmwk: () => global.dbBoolArray,
         encode: array => `ARRAY[${array.map(el => el ? "true" : "false").join(",")}]::bool[]`,
@@ -150,6 +163,7 @@ const pgTypes = {
     },
   
     dbFloat32Array: {
+        name: () => 'dbFloat32Array',
         type: () => '_float4',
         fmwk: () => global.dbFloat32Array,
         encode: array => `ARRAY[${array.map(el => el.toString()).join(",")}]::float4[]`,
@@ -157,6 +171,7 @@ const pgTypes = {
     },
   
     dbFloat64Array: {
+        name: () => 'dbFloat64Array',
         type: () => '_float8',
         fmwk: () => global.dbFloat64Array,
         encode: array => `ARRAY[${array.map(el => el.toString()).join(",")}]::float4[]`,
@@ -164,6 +179,7 @@ const pgTypes = {
     },
   
     dbInt16Array: {
+        name: () => 'dbInt16Array',
         type: () => '_int2',
         fmwk: () => global.dbInt16Array,
         encode: array => `ARRAY[${array.map(el => el.toString()).join(",")}]::int2[]`,
@@ -171,6 +187,7 @@ const pgTypes = {
     },
   
     dbInt32Array: {
+        name: () => 'dbInt32Array',
         type: () => '_int4',
         fmwk: () => global.dbInt32Array,
         encode: array => `ARRAY[${array.map(el => el.toString()).join(",")}]::int4[]`,
@@ -178,6 +195,7 @@ const pgTypes = {
     },
   
     dbInt64Array: {
+        name: () => 'dbInt64Array',
         type: () => '_int8',
         fmwk: () => global.dbInt64Array,
         encode: array => `ARRAY[${array.map(el => el.toString()).join(",")}]::int8[]`,
@@ -185,6 +203,7 @@ const pgTypes = {
     },
   
     dbJsonArray: {
+        name: () => 'dbJsonArray',
         type: () => '_json',
         fmwk: () => global.dbJsonArray,
         encode: array => `ARRAY['${array.map(el => escape(toJson(el))).join("','")}']::json[]`,
@@ -192,6 +211,7 @@ const pgTypes = {
     },
   
     dbTextArray: {
+        name: () => 'dbTextArray',
         type: () => '_varchar',
         fmwk: () => global.dbTextArray,
         encode: array => `ARRAY['${array.map(el => escape(toJson(el))).join("','")}']::varchar[]`,
@@ -199,6 +219,7 @@ const pgTypes = {
     },
   
     dbTimeArray: {
+        name: () => 'dbTimeArray',
         type: () => '_timestamp',
         fmwk: () => global.dbTimeArray,
         encode: array => `ARRAY['${array.map(el => el.toISOString()).join("','")}']::timestamp[]`,
@@ -406,6 +427,10 @@ class PgClient {
         catch (e) {
             return { code: 'error', error: e };
         }
+    }
+
+    str(type, value) {
+        return pgTypes[type.name()].encode(value);
     }
 }
 

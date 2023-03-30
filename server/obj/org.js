@@ -32,11 +32,11 @@ singleton(class Orgs {
         let filter = [];
 
         if (name !== undefined) {
-            filter.push(`_name='${name}'`)
+            filter.push(`_name=${dbc.str(dbText, name)}`)
         }
 
         if (status !== undefined) {
-            filter.push(`_status='${status}'`)
+            filter.push(`_status=${dbc.str(dbText, status)}`)
         }
 
         if (filter.length == 0) {
@@ -52,7 +52,7 @@ singleton(class Orgs {
                 return await selectDboOrg(dbc, '', '_name ASC limit 20');
             }
             else {
-                return await selectDboOrg(dbc, `_name ~* '${pattern}'`, '_name ASC limit 20');
+                return await selectDboOrg(dbc, `_name ~* ${dbc.str(dbText, pattern)}`, '_name ASC limit 20');
             }
         }
         catch (e) {

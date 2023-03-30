@@ -3,7 +3,7 @@
         "on": false,
         "dbms": "org_${fillNumber(5, oid)}"
     },
-    "debug": true,
+    "debug": false,
     "cache": false,
     "cacheMB": 10,
     "logging": "console",

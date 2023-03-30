@@ -127,6 +127,10 @@ register(class DbClient {
             await this.query('START TRANSACTION');
         }
     }
+
+    str(type, value) {
+        return this.client.str(type, value);
+    }
 });
 
 

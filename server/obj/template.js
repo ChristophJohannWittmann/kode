@@ -60,11 +60,12 @@ singleton(class Templates {
                 .map(dboTemplate => mkTemplateObject(dboTemplate));
             }
             else {
-                return (await selectDboTemplate(dbc, `_name ~* '${DboTemplate.toDbmsValue(dbc, 'oid', pattern)}' AND _org_oid=${orgOid}`, '_name ASC limit 20'))
+                return (await selectDboTemplate(dbc, `_name ~* ${dbc.str(dbText, pattern)} AND _org_oid=${orgOid}`, '_name ASC limit 20'))
                 .map(dboTemplate => mkTemplateObject(dboTemplate));
             }
         }
         catch (e) {
+            console.log(e);
             return [];
         }
     }
@@ -118,7 +119,7 @@ register(class TemplateObject extends DboTemplate {
     }
 
     async validate(dbc) {
-        let dups = await selectDboTemplate(dbc, `_org_oid=${this.orgOid} AND _name=${this.toDbms(dbc, 'name')}`);
+        let dups = await selectDboTemplate(dbc, `_org_oid=${this.orgOid} AND _name=${dbc.str(dbText, this.name)}`);
 
         if (dups.length == 1 && dups[0].oid != this.oid) {
             this.feedback = 'fwTemplateEditorDuplicateTemplateName';

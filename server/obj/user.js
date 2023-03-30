@@ -34,7 +34,7 @@ singleton(class Users {
     }
 
     async authenticate(dbc, userName, password) {
-        let email = await selectOneDboEmailAddress(dbc, `_addr='${userName}'`);
+        let email = await selectOneDboEmailAddress(dbc, `_addr=${dbc.str(dbText, userName)}`);
 
         if (email && email.ownerType == 'DboUser') {
             let user = await getDboUser(dbc, email.ownerOid);
@@ -109,7 +109,7 @@ singleton(class Users {
     }
 
     async getEmail(dbc, oid) {
-        return await selectOneDboEmailAddress(dbc, `_owner_type='DboUser' AND _owner_oid='${oid}'`);
+        return await selectOneDboEmailAddress(dbc, `_owner_type='DboUser' AND _owner_oid=${oid}`);
     }
 
     async getUserData(dbc, oid) {
@@ -153,7 +153,7 @@ singleton(class Users {
     }
 
     async selectByEmail(dbc, email, orgOid) {
-        let dboEmailAddress = await selectOneDboEmailAddress(dbc, `_addr ~* '${email}' AND _org_oid = ${orgOid}`);
+        let dboEmailAddress = await selectOneDboEmailAddress(dbc, `_addr ~* ${dbc.str(dbText, email)} AND _org_oid = ${orgOid}`);
 
         if (dboEmailAddress && dboEmailAddress.ownerType == 'DboUser') {
             let user = await getDboUser(dbc, dboEmailAddress.ownerOid);
@@ -171,14 +171,14 @@ singleton(class Users {
 
         if (firstName) {
             if (lastName) {
-                return await selectDboUser(dbc, `_first_name ~* '${firstName.toLowerCase()}' AND _last_name ~* '${lastName.toLowerCase()} AND _org_oid = ${orgOid}`);
+                return await selectDboUser(dbc, `_first_name ~* ${dbc.str(dbText, firstName)} AND _last_name ~* ${dbc.str(dbText, lastName)}} AND _org_oid = ${orgOid}`);
             }
             else {
-                return await selectDboUser(dbc, `_first_name ~* '${firstName}' AND _org_oid = ${orgOid}`);
+                return await selectDboUser(dbc, `_first_name ~* ${dbc.str(dbText, firstName)} AND _org_oid = ${orgOid}`);
             }
         }
         else if (lastName) {
-            return await selectDboUser(dbc, `_last_name ~* '${lastName.toLowerCase()}' AND _org_oid = ${orgOid}`);
+            return await selectDboUser(dbc, `_last_name ~* ${dbc.str(dbText, lastName)} AND _org_oid = ${orgOid}`);
         }
 
         return selected.map(user => mkUserObject(user));
