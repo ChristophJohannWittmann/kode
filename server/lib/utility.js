@@ -209,7 +209,9 @@ register(async function recurseDirectories(...args) {
                 dirs.push(path);
 
                 (await FILES.readdir(path)).forEach(fileName => {
-                    stack.push(`${path}/${fileName}`);
+                    if (!fileName.startsWith('.')) {
+                        stack.push(`${path}/${fileName}`);
+                    }
                 });
             }
         } catch (e) {}
@@ -237,7 +239,9 @@ register(async function recurseFiles(...args) {
   
             if (stats.isDirectory()) {
                 (await FILES.readdir(path)).forEach(fileName => {
-                    stack.push(`${path}/${fileName}`);
+                    if (!fileName.startsWith('.')) {
+                        stack.push(`${path}/${fileName}`);
+                    }
                 });
             }
             else if (stats.isFile()) {
