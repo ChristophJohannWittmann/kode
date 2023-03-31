@@ -164,14 +164,14 @@ register(async function dbConnect(arg) {
     return dbc;
 });
 
-register(async function dbCreate(arg) {
-    let settings = mkDbSettings(arg); 
-    await DbClient.clients[settings.dbms].dbCreate(settings, settings.database);
+register(async function dbCreate(arg, dbName) {
+    let settings = mkDbSettings(arg);
+    await DbClient.clients[settings.dbms].dbCreate(settings, dbName);
 });
 
-register(async function dbDrop(arg) {
+register(async function dbDrop(arg, dbName) {
     let settings = mkDbSettings(arg); 
-    await DbClient.clients[settings.dbms].dbDrop(settings, settings.database);
+    await DbClient.clients[settings.dbms].dbDrop(settings, dbName);
 });
 
 register(async function dbList(arg) {

@@ -59,7 +59,17 @@ register(class EndpointContainer {
                 EndpointContainer.endpoints[endpoint.name] = endpoint;
 
                 webapp.on(endpoint.name, async trx => {
-                    let session = trx['#Session'] ? trx['#Session'] : '';
+                    let sessionKey = trx['#Session'] ? trx['#Session'] : '';
+
+                    if (sessionKey) {
+                        trx.session = await Ipc.queryPrimary({
+                            messageName: '#SessionManagerGetSession',
+                            session: trx['#Session'],
+                        });
+                    }
+                    else {
+                        trx.session = null;
+                    }
 
                     try {
                         if (endpoint.flags.unprotected) {
@@ -67,7 +77,7 @@ register(class EndpointContainer {
 
                             await mkDboWebappLog({
                                 userOid: 0n,
-                                session: session,
+                                session: sessionKey,
                                 endpoint: endpoint.name,
                                 status: 'ok',
                                 request: trx.incomingRequestData(),
@@ -75,7 +85,7 @@ register(class EndpointContainer {
 
                             await Ipc.queryPrimary({
                                 messageName: '#SessionManagerTouchSession',
-                                session: session,
+                                session: sessionKey,
                             });
 
                             trx.reply(result);
@@ -88,7 +98,7 @@ register(class EndpointContainer {
 
                                 await mkDboWebappLog({
                                     userOid: authorization.user.oid,
-                                    session: session,
+                                    session: sessionKey,
                                     endpoint: endpoint.name,
                                     status: 'ok',
                                     request: trx.incomingRequestData(),
@@ -96,7 +106,7 @@ register(class EndpointContainer {
 
                                 await Ipc.queryPrimary({
                                     messageName: '#SessionManagerTouchSession',
-                                    session: session,
+                                    session: sessionKey,
                                 });
 
                                 trx.reply(result);
@@ -104,7 +114,7 @@ register(class EndpointContainer {
                             else {
                                 await mkDboWebappLog({
                                     userOid: authorization.user.oid,
-                                    session: session,
+                                    session: sessionKey,
                                     endpoint: endpoint.name,
                                     status: 'unauthorized',
                                     request: trx.incomingRequestData(),
@@ -119,7 +129,7 @@ register(class EndpointContainer {
 
                         await mkDboWebappLog({
                             userOid: 0n,
-                            session: session,
+                            session: sessionKey,
                             endpoint: endpoint.name,
                             status: 'error',
                             request: trx.incomingRequestData(),

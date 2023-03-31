@@ -280,15 +280,15 @@ register(function fillNumber(n, width) {
         let text = n.toString();
         let len = text.length;
 
-        if (l == width) {
+        if (len == width) {
             return text;
         }
-        else if (l > width) {
+        else if (len > width) {
             return fillWithChar(width, '*');
         }
         else {
             return [
-                fillWithChar(len - width, '0'),
+                fillWithChar(width - len, '0'),
                 text,
             ].join('');
         }
@@ -304,7 +304,7 @@ register(function fillNumber(n, width) {
  * same char that's resturned as a string.
 *****/
 register(function fillWithChar(count, char) {
-    char == char === undefined ? '' : char;
+    char = char === undefined ? '' : char;
     let chars = [];
 
     for (let i = 0; i < count; i++) {

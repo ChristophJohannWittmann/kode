@@ -37,6 +37,7 @@ mkDbSchema(
         columns: [
             { name: 'ownerType',    type: dbText, size:  20 },
             { name: 'ownerOid',     type: dbInt64           },
+            { name: 'ownerOrg',     type: dbInt64           },
             { name: 'street',       type: dbText, size: 100 },
             { name: 'building',     type: dbText, size:  50 },
             { name: 'suite',        type: dbText, size:  50 },
@@ -50,6 +51,7 @@ mkDbSchema(
         ],
         indexes: [
             'ownerType:asc, ownerOid:asc',
+            'ownerOrg:asc',
         ]
     },
     {
@@ -83,6 +85,7 @@ mkDbSchema(
         columns: [
             { name: 'ownerType',     type: dbText, size:   20 },
             { name: 'ownerOid',      type: dbInt64            },
+            { name: 'ownerOrg',      type: dbInt64            },
             { name: 'domainOid',     type: dbInt64            },
             { name: 'user',          type: dbText, size:  200 },
             { name: 'addr',          type: dbText, size:  200 },
@@ -95,6 +98,7 @@ mkDbSchema(
         ],
         indexes: [
             'ownerType:asc, ownerOid:asc',
+            'ownerOrg:asc',
             'domainOid:asc',
             'user:asc',
             'addr:asc',
@@ -228,6 +232,7 @@ mkDbSchema(
         columns: [
             { name: 'ownerType',    type: dbText, size:    20 },
             { name: 'ownerOid',     type: dbInt64             },
+            { name: 'ownerOrg',     type: dbInt64             },
             { name: 'country',      type: dbText, size:    10 },
             { name: 'number',       type: dbText, size:    30 },
             { name: 'canonical',    type: dbText, size:    50 },
@@ -238,6 +243,7 @@ mkDbSchema(
         ],
         indexes: [
             'ownerType:asc, ownerOid:asc',
+            'ownerOrg:asc',
             'canonical:asc',
         ]
     },
@@ -296,6 +302,18 @@ mkDbSchema(
             'firstName:asc',
             'lastName:asc, firstName:asc',
             'authType:asc',
+        ]
+    },
+    {
+        name: 'userLog',
+        columns: [
+            { name: 'userOid',      type: dbInt64           },
+            { name: 'activity',     type: dbText, size:  50 },
+            { name: 'info',         type: dbText, size:  -1 },
+        ],
+        indexes: [
+            'userOid:asc',
+            'activity:asc',
         ]
     },
     {

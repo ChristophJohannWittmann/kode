@@ -37,6 +37,17 @@ register(class OrgEndpoints extends EndpointContainer {
     async [ mkEndpoint('OrgCreateOrg', 'org', { notify: true }) ](trx) {
         let org = mkDboOrg(trx.dboOrg);
         await org.save(await trx.connect());
+        const pref = await selectOneDboPreference(dbc, `_name='Orgs'`);
+
+        if (pref.value.on && typeof pref.value.dbName == 'string' && pref.value.dbName) {
+            let dbName;
+            eval('dbName=`' + pref.value.dbName + '`;');
+
+            if (!(await dbList()).has(dbName)) {
+                await dbCreate(null, dbName);
+            }
+        }
+
         return org;
     }
     
@@ -76,12 +87,17 @@ register(class OrgEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('OrgRemoveOrg', 'org', { notify: true }) ](trx) {
-        // TODO
-        // Stub to remove the org's individual DBMS.  This will remove
-        // data that's specific to the app and the org.  Note that the
-        // org object is never removed from the main OLTP DBMS.  It's only
-        // marked as being closed or inactive.
-        console.log('OrgRemoveOrg ENDPOINT STUB');
+        const pref = await selectOneDboPreference(dbc, `_name='Orgs'`);
+        let org = await getDboOrg(await trx.connect(), trx.orgOid);
+
+        if (pref.value.on && typeof pref.value.dbName == 'string' && pref.value.dbName) {
+            let dbName;
+            eval('dbName=`' + pref.value.dbName + '`;');
+
+            if (!(await dbList()).has(dbName)) {
+                await dbDrop(null, dbName);
+            }
+        }
     }
     
     async [ mkEndpoint('OrgSearchOrgs', 'org', { notify: false }) ](trx) {

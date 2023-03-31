@@ -36,13 +36,8 @@ register(class TemplateEndpoints extends EndpointContainer {
     
     async [ mkEndpoint('TemplateCreateTemplate', 'template', { notify: true }) ](trx) {
         if (trx.templateData.oid == 0n) {
-            let session = await Ipc.queryPrimary({
-                messageName: '#SessionManagerGetSession',
-                session: trx['#Session'],
-            });
-
             let dbc = await trx.connect();
-            let template = mkTemplateObject(trx.templateData, session);
+            let template = mkTemplateObject(trx.templateData, trx.session);
 
             if (await template.validate(dbc) !== true) {
                 return { ok: false, feedback: template.feedback };
@@ -57,14 +52,9 @@ register(class TemplateEndpoints extends EndpointContainer {
     
     async [ mkEndpoint('TemplateEraseTemplate', 'template', { notify: true }) ](trx) {
         if (trx.templateData.oid > 0n) {
-            let session = await Ipc.queryPrimary({
-                messageName: '#SessionManagerGetSession',
-                session: trx['#Session'],
-            });
+            let template = mkTemplateObject(trx.templateData, trx.session);
 
-            let template = mkTemplateObject(trx.templateData, session);
-
-            if (template.ownerType == 'DboOrg' && template.ownerOid == session.orgOid) {
+            if (template.ownerType == 'DboOrg' && template.ownerOid == trx.session.orgOid) {
                 await template(await trx.connect());
             }
         }
@@ -73,23 +63,13 @@ register(class TemplateEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('TemplateGetTemplate', 'template') ](trx) {
-        let session = await Ipc.queryPrimary({
-            messageName: '#SessionManagerGetSession',
-            session: trx['#Session'],
-        });
-
-        return await Templates.getTemplate(await trx.connect(), session.orgOid, trx.oid);
+        return await Templates.getTemplate(await trx.connect(), trx.session.orgOid, trx.oid);
     }
     
     async [ mkEndpoint('TemplateModifyTemplate', 'template', { notify: true }) ](trx) {
         if (trx.templateData.oid > 0n) {
-            let session = await Ipc.queryPrimary({
-                messageName: '#SessionManagerGetSession',
-                session: trx['#Session'],
-            });
-
             let dbc = await trx.connect();
-            let template = mkTemplateObject(trx.templateData, session);
+            let template = mkTemplateObject(trx.templateData, trx.session);
 
             if (await template.validate(dbc) !== true) {
                 return { ok: false, feedback: template.feedback };
@@ -103,11 +83,6 @@ register(class TemplateEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('TemplateSearchTemplates', 'template', { notify: true }) ](trx) {
-        let session = await Ipc.queryPrimary({
-            messageName: '#SessionManagerGetSession',
-            session: trx['#Session'],
-        });
-
-        return await Templates.search(await trx.connect(), session.orgOid, trx.pattern);
+        return await Templates.search(await trx.connect(), trx.session.orgOid, trx.pattern);
     }
 });

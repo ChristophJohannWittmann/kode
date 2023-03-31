@@ -39,12 +39,7 @@ register(class UserEndpoints extends EndpointContainer {
     }
 
     async [ mkEndpoint('UserCreateUser', 'user', { notify: true }) ](trx) {
-        let session = await Ipc.queryPrimary({
-            messageName: '#SessionManagerGetSession',
-            session: trx['#Session'],
-        });
-
-        trx.userData.orgOid = session.orgOid;
+        trx.userData.orgOid = trx.session.orgOid;
         return await Users.createUser(await trx.connect(), trx.userData);
     }
 
@@ -83,16 +78,11 @@ register(class UserEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('UserSearch', 'user') ](trx) {
-        let session = await Ipc.queryPrimary({
-            messageName: '#SessionManagerGetSession',
-            session: trx['#Session'],
-        });
-
         if (trx.criterion == 'email') {
             return await Users.selectByEmail(
                 await trx.connect(),
                 trx.email,
-                session.user.orgOid,
+                trx.session.user.orgOid,
             );
         }
         else if (trx.criterion == 'name') {
@@ -100,14 +90,14 @@ register(class UserEndpoints extends EndpointContainer {
                 await trx.connect(),
                 trx.firstName,
                 trx.lastName,
-                session.user.orgOid,
+                trx.session.user.orgOid,
             );
         }
         else if (trx.criterion == 'search') {
             return await Users.search(
                 await trx.connect(),
                 trx.pattern,
-                session.user.orgOid,
+                trx.session.user.orgOid,
             );
         }
         else {

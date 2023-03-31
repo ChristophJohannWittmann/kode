@@ -39,36 +39,72 @@ singleton(class Users {
         if (email && email.ownerType == 'DboUser') {
             let user = await getDboUser(dbc, email.ownerOid);
 
-            if (user && user.status == 'active') {
-                let orgOk = user.orgOid == 0n;
+            if (user) {
+                if (user.status == 'active') {
+                    let orgOk = user.orgOid == 0n;
 
-                if (!orgOk) {
-                    let org = await getDboOrg(dbc, user.orgOid);
+                    if (!orgOk) {
+                        let org = await getDboOrg(dbc, user.orgOid);
 
-                    if (typeof org == 'object') {
-                        if (org.status == 'active') {
-                            orgOk = true;
-                        }
-                    }
-                }
-
-                if (orgOk) {
-                    if (user.failures < 5) {
-                        let credentials = await selectOneDboCredentials(dbc, `_user_oid=${user.oid} AND _type='password' AND _status='current'`)
-
-                        if (credentials) {
-                            let crypto = await Crypto.digestUnsalted('sha512', `${user.oid}${password}${user.oid}`);
-
-                            if (crypto == credentials.crypto) {
-                                user.failures = 0;
-                                await user.save(dbc);
-                                return user;
+                        if (org instanceof DboOrg) {
+                            if (org.status == 'active') {
+                                orgOk = true;
                             }
                         }
                     }
 
-                    user.failures++;
-                    await user.save(dbc);
+                    if (orgOk) {
+                        if (user.failures < 5) {
+                            let credentials = await selectOneDboCredentials(dbc, `_user_oid=${user.oid} AND _type='password' AND _status='current'`)
+
+                            if (credentials) {
+                                let crypto = await Crypto.digestUnsalted('sha512', `${user.oid}${password}${user.oid}`);
+
+                                if (crypto == credentials.crypto) {
+                                    user.failures = 0;
+                                    await user.save(dbc);
+
+                                    await mkDboUserLog({
+                                        userOid: user.oid,
+                                        activity: 'signin',
+                                        info: 'ok',
+                                    }).save(dbc);
+
+                                    return user;
+                                }
+                            }
+
+                            await mkDboUserLog({
+                                userOid: user.oid,
+                                activity: 'signin',
+                                info: 'failed.password',
+                            }).save(dbc);
+                        }
+                        else {
+                            await mkDboUserLog({
+                                userOid: user.oid,
+                                activity: 'signin',
+                                info: 'failed.too-many-attempts',
+                            }).save(dbc);
+                        }
+
+                        user.failures++;
+                        await user.save(dbc);
+                    }
+                    else {
+                        await mkDboUserLog({
+                            userOid: user.oid,
+                            activity: 'signin',
+                            info: 'failed.org-inactive',
+                        }).save(dbc);
+                    }
+                }
+                else {
+                    await mkDboUserLog({
+                        userOid: user.oid,
+                        activity: 'signin',
+                        info: 'failed.user-inactive',
+                    }).save(dbc);
                 }
             }
         }
@@ -99,6 +135,12 @@ singleton(class Users {
             email.ownerType = 'DboUser';
             email.ownerOid = user.oid;
             await email.save(dbc);
+
+            await mkDboUserLog({
+                userOid: user.oid,
+                activity: 'user-create',
+                info: 'ok',
+            }).save(dbc);
         }
 
         return { ok: true, userOid: user.oid };

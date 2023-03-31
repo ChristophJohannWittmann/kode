@@ -373,9 +373,29 @@ async function seedUser(dbc) {
     }
 
     if (CLUSTER.isPrimary) {
+        let dbc = await dbConnect();
+
         for (dbDatabase of DbDatabase) {
             await dbDatabase.upgrade();
         }
+
+        const pref = await selectOneDboPreference(dbc, `_name='Orgs'`);
+
+        if (pref.value.on && typeof pref.value.dbName == 'string' && pref.value.dbName) {
+            let databases = await dbList();
+
+            for (let org of await selectDboOrg(dbc, '1=1')) {
+                let dbName;
+                eval('dbName=`' + pref.value.dbName + '`;');
+
+                if (!databases.has(dbName)) {
+                    await dbCreate(null, dbName);
+                }
+            }
+        }
+
+        await dbc.commit();
+        await dbc.free();
     }
 
     /********************************************

@@ -73,19 +73,14 @@ register(class SelfEndpoints extends EndpointContainer {
     
     async [ mkEndpoint('SelfSetOrg') ](trx) {
         if (typeof trx.orgOid == 'bigint' && trx.orgOid >= 0) {
-            let session = await Ipc.queryPrimary({
-                messageName: '#SessionManagerGetSession',
-                session: trx['#Session'],
-            });
-
             let org;
             let dbc = await trx.connect();
 
-            if (session.user.orgOid == 0) {
+            if (trx.session.user.orgOid == 0) {
                 org = await getDboOrg(dbc, trx.orgOid);
             }
             else {
-                org = await getDboOrg(dbc, session.user.orgOid);
+                org = await getDboOrg(dbc, trx.session.user.orgOid);
             }
 
             if (typeof org == 'object') {
@@ -110,22 +105,28 @@ register(class SelfEndpoints extends EndpointContainer {
     
     async [ mkEndpoint('SelfSetPassword', undefined, { password: true }) ](trx) {
         let dbc = await trx.connect();
-
-        let session = await Ipc.queryPrimary({
-            messageName: '#SessionManagerGetSession',
-            session: trx['#Session'],
-        });
-
-        let user = await Users.get(dbc, session.user.oid);
+        let user = await Users.get(dbc, trx.session.user.oid);
 
         if (await Ipc.queryPrimary({
             messageName: '#SessionManagerValidateVerificationCode',
             session: trx['#Session'],
             code: trx.verificationCode,
         })) {
+            await mkDboUserLog({
+                userOid: trx.session.user.oid,
+                activity: 'password-set',
+                info: 'ok',
+            }).save(await trx.connect());
+
             await user.setPassword(dbc, trx.password);
             return true;
         }
+
+        await mkDboUserLog({
+            userOid: trx.session.user.oid,
+            activity: 'password-set',
+            info: 'failed.potential-hack',
+        }).save(await trx.connect());
 
         return false;
     }
@@ -135,6 +136,12 @@ register(class SelfEndpoints extends EndpointContainer {
             messageName: '#SessionManagerCloseSession',
             session: trx['#Session'],
         });
+
+        await mkDboUserLog({
+            userOid: trx.session.user.oid,
+            activity: 'signout',
+            info: 'ok',
+        }).save(await trx.connect());
 
         return true;
     }
@@ -147,7 +154,15 @@ register(class SelfEndpoints extends EndpointContainer {
             milliseconds: 5*60*1000,
         });
 
+        // TODO -- actually send code via message.
         console.log(`Created code ${code}`);
+
+        await mkDboUserLog({
+            userOid: trx.session.user.oid,
+            activity: 'verify-start',
+            info: 'ok',
+        }).save(await trx.connect());
+
         return true;
     }
     
@@ -159,10 +174,22 @@ register(class SelfEndpoints extends EndpointContainer {
         });
 
         if (verification === false) {
+            await mkDboUserLog({
+                userOid: trx.session.user.oid,
+                activity: 'verify-entry',
+                info: 'failed.incorrect-verification-code',
+            }).save(await trx.connect());
+
             await pauseFor(700);
             return false;
         }
         else {
+            await mkDboUserLog({
+                userOid: trx.session.user.oid,
+                activity: 'verify-entry',
+                info: 'ok',
+            }).save(await trx.connect());
+
             return verification;
         }
     }
