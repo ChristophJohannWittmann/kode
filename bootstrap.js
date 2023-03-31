@@ -281,6 +281,7 @@ async function seedUser(dbc) {
         require('./server/lib/session.js');
         require('./server/daemons/dns.js');
         require('./server/daemons/events.js');
+        require('./server/daemons/permissions.js');
         require('./server/daemons/session.js');
         require('./server/daemons/emailSpooler.js');
         require('./server/daemons/webLibrary.js');
@@ -338,6 +339,7 @@ async function seedUser(dbc) {
                     if (stats.isFile() && thunkPath.endsWith('.js')) {
                         thunk = await require(thunkPath)(modulePath);
                         await thunk.loadSchemas();
+                        await thunk.loadPermissions();
                     }
                     else {
                         console.log(`Error: Thunk at "${thunkPath} is not a regular javascript file."`);

@@ -84,6 +84,19 @@ register(class Thunk {
         return this;
     }
 
+    async loadPermissions() {
+        if (CLUSTER.isPrimary) {
+            if (Array.isArray(this.opts.permissions)) {
+                for (let permission of Object.values(this.opts.permissions)) {
+                    await Ipc.sendPrimary({
+                        messageName: '#PermissionsManagerSetPermission',
+                        permission: permission,
+                    });
+                }
+            }
+        }
+    }
+
     async loadServer() {
         setContainer(this.opts.container);
 
@@ -173,5 +186,6 @@ global.fwThunk = mkThunk('', {
     server: [],
     client: [],
     dark: [],
+    permissions: [],
     references: [],
 });
