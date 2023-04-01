@@ -46,7 +46,7 @@ register(class PublicEndpoints extends EndpointContainer {
         let dbc = await trx.connect();
         let user = await Users.authenticate(dbc, trx.username, trx.password);
 
-        if (user instanceof DboUser) {
+        if (user instanceof User) {
             let sessionKey = await Ipc.queryPrimary({
                 messageName: '#SessionManagerCreateSession',
                 user: user,
@@ -54,7 +54,7 @@ register(class PublicEndpoints extends EndpointContainer {
             });
 
             let grants = await Ipc.queryPrimary({
-                messageName: '#SessionManagerListGrants',
+                messageName: '#SessionManagerGetGrants',
                 session: sessionKey,
             });
 

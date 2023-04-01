@@ -109,14 +109,14 @@ mkDbSchema(
         ]
     },
     {
-        name: 'grant',
+        name: 'grants',
         columns: [
             { name: 'userOid',      type: dbInt64             },
-            { name: 'context',      type: dbText,  size: 4000 },
+            { name: 'permissions',  type: dbText,  size:   -1 },
+            { name: 'context',      type: dbText,  size:   -1 },
         ],
         indexes: [
             'userOid:asc',
-            'context:asc',
         ]
     },
     {

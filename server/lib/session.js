@@ -35,7 +35,7 @@ register(class Session {
             this.timeout = null;
             this.workerId = 0;
             this.socketId = false;
-            this.user = mkUserObject(user);
+            this.user = mkUser(user);
             this.idleMinutes = idleMinutes;
             this.pendingMessages = [];
             this.dbc = await dbConnect();
@@ -52,7 +52,8 @@ register(class Session {
             }
 
             this.orgOid = this.user.orgOid;
-            this.grants = mkStringSet((await this.user.getGrants(this.dbc)).map(grant => grant.context));
+            this.grants = await this.user.getGrants(this.dbc);
+            this.grants.setPermission('self');
 
             await this.dbc.rollback();
             await this.dbc.free();
@@ -63,24 +64,7 @@ register(class Session {
     }
 
     async authorize(permission) {
-        if (permission) {
-            let context;
-
-            if (this.user.orgOid == 0) {
-                context = mkContext({ permission: permission });
-            }
-            else {
-                context = mkContext({ permission: permission, orgOid: this.orgOid });
-            }
-
-            if (this.grants.has(context.toBase64())) {
-                return { granted: true, user: this.user };
-            }
-
-            return { granted: false, user: this.user };
-        }
-
-        return { granted: true, user: this.user };
+        return { granted: this.grants.hasPermission(permission), user: this.user };
     }
 
     clearVerificationCode() {
@@ -127,19 +111,14 @@ register(class Session {
         return digits;
     }
 
-    hasSocket() {
-        return this.socketId !== false;
+    getGrants() {
+        let scrubbed = clone(this.grants.getPermissions());
+        delete scrubbed.self;
+        return scrubbed;
     }
 
-    listGrants() {
-        let grants = {};
-
-        for (let grant of this.grants) {
-            let grantObj = fromJson(mkBuffer(grant, 'base64').toString())[0];
-            grants[grantObj.permission] = grantObj;
-        }
-
-        return grants;
+    hasSocket() {
+        return this.socketId !== false;
     }
 
     queue(message) {

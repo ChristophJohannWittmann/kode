@@ -35,43 +35,43 @@ register(class SelfEndpoints extends EndpointContainer {
         super(webApp);
     }
     
-    async [ mkEndpoint('SelfAddAddress') ](trx) {
+    async [ mkEndpoint('SelfAddAddress', 'self') ](trx) {
     }
     
-    async [ mkEndpoint('SelfAddEmail') ](trx) {
+    async [ mkEndpoint('SelfAddEmail', 'self') ](trx) {
     }
     
-    async [ mkEndpoint('SelfAddPhone') ](trx) {
+    async [ mkEndpoint('SelfAddPhone', 'self') ](trx) {
     }
     
-    async [ mkEndpoint('SelfGetDarkWidget') ](trx) {
+    async [ mkEndpoint('SelfGetDarkWidget', 'self') ](trx) {
         return DarkKode.getClass(trx.libName, trx.className);
     }
     
-    async [ mkEndpoint('SelfGetOrgsPreference') ](trx) {
+    async [ mkEndpoint('SelfGetOrgsPreference', 'self') ](trx) {
         return (await selectOneDboPreference(await trx.connect(), `_name='Orgs'`)).value.on;
     }
     
-    async [ mkEndpoint('SelfListGrants') ](trx) {
+    async [ mkEndpoint('SelfListGrants', 'self') ](trx) {
         return await Ipc.queryPrimary({
-            messageName: '#SessionManagerListGrants',
+            messageName: '#SessionManagerGetGrants',
             session: trx['#Session'],
         });
     }
     
-    async [ mkEndpoint('SelfModify') ](trx) {
+    async [ mkEndpoint('SelfModify', 'self') ](trx) {
     }
     
-    async [ mkEndpoint('SelfModifyAddress') ](trx) {
+    async [ mkEndpoint('SelfModifyAddress', 'self') ](trx) {
     }
     
-    async [ mkEndpoint('SelfModifyEmail') ](trx) {
+    async [ mkEndpoint('SelfModifyEmail', 'self') ](trx) {
     }
     
-    async [ mkEndpoint('SelfModifyPhone') ](trx) {
+    async [ mkEndpoint('SelfModifyPhone', 'self') ](trx) {
     }
     
-    async [ mkEndpoint('SelfSetOrg') ](trx) {
+    async [ mkEndpoint('SelfSetOrg', 'self') ](trx) {
         if (typeof trx.orgOid == 'bigint' && trx.orgOid >= 0) {
             let org;
             let dbc = await trx.connect();
@@ -91,21 +91,21 @@ register(class SelfEndpoints extends EndpointContainer {
         return false;
     }
     
-    async [ mkEndpoint('SelfRemoveAddress') ](trx) {
+    async [ mkEndpoint('SelfRemoveAddress', 'self') ](trx) {
     }
     
-    async [ mkEndpoint('SelfRemoveEmail') ](trx) {
+    async [ mkEndpoint('SelfRemoveEmail', 'self') ](trx) {
     }
     
-    async [ mkEndpoint('SelfRemovePhone') ](trx) {
+    async [ mkEndpoint('SelfRemovePhone', 'self') ](trx) {
     }
     
-    async [ mkEndpoint('SelfResetPassword', undefined, { password: true }) ](trx) {
+    async [ mkEndpoint('SelfResetPassword', 'self', { password: true }) ](trx) {
     }
     
-    async [ mkEndpoint('SelfSetPassword', undefined, { password: true }) ](trx) {
+    async [ mkEndpoint('SelfSetPassword', 'self', { password: true }) ](trx) {
         let dbc = await trx.connect();
-        let user = await Users.get(dbc, trx.session.user.oid);
+        let user = await Users.getUser(dbc, trx.session.user.oid);
 
         if (await Ipc.queryPrimary({
             messageName: '#SessionManagerValidateVerificationCode',
@@ -131,7 +131,7 @@ register(class SelfEndpoints extends EndpointContainer {
         return false;
     }
     
-    async [ mkEndpoint('SelfSignOut', undefined, { password: true, verify: true }) ](trx) {
+    async [ mkEndpoint('SelfSignOut', 'self', { password: true, verify: true }) ](trx) {
         await Ipc.queryPrimary({
             messageName: '#SessionManagerCloseSession',
             session: trx['#Session'],
@@ -146,7 +146,7 @@ register(class SelfEndpoints extends EndpointContainer {
         return true;
     }
     
-    async [ mkEndpoint('SelfSendVerificationRequest', undefined, { unprotected: true }) ](trx) {
+    async [ mkEndpoint('SelfSendVerificationRequest', 'self', { unprotected: true }) ](trx) {
         let code = await Ipc.queryPrimary({
             messageName: '#SessionManagerCreateVerificationCode',
             session: trx['#Session'],
@@ -166,7 +166,7 @@ register(class SelfEndpoints extends EndpointContainer {
         return true;
     }
     
-    async [ mkEndpoint('SelfValidateVerificationDigits', undefined, { unprotected: true }) ](trx) {
+    async [ mkEndpoint('SelfValidateVerificationDigits', 'self', { unprotected: true }) ](trx) {
         let verification = await Ipc.queryPrimary({
             messageName: '#SessionManagerValidateVerificationDigits',
             session: trx['#Session'],
@@ -194,6 +194,6 @@ register(class SelfEndpoints extends EndpointContainer {
         }
     }
     
-    async [ mkEndpoint('SelfVerifyEmail', undefined, { verify: true }) ](trx) {
+    async [ mkEndpoint('SelfVerifyEmail', 'self', { verify: true }) ](trx) {
     }
 });

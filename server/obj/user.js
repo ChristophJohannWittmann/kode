@@ -23,15 +23,15 @@
 
 
 /*****
- * A singleton class used for selecting and manipulating UserObjects, which
- * are extensions of the DboUser wrapper class.  The select functions simplify
- * DBMS operations since searching and selecting may be complex and required
- * in multiple back-end coponents of the server framework.
+ * Provides back-end management of user-table objects, which are involved with
+ * a number of complex administrative and security procedures.  This singleton
+ * class provides services to create, modify, view, and analyze users.  Like
+ * the org object, once a user has been added to the DBMS, the record will not
+ * ever be deleted.  Users are modified and set to inactive rather than
+ * deleting them.  Most of the user management processes are security intensive
+ * and are thus best implemented in this back-end server object.
 *****/
 singleton(class Users {
-    constructor() {
-    }
-
     async authenticate(dbc, userName, password) {
         let email = await selectOneDboEmailAddress(dbc, `_addr=${dbc.str(dbText, userName)}`);
 
@@ -69,7 +69,7 @@ singleton(class Users {
                                         info: 'ok',
                                     }).save(dbc);
 
-                                    return user;
+                                    return mkUser(user);
                                 }
                             }
 
@@ -120,7 +120,7 @@ singleton(class Users {
             return { ok: false, feedback: 'fwUserEditorNoName' };
         }
 
-        let user = mkDboUser(userData);
+        let user = mkUser(userData);
         let email = await EmailAddresses.ensureFromAddr(dbc, userData.email);
 
         if (email.ownerOid > 0n) {
@@ -134,6 +134,7 @@ singleton(class Users {
             email.ownerType = 'DboUser';
             email.ownerOid = user.oid;
             await email.save(dbc);
+            await mkGrants(user).save(dbc);
 
             await mkDboUserLog({
                 userOid: user.oid,
@@ -145,12 +146,12 @@ singleton(class Users {
         return { ok: true, userOid: user.oid };
     }
 
-    async get(dbc, oid) {
-        return mkUserObject(await getDboUser(dbc, oid));
-    }
-
     async getEmail(dbc, oid) {
         return await selectOneDboEmailAddress(dbc, `_owner_type='DboUser' AND _owner_oid=${oid}`);
+    }
+
+    async getUser(dbc, oid) {
+        return mkUser(await getDboUser(dbc, oid));
     }
 
     async getUserData(dbc, oid) {
@@ -200,7 +201,7 @@ singleton(class Users {
             let user = await getDboUser(dbc, dboEmailAddress.ownerOid);
 
             if (user && user.status == 'active') {
-                return mkUserObject(user);
+                return mkUser(user);
             }
         }
 
@@ -222,48 +223,25 @@ singleton(class Users {
             return await selectDboUser(dbc, `_last_name ~* ${dbc.str(dbText, lastName)} AND _org_oid = ${orgOid}`);
         }
 
-        return selected.map(user => mkUserObject(user));
+        return selected.map(user => mkUser(user));
     }
 });
 
 
 /*****
- * The UserObject is an extension of the DboUser class, which is a wrapper for
- * DBMS user records.  These functions encapsulate the manipulation of user data
- * in a single class.  User objects extend their features to include supporting
- * DBMS objects: credentials, grants, addresses, emails, and phone numbers.
+ * An extension of the DbuUser, this class is a shadow object for managing and
+ * editing a user object.  The only constructor paramter is the DboUser object
+ * that's being shadowed.  This class provides for getting additional user data
+ * from the DBMS and taking care of complex assignment such as setting the
+ * password.
 *****/
-register(class UserObject extends DboUser {
+register(class User extends DboUser {
     constructor(properties) {
         super(properties);
     }
 
-    async activate() {
-        this.status = 'active';
-        return this;
-    }
-
-    async checkPasswordHistory() {
-        // ********************************************************
-        // -- TODO --
-        // ********************************************************
-        return true;
-    }
-
-    async clearGrant(dbc, grant) {
-        // ********************************************************
-        // -- TODO --
-        // ********************************************************
-        return true;
-    }
-
     async credentials(dbc) {
         return await selectOneDboCredentials(dbc, `_user_oid=${this.oid} AND _status='current'`);
-    }
-
-    async deactivate() {
-        this.status = 'inactive';
-        return this;
     }
 
     async getEmails(dbc) {
@@ -271,7 +249,7 @@ register(class UserObject extends DboUser {
     }
 
     async getGrants(dbc) {
-        return await selectDboGrant(dbc, `_user_oid=${this.oid}`);
+        return mkGrants(await selectOneDboGrants(dbc, `_user_oid=${this.oid}`));
     }
 
     async getHistory(dbc, data0, date1) {
@@ -289,31 +267,6 @@ register(class UserObject extends DboUser {
 
     async getPrimaryEmail(dbc) {
         return await selectOneDboUser(dbc, `_owner_type='DboUser' AND _owner_oid=${this.oid}`);
-    }
-
-    async sendEmail(dbc, email) {
-        // ********************************************************
-        // -- TODO --
-        // ********************************************************
-        return this;
-    }
-
-    async sendMMS(dbc, mms) {
-        // ********************************************************
-        // -- TODO --
-        // ********************************************************
-        return this;
-    }
-
-    async setGrant(dbc, grant) {
-        let context = mkContext(grant);
-
-        if (!(await selectOneDboGrant(dbc, `_context='${context.toBase64()}'`))) {
-            await mkDboGrant({
-                userOid: this.oid,
-                context: context.toBase64(),
-            }).save(dbc);
-        }
     }
 
     async setPassword(dbc, password) {
@@ -337,9 +290,86 @@ register(class UserObject extends DboUser {
 
         return this;
     }
+});
 
-    async zombify() {
-        this.status = 'zombie';
+
+/*****
+ * A permission is simple a unique string indentifier.  A grant is where that
+ * permission is granted to an application user.  Logically, a grant is an object
+ * that specifies the grant, as shown below.  In practise, the permission must
+ * also be converted to a base64 representation for internal use.
+ * 
+ *          { permission:"org" }
+ * 
+ * Additionally, a grant may contain an additional object called, the context
+ * object.  The overall application frameworks handles the basic permission,
+ * but if there is additional context data, that must be provides to the endpoiont
+ * that will handle the request to further restrict or limit the data provided
+ * by that endpooint.
+*****/
+register(class Grants extends DboGrants {
+    constructor(arg) {
+        if (arg instanceof DboGrants) {
+            super(arg);
+        }
+        else if (arg instanceof User) {
+            super({ 
+                userOid: arg.oid,
+                permissions: mkBuffer('{}').toString('base64'),
+                context: mkBuffer('{}').toString('base64'),
+            });
+        }
+    }
+
+    clearContext(permission, arg) {
+    }
+
+    clearPermission(permission) {
+        let permissions = fromJson(mkBuffer(this.permissions, 'base64').toString());
+        let context = fromJson(mkBuffer(this.context, 'base64').toString());
+        delete permissions[permission];
+        delete context[permission];
+        this.permissions = mkBuffer(toJson(permissions)).toString('base64');
+        this.context = mkBuffer(toJson(context)).toString('base64');
+        return this;
+    }
+
+    getContext(permission) {
+        if (this.hasPermission(permission)) {
+            return fromJson(mkBuffer(this.context, 'base64').toString())[permission];
+        }
+    }
+
+    getPermissions() {
+        return fromJson(mkBuffer(this.permissions, 'base64').toString());
+    }
+
+    hasPermission(permission) {
+        return permission in this.getPermissions();
+    }
+
+    setContext(permission, ...args) {
+        if (this.hasPermission(permission)) {
+            if (typeof args[0] == 'object') {
+                let context = fromJson(mkBuffer(this.context, 'base64').toString());
+                context[permission] = args[0];
+                this.context = mkBuffer(toJson(context)).toString('base64');
+            }
+            else if (typeof args[0] == 'string' && typeof args[1] != 'undefined') {
+                let context = fromJson(mkBuffer(this.context, 'base64').toString());
+                context[permission][args[0]] = args[1];
+                this.context = mkBuffer(toJson(context)).toString('base64');
+            }
+        }
+
+        return this;
+    }
+
+    setPermission(permission, context) {
+        let permissions = fromJson(mkBuffer(this.permissions, 'base64').toString());
+        permissions[permission] = true;
+        this.permissions = mkBuffer(toJson(permissions)).toString('base64');
+        this.setContext(permission, context ? context : new Object());
         return this;
     }
 });

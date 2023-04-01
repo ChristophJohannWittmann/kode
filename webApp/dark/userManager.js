@@ -242,6 +242,8 @@
                         type: ScalarNumber,
                     },
                 }),
+
+                new GrantsEditor(this),
             );
 
             this.listen();
@@ -271,6 +273,24 @@
 
             this.userManager.refreshList();
             this.getView().pop();
+        }
+    }
+
+
+    /*****
+    *****/
+    class GrantsEditor extends WPanel {
+        constructor(userEditor) {
+            super();
+            this.userEditor = userEditor;
+            this.refresh();
+        }
+
+        async refresh() {
+            this.append(
+                mkWidget('h2')
+                .setInnerHtml(toJson(await queryServer({ messageName: 'UserGetGrants' })), true)
+            );
         }
     }
 })();

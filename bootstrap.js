@@ -156,45 +156,29 @@ async function loadOrgPreference(dbc) {
 async function seedUser(dbc) {
     logPrimary('[ Seeding Initial User: Charlie Root ]');
 
-    let user = await mkUserObject({
+    let result = await Users.createUser(dbc, {
         firstName: 'Charlie',
         lastName: 'Root',
         status: 'active',
         authType: 'simple',
         verified: true,
         password: true,
-    }).save(dbc);
+        email: 'charlie@kodeprogramming.org',
+    });
 
-    await user.setPassword(dbc, 'password');
-    await user.setGrant(dbc, { permission: 'user' });
-    await user.setGrant(dbc, { permission: 'system' });
+    if (result.ok) {
+        let user = await Users.getUser(dbc, result.userOid);
+        await user.setPassword(dbc, 'password');
 
-    if (env.orgs) {
-        await user.setGrant(dbc, { permission: 'org' });
+        let grants = await user.getGrants(dbc);
+        grants.setPermission('user')
+        grants.setPermission('system')
+        await grants.save(dbc); 
+
+        if (env.orgs) {
+            await grants.setPermission('org').save(dbc);
+        }
     }
-
-    let domain = await mkDboDomain({
-        name: 'kodeprogramming.org',
-        tld: 'org',
-        verified: false,
-        lastVerified: mkTime(0),
-        error: '',
-    }).save(dbc);
-
-    let email = await mkDboEmailAddress({
-        ownerType: 'DboUser',
-        ownerOid: user.oid,
-        domainOid: domain.oid,
-        user: 'charlie',
-        addr: 'charlie@kodeprogramming.org',
-        verified: false,
-        lastVerified: mkTime(0),
-        lastDelivered: mkTime(0),
-        error: '',
-    }).save(dbc);
-
-    user.emailOid = email.oid;
-    await user.save(dbc);
 }
 
 
@@ -375,29 +359,9 @@ async function seedUser(dbc) {
     }
 
     if (CLUSTER.isPrimary) {
-        let dbc = await dbConnect();
-
         for (dbDatabase of DbDatabase) {
             await dbDatabase.upgrade();
         }
-
-        const pref = await selectOneDboPreference(dbc, `_name='Orgs'`);
-
-        if (pref.value.on && typeof pref.value.dbName == 'string' && pref.value.dbName) {
-            let databases = await dbList();
-
-            for (let org of await selectDboOrg(dbc, '1=1')) {
-                let dbName;
-                eval('dbName=`' + pref.value.dbName + '`;');
-
-                if (!databases.has(dbName)) {
-                    await dbCreate(null, dbName);
-                }
-            }
-        }
-
-        await dbc.commit();
-        await dbc.free();
     }
 
     /********************************************

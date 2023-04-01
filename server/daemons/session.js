@@ -114,6 +114,17 @@ singleton(class SessionManager extends Daemon {
         }
     }
 
+    async onGetGrants(message) {
+        if ('session' in message) {
+            if (message.session in this.byKey) {
+                let session = this.byKey[message.session];
+                return Message.reply(message, session.getGrants());
+            }
+        }
+
+        Message.reply(message, {});
+    }
+
     async onGetUserSessions(message) {
         if (message.userOid in this.byUser) {
         }
@@ -134,17 +145,6 @@ singleton(class SessionManager extends Daemon {
         }
 
         Message.reply(message, false);
-    }
-
-    async onListGrants(message) {
-        if ('session' in message) {
-            if (message.session in this.byKey) {
-                let session = this.byKey[message.session];
-                return Message.reply(message, session.listGrants());
-            }
-        }
-
-        Message.reply(message, {});
     }
 
     async onNotifyClient(message) {

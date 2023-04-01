@@ -46,6 +46,11 @@ register(class UserEndpoints extends EndpointContainer {
     async [ mkEndpoint('UserGetEmail', 'user', { notify: true }) ](trx) {
     }
 
+    async [ mkEndpoint('UserGetGrants', 'user', { notify: true }) ](trx) {
+        let user = mkUser(trx.session.user);
+        return await user.getGrants(await trx.connect());
+    }
+
     async [ mkEndpoint('UserGetUser', 'user', { notify: true }) ](trx) {
     }
 
