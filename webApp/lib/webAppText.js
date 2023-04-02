@@ -384,6 +384,9 @@ exports = module.exports = {
     fwUserManagerTitle: {
         en: `Users`,
     },
+    fwUserPermissionsTitle: {
+        en: `Permissions`,
+    },
 
     // ****************************************************************
     // Verification

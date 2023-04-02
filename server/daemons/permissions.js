@@ -73,12 +73,12 @@ singleton(class PermissionsManager extends Daemon {
         }
     }
 
-    async onHasPermission(message) {
-        Message.reply(message, message.permission in this.permissions);
+    async onGetPermissions(message) {
+        Message.reply(message, this.permissions);
     }
 
-    async onListPermissions(message) {
-        Message.reply(message, this.permissions);
+    async onHasPermission(message) {
+        Message.reply(message, message.permission in this.permissions);
     }
 
     async onSetPermission(message) {

@@ -52,7 +52,7 @@ register(class SelfEndpoints extends EndpointContainer {
         return (await selectOneDboPreference(await trx.connect(), `_name='Orgs'`)).value.on;
     }
     
-    async [ mkEndpoint('SelfListGrants', 'self') ](trx) {
+    async [ mkEndpoint('SelfGetGrants', 'self') ](trx) {
         return await Ipc.queryPrimary({
             messageName: '#SessionManagerGetGrants',
             session: trx['#Session'],

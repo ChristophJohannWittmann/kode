@@ -178,7 +178,7 @@ singleton(class Users {
         pattern = pattern.indexOf('*') >= 0 ? '' : pattern.trim();
 
         try {
-            return (await dbc.query(`
+            let found = (await dbc.query(`
                 SELECT u._oid AS "oid", u._first_name AS "firstName", u._last_name AS "lastName", e._addr as "email"
                 FROM _user u
                 JOIN _email_address e
@@ -188,6 +188,9 @@ singleton(class Users {
                 OR u._last_name ~* '${pattern}'
                 OR e._addr ~* '${pattern}')
             `)).data;
+
+            found.forEach(found => found.oid = BigInt(found.oid));
+            return found;
         }
         catch (e) {
             return [];
@@ -322,6 +325,13 @@ register(class Grants extends DboGrants {
     }
 
     clearContext(permission, arg) {
+        if (this.hasPermission(permission)) {
+            let context = fromJson(mkBuffer(this.context, 'base64').toString());
+            typeof arg == 'string' ? delete context[permission][arg] : context[permission] = {};
+            this.context = mkBuffer(toJson(context)).toString('base64');
+        }
+
+        return this;
     }
 
     clearPermission(permission) {
@@ -335,8 +345,13 @@ register(class Grants extends DboGrants {
     }
 
     getContext(permission) {
-        if (this.hasPermission(permission)) {
-            return fromJson(mkBuffer(this.context, 'base64').toString())[permission];
+        if (permission) {
+            if (this.hasPermission(permission)) {
+                return fromJson(mkBuffer(this.context, 'base64').toString())[permission];
+            }
+        }
+        else {
+            return fromJson(mkBuffer(this.context, 'base64').toString());
         }
     }
 

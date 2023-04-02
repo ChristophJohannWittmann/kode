@@ -79,6 +79,12 @@ register(class Thunk {
 
         if (!this.darkCodeUrl && !DarkKode.isEmpty(this.opts.container)) {
             this.darkCodeUrl = `/${this.opts.container}/DARKCODE.js`;
+
+            await mkWebBlob(
+                this.darkCodeUrl,
+                'text/javascript',
+                `setContainer('${this.opts.container}');\n` + DarkKode.getBlob(this.opts.container),
+            ).register();
         }
 
         return this;

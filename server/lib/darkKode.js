@@ -41,23 +41,19 @@ singleton(class DarkKode {
 
         if (libName in this.libs) {
             for (let className in this.libs[libName]) {
+                let fqcn = libName == 'webapp' ? className : `${libName}.${className}`;
+                let maker = libName == 'webapp' ? `mk${className}` : `${libName}.mk${className}`;
+
                 let js =
 `register(class ${className} extends DarkWidget {
-    static downloaded = false;
-
     constructor(...args) {
         super();
-
-        if (${className}.downloaded) {
-            return mk${className}(...args);
-        }
-        else {
-            return new Promise(async (ok, fail) => {
-                await this.download('${libName}');
-                ${className}.downloaded = true;
-                ok(mk${className}(...args));
-            });
-        }
+        
+        return new Promise(async (ok, fail) => {
+            await this.download('${libName}');
+            ${fqcn}.downloaded = true;
+            ok(${maker}(...args));
+        });
     }
 });`;
 
@@ -122,7 +118,7 @@ singleton(class DarkKode {
 
     isEmpty(libName) {
         if (libName in this.libs) {
-            return Object.keys(this.libs[libName]) == 0;
+            return Object.keys(this.libs[libName]).length == 0;
         }
 
         return true;

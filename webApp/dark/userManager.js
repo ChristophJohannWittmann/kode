@@ -242,9 +242,11 @@
                         type: ScalarNumber,
                     },
                 }),
-
-                new GrantsEditor(this),
             );
+
+            if (userData.oid > 0n) {
+                this.append(new GrantsEditor(this));
+            }
 
             this.listen();
             super.refresh();
@@ -287,10 +289,16 @@
         }
 
         async refresh() {
+            this.grants = await queryServer({ messageName: 'UserGetGrants', userOid: this.userEditor.userOid })
+            this.permissions = await queryServer({ messageName: 'UserGetPermissions' });
+
             this.append(
-                mkWidget('h2')
-                .setInnerHtml(toJson(await queryServer({ messageName: 'UserGetGrants' })), true)
+                mkWHrLite().setStyle('margin-top', '14px'),
+                mkWidget('h3').setInnerHtml(txx.fwUserPermissionsTitle),
             );
+
+            console.log(this.permissions);
+            console.log(this.grants);
         }
     }
 })();

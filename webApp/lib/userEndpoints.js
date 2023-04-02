@@ -23,6 +23,11 @@
 
 
 /*****
+ * This is the endpoint container for managing users if one has the "user"
+ * permission set.  For the currently opened organization, or none, these
+ * endpoints are used for managing users within that entity.  If the session
+ * currently has no org, then these endpoints will pertain to all users
+ * with NO associated org.
 *****/
 register(class UserEndpoints extends EndpointContainer {
     constructor(webapp) {
@@ -47,8 +52,19 @@ register(class UserEndpoints extends EndpointContainer {
     }
 
     async [ mkEndpoint('UserGetGrants', 'user', { notify: true }) ](trx) {
-        let user = mkUser(trx.session.user);
-        return await user.getGrants(await trx.connect());
+        let user = await Users.getUser(await trx.connect(), trx.userOid);
+        let grants = await user.getGrants(await trx.connect());
+
+        return {
+            permissions: grants.getPermissions(),
+            context: grants.getContext(),
+        };
+    }
+
+    async [ mkEndpoint('UserGetPermissions', 'user', { notify: true }) ](trx) {
+        return await Ipc.queryPrimary({
+            messageName: '#PermissionsManagerGetPermissions'
+        });
     }
 
     async [ mkEndpoint('UserGetUser', 'user', { notify: true }) ](trx) {

@@ -30,9 +30,10 @@
  * to support all of the webapp's built in features.
 *****/
 register(class MainMenu extends WPopupMenu {
-    constructor(grants) {
+    constructor() {
         super();
         global.mainMenu = this;
+        let grants = webAppSettings.grants();
 
         return new Promise(async (ok, fail) => {
             if (await queryServer({ messageName: 'SelfGetOrgsPreference' })) {

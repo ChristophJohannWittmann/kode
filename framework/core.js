@@ -149,10 +149,14 @@
                         let makerName = `mk${func.name}`;
                         func[SymbolCtor] = { container: chain, maker: makerName };
 
-                        let makerFunc = (...args) => {
+                        let makerFunc;
+                        eval(`makerFunc = function ${makerName}(...args) {
                             let made = Reflect.construct(func, args);
                             return made;
                         };
+                        
+                        makerFunc.container = container;
+                        `);
 
                         container[makerName] = makerFunc;
                         container[`${func.name}`] = func;

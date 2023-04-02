@@ -140,7 +140,8 @@ register(class FixedViewMenuAction extends MenuAction {
 register(class SingletonViewMenuAction extends MenuAction {
     constructor(maker, ...args) {
         super();
-        this.maker = maker;
+        this.makerName = maker.name;
+        this.makerContainer = maker.container;
         this.args = args;
         this.widget = null;
     }
@@ -153,7 +154,7 @@ register(class SingletonViewMenuAction extends MenuAction {
                 this.view.promote(this.widget);
             }
             else {
-                this.widget = await waitOn(this.maker(...this.args));
+                this.widget = await waitOn(this.makerContainer[this.makerName](...this.args));
                 this.view.push(this.widget);
                 this.menuItem.setOpen();
             }
@@ -180,7 +181,8 @@ register(class SingletonViewMenuAction extends MenuAction {
 register(class ToggleViewMenuAction extends MenuAction {
     constructor(maker, ...args) {
         super(view);
-        this.maker = maker;
+        this.makerName = maker.name;
+        this.makerContainer = maker.container;
         this.args = args;
         this.widget = null;
     }
@@ -189,7 +191,7 @@ register(class ToggleViewMenuAction extends MenuAction {
         await super.onClick(menuItem, message);
 
         if (!this.widget) {
-            this.widget = await waitOn(this.maker(...this.args));
+                this.widget = await waitOn(this.makerContainer[this.makerName](...this.args));
             this.view.push(this.widget);
             this.menuItem.disable();
         }
