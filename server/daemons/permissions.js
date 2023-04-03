@@ -32,34 +32,24 @@ singleton(class PermissionsManager extends Daemon {
     constructor() {
         super();
         this.permissions = {
-            dbms: {
-                name: 'dbms',
-                fmwk: true,
-                editor: '',
-            },
             org: {
                 name: 'org',
-                fmwk: true,
+                container: '',
                 editor: '',
             },
             system: {
                 name: 'system',
-                fmwk: true,
+                container: '',
                 editor: '',
             },
             template: {
                 name: 'template',
-                fmwk: true,
-                editor: '',
-            },
-            ticket: {
-                name: 'ticket',
-                fmwk: true,
+                container: '',
                 editor: '',
             },
             user: {
                 name: 'user',
-                fmwk: true,
+                container: '',
                 editor: '',
             },
         };
@@ -67,7 +57,7 @@ singleton(class PermissionsManager extends Daemon {
 
     async onClearPermission(message) {
         if (message.permission in this.permissions) {
-            if (!this.permissions[message.permission].fmwk) {
+            if (this.permissions[message.permission].container) {
                 delete this.permissions[message.permission];
             }
         }
@@ -83,7 +73,6 @@ singleton(class PermissionsManager extends Daemon {
 
     async onSetPermission(message) {
         let perm = clone(message.permission);
-        perm.fmwk = false;
         perm.editor = typeof perm.editor == 'string' ? perm.editor : '';
 
         if (!(perm.name in this.permissions)) {

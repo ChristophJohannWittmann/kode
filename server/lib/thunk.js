@@ -94,6 +94,8 @@ register(class Thunk {
         if (CLUSTER.isPrimary) {
             if (Array.isArray(this.opts.permissions)) {
                 for (let permission of Object.values(this.opts.permissions)) {
+                    permission.container = this.opts.container;
+                    
                     await Ipc.sendPrimary({
                         messageName: '#PermissionsManagerSetPermission',
                         permission: permission,

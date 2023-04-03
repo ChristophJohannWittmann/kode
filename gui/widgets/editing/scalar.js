@@ -168,6 +168,7 @@ register(class WScalar extends Widget {
         this.activeData = activeData;
         this.viewer = opts.type.mkViewer(opts).bind(activeData, key, Binding.valueBinding);
         this.editor = opts.type.mkEditor(opts).bind(activeData, key, Binding.valueBinding);
+        this.extra = null;
         this.append(this.viewer, this.editor);
         opts.readonly ? this.setReadOnly() : this.setReadWrite();
 
@@ -230,6 +231,15 @@ register(class WScalar extends Widget {
         }
 
         return ScalarText;
+    }
+
+    setExtra(widget) {
+        if (!this.extra) {
+            this.extra = widget;
+            this.append(this.extra);
+        }
+
+        return this;
     }
 
     setReadOnly() {

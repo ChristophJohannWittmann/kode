@@ -269,6 +269,25 @@ exports = module.exports = {
     },
 
     // ****************************************************************
+    // Permissions
+    // ****************************************************************
+    fwPermissionContextAvailable: {
+        en: `More ...`,
+    },
+    fwPermissionOrg: {
+        en: `Organizations`,
+    },
+    fwPermissionSystem: {
+        en: `System`,
+    },
+    fwPermissionTemplate: {
+        en: `Templates`,
+    },
+    fwPermissionUser: {
+        en: `Users`,
+    },
+
+    // ****************************************************************
     // Preferences
     // ****************************************************************
     fwPreferencesTitle: {

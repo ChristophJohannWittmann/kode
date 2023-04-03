@@ -66,7 +66,7 @@ register(class WObjectEditor extends WEditor {
                         .append(mkWScalar(this.fields, property, opts))
                         .setMenu(opts.menu)
                     )
-                )
+                );
             }
         }
 
@@ -77,6 +77,49 @@ register(class WObjectEditor extends WEditor {
         }
 
         return this;
+    }
+
+    addBreak(content) {
+        this.table.append(
+            mkWTableRow().append(
+                mkWTableCell()
+                .setAttribute('colspan', '2')
+                .append(content)
+            )
+        );
+
+        return this;
+    }
+
+    addField(property, value, options) {
+        let opts = Object.assign(new Object(), options);
+
+        if (typeof value == 'object' && !(value instanceof Time) && !(value instanceof Date)) {
+            value = '';
+        }
+
+        if (!opts.hidden) {
+            this.fields[property] = value;
+            opts.readonly = opts.readonly === true;
+            opts.disabled = opts.disabled === true;
+            opts.type = opts.type ? opts.type : WScalar.selectType(value);
+            let scalar;
+
+            this.table.append(
+                mkWTableRow().append(
+                    mkWTableCell()
+                    .setInnerHtml(opts.label ? opts.label : property),
+                    mkWTableCell()
+                    .setPanelState('focus', opts.focus)
+                    .append((scalar = mkWScalar(this.fields, property, opts)))
+                    .setMenu(opts.menu)
+                )
+            );
+
+            if (opts.extra instanceof Widget) {
+                scalar.setExtra(opts.extra);
+            }
+        }
     }
 
     getActiveData() {

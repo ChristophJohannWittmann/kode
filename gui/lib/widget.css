@@ -640,13 +640,13 @@ body {
  * Input Checkbox
  ***********************************************/
 [widget-style=checkbox] {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
     font-family: inherit;
     font-size: inherit;
     text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     padding-left: 6px;
     padding-right: 6px;
     border-style: solid;
@@ -928,55 +928,6 @@ body {
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
     border-color: var(--widget-disabled-border-color);
-}
-
-
-/***********************************************
- * Scalar Checkbox
- ***********************************************/
-[widget-style=checkbox] {
-    width: 32px;
-    height: 32px;
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    margin-top: 4px;
-    margin-bottom: 4px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    outline-color: var(--widget-outline-color);
-}
-[widget-style=checkbox]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-    cursor: pointer;
-}
-[widget-style=checkbox]:focus {
-    color: var(--widget-focus-color);
-    background-color: var(--widget-focus-background-color);
-    outline-style: solid;
-    outline-color: var(--outline-color);
-    outline-width: var(--widget-outline-width);
-}
-[widget-style=checkbox]:disabled {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: none;
-    font-size: var(--font-size);
-    font-family: var(--font-family);
-    text-decoration: none;
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
 }
 
 

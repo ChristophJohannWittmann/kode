@@ -147,6 +147,26 @@
             this.refresh();
         }
 
+        permissionExt(permission) {
+            let editor = null;
+            let name = `permission${permission.name[0].toUpperCase()}${permission.name.substr(1)}`;
+
+            if (permission.container) {
+                let labelKey = `${permission.container}Permission${permission.name[0].toUpperCase()}${permission.name.substr(1)}`
+                var label = labelKey in txx ? txx[labelKey] : name;
+            }
+            else {
+                let labelKey = `fwPermission${permission.name[0].toUpperCase()}${permission.name.substr(1)}`
+                var label = labelKey in txx ? txx[labelKey] : name;
+            }
+
+            if (typeof permission.editor == 'string' && permission.editor.length) {
+                eval(`editor = ${permission.editor}`);
+            }
+
+            return [ name, label, editor ];
+        }
+
         async refresh() {
             if (this.userOid > 0n) {
                 var userData = await queryServer({ messageName: 'UserGetUserData', oid: this.userOid });
@@ -188,10 +208,8 @@
             this.clear();
 
             this.append(
-                mkWidget('h3')
-                .setInnerHtml(txx.fwUserEditorTitle),
-
                 (this.userEditor = mkWObjectEditor())
+                .addBreak(mkWidget('h3').setInnerHtml(txx.fwUserEditorTitle))
                 .add(userData, {
                     email: {
                         label: txx.fwUserEditorEmail,
@@ -244,12 +262,60 @@
                 }),
             );
 
-            if (userData.oid > 0n) {
-                this.append(new GrantsEditor(this));
-            }
 
+            await this.refreshGrants(userData);
             this.listen();
             super.refresh();
+        }
+
+        async refreshGrants(userData) {
+            if (userData.oid > 0n) {
+                const permissions = await queryServer({ messageName: 'UserGetPermissions' });
+                const grants = await queryServer({ messageName: 'UserGetGrants', userOid: userData.oid });
+                this.userEditor.addBreak(mkWidget('h3').setInnerHtml(txx.fwUserPermissionsTitle));
+
+                for (let permissionKey of Object.keys(permissions).sort()) {
+                    let permission = permissions[permissionKey];
+                    let value = permissionKey in grants.permissions ? true : false;
+                    let [ name, label, editor ] = this.permissionExt(permission);
+
+                    if (editor) {
+                        if (permission.name in grants.permissions) {
+                            var context = grants.context[permission.name];
+                        }
+                        else {
+                            var context = new Object();
+                        }
+
+                        var extra = mkWidget('span')
+                        .setInnerHtml(txx.fwPermissionContextAvailable)
+                        .setStyle({
+                            cursor: 'pointer',
+                            marginLeft: '24px',
+                            verticalAlign: 'middle',
+                        })
+                        .bind(this.userEditor.getActiveData(), name, (widget, value) => {
+                            value ? widget.reveal() : widget.conceal();
+                        })
+                        .on('dom.click', message => {
+                            console.log(message)
+                            console.log(editor);
+                            console.log(context);
+                        });
+                    }
+                    else {
+                        var extra = null;
+                    }
+
+                    let options = new Object({
+                        type: ScalarBool,
+                        label: label,
+                        extra: extra,
+                    });
+
+                    this.userEditor.addField(name, value, options);
+                }
+            }
         }
 
         async save() {
@@ -276,29 +342,8 @@
             this.userManager.refreshList();
             this.getView().pop();
         }
-    }
 
-
-    /*****
-    *****/
-    class GrantsEditor extends WPanel {
-        constructor(userEditor) {
-            super();
-            this.userEditor = userEditor;
-            this.refresh();
-        }
-
-        async refresh() {
-            this.grants = await queryServer({ messageName: 'UserGetGrants', userOid: this.userEditor.userOid })
-            this.permissions = await queryServer({ messageName: 'UserGetPermissions' });
-
-            this.append(
-                mkWHrLite().setStyle('margin-top', '14px'),
-                mkWidget('h3').setInnerHtml(txx.fwUserPermissionsTitle),
-            );
-
-            console.log(this.permissions);
-            console.log(this.grants);
+        async toggleGrant(permission) {
         }
     }
 })();
