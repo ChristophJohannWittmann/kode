@@ -63,6 +63,7 @@ register(class WEditor extends Widget {
 
     ignore() {
         for (let widget of this.enumerate()) {
+            super.ignore(widget, 'Widget.Changed', message => this.onChildChanged(message));
             super.ignore(widget, 'Widget.Modified', message => this.onChildModified(message));
             super.ignore(widget, 'Widget.Validity', message => this.onChildValidity(message));
 
@@ -84,6 +85,7 @@ register(class WEditor extends Widget {
 
     listen() {
         for (let widget of this.enumerate()) {
+            super.listen(widget, 'Widget.Changed', message => this.onChildChanged(message));
             super.listen(widget, 'Widget.Modified', message => this.onChildModified(message));
             super.listen(widget, 'Widget.Validity', message => this.onChildValidity(message));
 
@@ -93,6 +95,14 @@ register(class WEditor extends Widget {
         }
 
         return this;
+    }
+
+    onChildChanged(message) {
+        this.send({
+            messageName: 'Widget.Changed',
+            type: 'value',
+            widget: this,
+        });
     }
 
     onChildModified(message) {

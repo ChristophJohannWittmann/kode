@@ -149,22 +149,23 @@
 
         permissionExt(permission) {
             let editor = null;
-            let name = `permission${permission.name[0].toUpperCase()}${permission.name.substr(1)}`;
+            let valueName = `permission${permission.name[0].toUpperCase()}${permission.name.substr(1)}`;
+            let contextName = `context${permission.name[0].toUpperCase()}${permission.name.substr(1)}`;
 
             if (permission.container) {
                 let labelKey = `${permission.container}Permission${permission.name[0].toUpperCase()}${permission.name.substr(1)}`
-                var label = labelKey in txx ? txx[labelKey] : name;
+                var label = labelKey in txx ? txx[labelKey] : valueName;
             }
             else {
                 let labelKey = `fwPermission${permission.name[0].toUpperCase()}${permission.name.substr(1)}`
-                var label = labelKey in txx ? txx[labelKey] : name;
+                var label = labelKey in txx ? txx[labelKey] : valueName;
             }
 
             if (typeof permission.editor == 'string' && permission.editor.length) {
                 eval(`editor = ${permission.editor}`);
             }
 
-            return [ name, label, editor ];
+            return [ valueName, contextName, label, editor ];
         }
 
         async refresh() {
@@ -262,7 +263,6 @@
                 }),
             );
 
-
             await this.refreshGrants(userData);
             this.listen();
             super.refresh();
@@ -277,30 +277,36 @@
                 for (let permissionKey of Object.keys(permissions).sort()) {
                     let permission = permissions[permissionKey];
                     let value = permissionKey in grants.permissions ? true : false;
-                    let [ name, label, editor ] = this.permissionExt(permission);
+                    let [ valueName, contextName, label, editor ] = this.permissionExt(permission);
+
+                    if (permission.name in grants.permissions) {
+                        this.userEditor.getActiveData()[contextName] = grants.context[permission.name];
+                    }
+                    else {
+                        this.userEditor.getActiveData()[contextName] = new Object();
+                    }
 
                     if (editor) {
-                        if (permission.name in grants.permissions) {
-                            var context = grants.context[permission.name];
-                        }
-                        else {
-                            var context = new Object();
-                        }
-
-                        var extra = mkWidget('span')
+                        var extra = mkWHotSpot()
                         .setInnerHtml(txx.fwPermissionContextAvailable)
-                        .setStyle({
-                            cursor: 'pointer',
-                            marginLeft: '24px',
-                            verticalAlign: 'middle',
-                        })
-                        .bind(this.userEditor.getActiveData(), name, (widget, value) => {
+                        .setWidgetStyle('scalar-extra')
+                        .bind(this.userEditor.getActiveData(), valueName, (widget, value) => {
                             value ? widget.reveal() : widget.conceal();
                         })
-                        .on('dom.click', message => {
-                            console.log(message)
-                            console.log(editor);
-                            console.log(context);
+                        .on('dom.click', async message => {
+                            this.clearFlag('transient');
+
+                           let contextEditor = await waitOn(new editor({
+                                grants: grants,
+                                permission: permission,
+                                save: context => {
+                                    ActiveData.assign(this.userEditor.getActiveData()[contextName], context);
+                                    this.getView().pop();
+                                    this.setFlag('transient');
+                                },
+                            }));
+
+                           this.getView().push(contextEditor);
                         });
                     }
                     else {
@@ -313,7 +319,7 @@
                         extra: extra,
                     });
 
-                    this.userEditor.addField(name, value, options);
+                    this.userEditor.addField(valueName, value, options);
                 }
             }
         }
@@ -341,9 +347,6 @@
 
             this.userManager.refreshList();
             this.getView().pop();
-        }
-
-        async toggleGrant(permission) {
         }
     }
 })();

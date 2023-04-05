@@ -125,6 +125,13 @@ register(class UserEndpoints extends EndpointContainer {
             return [];
         }
     }
+
+    async [ mkEndpoint('UserSetGrants', 'user', { notify: true }) ](trx) {
+        console.log('UseSetPermissions');
+        console.log(trx.grants);
+        return false;
+        return await Users.modifyUser(await trx.connect(), trx.userData);
+    }
     
     async [ mkEndpoint('UserVerify', 'user') ](trx) {
     }

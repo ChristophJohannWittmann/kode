@@ -256,7 +256,6 @@ async function seedUser(dbc) {
     require('./webApp/lib/selfEndpoints.js');
     require('./webApp/lib/systemEndpoints.js');
     require('./webApp/lib/templateEndpoints.js');
-    require('./webApp/lib/ticketEndpoints.js');
     require('./webApp/lib/userEndpoints.js');
     require('./webApp/lib/transaction.js');
 

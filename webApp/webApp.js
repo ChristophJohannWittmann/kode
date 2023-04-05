@@ -267,7 +267,6 @@ register(class WebApp extends Webx {
         await mkSmtpEndpoints(this);
         await mkSystemEndpoints(this);
         await mkTemplateEndpoints(this);
-        await mkTicketEndpoints(this);
         await mkUserEndpoints(this);
     }
 

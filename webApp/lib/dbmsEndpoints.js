@@ -29,21 +29,21 @@ register(class DbmsEndpoints extends EndpointContainer {
         super(webapp);
     }
     
-    async [ mkEndpoint('AnalyzeDbmsDatabase', 'dbms') ](trx) {
+    async [ mkEndpoint('AnalyzeDbmsDatabase', 'system') ](trx) {
     }
     
-    async [ mkEndpoint('EraseDbmsDatabase', 'dbms') ](trx) {
+    async [ mkEndpoint('EraseDbmsDatabase', 'system') ](trx) {
     }
     
-    async [ mkEndpoint('GetDbmsSchema', 'dbms') ](trx) {
+    async [ mkEndpoint('GetDbmsSchema', 'system') ](trx) {
     }
     
-    async [ mkEndpoint('ListDbmsDatabases', 'dbms') ](trx) {
+    async [ mkEndpoint('ListDbmsDatabases', 'system') ](trx) {
     }
     
-    async [ mkEndpoint('ListDbmsSchemas', 'dbms') ](trx) {
+    async [ mkEndpoint('ListDbmsSchemas', 'system') ](trx) {
     }
     
-    async [ mkEndpoint('UpgradeDbmsDatabase', 'dbms') ](trx) {
+    async [ mkEndpoint('UpgradeDbmsDatabase', 'system') ](trx) {
     }
 });

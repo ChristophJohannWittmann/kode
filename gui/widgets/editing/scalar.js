@@ -176,7 +176,7 @@ register(class WScalar extends Widget {
             opts.menu.attach(this, 'dom.click');
         }
 
-        for (let messageName of ['dom.click', 'Widget.Change', 'Widget.Modified', 'Widget.Validity']) {
+        for (let messageName of ['dom.click', 'Widget.Changed', 'Widget.Modified', 'Widget.Validity']) {
             this.editor.on(messageName, message => this.bubble(message));
             this.viewer.on(messageName, message => this.bubble(message));
         }
@@ -192,6 +192,16 @@ register(class WScalar extends Widget {
         this.send(message);
     }
 
+    clearExtra(widget) {
+        if (this.extra) {
+            this.extra.remove();
+            this.extra = null;
+            this.clearClassName('flex-h-sc');
+        }
+
+        return this;
+    }
+
     focus() {
         this.editor.focus();
         return this;
@@ -203,6 +213,10 @@ register(class WScalar extends Widget {
 
     getActiveKey() {
         return this.activeKey;
+    }
+
+    getExtra() {
+        return this.extra;
     }
 
     isReadonly() {
@@ -237,6 +251,7 @@ register(class WScalar extends Widget {
         if (!this.extra) {
             this.extra = widget;
             this.append(this.extra);
+            this.setClassName('flex-h-sc');
         }
 
         return this;

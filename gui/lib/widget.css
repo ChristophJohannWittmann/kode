@@ -657,6 +657,24 @@ body {
     background-color: var(--widget-background-color);
     outline-color: var(--widget-outline-color);
 }
+[widget-style=checkbox]:checked {
+    width: 48px;
+    height: 48px;
+    font-family: inherit;
+    font-size: inherit;
+    text-decoration: none;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: var(--widget-border-radius);
+    outline-style: none;
+    color: var(--widget-color);
+    background-color: var(--widget-background-color);
+    outline-color: var(--widget-outline-color);
+}
 [widget-style=checkbox]:hover {
     color: var(--widget-hover-color);
     background-color: var(--widget-hover-background-color);
@@ -688,8 +706,26 @@ body {
  * Input Radio
  ***********************************************/
 [widget-style=radio] {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
+    font-family: inherit;
+    font-size: inherit;
+    text-decoration: none;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: var(--widget-border-radius);
+    outline-style: none;
+    color: var(--widget-color);
+    background-color: var(--widget-background-color);
+    outline-color: var(--widget-outline-color);
+}
+[widget-style=radio]:checked {
+    width: 48px;
+    height: 48px;
     font-family: inherit;
     font-size: inherit;
     text-decoration: none;
@@ -978,6 +1014,22 @@ body {
     color: var(--widget-disabled-color);
     background-color: var(--widget-disabled-background-color);
     border-color: var(--widget-disabledborder-color);
+}
+
+
+/***********************************************
+ * Scalar Extra
+ ***********************************************/
+[widget-style=scalar-extra] {
+    display: inline-block;
+    margin-left: 32px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+    border: solid 1px gray;
+    border-radius:  4px;
+    cursor: pointer;
 }
 
 
