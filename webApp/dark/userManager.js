@@ -143,7 +143,7 @@
             this.userManager = userManager;
             this.setFlag('transient');
             this.setAttribute('autocomplete', 'off');
-            this.setRefreshers('UserModifyUser');
+            this.setRefreshers('UserModifyUser', 'UserSetGrants');
             this.refresh();
         }
 
@@ -342,6 +342,33 @@
                 await queryServer({
                     messageName: 'UserModifyUser',
                     userData: userData,
+                });
+
+                let values = this.userEditor.getValues();
+                const grants = {};
+
+                Object.keys(values)
+                .filter(key => key.startsWith('permission'))
+                .forEach(key => {
+                    let name = key.substring(10).toLowerCase();
+
+                    grants[name] = {
+                        permission: name,
+                        granted: values[key],
+                    };
+                });
+
+                Object.keys(values)
+                .filter(key => key.startsWith('context'))
+                .forEach(key => {
+                    let name = key.substring(7).toLowerCase();
+                    grants[name].context = values[key];
+                });
+
+                await queryServer({
+                    messageName: 'UserSetGrants',
+                    userOid: userData.oid,
+                    grants: grants,
                 });
             }
 

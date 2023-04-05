@@ -84,9 +84,12 @@ register(class UserEndpoints extends EndpointContainer {
     }
 
     async [ mkEndpoint('UserModifyUser', 'user', { notify: true }) ](trx) {
-        console.log('UserModifyUser');
-        return false;
-        return await Users.modifyUser(await trx.connect(), trx.userData);
+        let dbc = await trx.connect();
+        let user = await Users.getUser(dbc, trx.userData.oid);
+
+        if (user) {
+            await user.modify(dbc, trx.userData);
+        }
     }
 
     async [ mkEndpoint('UserRemoveAddress', 'user', { notify: true }) ](trx) {
@@ -127,10 +130,12 @@ register(class UserEndpoints extends EndpointContainer {
     }
 
     async [ mkEndpoint('UserSetGrants', 'user', { notify: true }) ](trx) {
-        console.log('UseSetPermissions');
-        console.log(trx.grants);
-        return false;
-        return await Users.modifyUser(await trx.connect(), trx.userData);
+        let dbc = await trx.connect();
+        let user = await Users.getUser(dbc, trx.userOid);
+
+        if (user) {
+            await user.setGrants(dbc, trx.grants);
+        }
     }
     
     async [ mkEndpoint('UserVerify', 'user') ](trx) {

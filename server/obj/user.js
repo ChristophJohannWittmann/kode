@@ -171,9 +171,6 @@ singleton(class Users {
         return null;
     }
 
-    async modifyUser(dbc, userData) {
-    }
-
     async search(dbc, pattern, orgOid) {
         pattern = pattern.indexOf('*') >= 0 ? '' : pattern.trim();
 
@@ -270,6 +267,32 @@ register(class User extends DboUser {
 
     async getPrimaryEmail(dbc) {
         return await selectOneDboUser(dbc, `_owner_type='DboUser' AND _owner_oid=${this.oid}`);
+    }
+
+    async modify(dbc, userData) {
+        console.log('Users.modifyUser():  modify basis user record.')
+    }
+
+    async setGrants(dbc, modifiedGrants) {
+        let grants = mkGrants(await selectOneDboGrants(dbc, `_user_oid=${this.oid}`));
+
+        for (let modifiedGrant of Object.values(modifiedGrants)) {
+            if (modifiedGrant.granted) {
+                if (grants.hasPermission(modifiedGrant.permission)) {
+                    grants.setContext(modifiedGrant.permission, modifiedGrant.context);
+                }
+                else {
+                    grants.setPermission(modifiedGrant.permission, modifiedGrant.context);
+                }
+            }
+            else {
+                if (grants.hasPermission(modifiedGrant.permission)) {
+                    grants.clearPermission(modifiedGrant.permission);
+                }
+            }
+        }
+
+        await grants.save(dbc);
     }
 
     async setPassword(dbc, password) {
@@ -386,5 +409,9 @@ register(class Grants extends DboGrants {
         this.permissions = mkBuffer(toJson(permissions)).toString('base64');
         this.setContext(permission, context ? context : new Object());
         return this;
+    }
+
+    [Symbol.iterator]() {
+        return Object.keys(this.getPermissions())[Symbol.iterator]();
     }
 });

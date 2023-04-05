@@ -81,6 +81,9 @@ exports = module.exports = {
     fwMiscOk: {
         en: `Ok`,
     },
+    fwSelectValue: {
+        en: `Select Value`,
+    },
 
     // ****************************************************************
     // Menu
