@@ -34,6 +34,56 @@ register(class WGrid extends Widget {
 
     constructor(opts) {
         super(opts.tagName);
+        this.configure(opts);
+    }
+
+    calcIndex(rowIndex, colIndex) {
+        return this.cols.length*rowIndex + colIndex;
+    }
+
+    clear() {
+        for (let i = 0; i < this.rows.length; i++) {
+            for (let j = 0; j < this.cols.length; j++) {
+                let index = this.calcIndex(i, j);
+
+                if (!this.cells[index][WGrid.PlaceholderKey]) {
+                    let placeholder = mkWidget('div');
+                    placeholder[WGrid.PlaceholderKey] = true;
+                    this.cells[index].replace(placeholder);
+                    this.cells[index] = placeholder;
+                }
+            }
+        }
+
+        return this;
+    }
+
+    clearAt(rowIndex, colIndex) {
+        let index = this.calcIndex(rowIndex, colIndex);
+
+        if (!this.cells[index][WGrid.PlaceholderKey]) {
+            let placeholder = mkWidget('div');
+            placeholder[WGrid.PlaceholderKey] = true;
+            this.cells[index].replace(placeholder);
+            this.cells[index] = placeholder;
+        }
+
+        return this;
+    }
+
+    clearColGap() {
+        this.colGap = '0px';
+        this.setStyle('col-gap', this.colGap);
+        return this;
+    }
+
+    clearRowGap() {
+        this.colGap = '0px';
+        this.setStyle('col-gap', '');
+        return this;
+    }
+
+    configure(opts) {
         this.cells = [];
 
         if (Array.isArray(opts.rows)) {
@@ -81,52 +131,6 @@ register(class WGrid extends Widget {
                 this.append(placeholder);
             }
         }
-    }
-
-    calcIndex(rowIndex, colIndex) {
-        return this.cols.length*rowIndex + colIndex;
-    }
-
-    clear() {
-        for (let i = 0; i < this.rows.length; i++) {
-            for (let j = 0; j < this.cols.length; j++) {
-                let index = this.calcIndex(i, j);
-
-                if (!this.cells[index][WGrid.PlaceholderKey]) {
-                    let placeholder = mkWidget('div');
-                    placeholder[WGrid.PlaceholderKey] = true;
-                    this.cells[index].replace(placeholder);
-                    this.cells[index] = placeholder;
-                }
-            }
-        }
-
-        return this;
-    }
-
-    clearAt(rowIndex, colIndex) {
-        let index = this.calcIndex(rowIndex, colIndex);
-
-        if (!this.cells[index][WGrid.PlaceholderKey]) {
-            let placeholder = mkWidget('div');
-            placeholder[WGrid.PlaceholderKey] = true;
-            this.cells[index].replace(placeholder);
-            this.cells[index] = placeholder;
-        }
-
-        return this;
-    }
-
-    clearColGap() {
-        this.colGap = '0px';
-        this.setStyle('col-gap', this.colGap);
-        return this;
-    }
-
-    clearRowGap() {
-        this.colGap = '0px';
-        this.setStyle('col-gap', '');
-        return this;
     }
 
     getAt(rowIndex, colIndex) {

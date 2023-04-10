@@ -605,6 +605,10 @@
             return set;
         }
 
+        getComputedStyle(pseudoElement) {
+            return window.getComputedStyle(this.node, pseudoElement);
+        }
+
         getInnerHtml() {
             return this.node.innerHTML;
         }
@@ -621,16 +625,23 @@
             return this.node.classList.contains(className);
         }
 
-        hasPointerCapture() {
-            console.log('TBD DocElement.hasPointerCapture()');
+        hasPointerCapture(pointerId) {
+            return this.node.hasPointerCapture(pointerId);
         }
 
-        insertAdjacentHtml() {
-            console.log('TBD DocElement.insertAdjacetnHtml()');
+        insertAdjacentElement(position, element) {
+            this.node.insertAdjacentElement(position, element);
+            return this;
         }
 
-        insertAdjacentText() {
-            console.log('TBD DocElement.insertAdjacetnText()');
+        insertAdjacentHtml(position, text) {
+            this.node.insertAdjacentHTML(position, text);
+            return this;
+        }
+
+        insertAdjacentHtml(where, data) {
+            this.node.insertAdjacentText(where, data);
+            return this;
         }
 
         isDisabled() {
@@ -750,20 +761,24 @@
             return this;
         }
 
-        scroll() {
-            console.log('TBD DocElement.scroll()');
+        scroll(...args) {
+            this.node.scroll(...args);
+            return this;
         }
 
-        scrollBy() {
-            console.log('TBD DocElement.scrollBy()');
+        scrollBy(...args) {
+            this.node.scrollBy(...args);
+            return this;
         }
 
-        scrollIntoView() {
-            console.log('TBD DocElement.scrollIntoView()');
+        scrollIntoView(...args) {
+            this.node.scrollIntoView(...args);
+            return this;
         }
 
-        scrollTo() {
-            console.log('TBD DocElement.scrollTo()');
+        scrollTo(...args) {
+            this.node.scrollTo(...args);
+            return this;
         }
 
         setAttribute(name, value) {
@@ -798,8 +813,9 @@
             return this;
         }
 
-        setPointerCapture() {
-            console.log('TBD DocElement.setPointerCapture()');
+        setPointerCapture(pointerId) {
+            this.node.setPointerCapture(pointerId);
+            return this;
         }
 
         setOuterHtml(outerHtml) {
@@ -1019,48 +1035,6 @@
         setTitle(title) {
             this.node.title = title;
             return this;
-        }
-    });
-
-
-    /*****
-     * TODO
-    *****/
-    register(class SvgElement extends DocElement {
-        constructor(arg) {
-            if (arg instanceof SVGElement) {
-                super(arg);
-            }
-            else if (arg instanceof SvgElement) {
-                super(arg.node);
-            }
-            else if (typeof arg == 'string') {
-                super(document.createElementNS('http://www.w3.org/2000/svg', arg));
-            }
-            else {
-                super(document.createElementNS('http://www.w3.org/2000/svg', 'svg'));
-            }
-        }
-    });
-
-
-    /*****
-     * TODO
-    *****/
-    register(class MathElement extends DocElement {
-        constructor(arg) {
-            if (arg instanceof MathMLElement) {
-                super(arg);
-            }
-            else if (arg instanceof MathElement) {
-                super(arg.node);
-            }
-            else if (typeof arg == 'string') {
-                super(document.createElementNS('http://www.w3.org/1998/Math/MathML', arg));
-            }
-            else {
-                super(document.createElementNS('http://www.w3.org/1998/Math/MathML', 'math'));
-            }
         }
     });
 

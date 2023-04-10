@@ -49,6 +49,9 @@ ${dark}
  * HTML
  ***********************************************/
 html {
+    ${noncolor}
+    /* *************************************** */
+    /* *************************************** */
     --font-size-1: 7pt;
     --font-size-2: 8pt;
     --font-size-3: 10pt;
@@ -58,16 +61,14 @@ html {
     --font-size-7: 20pt;
     --font-size-8: 24pt;
     --font-size-9: 28pt;
-    --font-family-sans: Avenir, Helvetica, Arial, sans-serif;
-    --font-family-serif: Times New Romas;
-    --font-family-fixed: Courier, Courier New;
     --border-radius-0: 0px;
     --border-radius-1: 6px;
     --border-radius-2: 12px;
     --border-radius-3: 20px;
     --border-radius-4: 30px;
     --border-radius-5: 40px;
-
+    /* *************************************** */
+    /* *************************************** */
     height: 100%;
     width: 100%;
     margin: 0px;
@@ -1424,4 +1425,31 @@ body {
     background-color: var(--nav-background-color);
     border: var(--nav-border);
     font-weight: bold;
+}
+
+
+/***********************************************
+ * Tile
+ ***********************************************/
+[widget-style=tile] {
+    margin:  0px;
+    padding: 0px;
+    border: none;
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;;
+}
+[widget-style=tile-frame] {
+    margin:  0px;
+    padding:  0px;
+    border: none;
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
 }
