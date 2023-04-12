@@ -105,9 +105,15 @@ register(class Thunk {
         }
     }
 
-    async loadServer() {
-        setContainer(this.opts.container);
+    async loadSchemas() {
+        if (await pathExists(this.mkPath('schemas.js'))) {
+            require(this.mkPath('schemas.js'));
+        }
 
+        return this;
+    }
+
+    async loadServer() {
         for (let path of this.opts.server) {
             let absPath = this.mkPath(path);
 
@@ -116,12 +122,10 @@ register(class Thunk {
             }
         }
 
-        return this;
-    }
+        let orgSchemaNamesPath = this.mkPath('schemaNames.js');
 
-    async loadSchemas() {
-        if (await pathExists(this.mkPath('schemas.js'))) {
-            require(this.mkPath('schemas.js'));
+        if (await pathExists(orgSchemaNamesPath)) {
+            global[this.opts.container].getOrgSchemaNames = require(orgSchemaNamesPath);
         }
 
         return this;
@@ -180,6 +184,10 @@ register(class Thunk {
         else {
             return PATH.join(this.path, subpath);
         }
+    }
+
+    setContainer() {
+        global.setContainer(this.opts.container);
     }
 });
 

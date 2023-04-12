@@ -75,8 +75,22 @@ register(class DbDatabase {
         return schemaName in this.schemaMap;
     }
 
+    static getDatabase(dbName) {
+        return DbDatabase.databases[dbName];
+    }
+
     getSchema(schemaName) {
         return this.schemaMap[schemaName];
+    }
+
+    static getSettings(dbName) {
+        if (dbName in DbDatabase.databases) {
+            return DbDatabase.databases[dbName].settings;
+        }
+    }
+
+    static hasDatabase(dbName) {
+        return dbName in DbDatabase.databases;
     }
 
     setSchema(schemaName) {

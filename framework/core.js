@@ -49,7 +49,9 @@
     chainKey = Symbol('chain');
     containerKey = Symbol('container');
 
-    global.getContainer = function(links) {
+    global.getChain = () => chain;
+
+    global.getContainer = links => {
         if (links === undefined) {
             return container;
         }
@@ -70,14 +72,14 @@
         }
     };
 
-    global.paws = function() {
+    global.paws = () => {
         if (swapped) {
             container = swapped;
             swapped = null;
         }
     }
 
-    global.setContainer = function(links) {
+    global.setContainer = links => {
         if (links !== undefined) {
             container = global;
             chain = [];
@@ -98,7 +100,7 @@
         return container;
     };
 
-    global.swap = function(arg) {
+    global.swap = arg => {
         if (!swapped) {
             swapped = container;
             container = arg;
@@ -176,6 +178,8 @@
                         container[`${func.name}`] = (...args) => {
                             return Reflect.apply(func, container, args);
                         };
+                        
+                        container[`${func.name}`].code = func.toString();
                     }
                     else {
                         throw new Error(`register(), function name must start with an lower-case letter: ${func.name}`);

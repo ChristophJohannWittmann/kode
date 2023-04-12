@@ -30,14 +30,15 @@
 *****/
 global.webxCssVars = {
     noncolor: {
-        widget_border_radius: '5px',
-        widget_border_width: '1px',
-        widget_border_style: 'solid',
-        widget_outline_width: '2px',
-
         font_family_sans: 'Avenir, Helvetica, Arial, sans-serif',
         font_family_serif: 'Times New Roman',
         font_family_fixed: 'Couriser, Courier New',
+        
+        widget_border_radius: '5px',
+        widget_border_style: 'solid',
+        widget_border_width: '1px',
+
+        widget_outline_width: '2px',
     },
 
     light: {
@@ -105,7 +106,7 @@ global.webxCssVars = {
         framing_border: 'solid 1px #E3E3E3',
         framing_border_radius: '6px',
     },
-    
+
     dark: {
         widget_border_width: '1px',
         widget_border_radius: '5px',

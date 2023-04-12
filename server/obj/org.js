@@ -28,6 +28,9 @@
  * should be used throughout the server-side framework code.
 *****/
 singleton(class Orgs {
+    constructor() {
+    }
+
     async list(dbc, name, status) {
         let filter = [];
 
@@ -58,5 +61,70 @@ singleton(class Orgs {
         catch (e) {
             return [];
         }
+    }
+});
+
+
+/*****
+*****/
+register(class Org extends DboOrg {
+    constructor(dboOrg) {
+        super(dboOrg);
+    }
+
+    generateDatabaseName() {
+        let dbName;
+        let org = this;
+        eval('dbName=`' + env.orgs.dbName + "`");
+        return dbName;
+    }
+
+    async generateDatabaseSettings() {
+        let orgDbSettings = {};
+        let mainDbSettings = DbDatabase.getSettings('@');
+
+        if (mainDbSettings) {
+            for (let key in mainDbSettings) {
+                if (key == 'database') {
+                    orgDbSettings.database = this.generateDatabaseName();
+                }
+                else if (key == 'schemas') {
+                    orgDbSettings.schemas = await this.getSchemaNames();
+                }
+                else {
+                    orgDbSettings[key] = mainDbSettings[key];
+                }
+            }
+        }
+
+        return orgDbSettings;
+    }
+
+    getDatabase() {
+        return DbDatabase.databases[`@${this.generateDatabaseName()}`];
+    }
+
+    async getSchemaNames() {
+        let schemaNames = [];
+
+        for (let thunk of Thunk.thunks) {
+            if (typeof global[thunk.opts.container].getOrgSchemaNames == 'function') {
+                schemaNames = schemaNames.concat(await global[thunk.opts.container].getOrgSchemaNames(this));
+            }
+        }
+
+        return schemaNames;
+    }
+
+    async registerDatabase() {
+        let dbName = `@${this.generateDatabaseName()}`;
+        let dbSettings = await this.generateDatabaseSettings();
+        return mkDbDatabase(dbName, dbSettings);
+    }
+
+    async upgradeSchema() {
+        let dbDatabase = this.getDatabase();
+        await dbDatabase.upgrade();
+        return this;
     }
 });

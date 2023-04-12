@@ -35,20 +35,25 @@ register(class OrgEndpoints extends EndpointContainer {
     }
     
     async [ mkEndpoint('OrgCreateOrg', 'org', { notify: true }) ](trx) {
-        let org = mkDboOrg(trx.dboOrg);
-        await org.save(await trx.connect());
+        let dbc = await trx.connect();
+        let dboOrg = mkDboOrg(trx.dboOrg);
+        await dboOrg.save(await trx.connect());
         const pref = await selectOneDboPreference(dbc, `_name='Orgs'`);
 
         if (pref.value.on && typeof pref.value.dbName == 'string' && pref.value.dbName) {
             let dbName;
+            let org = dboOrg;
             eval('dbName=`' + pref.value.dbName + '`;');
 
             if (!(await dbList()).has(dbName)) {
                 await dbCreate(null, dbName);
+                let org = mkOrg(dboOrg);
+                await org.registerDatabase();
+                await org.upgradeSchema();
             }
         }
 
-        return org;
+        return dboOrg;
     }
     
     async [ mkEndpoint('OrgGetOrg', 'org', { notify: false }) ](trx) {

@@ -116,7 +116,8 @@ global.env = {
  * the setting from the configuration JSON file once the server has been
  * initialized.
 *****/
-async function loadOrgPreference(dbc) {
+async function loadOrgPreference() {
+    let dbc = await dbConnect();
     let preference = await selectOneDboPreference(dbc, `_name='Orgs'`);
 
     if (!preference) {
@@ -143,6 +144,8 @@ async function loadOrgPreference(dbc) {
         await preference.save(dbc);
     }
 
+    await dbc.commit();
+    await dbc.free();
     env.orgs = preference.value;
     logPrimary(`    Orgs mode: ${JSON.stringify(env.orgs)}`);
 }
@@ -153,32 +156,39 @@ async function loadOrgPreference(dbc) {
  * empty user database.  Create a new user named Charlie Root, which will be used
  * for signing in to get things going.
 *****/
-async function seedUser(dbc) {
-    logPrimary('[ Seeding Initial User: Charlie Root ]');
+async function seedUser() {
+    let dbc = await dbConnect();
 
-    let result = await Users.createUser(dbc, {
-        firstName: 'Charlie',
-        lastName: 'Root',
-        status: 'active',
-        authType: 'simple',
-        verified: true,
-        password: true,
-        email: 'charlie@kodeprogramming.org',
-    });
+    if ((await selectDboUser(dbc)).length == 0) {
+        logPrimary('[ Seeding user charlie@kodeprogramming.org ]');
 
-    if (result.ok) {
-        let user = await Users.getUser(dbc, result.userOid);
-        await user.setPassword(dbc, 'password');
+        let result = await Users.createUser(dbc, {
+            firstName: 'Charlie',
+            lastName: 'Root',
+            status: 'active',
+            authType: 'simple',
+            verified: true,
+            password: true,
+            email: 'charlie@kodeprogramming.org',
+        });
 
-        let grants = await user.getGrants(dbc);
-        grants.setPermission('user')
-        grants.setPermission('system')
-        await grants.save(dbc); 
+        if (result.ok) {
+            let user = await Users.getUser(dbc, result.userOid);
+            await user.setPassword(dbc, 'password');
 
-        if (env.orgs) {
-            await grants.setPermission('org').save(dbc);
+            let grants = await user.getGrants(dbc);
+            grants.setPermission('user')
+            grants.setPermission('system')
+            await grants.save(dbc); 
+
+            if (env.orgs) {
+                await grants.setPermission('org').save(dbc);
+            }
         }
     }
+
+    await dbc.commit();
+    await dbc.free();
 }
 
 
@@ -350,7 +360,7 @@ async function seedUser(dbc) {
     /********************************************
      * Analyze and Upgrade Databases
      *******************************************/
-    logPrimary('[ Preparing Databases ]');
+    logPrimary('[ Checking Main Database ]');
 
     for (let dbName in Config.databases) {
         let dbSettings = Config.databases[dbName];
@@ -366,26 +376,30 @@ async function seedUser(dbc) {
     /********************************************
      * Loading Server Preferences
      *******************************************/
-     if (CLUSTER.isPrimary) {
-        let dbc = await dbConnect();
-
-        logPrimary('[ Configuring Preferences ]');
-        await loadOrgPreference(dbc);
-
-        if ((await selectDboUser(dbc)).length == 0) {
-            logPrimary('[ Adding user charlie@kodeprogramming.org ]');
-            await seedUser(dbc);
-        }
-
-        await dbc.commit();
-        await dbc.free();
-    }
+    logPrimary('[ Configuring Preferences ]');
+    await loadOrgPreference();
+    await seedUser();
 
     /********************************************
      * Start Servers
      *******************************************/
     if (CLUSTER.isPrimary) {
         logPrimary('[ Starting Servers ]');
+        for (let thunk of Thunk.thunks) {
+            thunk.setContainer();
+            await thunk.loadServer();
+        }
+
+        let dbc = await dbConnect();
+
+        for (let dboOrg of await selectDboOrg(dbc)) {
+            let org = mkOrg(dboOrg);
+            await org.registerDatabase();
+            await org.upgradeSchema();
+        }
+
+        await dbc.rollback();
+        await dbc.free();
 
         for (let serverName in Config.servers) {
             let config = Config.servers[serverName];
@@ -422,6 +436,7 @@ async function seedUser(dbc) {
                 await WebApp.initialize();
 
                 for (let thunk of Thunk.thunks) {
+                    thunk.setContainer();
                     await thunk.loadServer();
                     await thunk.loadClient();
                     await thunk.loadDark();
@@ -432,7 +447,7 @@ async function seedUser(dbc) {
         }
 
         if (CLUSTER.worker.id == 1 && Config.debug) {
-            Ipc.on('#ApplicationHostReady', message => developmentHook());
+            Ipc.on('#ApplicationHostReady', message => workerHook());
         }
 
         await onSingletons();
@@ -447,7 +462,7 @@ async function seedUser(dbc) {
  * easiest to simply place a return as the first line of code to ensure that this
  * hook is disabled.
 *****/
-async function developmentHook() {
+async function workerHook() {
     let dbc = await dbConnect();
 
     await dbc.commit();

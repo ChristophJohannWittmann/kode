@@ -30,11 +30,11 @@
 register(class DbSettings {
     constructor(arg) {
         if (!arg) {
-            this.config = Config.databases['@'];
+            this.config = DbDatabase.getSettings('@');
         }
         else if (typeof arg == 'string') {
-            if (arg.startsWith('@') && arg in Config.databases) {
-                this.config = Config.databases[arg];
+            if (arg.startsWith('@') && DbDatabase.hasDatabase(arg)) {
+                this.config = DbDatabase.getSettings(arg);
             }
             else {
                 throw new Error(`Couldn't find database: "${arg}"`);
