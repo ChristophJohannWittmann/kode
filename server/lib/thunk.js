@@ -33,7 +33,7 @@ register(class Thunk {
     static thunks = [];
 
     constructor(path, opts) {
-        this.path = path;
+        this.path = path == '' ? env.kodePath : path;
         this.opts = opts ? opts : {};
         Thunk.thunks.push(this);
         this.darkCodeUrl = '';
