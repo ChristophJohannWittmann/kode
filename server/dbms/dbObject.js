@@ -205,6 +205,10 @@ register(function defineDboType(schemaTable) {
         return ${className}Obj;
     });
 
+    register(function get${className}PropertyNames() {
+        return Object.keys(fwdMap);
+    });
+
     register(async function erase${className}(dbc, where) {
         if (typeof where == 'string') {
             await dbc.query("DELETE FROM ${tableName} WHERE " + where);

@@ -125,7 +125,10 @@ register(class Thunk {
         let orgSchemaNamesPath = this.mkPath('schemaNames.js');
 
         if (await pathExists(orgSchemaNamesPath)) {
-            global[this.opts.container].getOrgSchemaNames = require(orgSchemaNamesPath);
+            this.orgSchemaFunc = require(orgSchemaNamesPath);
+        }
+        else {
+            this.orgSchemaFunc = () => [];
         }
 
         return this;

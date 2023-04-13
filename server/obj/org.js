@@ -66,6 +66,13 @@ singleton(class Orgs {
 
 
 /*****
+ * The Org class extends DboOrg by adding features that are required for loading
+ * and managing an organizaton.  Some of primary challenges around this pertain
+ * to maintenance of the organizational databases.  Orgs do have the options of
+ * provided schemas and a schemaNames.js file that computes an array of schema
+ * names (registered) that should be part of the org's schema.  Since this call
+ * accepts an org oid, each org's schema can be unique depending on what the
+ * schema names function products.
 *****/
 register(class Org extends DboOrg {
     constructor(dboOrg) {
@@ -108,9 +115,7 @@ register(class Org extends DboOrg {
         let schemaNames = [];
 
         for (let thunk of Thunk.thunks) {
-            if (typeof global[thunk.opts.container].getOrgSchemaNames == 'function') {
-                schemaNames = schemaNames.concat(await global[thunk.opts.container].getOrgSchemaNames(this));
-            }
+            schemaNames = schemaNames.concat(await thunk.orgSchemaFunc(this));
         }
 
         return schemaNames;
