@@ -172,10 +172,10 @@ register(class Thunk {
         }
     }
 
-    orgInitFunc(org) {
+    async orgInitFunc(org) {
     }
 
-    orgSchemaFunc(org) {
+    async orgSchemaFunc(org) {
         return [];
     }
 

@@ -146,3 +146,42 @@ register(class Org extends DboOrg {
         return this;
     }
 });
+
+
+/*****
+ * An org ext or extension is of way of allowing modules to add features and data
+ * to the org DBMS system.  It's part of the framework as well.  This object is
+ * pretty self explanatory and provides a named value, and object, that is to be
+ * associated with the organziation specified by its orgOid property.
+*****/
+register(class OrgExt extends DboOrgExt {
+    constructor(data) {
+        if (data instanceof DboOrgExt) {
+            super(data);
+            this.data = typeof this.data == 'object' ? this.data : fromJson(mkBuffer(this.data, 'base64').toString());
+        }
+        else if (data instanceof DboOrg) {
+            super();
+            this.orgOid = data.oid;
+            this.name = '';
+            this.data = {};
+        }
+        else {
+            super();
+            this.orgOid = 0n;
+            this.name = '';
+            this.data = {};
+        }
+    }
+
+    async save(dbc) {
+        if (this.orgOid > 0n) {
+            let data = this.data;
+            this.data = mkBuffer(toJson(data)).toString('base64');
+            await super.save(dbc);
+            this.data = data;
+        }
+
+        return this;
+    }
+});

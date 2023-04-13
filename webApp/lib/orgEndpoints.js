@@ -38,8 +38,13 @@ register(class OrgEndpoints extends EndpointContainer {
         let dbc = await trx.connect();
         let dboOrg = mkDboOrg(trx.dboOrg);
         await dboOrg.save(await trx.connect());
-        const pref = await selectOneDboPreference(dbc, `_name='Orgs'`);
 
+        for (let thunk of Thunk.thunks) {
+            await thunk.orgInitFunc(dboOrg);
+        }
+
+        const pref = await selectOneDboPreference(dbc, `_name='Orgs'`);
+        
         if (pref.value.on && typeof pref.value.dbName == 'string' && pref.value.dbName) {
             let dbName;
             let org = dboOrg;
