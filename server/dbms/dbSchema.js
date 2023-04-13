@@ -370,6 +370,12 @@ register(class DbSchema {
         }
     }
 
+    static deleteSchema(name) {
+    }
+
+    static replaceSchema(name, defined, ...tableDefs) {
+    }
+
     [Symbol.iterator]() {
         return this.tableArray[Symbol.iterator]();
     }

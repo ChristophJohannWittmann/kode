@@ -228,6 +228,17 @@ mkDbSchema(
         ]
     },
     {
+        name: 'orgExt',
+        columns: [
+            { name: 'orgOid',       type: dbInt64          },
+            { name: 'name',         type: dbText, size: 50 },
+            { name: 'data',         type: dbText, size: -1 },
+        ],
+        indexes: [
+            'orgOid:asc',
+        ]
+    },
+    {
         name: 'phone',
         columns: [
             { name: 'ownerType',    type: dbText, size:    20 },

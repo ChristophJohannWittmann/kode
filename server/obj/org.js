@@ -77,6 +77,7 @@ singleton(class Orgs {
 register(class Org extends DboOrg {
     constructor(dboOrg) {
         super(dboOrg);
+        this.extensions = {};
     }
 
     generateDatabaseName() {
@@ -119,6 +120,18 @@ register(class Org extends DboOrg {
         }
 
         return schemaNames;
+    }
+
+    async loadExtensions() {
+        this.extensions = {};
+        let dbc = await dbConnect();
+
+        for (let dboOrgExt of await selectDboOrgExt(dbc, `_org_oid=${this.oid}`)) {
+            this.extensions[dboOrgExt.name] = fromJson(mkBuffer(dboOrgExt, 'base64').toString());
+        }
+
+        await dbc.rollback();
+        await dbc.free();
     }
 
     async registerDatabase() {

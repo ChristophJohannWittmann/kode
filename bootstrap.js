@@ -331,7 +331,6 @@ async function seedUser() {
 
                     if (stats.isFile() && thunkPath.endsWith('.js')) {
                         thunk = await require(thunkPath)(modulePath);
-                        await thunk.loadSchemas();
                         await thunk.loadPermissions();
                     }
                     else {

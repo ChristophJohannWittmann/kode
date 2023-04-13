@@ -105,14 +105,6 @@ register(class Thunk {
         }
     }
 
-    async loadSchemas() {
-        if (await pathExists(this.mkPath('schemas.js'))) {
-            require(this.mkPath('schemas.js'));
-        }
-
-        return this;
-    }
-
     async loadServer() {
         for (let path of this.opts.server) {
             let absPath = this.mkPath(path);
@@ -120,15 +112,6 @@ register(class Thunk {
             for (let filePath of await recurseFiles(absPath)) {
                 require(filePath);
             }
-        }
-
-        let orgSchemaNamesPath = this.mkPath('schemaNames.js');
-
-        if (await pathExists(orgSchemaNamesPath)) {
-            this.orgSchemaFunc = require(orgSchemaNamesPath);
-        }
-        else {
-            this.orgSchemaFunc = () => [];
         }
 
         return this;
@@ -187,6 +170,13 @@ register(class Thunk {
         else {
             return PATH.join(this.path, subpath);
         }
+    }
+
+    orgInitFunc(org) {
+    }
+
+    orgSchemaFunc(org) {
+        return [];
     }
 
     setContainer() {
