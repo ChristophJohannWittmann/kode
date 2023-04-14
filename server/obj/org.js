@@ -127,7 +127,7 @@ register(class Org extends DboOrg {
         let dbc = await dbConnect();
 
         for (let dboOrgExt of await selectDboOrgExt(dbc, `_org_oid=${this.oid}`)) {
-            this.extensions[dboOrgExt.name] = fromJson(mkBuffer(dboOrgExt, 'base64').toString());
+            this.extensions[dboOrgExt.name] = fromJson(mkBuffer(dboOrgExt.data, 'base64').toString());
         }
 
         await dbc.rollback();

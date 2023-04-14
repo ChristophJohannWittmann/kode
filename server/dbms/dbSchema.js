@@ -371,9 +371,45 @@ register(class DbSchema {
     }
 
     static deleteSchema(name) {
+        if (name in DbSchema.schemas) {
+            delete DbSchema.schemas[name];
+
+            for (let database of DbDatabase) {
+                database.deleteSchema();
+            }
+        }
+    }
+
+    static fromBase64(base64, prefix) {
+        let js = fromJson(mkBuffer(base64, 'base64').toString());
+        let schemaName = typeof prefix == 'string' ? `#${prefix}${js.name.substr(1)}` : js.name;
+
+        js.tables.forEach(tableDef => {
+            if (prefix) {
+                tableDef.name = `${prefix}${tableDef.name.substr(1)}`;
+            }
+
+            for (let columnDef of tableDef.columns) {
+                let dbType;
+                eval(`dbType=${columnDef.type}`);
+                columnDef.type = dbType;
+            }
+        });
+
+        mkDbSchema(schemaName, js.defined, ...js.tables);
+        return DbSchema.schemas[schemaName];
+    }
+
+    static getSchema(name) {
+        return DbSchema.schemas[name];
     }
 
     static replaceSchema(name, defined, ...tableDefs) {
+        if (name in DbSchema.schemas) {
+            delete DbSchema.schemas[name];
+        }
+
+        mkDbSchema(name, defined, ...tableDefs);
     }
 
     [Symbol.iterator]() {
@@ -382,6 +418,35 @@ register(class DbSchema {
 
     static [Symbol.iterator]() {
         return Object.values(DbSchema.schemas)[Symbol.iterator]();
+    }
+
+    toBase64() {
+        let schemaDef = {
+            name: this.name,
+            defined: this.defined,
+            tables:
+                this.tableArray.map(tableInfo => {
+                    return {
+                        name: tableInfo.name,
+
+                        columns: tableInfo.columnArray.slice(3).map(columnInfo => {
+                            return {
+                                name: columnInfo.name,
+                                type: columnInfo.type.name(),
+                                size: columnInfo.size,
+                            };
+                        }),
+
+                        indexes: tableInfo.indexArray.slice(3).map(indexInfo => {
+                            return indexInfo.columnArray.map(indexColumn => {
+                                return `${indexColumn.columnName}:${indexColumn.direction}`;
+                            }).join(', ');
+                        }),
+                    };
+                }),
+        };
+
+        return mkBuffer(toJson(schemaDef)).toString('base64');
     }
 });
 

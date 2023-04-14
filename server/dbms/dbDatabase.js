@@ -63,7 +63,11 @@ register(class DbDatabase {
         }
     }
 
-    clearSchema(schemaName) {
+    static deleteDatabase(name) {
+        delete DbDatabase.databases[name];
+    }
+
+    deleteSchema(schemaName) {
         if (schemaName in this.schemaMap) {
             delete this.schemaMap[schemaName];
         }
