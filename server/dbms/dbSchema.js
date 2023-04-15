@@ -317,6 +317,41 @@ global.dbTimeArray = {
 
 
 /*****
+ * It's convenient to genearate the base64 representation of a DbShema right from
+ * the source.  The source is where the column type is just a name.  Since the DB
+ * types are global objects, when converted to JSON, they are objects themselves.
+ * For converting the "source" code into JSON, this class is quick and direct and
+ * avoids the complex step of first creating the DbSchema and then decoding the
+ * parts into something that can be converted into base64.
+*****/
+register(class DbSchemaSource {
+    constructor(name, defined, ...tables) {
+        this.name = name;
+        this.defined = defined;
+        this.tables = tables;
+    }
+
+    toBase64() {
+        return mkBuffer(toJson({
+            name: this.name,
+            defined: this.defined,
+
+            tables: this.tables.map(tableDef => {
+                let tableDefClone = clone(tableDef);
+
+                tableDefClone.columns.forEach(columnDef => {
+                    columnDef = clone(columnDef);
+                    columnDef.type = columnDef.type.name();
+                });
+
+                return tableDefClone;
+            }),
+        })).toString('base64');
+    }
+});
+
+
+/*****
  * This is a DBMS independent representation of a DBMS schema.  In effect, it's
  * a type of compiler.  It accepts a schema name and table definitions to
  * generate the generic representation of a schema.  As such, it defines a
