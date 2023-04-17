@@ -38,18 +38,11 @@
 register(class WebApp extends Webx {
     constructor(thunk, reference) {
         super(thunk, reference);
-
-        if (Array.isArray(this.reference.text)) {
-            this.reference.text.unshift(PATH.join(env.kodePath, 'webApp/lib/webAppText.js'));
-        }
-        else {
-            this.reference.text = [ PATH.join(env.kodePath, 'webApp/lib/webAppText.js') ];
-        }
     }
 
     async handleGET(req, rsp) {
-        let language = this.calcLanguage(req);
-        let appText = toJson(this.text.getLanguage(language));
+        let language = MultilingualText.getAcceptableLanguage(req.acceptLanguage());
+        let appText = toJson(MultilingualText.getLanguage(language));
 
         let html = [
             '<!DOCTYPE html>',

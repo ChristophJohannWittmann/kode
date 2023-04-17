@@ -27,408 +27,408 @@
  * by the development team.  Other languages will be added as needed and as
  * requexted by influential end users and developer community organizations.
 *****/
-exports = module.exports = {
+MultilingualText.setText({
     // ****************************************************************
     // Forgot
     // ****************************************************************
-    fwForgotEmail: {
+    ForgotEmail: {
         en: `Enter email address here`,
     },
-    fwForgotInstructions: {
+    ForgotInstructions: {
         en: `Enter your email adddress and click "Reset Password Now".  If you have an active account, an email with a password reset link will be sent to you.`,
     },
-    fwForgotReset: {
+    ForgotReset: {
         en: `Reset Password Now`,
     },
-    fwForgotSignIn: {
+    ForgotSignIn: {
         en: `Back to sign in`,
     },
-    fwSignInForgotPassword: {
+    SignInForgotPassword: {
         en: `Forgot Password`,
     },
 
     // ****************************************************************
     // SignIn
     // ****************************************************************
-    fwSignInFailed: {
+    SignInFailed: {
         en: `Sorry, we are unable to authenticate your username and password.`,
     },
-    fwSignInPassword: {
+    SignInPassword: {
         en: `Password`,
     },
-    fwSignInSignIn: {
+    SignInSignIn: {
         en: `Sign In`,
     },
-    fwSignInUsername: {
+    SignInUsername: {
         en: `Email`,
     },
 
     // ****************************************************************
     // Misc
     // ****************************************************************
-    fwMiscActive: {
+    MiscActive: {
         en: `Active`,
     },
-    fwMiscCancel: {
+    MiscCancel: {
         en: `Cancel`,
     },
-    fwMiscInactive: {
+    MiscInactive: {
         en: `Inactive`,
     },
-    fwMiscSessionClosed: {
+    MiscSessionClosed: {
         en: `Your session has been closed.  Please sign in again.`,
     },
-    fwMiscOk: {
+    MiscOk: {
         en: `Ok`,
     },
-    fwSelectValue: {
+    SelectValue: {
         en: `Select Value`,
     },
 
     // ****************************************************************
     // Menu
     // ****************************************************************
-    fwMenuPassword: {
+    MenuPassword: {
         en: `Password`,
     },
-    fwMenuPreferences: {
+    MenuPreferences: {
         en: `Preferences`,
     },
-    fwMenuOrgs: {
+    MenuOrgs: {
         en: `Organizations`,
     },
-    fwMenuSignOut: {
+    MenuSignOut: {
         en: `Sign Out`,
     },
-    fwMenuSystem: {
+    MenuSystem: {
         en: `System`,
     },
-    fwMenuTemplate: {
+    MenuTemplate: {
         en: `Templates`,
     },
-    fwMenuUsers: {
+    MenuUsers: {
         en: `Users`,
     },
 
     // ****************************************************************
     // MIME
     // ****************************************************************
-    fwMimeMime: {
+    MimeMime: {
         en: `Mime`,
     },
-    fwMimeCss: {
+    MimeCss: {
         en: `Style Sheet`,
     },
-    fwMimeHtml: {
+    MimeHtml: {
         en: `HTML`,
     },
-    fwMimeImageBitmap: {
+    MimeImageBitmap: {
         en: `Bitmap Image`,
     },
-    fwMimeImageGif: {
+    MimeImageGif: {
         en: `GIF Image`,
     },
-    fwMimeImageJpeg: {
+    MimeImageJpeg: {
         en: `JPEG Image`,
     },
-    fwMimeImageMsIcon: {
+    MimeImageMsIcon: {
         en: `Microsoft Icon`,
     },
-    fwMimeImagePng: {
+    MimeImagePng: {
         en: `PNG Image`,
     },
-    fwMimeImageSvg: {
+    MimeImageSvg: {
         en: `SVG Image`,
     },
-    fwMimeText: {
+    MimeText: {
         en: `Text`,
     },
 
     // ****************************************************************
     // Nav
     // ****************************************************************
-    fwNavCancel: {
+    NavCancel: {
         en: `Cancel`,
     },
-    fwNavDone: {
+    NavDone: {
         en: `Done`,
     },
-    fwNavSignout: {
+    NavSignout: {
         en: `Signout`,
     },
 
     // ****************************************************************
     // Net
     // ****************************************************************
-    fwNetAcme: {
+    NetAcme: {
         en: `ACME Provider`,
     },
-    fwNetAddress: {
+    NetAddress: {
         en: `IP Address`,
     },
-    fwNetCert: {
+    NetCert: {
         en: `Certificate`,
     },
-    fwNetCertExpires: {
+    NetCertExpires: {
         en: `Expiration`,
     },
-    fwNetCertify: {
+    NetCertify: {
         en: `Request/Renew TLS Certificate`,
     },
-    fwNetCopyKeyPem: {
+    NetCopyKeyPem: {
         en: `Copy Public Key (PEM)`,
     },
-    fwNetCreateKeyPair: {
+    NetCreateKeyPair: {
         en: `Create Cryptographic Key Pair`,
     },
-    fwNetDomain: {
+    NetDomain: {
         en: `Domain`,
     },
-    fwNetHost: {
+    NetHost: {
         en: `Host`,
     },
-    fwNetInterface: {
+    NetInterface: {
         en: `Network Interface`,
     },
-    fwNetPrivateKey: {
+    NetPrivateKey: {
         en: `Private Key`,
     },
-    fwNetPublicKey: {
+    NetPublicKey: {
         en: `Public Key`,
     },
 
     // ****************************************************************
     // Org
     // ****************************************************************
-    fwOrgManagerAuthType: {
+    OrgManagerAuthType: {
         en: `Authorization Type`,
     },
-    fwOrgManagerCreateOrg: {
+    OrgManagerCreateOrg: {
         en: `Create Organization`,
     },
-    fwOrgManagerEditorSaveFailed: {
+    OrgManagerEditorSaveFailed: {
         en: `Failed to save changes to Organization.`,
     },
-    fwOrgManagerEditorName: {
+    OrgManagerEditorName: {
         en: `Name`,
     },
-    fwOrgManagerEditorStatus: {
+    OrgManagerEditorStatus: {
         en: `Status`,
     },
-    fwOrgManagerEditorNote: {
+    OrgManagerEditorNote: {
         en: `Note`,
     },
-    fwOrgManagerEditTitle: {
+    OrgManagerEditTitle: {
         en: `Organization`,
     },
-    fwOrgManagerFound: {
+    OrgManagerFound: {
         en: `Organizations Found`,
     },
-    fwOrgManagerListTitle: {
+    OrgManagerListTitle: {
         en: `Organizations`,
     },
-    fwOrgManagerSearch: {
+    OrgManagerSearch: {
         en: `Search`,
     },
-    fwOrgManagerSelectorEdit: {
+    OrgManagerSelectorEdit: {
         en: `Edit`,
     },
-    fwOrgManagerSelectorSwitch: {
+    OrgManagerSelectorSwitch: {
         en: `Switch to`,
     },
-    fwOrgManagerShowList: {
+    OrgManagerShowList: {
         en: `Show List`,
     },
 
     // ****************************************************************
     // Password
     // ****************************************************************
-    fwPasswordConfirm: {
+    PasswordConfirm: {
         en: `Confirm Password`,
     },
-    fwPasswordEnterAuthorization: {
+    PasswordEnterAuthorization: {
         en: `Enter Authorization Code`,
     },
-    fwPasswordEnter: {
+    PasswordEnter: {
         en: `Enter Password`,
     },
-    fwPasswordError: {
+    PasswordError: {
         en: `Password change could not be completed.`,
     },
-    fwPasswordErrorLength: {
+    PasswordErrorLength: {
         en: `Must be at least 8 characters long.`,
     },
-    fwPasswordErrorMatch: {
+    PasswordErrorMatch: {
         en: `The password does not match the confirm value.`,
     },
-    fwPasswordErrorSymbol: {
+    PasswordErrorSymbol: {
         en: `Password must contain one or more symbols: !@#$%^&*()-_`,
     },
-    fwPasswordErrorNumber: {
+    PasswordErrorNumber: {
         en: `Password must contain one or more digits: 0123456789`,
     },
-    fwPasswordTitle: {
+    PasswordTitle: {
         en: `Set Password`,
     },
 
     // ****************************************************************
     // Permissions
     // ****************************************************************
-    fwPermissionContextAvailable: {
+    PermissionContextAvailable: {
         en: `More ...`,
     },
-    fwPermissionOrg: {
+    PermissionOrg: {
         en: `Organizations`,
     },
-    fwPermissionSystem: {
+    PermissionSystem: {
         en: `System`,
     },
-    fwPermissionTemplate: {
+    PermissionTemplate: {
         en: `Templates`,
     },
-    fwPermissionUser: {
+    PermissionUser: {
         en: `Users`,
     },
 
     // ****************************************************************
     // Preferences
     // ****************************************************************
-    fwPreferencesTitle: {
+    PreferencesTitle: {
         en: `Preferences`,
     },
 
     // ****************************************************************
     // Template
     // ****************************************************************
-    fwTemplateEditorDefaultLanguage: {
+    TemplateEditorDefaultLanguage: {
         en: `Default Language`,
     },
-    fwTemplateEditorDuplicateSectionName: {
+    TemplateEditorDuplicateSectionName: {
         en: `Duplicate section name / language discovered`,
     },
-    fwTemplateEditorDuplicateTemplateName: {
+    TemplateEditorDuplicateTemplateName: {
         en: `Duplicate template name.`,
     },
-    fwTemplateEditorCreateSection: {
+    TemplateEditorCreateSection: {
         en: `Create Section`,
     },
-    fwTemplateEditorCreateTemplate: {
+    TemplateEditorCreateTemplate: {
         en: `Create Template`,
     },
-    fwTemplateEditorErrorWrongEndpoint: {
+    TemplateEditorErrorWrongEndpoint: {
         en: `Connection was made to the wrong enpoint.`,
     },
-    fwTemplateEditorName: {
+    TemplateEditorName: {
         en: `Template Name`,
     },
-    fwTemplateEditorTitle: {
+    TemplateEditorTitle: {
         en: `Template`,
     },
-    fwTemplateEditorSectionCopy: {
+    TemplateEditorSectionCopy: {
         en: `Copy`,
     },
-    fwTemplateEditorSectionDelete: {
+    TemplateEditorSectionDelete: {
         en: `Delete`,
     },
-    fwTemplateEditorSectionLanguage: {
+    TemplateEditorSectionLanguage: {
         en: `Language`,
     },
-    fwTemplateEditorSectionMime: {
+    TemplateEditorSectionMime: {
         en: `Select Format`,
     },
-    fwTemplateEditorSectionName: {
+    TemplateEditorSectionName: {
         en: `Name`,
     },
-    fwTemplateTitle: {
+    TemplateTitle: {
         en: `Templates`,
     },
-    fwTemplateSearch: {
+    TemplateSearch: {
         en: `Search`,
     },
 
     // ****************************************************************
     // User
     // ****************************************************************
-    fwUserEditorAuthorizationType: {
+    UserEditorAuthorizationType: {
         en: `Authorization Type`,
     },
-    fwUserEditorEmail: {
+    UserEditorEmail: {
         en: `Email`,
     },
-    fwUserEditorVerified: {
+    UserEditorVerified: {
         en: `Email Verified`,
     },
-    fwUserEditorEmailInUse: {
+    UserEditorEmailInUse: {
         en: `The provided email address is already assigned to another account.`,
     },
-    fwUserEditorFirstName: {
+    UserEditorFirstName: {
         en: `First Name`,
     },
-    fwUserEditorLastName: {
+    UserEditorLastName: {
         en: `Last Name`,
     },
-    fwUserEditorNoEmail: {
+    UserEditorNoEmail: {
         en: `You need to provide a valid email address to proceed.`,
     },
-    fwUserEditorNoName: {
+    UserEditorNoName: {
         en: `You need to provide a first and last name to proceed.`,
     },
-    fwUserEditorPassword: {
+    UserEditorPassword: {
         en: `Password Valid`,
     },
-    fwUserEditorSignInFailures: {
+    UserEditorSignInFailures: {
         en: `Sign In Failures`,
     },
-    fwUserEditorStatus: {
+    UserEditorStatus: {
         en: `User Status`,
     },
-    fwUserEditorStatusActive: {
+    UserEditorStatusActive: {
         en: `Active`,
     },
-    fwUserEditorStatusInactive: {
+    UserEditorStatusInactive: {
         en: `Inactive`,
     },
-    fwUserEditorSuffix: {
+    UserEditorSuffix: {
         en: `Suffix`,
     },
-    fwUserEditorTitle: {
+    UserEditorTitle: {
         en: `User`,
     },
-    fwUserEditorUserTitle: {
+    UserEditorUserTitle: {
         en: `Title`,
     },
-    fwUserManagerCreateUser: {
+    UserManagerCreateUser: {
         en: `Create User`,
     },
-    fwUserManagerSearch: {
+    UserManagerSearch: {
         en: `Search`,
     },
-    fwUserManagerTitle: {
+    UserManagerTitle: {
         en: `Users`,
     },
-    fwUserPermissionsTitle: {
+    UserPermissionsTitle: {
         en: `Permissions`,
     },
 
     // ****************************************************************
     // Verification
     // ****************************************************************
-    fwVerificationFailure: {
+    VerificationFailure: {
         en: `Awaiting valid verification code`,
     },
-    fwVerificationSendCode: {
+    VerificationSendCode: {
         en: `Send Code`,
     },
-    fwVerificationStep1: {
+    VerificationStep1: {
         en: `Click "Send Code" to receive a 7-digit code for verification.`,
     },
-    fwVerificationStep2: {
+    VerificationStep2: {
         en: `Enter the authorization code below to continue.`,
     },
-    fwVerificationSuccess: {
+    VerificationSuccess: {
         en: `Verification code accepted`,
     },
-    fwVerificationTitle: {
+    VerificationTitle: {
         en: `Verification`,
     },
-};
+});

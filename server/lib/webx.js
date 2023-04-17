@@ -61,22 +61,6 @@ register(class Webx extends Emitter {
         return schemeSettings;
     }
 
-    calcLanguage(req) {
-        let acceptLanguage = req.acceptLanguage();
-
-        if (Object.keys(acceptLanguage).length) {
-            for (let lang in acceptLanguage) {
-                let language = this.text.hasLanguage(lang);
-
-                if (language) {
-                    return language;
-                }
-            }
-        }
-
-        return this.text.getLanguage();
-    }
-
     getCssUrls() {
         return this.cssUrls.list();
     }
@@ -103,7 +87,6 @@ register(class Webx extends Emitter {
         await this.loadWebxCss();
         await this.loadCss();
         await this.loadFavIcons();
-        await this.loadText();
     }
 
     static async initialize() {
@@ -232,27 +215,6 @@ register(class Webx extends Emitter {
                             ).toCompact()
                         );
                         break;
-                }
-            }
-        }
-    }
-
-    async loadText() {
-        this.text = mkMultilingualText();
-
-        if (Array.isArray(this.reference.text)) {
-            for (let path of this.reference.text) {
-                if (path.endsWith('.js')) {
-                    let absPath = this.thunk.mkPath(path);
-
-                    if (await isFile(absPath)) {
-                        let mod = require(absPath);
-
-                        try {
-                            this.text.setText(mod);
-                        }
-                        catch (e) {}
-                    }
                 }
             }
         }

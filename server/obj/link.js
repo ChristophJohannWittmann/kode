@@ -189,7 +189,7 @@ register(class Linkx extends Webx {
 *****/
 (() => {
     if (CLUSTER.isWorker) {
-        fwThunk.opts.references.push({
+        thunk.opts.references.push({
             url: '/link',
             webx: 'Linkx',
             title: 'Link Handler',

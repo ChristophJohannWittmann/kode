@@ -268,6 +268,7 @@ async function seedUser() {
     require('./webApp/lib/templateEndpoints.js');
     require('./webApp/lib/userEndpoints.js');
     require('./webApp/lib/transaction.js');
+    require('./webApp/lib/webAppText.js');
 
     if (CLUSTER.isPrimary) {
         require('./server/lib/daemon.js');
@@ -361,7 +362,7 @@ async function seedUser() {
      *******************************************/
     logPrimary('[ Loading Thunks ]');
 
-    for (let thunk of Thunk.thunks) {
+    for (let thunk of Thunk) {
         if (CLUSTER.isPrimary) {
             thunk.setContainer();
             await thunk.loadServer();
@@ -376,6 +377,7 @@ async function seedUser() {
             await thunk.loadDark();
             await thunk.loadWebResources();
             await thunk.loadWebExtensions();
+            MultilingualText.finalize();
         }
     }
 

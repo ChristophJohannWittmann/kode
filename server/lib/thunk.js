@@ -30,14 +30,23 @@
  * javascript code.
 *****/
 register(class Thunk {
-    static thunks = [];
+    static thunkMap = {};
+    static thunkArray = [];
 
     constructor(path, opts) {
         this.path = path == '' ? env.kodePath : path;
         this.opts = opts ? opts : {};
-        Thunk.thunks.push(this);
         this.darkCodeUrl = '';
         this.clientCodeUrl = '';
+
+        if (opts.container) {
+            Thunk.thunkArray.push(this);
+            Thunk.thunkMap[this.opts.container] = this;
+        }
+    }
+
+    static get(container) {
+        return Thunk.thunkMap[container];
     }
 
     getClientCodeUrl() {
@@ -173,7 +182,12 @@ register(class Thunk {
     }
 
     setContainer() {
-        global.setContainer(this.opts.container);
+        setContainer(this.opts.container);
+        getContainer().thunk = this;
+    }
+
+    static [Symbol.iterator]() {
+        return Thunk.thunkArray[Symbol.iterator]();
     }
 });
 
@@ -181,10 +195,11 @@ register(class Thunk {
 /*****
  * This is a thunk that's created for automatically opening Webx object that are
  * part of the framework and are controlled by kode.json rather than by a module's
- * thunk.js program file.
+ * thunk.js program file.  After the thunk is created, we assign this thunk to
+ * the global object, which means that 
 *****/
-global.fwThunk = mkThunk('', {
-    container: '',
+global.thunk = mkThunk('', {
+    container: 'fw',
     server: [],
     client: [],
     dark: [],

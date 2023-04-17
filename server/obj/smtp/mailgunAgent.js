@@ -250,6 +250,6 @@ register(class SmtpApiMailGun extends Webx {
 *****/
 (() => {
     if (CLUSTER.isWorker) {
-        fwThunk.opts.references.push(Config.smtp.mailgun);
+        thunk.opts.references.push(Config.smtp.mailgun);
     }
 })();

@@ -29,7 +29,7 @@
  * called to generate a JSON object containing the text for the browser/client
  * in one of the languages that has been defined.
 *****/
-register(class MultilingualText {
+singleton(class MultilingualText {
     constructor(...args) {
         this.text = {};
 
@@ -42,12 +42,6 @@ register(class MultilingualText {
         if (!(language.toLowerCase() in this.text)) {
             this.text[language.toLowerCase()] = {};
         }
-    }
-
-    clone() {
-        let clone = mkMultilingualText();
-        clone.text = global.clone(this.text);
-        return clone;
     }
 
     finalize() {
@@ -72,8 +66,22 @@ register(class MultilingualText {
         return this.missing;
     }
 
+    getAcceptableLanguage(acceptableLanguages) {
+        if (Object.keys(acceptableLanguages).length) {
+            for (let lang in acceptableLanguages) {
+                let language = this.hasLanguage(lang);
+
+                if (language) {
+                    return language;
+                }
+            }
+        }
+
+        return Object.keys(this.text)[0];
+    }
+
     getLanguage(language) {
-            if (language) {
+        if (language) {
             if (language.toLowerCase() in this.text) {
                 return this.text[language.toLowerCase()];
             }
@@ -116,6 +124,8 @@ register(class MultilingualText {
     }
 
     setText(obj) {
+        let prefix = getContainer().thunk.opts.container;
+
         for (let key in obj) {
             let values = obj[key];
 
@@ -130,7 +140,7 @@ register(class MultilingualText {
                     this.addLanguage(lang);
                 }
 
-                this.text[lang.toLowerCase()][key] = text;
+                this.text[lang.toLowerCase()][`${prefix}${key}`] = text;
             }
         }
     }
