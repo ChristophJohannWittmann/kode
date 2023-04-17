@@ -299,14 +299,16 @@ async function seedUser() {
     }
 
     /********************************************
-     * Load Objects
+     * Load Additional Code
      *******************************************/
     logPrimary('[ Loading Framework Object API ]');
     require('./server/lib/schema.js');
 
-    for (let filePath of await recurseFiles(PATH.join(env.kodePath, 'server/obj'))) {
-        if (filePath.endsWith('.js')) {
-            require(filePath);
+    for (let directory of ['server/obj', 'server/smtp']) {
+        for (let filePath of await recurseFiles(PATH.join(env.kodePath, directory))) {
+            if (filePath.endsWith('.js')) {
+                require(filePath);
+            }
         }
     }
 
