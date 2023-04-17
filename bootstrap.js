@@ -357,9 +357,32 @@ async function seedUser() {
     await onSingletons();
 
     /********************************************
+     * Load Thunks
+     *******************************************/
+    logPrimary('[ Loading Thunks ]');
+
+    for (let thunk of Thunk.thunks) {
+        if (CLUSTER.isPrimary) {
+            thunk.setContainer();
+            await thunk.loadServer();
+        }
+        else {
+            await Webx.initialize();
+            await WebApp.initialize();
+
+            thunk.setContainer();
+            await thunk.loadServer();
+            await thunk.loadClient();
+            await thunk.loadDark();
+            await thunk.loadWebResources();
+            await thunk.loadWebExtensions();
+        }
+    }
+
+    /********************************************
      * Analyze and Upgrade Databases
      *******************************************/
-    logPrimary('[ Checking Main Database ]');
+    logPrimary('[ Upgrading Static Databases ]');
 
     for (let dbName in Config.databases) {
         let dbSettings = Config.databases[dbName];
@@ -380,25 +403,28 @@ async function seedUser() {
     await seedUser();
 
     /********************************************
+     * Analyze and Upgrade Org Databases
+     *******************************************/
+     if (env.orgs.on) {
+        logPrimary('[ Analyzing Org Databases ]');
+        await Orgs.buildOrgsSchema();
+
+        for (let dboOrg of await Orgs.listAll()) {
+            let org = mkOrg(dboOrg);
+            await org.registerSchema();
+            await org.registerDatabase();
+
+            if (CLUSTER.isPrimary) {
+                await org.upgradeDatabase();
+            }
+        }
+    }
+
+    /********************************************
      * Start Servers
      *******************************************/
     if (CLUSTER.isPrimary) {
         logPrimary('[ Starting Servers ]');
-        for (let thunk of Thunk.thunks) {
-            thunk.setContainer();
-            await thunk.loadServer();
-        }
-
-        let dbc = await dbConnect();
-
-        for (let dboOrg of await selectDboOrg(dbc)) {
-            let org = mkOrg(dboOrg);
-            await org.registerDatabase();
-            await org.upgradeSchema();
-        }
-
-        await dbc.rollback();
-        await dbc.free();
 
         for (let serverName in Config.servers) {
             let config = Config.servers[serverName];
@@ -428,20 +454,6 @@ async function seedUser() {
             if (config.active) {
                 let server;
                 eval(`server = mk${config.type}(${toJson(config)}, '${serverName}');`);
-            }
-
-            if (serverName == 'http') {
-                await Webx.initialize();
-                await WebApp.initialize();
-
-                for (let thunk of Thunk.thunks) {
-                    thunk.setContainer();
-                    await thunk.loadServer();
-                    await thunk.loadClient();
-                    await thunk.loadDark();
-                    await thunk.loadWebResources();
-                    await thunk.loadWebExtensions();
-                }
             }
         }
 

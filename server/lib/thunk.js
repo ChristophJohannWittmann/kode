@@ -172,13 +172,6 @@ register(class Thunk {
         }
     }
 
-    async orgInitFunc(org) {
-    }
-
-    async orgSchemaFunc(org) {
-        return [];
-    }
-
     setContainer() {
         global.setContainer(this.opts.container);
     }

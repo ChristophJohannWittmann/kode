@@ -520,7 +520,9 @@
                     return new RegExp(value['#REGEX']);
                 }
                 else if ('#FUNC' in value) {
-                    return mkBuffer(value['#FUNC'], 'base64').toString();
+                    let func;
+                    eval('func=' + mkBuffer(value['#FUNC'], 'base64').toString());
+                    return func;
                 }
                 else if ('#BUFFER' in value) {
                     return mkBuffer(value['#BUFFER'], 'base64');

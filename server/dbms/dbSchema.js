@@ -317,41 +317,6 @@ global.dbTimeArray = {
 
 
 /*****
- * It's convenient to genearate the base64 representation of a DbShema right from
- * the source.  The source is where the column type is just a name.  Since the DB
- * types are global objects, when converted to JSON, they are objects themselves.
- * For converting the "source" code into JSON, this class is quick and direct and
- * avoids the complex step of first creating the DbSchema and then decoding the
- * parts into something that can be converted into base64.
-*****/
-register(class DbSchemaSource {
-    constructor(name, defined, ...tables) {
-        this.name = name;
-        this.defined = defined;
-        this.tables = tables;
-    }
-
-    toBase64() {
-        return mkBuffer(toJson({
-            name: this.name,
-            defined: this.defined,
-
-            tables: this.tables.map(tableDef => {
-                let tableDefClone = clone(tableDef);
-
-                tableDefClone.columns.forEach(columnDef => {
-                    columnDef = clone(columnDef);
-                    columnDef.type = columnDef.type.name();
-                });
-
-                return tableDefClone;
-            }),
-        })).toString('base64');
-    }
-});
-
-
-/*****
  * This is a DBMS independent representation of a DBMS schema.  In effect, it's
  * a type of compiler.  It accepts a schema name and table definitions to
  * generate the generic representation of a schema.  As such, it defines a
@@ -381,28 +346,34 @@ register(class DbSchema {
                 }
                 
                 for (let tableDef of tableDefs) {
-                    if (this.defined) {
-                        tableDef.columns.unshift({ name: 'updated', type: dbTime });
-                        tableDef.columns.unshift({ name: 'created', type: dbTime });
-                        tableDef.columns.unshift({ name: 'oid',     type: dbKey  });
-                        tableDef.indexes.unshift('updated:asc');
-                        tableDef.indexes.unshift('created:asc');
-                        tableDef.indexes.unshift('oid:asc');
-                    }
-
-                    let schemaTable = new DbSchemaTable(this, tableDef);
-                    this.tableArray.push(schemaTable);
-                    this.tableMap[schemaTable.name] = schemaTable;
-
-                    if (this.defined) {
-                        defineDboType(schemaTable);
-                    }
+                    this.addTable(tableDef);
                 }
             }
         }
         else {
             throw new Error(`Schema name required to begin with "#": "${name}"`);
         }
+    }
+
+    addTable(tableDef) {
+        if (this.defined) {
+            tableDef.columns.unshift({ name: 'updated', type: dbTime });
+            tableDef.columns.unshift({ name: 'created', type: dbTime });
+            tableDef.columns.unshift({ name: 'oid',     type: dbKey  });
+            tableDef.indexes.unshift('updated:asc');
+            tableDef.indexes.unshift('created:asc');
+            tableDef.indexes.unshift('oid:asc');
+        }
+
+        let schemaTable = new DbSchemaTable(this, tableDef);
+        this.tableArray.push(schemaTable);
+        this.tableMap[schemaTable.name] = schemaTable;
+
+        if (this.defined) {
+            defineDboType(schemaTable);
+        }
+
+        return this;
     }
 
     static deleteSchema(name) {
@@ -413,6 +384,23 @@ register(class DbSchema {
                 database.deleteSchema();
             }
         }
+    }
+
+    deleteTable(tableName) {
+        if (tableName in this.tableMap) {
+            delete this.tableMap[tableName];
+
+            for (let i = 0; i < this.tableArray.length; i++) {
+                let tableSchema = this.tableArray[i];
+
+                if (tableSchema.name == tableName) {
+                    this.tableMap.splice(i, 1);
+                    break;
+                }
+            }
+        }
+
+        return this;
     }
 
     static fromBase64(base64, prefix) {
@@ -445,6 +433,12 @@ register(class DbSchema {
         }
 
         mkDbSchema(name, defined, ...tableDefs);
+    }
+
+    replaceTable(tableDef) {
+        this.deleteTable(tableDef.name);
+        this.addTable(tableDef);
+        return this;
     }
 
     [Symbol.iterator]() {

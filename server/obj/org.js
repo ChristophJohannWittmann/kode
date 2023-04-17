@@ -29,6 +29,16 @@
 *****/
 singleton(class Orgs {
     constructor() {
+        this.orgSpecificSchemas = mkStringSet();
+    }
+
+    async buildOrgsSchema() {
+        let tables = [].concat(...await Ipc.queryPrimary({ messageName: '#OrgSchemaTables' }));
+        return mkDbSchema('#ORGS', true, ...tables);
+    }
+
+    hasOrgSchema(orgSchemaName) {
+        return this.orgSpecificSchemas.has(orgSchemaName);
     }
 
     async list(dbc, name, status) {
@@ -49,6 +59,14 @@ singleton(class Orgs {
         return await selectDboOrg(dbc, filter.join(' AND '), '_name ASC limit 20');
     }
 
+    async listAll() {
+        let dbc = await dbConnect();
+        let orgs = await selectDboOrg(dbc);
+        await dbc.rollback();
+        await dbc.free();
+        return orgs;
+    }
+
     async search(dbc, pattern) {
         try {
             if (pattern.indexOf('*') >= 0) {
@@ -61,6 +79,10 @@ singleton(class Orgs {
         catch (e) {
             return [];
         }
+    }
+
+    setOrgSchema(orgSchemaName) {
+        this.orgSpecificSchemas.set(orgSchemaName);
     }
 });
 
@@ -81,23 +103,20 @@ register(class Org extends DboOrg {
     }
 
     generateDatabaseName() {
-        let dbName;
-        let org = this;
-        eval('dbName=`' + env.orgs.dbName + "`");
-        return dbName;
+        return `@${this.generateDbmsName()}`;
     }
 
-    async generateDatabaseSettings() {
+    generateDatabaseSettings() {
         let orgDbSettings = {};
         let mainDbSettings = DbDatabase.getSettings('@');
 
         if (mainDbSettings) {
             for (let key in mainDbSettings) {
                 if (key == 'database') {
-                    orgDbSettings.database = this.generateDatabaseName();
+                    orgDbSettings.database = this.generateDbmsName();
                 }
                 else if (key == 'schemas') {
-                    orgDbSettings.schemas = await this.getSchemaNames();
+                    orgDbSettings.schemas = this.generateSchemaArray();
                 }
                 else {
                     orgDbSettings[key] = mainDbSettings[key];
@@ -108,18 +127,34 @@ register(class Org extends DboOrg {
         return orgDbSettings;
     }
 
-    getDatabase() {
-        return DbDatabase.databases[`@${this.generateDatabaseName()}`];
+    generateDbmsName() {
+        let name;
+        let org = this;
+        eval('name=`' + env.orgs.dbName + '`');
+        return name;
     }
 
-    async getSchemaNames() {
-        let schemaNames = [];
+    generatePrefixName() {
+        return `org${this.oid}`;
+    }
 
-        for (let thunk of Thunk.thunks) {
-            schemaNames = schemaNames.concat(await thunk.orgSchemaFunc(this));
+    generateSchemaArray() {
+        let schemaName = this.generateSchemaName();
+
+        if (Orgs.hasOrgSchema(schemaName)) {
+            return [ '#ORGS', schemaName ];
         }
+        else {
+            return [ '#ORGS' ];
+        }
+    }
 
-        return schemaNames;
+    generateSchemaName() {
+        return `#${this.generateDbmsName()}`;
+    }
+
+    getDatabase() {
+        return DbDatabase.databases[this.generateDatabaseName()];
     }
 
     async loadExtensions() {
@@ -135,12 +170,31 @@ register(class Org extends DboOrg {
     }
 
     async registerDatabase() {
-        let dbName = `@${this.generateDatabaseName()}`;
-        let dbSettings = await this.generateDatabaseSettings();
-        return mkDbDatabase(dbName, dbSettings);
+        let dbName = this.generateDatabaseName();
+        let dbSettings = this.generateDatabaseSettings();
+        let dbDatabase = mkDbDatabase(dbName, dbSettings);
+        return this;
     }
 
-    async upgradeSchema() {
+    async registerSchema() {
+        let tables = [].concat(...await Ipc.queryPrimary({ messageName: '#OrgSchemaTables', dboOrg: this }));
+
+        if (tables.length) {
+            let schemaName = this.generateSchemaName();
+            let schema = mkDbSchema(schemaName, true, ...tables);
+            Orgs.setOrgSchema(schemaName);
+        }
+
+        return this;
+    }
+
+    async upgradeDatabase() {
+        let dbmsName = this.generateDbmsName();
+
+        if (!(await dbList()).has(dbmsName)) {
+            await dbCreate(null, dbmsName);
+        };
+
         let dbDatabase = this.getDatabase();
         await dbDatabase.upgrade();
         return this;

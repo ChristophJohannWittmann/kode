@@ -39,25 +39,15 @@ register(class OrgEndpoints extends EndpointContainer {
         let dboOrg = mkDboOrg(trx.dboOrg);
         await dboOrg.save(await trx.connect());
 
-        for (let thunk of Thunk.thunks) {
-            await thunk.orgInitFunc(dboOrg);
-        }
+        await Ipc.queryPrimary({
+            messageName: '#OrgCreated',
+            dboOrg: dboOrg,
+        });
 
-        const pref = await selectOneDboPreference(dbc, `_name='Orgs'`);
-        
-        if (pref.value.on && typeof pref.value.dbName == 'string' && pref.value.dbName) {
-            let dbName;
-            let org = dboOrg;
-            eval('dbName=`' + pref.value.dbName + '`;');
-
-            if (!(await dbList()).has(dbName)) {
-                await dbCreate(null, dbName);
-                let org = mkOrg(dboOrg);
-                await org.registerDatabase();
-                await org.upgradeSchema();
-            }
-        }
-
+        let org = await mkOrg(dboOrg);
+        await org.registerSchema();
+        await org.registerDatabase();
+        await org.upgradeDatabase();
         return dboOrg;
     }
     
