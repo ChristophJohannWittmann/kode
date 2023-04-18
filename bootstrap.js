@@ -422,6 +422,12 @@ async function seedUser() {
                 await org.upgradeDatabase();
             }
         }
+
+        for (let thunk of Thunk) {
+            for (let failedSource of thunk.failedSource.list()) {
+                require(failedSource);
+            }
+        }
     }
 
     /********************************************

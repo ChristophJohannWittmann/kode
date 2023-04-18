@@ -29,7 +29,7 @@
  * dark and light color schemes of various HTML widgets.
 *****/
 global.webxCssVars = {
-    noncolor: {
+    box: {
         font_family_sans: 'Avenir, Helvetica, Arial, sans-serif',
         font_family_serif: 'Times New Roman',
         font_family_fixed: 'Couriser, Courier New',
@@ -39,6 +39,9 @@ global.webxCssVars = {
         widget_border_width: '1px',
 
         widget_outline_width: '2px',
+    },
+
+    font: {
     },
 
     light: {
