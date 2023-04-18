@@ -45,9 +45,9 @@ register(class OrgEndpoints extends EndpointContainer {
         });
 
         let org = await mkOrg(dboOrg);
-        await org.registerSchema();
         await org.registerDatabase();
         await org.upgradeDatabase();
+
         return dboOrg;
     }
     

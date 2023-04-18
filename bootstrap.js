@@ -136,7 +136,7 @@ async function loadOrgPreference() {
                 name: 'Orgs',
                 value: {
                     on: false,
-                    dbms: 'org_${fillNumber(5, oid)}',
+                    dbms: 'org${fillNumber(4, oid)}',
                 }
             });
         }

@@ -143,10 +143,6 @@ register(class Org extends DboOrg {
         return name;
     }
 
-    generatePrefixName(width) {
-        return `org${fillNumber(this.oid, width)}`;
-    }
-
     getDatabase() {
         return DbDatabase.databases[this.generateDatabaseName()];
     }

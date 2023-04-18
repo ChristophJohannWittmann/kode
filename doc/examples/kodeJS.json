@@ -1,7 +1,7 @@
 {
     "orgs": {
         "on": false,
-        "dbName": "org_${fillNumber(org.oid, 4)}"
+        "dbName": "org${fillNumber(org.oid, 4)}"
     },
     "debug": false,
     "cache": false,
