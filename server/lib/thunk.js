@@ -36,7 +36,6 @@ register(class Thunk {
     constructor(path, opts) {
         this.path = path == '' ? env.kodePath : path;
         this.opts = opts ? opts : {};
-        this.failedSource = mkStringSet();
         this.darkCodeUrl = '';
         this.clientCodeUrl = '';
 
@@ -120,12 +119,7 @@ register(class Thunk {
             let absPath = this.mkPath(path);
 
             for (let filePath of await recurseFiles(absPath)) {
-                try {
-                    require(filePath);
-                }
-                catch (e) {
-                    this.failedSource.set(filePath);
-                }
+                require(filePath);
             }
         }
 

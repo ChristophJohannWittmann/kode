@@ -409,23 +409,13 @@ async function seedUser() {
     /********************************************
      * Analyze and Upgrade Org Databases
      *******************************************/
-     if (env.orgs.on) {
-        logPrimary('[ Analyzing Org Databases ]');
-        await Orgs.buildOrgsSchema();
-
+    if (env.orgs.on) {
         for (let dboOrg of await Orgs.listAll()) {
             let org = mkOrg(dboOrg);
-            await org.registerSchema();
             await org.registerDatabase();
 
             if (CLUSTER.isPrimary) {
                 await org.upgradeDatabase();
-            }
-        }
-
-        for (let thunk of Thunk) {
-            for (let failedSource of thunk.failedSource.list()) {
-                require(failedSource);
             }
         }
     }
@@ -450,6 +440,9 @@ async function seedUser() {
 
         clearBootMode();
         await onSingletons();
+
+        await Ipc.queryPrimary({ messageName: '#ApplicationHostInit' });
+        await Ipc.queryWorkers({ messageName: '#ApplicationHostInit' });
 
         logPrimary('[ Kode Application Host Ready ]');
         Ipc.sendPrimary({ messageName: '#ApplicationHostReady' });

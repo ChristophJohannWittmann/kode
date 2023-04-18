@@ -32,11 +32,6 @@ singleton(class Orgs {
         this.orgSpecificSchemas = mkStringSet();
     }
 
-    async buildOrgsSchema() {
-        let tables = [].concat(...await Ipc.queryPrimary({ messageName: '#OrgSchemaTables' }));
-        return mkDbSchema('#ORGS', true, ...tables);
-    }
-
     hasOrgSchema(orgSchemaName) {
         return this.orgSpecificSchemas.has(orgSchemaName);
     }
@@ -102,6 +97,20 @@ register(class Org extends DboOrg {
         this.extensions = {};
     }
 
+    appendSchema(schemaName) {
+        let dbName = this.generateDatabaseName();
+        let dbDatabase = DbDatabase.getDatabase(dbName);
+        dbDatabase.setSchema(schemaName);
+        return this;
+    }
+
+    deleteSchema(schemaName) {
+        let dbName = this.generateDatabaseName();
+        let dbDatabase = DbDatabase.getDatabase(dbName);
+        dbDatabase.deleteSchema(schemaName);
+        return this;
+    }
+
     generateDatabaseName() {
         return `@${this.generateDbmsName()}`;
     }
@@ -116,7 +125,7 @@ register(class Org extends DboOrg {
                     orgDbSettings.database = this.generateDbmsName();
                 }
                 else if (key == 'schemas') {
-                    orgDbSettings.schemas = this.generateSchemaArray();
+                    orgDbSettings.schemas = env.orgs.on ? [ '#ORG' ] : [];
                 }
                 else {
                     orgDbSettings[key] = mainDbSettings[key];
@@ -134,23 +143,8 @@ register(class Org extends DboOrg {
         return name;
     }
 
-    generatePrefixName() {
-        return `org${this.oid}`;
-    }
-
-    generateSchemaArray() {
-        let schemaName = this.generateSchemaName();
-
-        if (Orgs.hasOrgSchema(schemaName)) {
-            return [ '#ORGS', schemaName ];
-        }
-        else {
-            return [ '#ORGS' ];
-        }
-    }
-
-    generateSchemaName() {
-        return `#${this.generateDbmsName()}`;
+    generatePrefixName(width) {
+        return `org${fillNumber(this.oid, width)}`;
     }
 
     getDatabase() {
@@ -173,18 +167,6 @@ register(class Org extends DboOrg {
         let dbName = this.generateDatabaseName();
         let dbSettings = this.generateDatabaseSettings();
         let dbDatabase = mkDbDatabase(dbName, dbSettings);
-        return this;
-    }
-
-    async registerSchema() {
-        let tables = [].concat(...await Ipc.queryPrimary({ messageName: '#OrgSchemaTables', dboOrg: this }));
-
-        if (tables.length) {
-            let schemaName = this.generateSchemaName();
-            let schema = mkDbSchema(schemaName, true, ...tables);
-            Orgs.setOrgSchema(schemaName);
-        }
-
         return this;
     }
 
