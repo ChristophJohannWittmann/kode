@@ -159,8 +159,22 @@ register(class Org extends DboOrg {
         return name;
     }
 
+    generateTableName(name) {
+        if (typeof name == 'string') {
+            return `${this.generateDbmsName()}${name[0].toUpperCase()}${name.substr(1)}`;
+        }
+        else {
+            return this.generateDbmsName();
+        }
+    }
+
     getDatabase() {
         return DbDatabase.databases[this.generateDatabaseName()];
+    }
+
+    async getPhysicalSchema() {
+        let dbName = this.generateDatabaseName();
+        return await dbSchema(dbName);
     }
 
     async loadExtensions() {

@@ -273,7 +273,7 @@ register(class Webx extends Emitter {
     }
 
     async upgrade(req, socket, headPacket) {
-        if (this.reference.webSocket) {
+        if (this.reference.webSocket && Config.sockets) {
             if (Reflect.has(this, 'onUpgrade')) {
                 let secureKey = req.header('sec-websocket-key');
                 let hash = await Crypto.digestUnsalted('sha1', `${secureKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`);

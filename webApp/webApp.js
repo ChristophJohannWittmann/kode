@@ -85,7 +85,7 @@ register(class WebApp extends Webx {
             '            session: () => null,',
             '            org: () => null,',
             '            user: () => null,',
-            `            websocket: () => ${this.reference.webSocket},`,
+            `            websocket: () => ${this.reference.webSocket && Config.sockets},`,
             '            grants: () => {},',
             `            lang: () => '${language}',`,
             '        };',

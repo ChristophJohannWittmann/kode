@@ -50,6 +50,23 @@ global.widgetStyleSettings = {
         body_font_family: 'Avenir, Helvetica, Arial, sans-serif',
         body_font_size: '15px',
 
+        h1_font_size: '20px',
+        h2_font_size: '18px',
+        h3_font_size: '16px',
+        h4_font_size: '14px',
+        h5_font_size: '13px',
+        h6_font_size: '12px',
+
+        h1_margin_top: '10px',
+        h2_margin_top: '10px',
+        h3_margin_top: '8px',
+        h4_margin_top: '8px',
+        h5_margin_top: '6px',
+        h6_margin_top: '6px',
+    },
+
+    light: {
+
         /* ********** */
         /* DEPRECATED */
         font_family_sans: 'Avenir, Helvetica, Arial, sans-serif',
@@ -61,14 +78,9 @@ global.widgetStyleSettings = {
         widget_border_width: '1px',
 
         widget_outline_width: '2px',
-        /* DEPRECATED */
-        /* ********** */
-    },
 
-    light: {
 
-        /* ********** */
-        /* DEPRECATED */
+
         widget_border_color: 'gainsboro',
 
         widget_color: '#2F4F5F',
@@ -137,71 +149,5 @@ global.widgetStyleSettings = {
     },
 
     dark: {
-
-        /* ********** */
-        /* DEPRECATED */
-        widget_border_width: '1px',
-        widget_border_radius: '5px',
-        widget_outline_width: '2px',
-
-        widget_color: '#FFFFFF',
-        widget_background_color: '#000000',
-        widget_border_color: '#565656',
-
-        widget_hover_color: '#FFFFFF',
-        widget_hover_background_color: '#222222',
-        widget_hover_border_color: '#565656',
-
-        widget_focus_color: '#FFFFFF',
-        widget_focus_background_color: '#000000',
-        widget_focus_border_color: '#565656',
-        widget_focus_outline_color: '#FF8C00',
-
-        widget_disabled_color: '#A9A9A9',
-        widget_disabled_background_color: '#000000',
-        widget_disabled_border_color: '#454545',
-
-        widget_error_color: '#DC143C',
-        widget_error_background_color: '#222222',
-        widget_error_border_color: '#DC143C',
-
-        menu_color: '#FFFFFF',
-        menu_background_color: '#222222',
-        menu_hover_color: '#C0C0C0',
-        menu_hover_background_color: '#444444',
-        menu_disabled_color: '#777777',
-        menu_disabled_background_color: '#222222',
-        menu_separator: 'solid 1px #FFFFFF',
-        menu_separator_lite: 'solid 1px #373737',
-        menu_font_family: 'Arial',
-        menu_font_size: '17px',
-        menu_font_weight: 'Thin',
-        menu_min_height: '30px',
-
-        main_color: '#FFFFFF',
-        main_background_color: '#000000',
-        main_border_color: '#F0F8FF',
-        main_outline_color: '#FF8C00',
-        main_hover_color: '#2F4F4F',
-        main_hover_background_color: '#787878',
-
-        alt_color: '#B0C4DE',
-        alt_background_color: '#222222',
-        alt_border_color: '#4682B4',
-        alt_outline_color: '#FF8C00',
-        alt_hover_color: '#2F4F4F',
-        alt_hover_background_color: '#FF8C00',
-
-        dialog_color: '#B0C4DE',
-        dialog_background_color: '#222222',
-        dialog_border: 'solid 2px #4682B4',
-        dialog_border_radius: '7px',
-
-        framing_color: '#FFFFFF',
-        framing_background_color: '#040404',
-        framing_border: 'solid 1px #0A0A0A',
-        framing_border_radius: '6px',
-        /* DEPRECATED */
-        /* ********** */
     }
 };
