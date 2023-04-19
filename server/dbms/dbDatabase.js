@@ -75,6 +75,10 @@ register(class DbDatabase {
         return this;
     }
 
+    static hasDatabase(databaseName) {
+        return databbaseName in DbDatabase.databases;
+    }
+
     hasSchema(schemaName) {
         return schemaName in this.schemaMap;
     }

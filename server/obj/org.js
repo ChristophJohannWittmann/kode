@@ -111,6 +111,22 @@ register(class Org extends DboOrg {
         return this;
     }
 
+    async ensureSchema(name, ...tableDefs) {
+        if (env.orgs.on) {
+            let schemaName = name ? `#${this.generateDbmsName()}${name}` : `#${this.generateDbmsName()}`;
+            let schema = DbSchema.getSchema(schemaName);
+
+            if (!schema) {
+                mkDbSchema(schemaName, true, ...tableDefs);
+                this.registerDatabase();
+                this.appendSchema(schemaName);
+                await this.upgradeDatabase();
+            }
+        }
+
+        return this;
+    }
+
     generateDatabaseName() {
         return `@${this.generateDbmsName()}`;
     }
@@ -161,8 +177,12 @@ register(class Org extends DboOrg {
 
     async registerDatabase() {
         let dbName = this.generateDatabaseName();
-        let dbSettings = this.generateDatabaseSettings();
-        let dbDatabase = mkDbDatabase(dbName, dbSettings);
+
+        if (!DbDatabase.hasDatabase(dbName)) {
+            let dbSettings = this.generateDatabaseSettings();
+            let dbDatabase = mkDbDatabase(dbName, dbSettings);
+        }
+
         return this;
     }
 
