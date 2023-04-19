@@ -246,7 +246,7 @@ async function seedUser() {
     require('./server/lib/thunk.js');
     require('./server/lib/utility.js');
     require('./server/lib/webSocket.js');
-    require('./server/lib/webxStyles.js');
+    require('./server/lib/widgetStyleSettings.js');
     require('./server/lib/webx.js');
 
     require('./server/dbms/dbClient.js');

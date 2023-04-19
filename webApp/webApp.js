@@ -46,7 +46,7 @@ register(class WebApp extends Webx {
 
         let html = [
             '<!DOCTYPE html>',
-            '<html class="fill margin-none padding-none">',
+            '<html>',
             '  <head>',
             '    <meta charset="utf-8">',
             '    <meta name="viewport" content="width=device-width, initial-scale=1">',

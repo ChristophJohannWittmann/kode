@@ -2,17 +2,19 @@
  * Color Schemes
  ***********************************************/
 @media (prefers-color-scheme: light) {
-    :root {
+    html {
         color-scheme: light dark;
 ${light}
+${styles}
     }
     .lite {}
     .dark { display: none; }
 }
 @media (prefers-color-scheme: dark) {
-    :root {
+    html {
         color-scheme: light dark;
 ${dark}
+${styles}
     }
     .lite { display: none; }
     .dark {}
@@ -46,48 +48,203 @@ ${dark}
 
 
 /***********************************************
- * HTML
+ * Flex
  ***********************************************/
-html {
-${box}
-    /* *************************************** */
-    /* *************************************** */
-    --font-size-1: 7pt;
-    --font-size-2: 8pt;
-    --font-size-3: 10pt;
-    --font-size-4: 12pt;
-    --font-size-5: 14pt;
-    --font-size-6: 16pt;
-    --font-size-7: 20pt;
-    --font-size-8: 24pt;
-    --font-size-9: 28pt;
-    --border-radius-0: 0px;
-    --border-radius-1: 6px;
-    --border-radius-2: 12px;
-    --border-radius-3: 20px;
-    --border-radius-4: 30px;
-    --border-radius-5: 40px;
-    /* *************************************** */
-    /* *************************************** */
-    height: 100%;
-    width: 100%;
-    margin: 0px;
-    padding: 0px;
-    font-family: var(--font-family-sans);
-    font-size: var(--font-size-4);
+.flex-h-ss {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+.flex-h-cs {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+}
+.flex-h-es {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+.flex-h-sc {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+.flex-h-cc {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+.flex-h-ec {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+}
+.flex-h-se {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+.flex-h-ce {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+}
+.flex-h-ee {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+.flex-v-ss {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+.flex-v-cs {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+}.flex-v-es {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+.flex-v-sc {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+.flex-v-cc {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+.flex-v-ec {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+}
+.flex-v-se {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+.flex-v-ce {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+}
+.flex-v-ee {
+    display: flex;
+    flex-direction: column;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-end;
 }
 
 
 /***********************************************
- * Body Style
+ * Basic
  ***********************************************/
-body {
+[widget-style=widget-html] {
     height: 100%;
     width: 100%;
-    margin: 0px;
-    padding: 0px;
-    font-family: var(--font-family-sans);
-    font-size: var(--font-size-4);
+    margin-left: var(--html-margin-left);
+    margin-right: var(--html-margin-right);
+    margin-top: var(--html-margin-top);
+    margin-bottom: var(--html-margin-bottom);
+    padding-left: var(--html-padding-left);
+    padding-right: var(--html-padding-right);
+    padding-top: var(--html-padding-top);
+    padding-bottom: var(--html-padding-bottom);
+    font-family: var(--html-font-family);
+    font-size: var(--html-font-size);
+}
+
+[widget-style=widget-body] {
+    height: 100%;
+    width: 100%;
+    margin-left: var(--body-margin-left);
+    margin-right: var(--body-margin-right);
+    margin-top: var(--body-margin-top);
+    margin-bottom: var(--body-margin-bottom);
+    padding-left: var(--body-padding-left);
+    padding-right: var(--body-padding-right);
+    padding-top: var(--body-padding-top);
+    padding-bottom: var(--body-padding-bottom);
+    font-family: var(--body-font-family);
+    font-size: var(--body-font-size);
+    color: var(--body-color);
+}
+
+[widget-style=widget-h1] {
+}
+
+[widget-style=widget-h2] {
+}
+
+[widget-style=widget-h3] {
+}
+
+[widget-style=widget-h4] {
+}
+
+[widget-style=widget-h5] {
+}
+
+[widget-style=widget-h6] {
 }
 
 
@@ -296,160 +453,11 @@ body {
 .outline-width-3 { outline-width: 3px; --outline-width: 3px; }
 .outline-width-4 { outline-width: 4px; --outline-width: 4px; }
 .outline-width-5 { outline-width: 5px; --outline-width: 5px; }
-
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
 /* ********************************************************************** */
-
-
-/***********************************************
- * Flex
- ***********************************************/
-.flex-h-ss {
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: flex-start;
-}
-.flex-h-cs {
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-}
-.flex-h-es {
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: flex-start;
-}
-.flex-h-sc {
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-}
-.flex-h-cc {
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-}
-.flex-h-ec {
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: center;
-}
-.flex-h-se {
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: flex-end;
-}
-.flex-h-ce {
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-end;
-}
-.flex-h-ee {
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: flex-end;
-}
-.flex-v-ss {
-    display: flex;
-    flex-direction: column;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: flex-start;
-}
-.flex-v-cs {
-    display: flex;
-    flex-direction: column;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-}.flex-v-es {
-    display: flex;
-    flex-direction: column;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: flex-start;
-}
-.flex-v-sc {
-    display: flex;
-    flex-direction: column;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-}
-.flex-v-cc {
-    display: flex;
-    flex-direction: column;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-}
-.flex-v-ec {
-    display: flex;
-    flex-direction: column;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: center;
-}
-.flex-v-se {
-    display: flex;
-    flex-direction: column;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: flex-end;
-}
-.flex-v-ce {
-    display: flex;
-    flex-direction: column;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-end;
-}
-.flex-v-ee {
-    display: flex;
-    flex-direction: column;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: flex-end;
-}
 
 
 /***********************************************

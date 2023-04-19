@@ -28,8 +28,30 @@
  * or for the Webx specifically, use these standard organization colors for the
  * dark and light color schemes of various HTML widgets.
 *****/
-global.webxCssVars = {
-    box: {
+global.widgetStyleSettings = {
+    styles: {
+        html_margin_left: '0px',
+        html_margin_right: '0px',
+        html_margin_top: '0px',
+        html_margin_bottom: '0px',
+        html_padding_left: '0px',
+        html_padding_right: '0px',
+        html_padding_top: '0px',
+        html_padding_bottom: '0px',
+
+        body_margin_left: '0px',
+        body_margin_right: '0px',
+        body_margin_top: '0px',
+        body_margin_bottom: '0px',
+        body_padding_left: '0px',
+        body_padding_right: '0px',
+        body_padding_top: '0px',
+        body_padding_bottom: '0px',
+        body_font_family: 'Avenir, Helvetica, Arial, sans-serif',
+        body_font_size: '15px',
+
+        /* ********** */
+        /* DEPRECATED */
         font_family_sans: 'Avenir, Helvetica, Arial, sans-serif',
         font_family_serif: 'Times New Roman',
         font_family_fixed: 'Couriser, Courier New',
@@ -39,12 +61,14 @@ global.webxCssVars = {
         widget_border_width: '1px',
 
         widget_outline_width: '2px',
-    },
-
-    font: {
+        /* DEPRECATED */
+        /* ********** */
     },
 
     light: {
+
+        /* ********** */
+        /* DEPRECATED */
         widget_border_color: 'gainsboro',
 
         widget_color: '#2F4F5F',
@@ -108,9 +132,14 @@ global.webxCssVars = {
         framing_background_color: '#FBFBFB',
         framing_border: 'solid 1px #E3E3E3',
         framing_border_radius: '6px',
+        /* DEPRECATED */
+        /* ********** */
     },
 
     dark: {
+
+        /* ********** */
+        /* DEPRECATED */
         widget_border_width: '1px',
         widget_border_radius: '5px',
         widget_outline_width: '2px',
@@ -172,5 +201,7 @@ global.webxCssVars = {
         framing_background_color: '#040404',
         framing_border: 'solid 1px #0A0A0A',
         framing_border_radius: '6px',
+        /* DEPRECATED */
+        /* ********** */
     }
 };

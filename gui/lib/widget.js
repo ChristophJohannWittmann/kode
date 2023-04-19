@@ -43,9 +43,15 @@
         constructor(arg) {
             if (arg instanceof Node) {
                 super(arg);
+                this.setWidgetStyle(`widget-${arg.tagName.toLowerCase()}`);
+            }
+            else if (arg instanceof DocNode) {
+                super(arg);
+                this.setWidgetStyle(`widget-${arg.tagName()}`);
             }
             else {
                 super(typeof arg == 'string' ? arg : 'div');
+                this.setWidgetStyle('widget');
             }
 
             this.id = nextId++;
@@ -56,7 +62,6 @@
             this.panelState = mkPanelState(this);
 
             this.setId(`widget${this.id}`);
-            this.setWidgetStyle('widget');
             this.setAttribute('widget-class', `${Reflect.getPrototypeOf(this).constructor.name}`);
             global.on('#NotifyClient', message => this.onServerNotify(message));
         }

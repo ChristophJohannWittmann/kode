@@ -43,22 +43,37 @@ register(class Webx extends Emitter {
         this.cssUrls = mkStringSet();
         this.webxCssUrl = `${this.reference.url == '/' ? '' : this.reference.url}/STYLESHEET.css`;
         this.cssUrls.set(this.webxCssUrl);
+        this.widgetStyleSettings = clone(widgetStyleSettings);
     }
 
-    buildCssVars(cssVariables) {
-        const schemeSettings = {};
+    async buildWidgetCss() {
+        const widgetStyleSettings = {};
 
-        for (let section in cssVariables) {
-            schemeSettings[section] = [];
+        for (let section in this.widgetStyleSettings) {
+            widgetStyleSettings[section] = [];
 
-            for (let settingName in cssVariables[section]) {
-                schemeSettings[section].push(`        --${settingName.replaceAll('_', '-')}: ${cssVariables[section][settingName]};`);
+            for (let settingName in this.widgetStyleSettings[section]) {
+                widgetStyleSettings[section].push(`        --${settingName.replaceAll('_', '-')}: ${this.widgetStyleSettings[section][settingName]};`);
             }
 
-            schemeSettings[section] = schemeSettings[section].join('\n');
+            widgetStyleSettings[section] = widgetStyleSettings[section].join('\n');
         }
 
-        return schemeSettings;
+        let cssContent = (await FILES.readFile(PATH.join(env.kodePath, 'gui/lib/widget.css'))).toString();
+        let cssTemplate = mkTextTemplate(cssContent);
+
+        for (let symbol in cssTemplate.symbols) {
+            if (symbol in widgetStyleSettings) {
+                cssTemplate.set(symbol, widgetStyleSettings[symbol]);
+            }
+            else {
+                cssTemplate.set(symbol, '');
+            }
+        }
+
+        let cssText = Config.debug ? cssTemplate.toString() : await minifyCss(cssTemplate.toString());
+        await mkWebBlob(this.webxCssUrl, 'text/css', cssText).register();
+        return this;
     }
 
     getCssUrls() {
@@ -84,7 +99,7 @@ register(class Webx extends Emitter {
     }
 
     async init() {
-        await this.loadWebxCss();
+        await this.buildWidgetCss();
         await this.loadCss();
         await this.loadFavIcons();
     }
@@ -220,51 +235,41 @@ register(class Webx extends Emitter {
         }
     }
 
-    async loadWebxCss() {
-        let vars;
-        let varsPath = '';
-        let cssContent = (await FILES.readFile(PATH.join(env.kodePath, 'gui/lib/widget.css'))).toString();
-        let cssTemplate = mkTextTemplate(cssContent);
+    async setWidgetStyleSettings(arg) {
+        if (typeof arg == 'string') {
+            try {
+                let path = this.thunk.mkPath(arg);
+                let module = require(path);
 
-        if (this.reference.vars) {
-            varsPath = this.thunk.mkPath(this.reference.vars);
+                if (typeof module == 'object') {
+                    var settings = module;
+                }
+                else {
+                    return this;
+                }
+            }
+            catch(e) {
+                return this;
+            }
         }
-        else if (this.thunk.opts.vars) {
-            varsPath = this.thunk.mkPath(this.thunk.opts.vars);
+        else if (typeof arg == 'object') {
+            var settings = arg;
+        }
+        else {
+            return this;
         }
 
-        if (varsPath) {
-            if (varsPath.endsWith('.js')) {
-                if (await pathExists(varsPath)) {
-                    let stats = await FILES.stat(varsPath);
-
-                    if (stats.isFile()) {
-                        vars = require(varsPath);
+        for (let section in settings) {
+            if (section in this.widgetStyleSettings) {
+                for (let settingName in settings[section]) {
+                    if (settingName in this.widgetStyleSettings[section]) {
+                        this.widgetStyleSettings[section][settingName] = settings[section][settingName];
                     }
                 }
             }
-
-            varsPath = '';
         }
 
-        if (!vars) {
-            vars = webxCssVars;
-        }
-
-        let cssVars = this.buildCssVars(vars);
-
-        for (let symbol in cssTemplate.symbols) {
-            if (symbol in cssVars) {
-                cssTemplate.set(symbol, cssVars[symbol]);
-            }
-            else {
-                cssTemplate.set(symbol, '');
-            }
-        }
-
-        let cssText = Config.debug ? cssTemplate.toString() : await minifyCss(cssTemplate.toString());
-        await mkWebBlob(this.webxCssUrl, 'text/css', cssText).register();
-
+        return this;
     }
 
     async upgrade(req, socket, headPacket) {
