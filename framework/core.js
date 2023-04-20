@@ -439,7 +439,7 @@
         extension = true;
 
         return JSON.stringify(value, (key, value) => {
-            if (value === null) {
+            if (value === null || typeof value == 'undefined') {
                 return { '#NULL': 0 };
             }
             else if (Number.isNaN(value)) {

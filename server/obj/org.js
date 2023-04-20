@@ -111,22 +111,6 @@ register(class Org extends DboOrg {
         return this;
     }
 
-    async ensureSchema(name, ...tableDefs) {
-        if (env.orgs.on) {
-            let schemaName = name ? `#${this.generateDbmsName()}${name}` : `#${this.generateDbmsName()}`;
-            let schema = DbSchema.getSchema(schemaName);
-
-            if (!schema) {
-                mkDbSchema(schemaName, true, ...tableDefs);
-                this.registerDatabase();
-                this.appendSchema(schemaName);
-                await this.upgradeDatabase();
-            }
-        }
-
-        return this;
-    }
-
     generateDatabaseName() {
         return `@${this.generateDbmsName()}`;
     }
@@ -157,15 +141,6 @@ register(class Org extends DboOrg {
         let org = this;
         eval('name=`' + env.orgs.dbName + '`');
         return name;
-    }
-
-    generateTableName(name) {
-        if (typeof name == 'string') {
-            return `${this.generateDbmsName()}${name[0].toUpperCase()}${name.substr(1)}`;
-        }
-        else {
-            return this.generateDbmsName();
-        }
     }
 
     getDatabase() {
