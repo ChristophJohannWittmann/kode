@@ -427,6 +427,10 @@ register(class DbSchema {
         return DbSchema.schemas[name];
     }
 
+    static hasSchema(name) {
+        return name in DbSchema.schemas;
+    }
+
     static replaceSchema(name, defined, ...tableDefs) {
         if (name in DbSchema.schemas) {
             delete DbSchema.schemas[name];
