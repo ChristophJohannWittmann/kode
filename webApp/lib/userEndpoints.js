@@ -68,9 +68,7 @@ register(class UserEndpoints extends EndpointContainer {
     }
 
     async [ mkEndpoint('UserGetUserData', 'user', { notify: true }) ](trx) {
-        let data = await Users.getUserData(await trx.connect(), trx.oid);
-        console.log(data);
-        return data;
+        return await Users.getUserData(await trx.connect(), trx.oid);
     }
 
     async [ mkEndpoint('UserModifyAddress', 'user', { notify: true }) ](trx) {
