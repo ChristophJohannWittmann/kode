@@ -534,7 +534,7 @@
                     delete value['#ACTIVE'];
                     return mkActiveData(value);
                 }
-                else if ('#CTOR' in value) {
+                else if (value['#CTOR']) {
                     let ctor = value['#CTOR'];
                     let ctorContainer = getContainer(ctor.container);
 
