@@ -23,6 +23,19 @@
 
 
 /*****
+ * A useful widget for creating small DIVs that represent a label on a form or
+ * othe sort of HTML element.  In generate, labels should be formatted to be
+ * larger and bolder than regular text with perhaps a distinctive color.
+*****/
+register(class WLabel extends Widget {
+    constructor() {
+        super('div');
+        this.setWidgetStyle('label');
+    }
+});
+
+
+/*****
  * A hot spot is implemented as a DIV and provides an alternative to using an A
  * element for interactive / responsive elements for clicking to invoke GUI
  * actions.  The framework approach is to encourage the use of the WLink for
@@ -50,13 +63,6 @@ register(class WHotSpot extends WSpot {
     constructor(display) {
         super(display);
         this.setWidgetStyle('hotspot');
-    }
-});
-
-register(class WWarmSpot extends WSpot {
-    constructor(display) {
-        super(display);
-        this.setWidgetStyle('warmspot');
     }
 });
 

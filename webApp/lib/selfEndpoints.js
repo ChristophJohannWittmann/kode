@@ -118,8 +118,14 @@ register(class SelfEndpoints extends EndpointContainer {
                 info: 'ok',
             }).save(await trx.connect());
 
-            await user.setPassword(dbc, trx.password);
-            return true;
+            if (typeof trx.password == 'string' && trx.password.length >= 8) {
+                if (trx.password.match(/[0-9]/)) {
+                    if (trx.password.match(/[!@#$%^&*()_-]/)) {
+                        await user.setPassword(dbc, trx.password);
+                        return true;
+                    }
+                }
+            }
         }
 
         await mkDboUserLog({

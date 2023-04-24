@@ -60,7 +60,6 @@
                 })
                 .setAt(1, 1,
                     mkWidget()
-                    .setClassNames('font-size-4')
                     .setInnerHtml(txx.fwTemplateSearch)
                 )
                 .setAt(3, 1,
@@ -370,7 +369,6 @@
     class TemplateContentEditor extends WPanel {
         constructor(templateEditor, sectionData) {
             super('div');
-            this.setClassName('fmwk-container');
             this.templateEditor = templateEditor;
 
             this.append(
@@ -384,7 +382,7 @@
                     .append(
                         mkIButton()
                         .setValue(txx.fwTemplateEditorSectionCopy)
-                        .setWidgetStyle('button-small')
+                        .setWidgetStyle('small-button')
                         .on('dom.click', message => this.templateEditor.copySection(sectionData))
                     )
                 )
@@ -393,7 +391,7 @@
                     .append(
                         mkIButton()
                         .setValue(txx.fwTemplateEditorSectionDelete)
-                        .setWidgetStyle('button-small')
+                        .setWidgetStyle('small-button')
                         .setStyle('margin-left', '12px')
                         .on('dom.click', message => this.templateEditor.eraseSection(sectionData))
                     )
@@ -404,9 +402,6 @@
                 .setStyle({
                     marginLeft: '3px',
                     width: 'calc(100% - 19px)',
-                    fontFamily: 'courier',
-                    fontSize: '14px',
-                    border: 'none',
                 }),
             );
 

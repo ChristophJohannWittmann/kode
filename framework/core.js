@@ -536,24 +536,27 @@
                 }
                 else if (value['#CTOR']) {
                     let ctor = value['#CTOR'];
-                    let ctorContainer = getContainer(ctor.container);
 
-                    if (!(ctor.maker in ctorContainer)) {
-                        swap(ctorContainer);
+                    if (typeof ctor.container == 'string' && typeof ctor.maker == 'string') {
+                        let ctorContainer = getContainer(ctor.container);
 
-                        eval(`
-                            register(class ${value['#CTOR'].maker.substr(2)} extends Jsonable {
-                                constructor(value) {
-                                    super();
-                                    Object.assign(this, value);
-                                }
-                            });
-                        `);
+                        if (!(ctor.maker in ctorContainer)) {
+                            swap(ctorContainer);
 
-                        paws();
+                            eval(`
+                                register(class ${value['#CTOR'].maker.substr(2)} extends Jsonable {
+                                    constructor(value) {
+                                        super();
+                                        Object.assign(this, value);
+                                    }
+                                });
+                            `);
+
+                            paws();
+                        }
+
+                        return ctorContainer[ctor.maker](value);
                     }
-
-                    return ctorContainer[ctor.maker](value);
                 }
             }
      

@@ -51,8 +51,8 @@ register(class VerificationForm extends Widget {
                     .setInnerHtml(txx.fwVerificationStep1)
                     .setStyle('margin-bottom', '15px'),
 
-                    mkWButton()
-                    .setInnerHtml(txx.fwVerificationSendCode)
+                    mkIButton()
+                    .setValue(txx.fwVerificationSendCode)
                     .setStyle('margin-bottom', '12px')
                     .on('dom.click', message => this.requestCode()),
                 )

@@ -5,7 +5,7 @@
     html {
         color-scheme: light dark;
 ${light}
-${styles}
+${geom}
     }
     .lite {}
     .dark { display: none; }
@@ -14,7 +14,7 @@ ${styles}
     html {
         color-scheme: light dark;
 ${dark}
-${styles}
+${geom}
     }
     .lite { display: none; }
     .dark {}
@@ -224,8 +224,6 @@ ${styles}
     padding-right: var(--body-padding-right);
     padding-top: var(--body-padding-top);
     padding-bottom: var(--body-padding-bottom);
-    font-family: var(--body-font-family);
-    font-size: var(--body-font-size);
     color: var(--body-color);
 }
 
@@ -233,267 +231,66 @@ ${styles}
     font-weight: bold;
     font-size: var(--h1-font-size);
     color: var(--h1-color);
+    padding:  0px;
+    margin-left:  0px;
+    margin-right: 0px;
     margin-top: var(--h1-margin-top);
-    margin-top: var(--h1-margin-bottom);
+    margin-bottom: var(--h1-margin-bottom);
 }
 
 [widget-style=widget-h2] {
+    font-weight: bold;
+    font-size: var(--h2-font-size);
+    color: var(--h2-color);
+    padding:  0px;
+    margin-left:  0px;
+    margin-right: 0px;
+    margin-top: var(--h2-margin-top);
+    margin-bottom: var(--h2-margin-bottom);
 }
 
 [widget-style=widget-h3] {
+    font-weight: bold;
+    font-size: var(--h3-font-size);
+    color: var(--h3-color);
+    padding:  0px;
+    margin-left:  0px;
+    margin-right: 0px;
+    margin-top: var(--h3-margin-top);
+    margin-bottom: var(--h3-margin-bottom);
 }
 
 [widget-style=widget-h4] {
+    font-weight: bold;
+    font-size: var(--h4-font-size);
+    color: var(--h4-color);
+    padding:  0px;
+    margin-left:  0px;
+    margin-right: 0px;
+    margin-top: var(--h4-margin-top);
+    margin-bottom: var(--h4-margin-bottom);
 }
 
 [widget-style=widget-h5] {
+    font-weight: bold;
+    font-size: var(--h5-font-size);
+    color: var(--h5-color);
+    padding:  0px;
+    margin-left:  0px;
+    margin-right: 0px;
+    margin-top: var(--h5-margin-top);
+    margin-bottom: var(--h5-margin-bottom);
 }
 
 [widget-style=widget-h6] {
-}
-
-
-/* ********************************************************************** */
-/* ********************************************************************** */
-/* ********************************************************************** */
-/* ********************************************************************** */
-/* ********************************************************************** */
-
-/***********************************************
- * Colors
- ***********************************************/
-.main-color {
-    color: var(--main-color);
-    --color: var(--main-color);
-}
-.main-background-color {
-    background-color: var(--main-background-color);
-    background-color: var(--main-background-color);
-}
-.main-border-color {
-    border-color: var(--main-border-color);
-    --border-color: var(--main-border-color);
-}
-.main-outline-color {
-    outline-color: var(--main-outline-color);
-    --outline-color: var(--main-outline-color);
-}
-.main-hover-color {
-    --hover-color: var(--main-hover-color);
-}
-.main-hover-background-color {
-    --hover-background-color: var(--main-hover-background-color);
-}
-.main-colors {
-    color: var(--main-color);
-    background-color: var(--main-background-color);
-    border-color: var(--main-border-color);
-    outline-color: var(--main-outline-color);
-    --color: var(--main-color); 
-    background-color: var(--main-background-color);
-    --border-color: var(--main-border-color);
-    --outline-color: var(--main-outline-color);
-    --hover-color: var(--main-hover-color);
-    --hover-background-color: var(--main-hover-background-color);
-}
-.alt-color {
-    color: var(--alt-color);
-    --color: var(--alt-color);
-}
-.alt-background-color {
-    background-color: var(--alt-background-color);
-    --background-color: var(--alt-background-color);
-}
-.alt-border-color {
-    border-color: var(--alt-border-color);
-    --border-color: var(--alt-border-color);
-}
-.alt-outline-color {
-    outline-color: var(--alt-outline-color);
-    --outline-color: var(--alt-outline-color);
-}
-.alt-hover-color {
-    --hover-color: var(--alt-hover-color);
-}
-.alt-hover-background-color {
-    --hover-background-color: var(--alt-hover-background-color);
-}
-.alt-colors {
-    color: var(--alt-color);
-    background-color: var(--alt-background-color);
-    border-color: var(--alt-border-color);
-    outline-color: var(--alt-outline-color);
-    --color: var(--alt-color); 
-    background-color: var(--alt-background-color);
-    --border-color: var(--alt-border-color);
-    --outline-color: var(--alt-outline-color);
-    --hover-color: var(--alt-hover-color);
-    --hover-background-color: var(--alt-hover-background-color);
-}
-
-
-/***********************************************
- * Font
- ***********************************************/
-.font-size-1 { font-size: var(--font-size-1); }
-.font-size-2 { font-size: var(--font-size-2); }
-.font-size-3 { font-size: var(--font-size-3); }
-.font-size-4 { font-size: var(--font-size-4); }
-.font-size-5 { font-size: var(--font-size-5); }
-.font-size-6 { font-size: var(--font-size-6); }
-.font-size-7 { font-size: var(--font-size-7); }
-.font-size-8 { font-size: var(--font-size-8); }
-.font-size-9 { font-size: var(--font-size-9); }
-.font-family-sans { font-family: var(--font-family-sans); }
-.font-family-serif { font-family: var(--font-family-serif); }
-.font-family-fixed { font-family: var(--font-family-fixed); }
-.font-weight-bold { font-weight: bold; }
-.font-weight-normal { font-weight: normal; }
-.font-weight-light { font-weight: light; }
-
-
-/***********************************************
- * Height Width
- ***********************************************/
-.fill { height: 100%; width: 100%; }
-.fill-x { width: 100%; }
-.fill-y { height: 100%; }
-.auto { height: auto; width: auto; }
-.auto-x { width: auto; }
-.auto-y { height: auto; }
-
-
-/***********************************************
- * Margins
- ***********************************************/
-.margin-0 { margin: 0px; }
-.margin-left-0 { margin-left: 0px; }
-.margin-right-0 { margin-right: 0px; }
-.margin-top-0 { margin-top: 0px; }
-.margin-bottom-0 { margin-bottom: 0px; }
-.margin-3 { margin: 3px; }
-.margin-left-3 { margin-left: 3px; }
-.margin-right-3 { margin-right: 3px; }
-.margin-top-3 { margin-top: 3px; }
-.margin-bottom-3 { margin-bottom: 3px; }
-.margin-6 { margin: 6px; }
-.margin-left-6 { margin-left: 6px; }
-.margin-right-6 { margin-right: 6px; }
-.margin-top-6 { margin-top: 6px; }
-.margin-bottom-6 { margin-bottom: 6px; }
-.margin-8 { margin: 8px; }
-.margin-left-8 { margin-left: 8px; }
-.margin-right-8 { margin-right: 8px; }
-.margin-top-8 { margin-top: 8px; }
-.margin-bottom-8 { margin-bottom: 8px; }
-.margin-12 { margin: 12px; }
-.margin-left-12 { margin-left: 12px; }
-.margin-right-12 { margin-right: 12px; }
-.margin-top-12 { margin-top: 12px; }
-.margin-bottom-12 { margin-bottom: 12px; }
-
-
-/***********************************************
- * Padding
- ***********************************************/
-.padding-0 { padding: 0px; }
-.padding-left-0 { padding-left: 0px; }
-.padding-right-0 { padding-right: 0px; }
-.padding-top-0 { padding-top: 0px; }
-.padding-bottom-0 { padding-bottom: 0px; }
-.padding-3 { padding: 3px; }
-.padding-left-3 { padding-left: 3px; }
-.padding-right-3 { padding-right: 3px; }
-.padding-top-3 { padding-top: 3px; }
-.padding-bottom-3 { padding-bottom: 3px; }
-.padding-6 { padding: 6px; }
-.padding-left-6 { padding-left: 6px; }
-.padding-right-6 { padding-right: 6px; }
-.padding-top-6 { padding-top: 6px; }
-.padding-bottom-6 { padding-bottom: 6px; }
-.padding-8 { padding: 8px; }
-.padding-left-8 { padding-left: 8px; }
-.padding-right-8 { padding-right: 8px; }
-.padding-top-8 { padding-top: 8px; }
-.padding-bottom-8 { padding-bottom: 8px; }
-.padding-12 { padding: 12px; }
-.padding-left-12 { padding-left: 12px; }
-.padding-right-12 { padding-right: 12px; }
-.padding-top-12 { padding-top: 12px; }
-.padding-bottom-12 { padding-bottom: 12px; }
-
-
-/***********************************************
- * Border
- ***********************************************/
-.border-style-none { border-style: none; }
-.border-style-dotted { border-style: dotted; }
-.border-style-dashed { border-style: dashed; }
-.border-style-solid { border-style: solid; }
-.border-style-hidden { border-style: hidden; }
-.border-width-0 { border-width: 0px; }
-.border-width-1 { border-width: 1px; }
-.border-width-2 { border-width: 2px; }
-.border-width-3 { border-width: 3px; }
-.border-width-4 { border-width: 4px; }
-.border-width-5 { border-width: 5px; }
-.border-radius-0 { border-radius: var(--border-radius-0); }
-.border-radius-1 { border-radius: var(--border-radius-1); }
-.border-radius-2 { border-radius: var(--border-radius-2); }
-.border-radius-3 { border-radius: var(--border-radius-3); }
-.border-radius-4 { border-radius: var(--border-radius-4); }
-.border-radius-5 { border-radius: var(--border-radius-5); }
-
-
-/***********************************************
- * Outline
- ***********************************************/
-.outline-style-none { outline-style: none; --outline-style: none; }
-.outline-style-dotted { outline-style: dotted; --outline-style: dotted; }
-.outline-style-dashed { outline-style: dashed; --outline-style: dashed; }
-.outline-style-solid { outline-style: solid; --outline-style: solid; }
-.outline-width-0 { outline-width: 0px; --outline-width: 0px; }
-.outline-width-1 { outline-width: 1px; --outline-width: 1px; }
-.outline-width-2 { outline-width: 2px; --outline-width: 2px; }
-.outline-width-3 { outline-width: 3px; --outline-width: 3px; }
-.outline-width-4 { outline-width: 4px; --outline-width: 4px; }
-.outline-width-5 { outline-width: 5px; --outline-width: 5px; }
-/* ********************************************************************** */
-/* ********************************************************************** */
-/* ********************************************************************** */
-/* ********************************************************************** */
-/* ********************************************************************** */
-
-
-/***********************************************
- * Link
- ***********************************************/
-[widget-style=link], [widget-style=link]:active, [widget-style=link]:visited {
-    display: inline-block;
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    margin-top: 12px;
-    margin-bottom: 12px;
-    padding-top: 3px;
-    padding-bottom: 3px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: none;
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-}
-[widget-style=link]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-    outline-style: solid;
-    outline-color: var(--widget-hover-outline-color);
-}
-[widget-style=link]:focus {
-    color: var(--widget-focus-color);
-    background-color: var(--widget-focus-background-color);
+    font-weight: bold;
+    font-size: var(--h6-font-size);
+    color: var(--h6-color);
+    padding:  0px;
+    margin-left:  0px;
+    margin-right: 0px;
+    margin-top: var(--h6-margin-top);
+    margin-bottom: var(--h6-margin-bottom);
 }
 
 
@@ -501,382 +298,143 @@ ${styles}
  * Input
  ***********************************************/
 [widget-style=input] {
-    font-family: inherit;
-    font-size: inherit;
+    font-size: var(--input-font-size);
     text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    border-color: var(--widget-border-color);
+    margin-left: var(--input-margin-left);
+    margin-right: var(--input-margin-right);
+    margin-top: var(--input-margin-top);
+    margin-bottom: var(--input-margin-bottom);
+    padding-left: var(--input-padding-left);
+    padding-right: var(--input-padding-right);
+    padding-top: var(--input-padding-top);
+    padding-bottom: var(--input-padding-bottom);
+    border-style: var(--input-border-style);
+    border-width: var(--input-border-width);
+    border-color: var(--input-border-color);
+    border-radius: var(--input-border-radius);
+    outline-style: var(--input-outline-style);
+    outline-width: var(--input-outline-width);
+    outline-color: var(--input-outline-color);
+    color: var(--input-color);
+    background-color: var(--input-background-color);
 }
 [widget-style=input]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
+    color: var(--input-hover-color);
+    background-color: var(--input-hover-background-color);
+    border-style: var(--input-hover-border-style);
+    border-width: var(--input-hover-border-width);
+    border-color: var(--input-hover-border-color);
 }
 [widget-style=input]:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-color: var(--outline-color);
-    outline-width: var(--widget-outline-width);
+    border-color:  transparent;
+    outline-style: var(--input-focus-outline-style);
+    outline-width: var(--input-focus-outline-width);
+    outline-color: var(--input-focus-outline-color);
 }
 [widget-style=input]:invalid {
+    color: var(--input-invalid-color);
+    background-color: var(--input-invalid-background-color);
     outline-style: none;
-    color: var(--widget-error-color);
-    background-color: var(--widget-error-background-color);
-    border-color: var(--widget-error-border-color);
+    border-style: var(--input-invalid-border-style);
+    border-width: var(--input-invalid-border-width);
+    border-color: var(--input-invalid-border-color);
 }
-[widget-style=inputdisabled] {
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
+[widget-style=input]:disabled {
+    color: var(--input-disabled-color);
+    background-color: var(--input-disabled-background-color);
     outline-style: none;
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
-    border-color: var(--widget-disabled-border-color);
+    border-style: var(--input-disabled-border-style);
+    border-width: var(--input-disabled-border-width);
+    border-color: var(--input-disabled-border-color);
+    outline-style: var(--input-disabled-outline-style);
+    outline-width: var(--input-disabled-outline-width);
+    outline-color: var(--input-disabled-outline-color);
 }
 
 
 /***********************************************
- * Input Button
- ***********************************************/
-[widget-style=button] {
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    border-color: var(--widget-border-color);
-}
-[widget-style=button]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-    cursor: pointer;
-}
-[widget-style=button]:focus {
-    color: var(--widget-focus-color);
-    background-color: var(--widget-focus-background-color);
-    border-color: transparent;
-    outline-style: solid;
-    outline-color: var(--outline-color);
-    outline-width: var(--widget-outline-width);
-}
-[widget-style=buttondisabled] {
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
-    border-color: var(--widget-disabled-border-color);
-}
-
-
-/***********************************************
- * Input Button SMALL
- ***********************************************/
-[widget-style=button-small] {
-    font-family: inherit;
-    font-size: 12px;
-    text-decoration: none;
-    padding-top: 1px;
-    padding-bottom: 1px;
-    padding-left: 2px;
-    padding-right: 2px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    border-color: var(--widget-border-color);
-}
-[widget-style=button-small]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-    cursor: pointer;
-}
-[widget-style=button-small]:focus {
-    color: var(--widget-focus-color);
-    background-color: var(--widget-focus-background-color);
-    border-color: transparent;
-    outline-style: solid;
-    outline-color: var(--outline-color);
-    outline-width: var(--widget-outline-width);
-}
-[widget-style=button-smalldisabled] {
-    font-family: inherit;
-    font-size: 12px;
-    text-decoration: none;
-    padding-top: 1px;
-    padding-bottom: 1px;
-    padding-left: 2px;
-    padding-right: 2px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
-    border-color: var(--widget-disabled-border-color);
-}
-
-
-/***********************************************
- * Input Checkbox
+ * Checkbox
  ***********************************************/
 [widget-style=checkbox] {
-    width: 48px;
-    height: 48px;
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    outline-color: var(--widget-outline-color);
-}
-[widget-style=checkbox]:checked {
-    width: 48px;
-    height: 48px;
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    outline-color: var(--widget-outline-color);
+    width: var(--checkbox-width);
+    height: var(--checkbox-height);
+    margin-left: var(--checkbox-margin-left);
+    margin-right: var(--checkbox-margin-right);
+    margin-top: var(--checkbox-margin-top);
+    margin-bottom: var(--checkbox-margin-bottom);
+    padding-left: var(--checkbox-padding-left);
+    padding-right: var(--checkbox-padding-right);
+    padding-top: var(--checkbox-padding-top);
+    padding-bottom: var(--checkbox-padding-bottom);
+    border-style: var(--input-border-style);
+    border-width: var(--input-border-width);
+    border-color: var(--input-border-color);
+    border-radius: var(--input-border-radius);
+    outline-style: var(--input-outline-style);
+    outline-width: var(--input-outline-width);
+    outline-color: var(--input-outline-color);
+    color: var(--input-color);
+    background-color: var(--input-background-color);
+    cursor: pointer;
 }
 [widget-style=checkbox]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-    cursor: pointer;
+    color: var(--input-hover-color);
+    background-color: var(--input-hover-background-color);
+    border-style: var(--input-hover-border-style);
+    border-width: var(--input-hover-border-width);
+    border-color: var(--input-hover-border-color);
 }
 [widget-style=checkbox]:focus {
-    color: var(--widget-focus-color);
-    background-color: var(--widget-focus-background-color);
-    border-color: transparent;
-    outline-style: solid;
-    outline-color: var(--outline-color);
-    outline-width: var(--widget-outline-width);
+    border-color:  transparent;
+    outline-style: var(--input-focus-outline-style);
+    outline-width: var(--input-focus-outline-width);
+    outline-color: var(--input-focus-outline-color);
 }
 [widget-style=checkbox]:disabled {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: none;
-    font-size: var(--font-size);
-    font-family: var(--font-family);
-    text-decoration: none;
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
+    cursor: default;
 }
 
 
 /***********************************************
- * Input Radio
+ * Radio
  ***********************************************/
 [widget-style=radio] {
-    width: 48px;
-    height: 48px;
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    outline-color: var(--widget-outline-color);
-}
-[widget-style=radio]:checked {
-    width: 48px;
-    height: 48px;
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    outline-color: var(--widget-outline-color);
+    width: var(--radio-width);
+    height: var(--radio-height);
+    margin-left: var(--radio-margin-left);
+    margin-right: var(--radio-margin-right);
+    margin-top: var(--radio-margin-top);
+    margin-bottom: var(--radio-margin-bottom);
+    padding-left: var(--radio-padding-left);
+    padding-right: var(--radio-padding-right);
+    padding-top: var(--radio-padding-top);
+    padding-bottom: var(--radio-padding-bottom);
+    border-style: var(--input-border-style);
+    border-width: var(--input-border-width);
+    border-color: var(--input-border-color);
+    border-radius: var(--input-border-radius);
+    outline-style: var(--input-outline-style);
+    outline-width: var(--input-outline-width);
+    outline-color: var(--input-outline-color);
+    color: var(--input-color);
+    background-color: var(--input-background-color);
+    cursor: pointer;
 }
 [widget-style=radio]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-    cursor: pointer;
+    color: var(--input-hover-color);
+    background-color: var(--input-hover-background-color);
+    border-style: var(--input-hover-border-style);
+    border-width: var(--input-hover-border-width);
+    border-color: var(--input-hover-border-color);
 }
 [widget-style=radio]:focus {
-    color: var(--widget-focus-color);
-    background-color: var(--widget-focus-background-color);
-    border-color: transparent;
-    outline-style: solid;
-    outline-color: var(--outline-color);
-    outline-width: var(--widget-outline-width);
+    border-color:  transparent;
+    outline-style: var(--input-focus-outline-style);
+    outline-width: var(--input-focus-outline-width);
+    outline-color: var(--input-focus-outline-color);
 }
 [widget-style=radio]:disabled {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: none;
-    font-size: var(--font-size);
-    font-family: var(--font-family);
-    text-decoration: none;
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
-}
-
-
-/***********************************************
- * Select
- ***********************************************/
-[widget-style=scalarselect] {
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    outline-width: var(--widget-outline-width);
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    border-color: var(--widget-border-color);
-}
-[widget-style=scalarselect]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-}
-[widget-style=scalarselect]:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-color: var(--widget-focus-outline-color);
-}
-[widget-style=scalarselectdisabled] {
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    outline-width: var(--widget-outline-width);
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
-    border-color: var(--widget-disabledborder-color);
-}
-
-
-/***********************************************
- * Button Tag
- ***********************************************/
-[widget-style=buttontag] {
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    border-color: var(--widget-border-color);
-}
-[widget-style=buttontag]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-    cursor: pointer;
-}
-[widget-style=buttontag]:focus {
-    color: var(--widget-focus-color);
-    background-color: var(--widget-focus-background-color);
-    border-color: transparent;
-    outline-style: solid;
-    outline-color: var(--outline-color);
-    outline-width: var(--widget-outline-width);
-}
-[widget-style=buttontagisabled] {
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
-    border-color: var(--widget-disabled-border-color);
+    cursor: default;
 }
 
 
@@ -884,45 +442,166 @@ ${styles}
  * Text Area
  ***********************************************/
 [widget-style=textarea] {
-    font-family: inherit;
-    font-size: inherit;
+    font-family: var(--input-font-family);
+    font-size: var(--input-font-size);
     text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
+    margin-left: var(--input-margin-left);
+    margin-right: var(--input-margin-right);
+    margin-top: var(--input-margin-top);
+    margin-bottom: var(--input-margin-bottom);
+    padding-left: var(--input-padding-left);
+    padding-right: var(--input-padding-right);
+    padding-top: var(--input-padding-top);
+    padding-bottom: var(--input-padding-bottom);
+    border-style: var(--input-border-style);
+    border-width: var(--input-border-width);
+    border-color: var(--input-border-color);
+    border-radius: var(--input-border-radius);
+    outline-style: var(--input-outline-style);
+    outline-width: var(--input-outline-width);
+    outline-color: var(--input-outline-color);
+    color: var(--input-color);
+    background-color: var(--input-background-color);
+}
+[widget-style=textarea]:hover {
+    color: var(--input-hover-color);
+    background-color: var(--input-hover-background-color);
+    border-style: var(--input-hover-border-style);
+    border-width: var(--input-hover-border-width);
+    border-color: var(--input-hover-border-color);
 }
 [widget-style=textarea]:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-color: var(--widget-focus-outline-color);
-    outline-width: var(--widget-outline-width);
+    border-color:  transparent;
+    outline-style: var(--input-focus-outline-style);
+    outline-width: var(--input-focus-outline-width);
+    outline-color: var(--input-focus-outline-color);
 }
-[widget-style=select]:invalid {
-    color: var(--widget-error-color);
-    background-color: var(--widget-error-background-color);
-    border-color: var(--widget-error-border-color);
-}
-[widget-style=textareadisabled] {
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-disabled-border-width);
-    border-radius: var(--widget-disabled-border-radius);
+[widget-style=textarea]:invalid {
+    color: var(--input-invalid-color);
+    background-color: var(--input-invalid-background-color);
     outline-style: none;
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
+    border-style: var(--input-invalid-border-style);
+    border-width: var(--input-invalid-border-width);
+    border-color: var(--input-invalid-border-color);
+}
+[widget-style=textarea]:disabled {
+    color: var(--input-invalid-color);
+    background-color: var(--input-invalid-background-color);
+    outline-style: none;
+    border-style: var(--input-disabled-border-style);
+    border-width: var(--input-disabled-border-width);
+    border-color: var(--input-disabled-border-color);
+    outline-style: var(--input-disabled-outline-style);
+    outline-width: var(--input-disabled-outline-width);
+    outline-color: var(--input-disabled-outline-color);
+}
+
+
+/***********************************************
+ * Select
+ ***********************************************/
+[widget-style=select] {
+    font-size: var(--input-font-size);
+    text-decoration: none;
+    margin-left: var(--input-margin-left);
+    margin-right: var(--input-margin-right);
+    margin-top: var(--input-margin-top);
+    margin-bottom: var(--input-margin-bottom);
+    padding-left: var(--input-padding-left);
+    padding-right: var(--input-padding-right);
+    padding-top: var(--input-padding-top);
+    padding-bottom: var(--input-padding-bottom);
+    border-style: var(--input-border-style);
+    border-width: var(--input-border-width);
+    border-color: var(--input-border-color);
+    border-radius: var(--input-border-radius);
+    outline-style: var(--input-outline-style);
+    outline-width: var(--input-outline-width);
+    outline-color: var(--input-outline-color);
+    color: var(--input-color);
+    background-color: var(--input-background-color);
+}
+[widget-style=select]:hover {
+    color: var(--input-hover-color);
+    background-color: var(--input-hover-background-color);
+    border-style: var(--input-hover-border-style);
+    border-width: var(--input-hover-border-width);
+    border-color: var(--input-hover-border-color);
+}
+[widget-style=select]:focus {
+    border-color:  transparent;
+    outline-style: var(--input-focus-outline-style);
+    outline-width: var(--input-focus-outline-width);
+    outline-color: var(--input-focus-outline-color);
+}
+[widget-style=select]:disabled {
+    color: var(--input-invalid-color);
+    background-color: var(--input-invalid-background-color);
+    outline-style: none;
+    border-style: var(--input-disabled-border-style);
+    border-width: var(--input-disabled-border-width);
+    border-color: var(--input-disabled-border-color);
+    outline-style: var(--input-disabled-outline-style);
+    outline-width: var(--input-disabled-outline-width);
+    outline-color: var(--input-disabled-outline-color);
+}
+
+
+/***********************************************
+ * Input (Small Button)
+ ***********************************************/
+[widget-style=small-button] {
+    font-size: var(--smallbutton-font-size);
+    text-decoration: none;
+    margin-left: var(--input-margin-left);
+    margin-right: var(--input-margin-right);
+    margin-top: var(--input-margin-top);
+    margin-bottom: var(--input-margin-bottom);
+    padding-left: var(--smallbutton-padding-left);
+    padding-right: var(--smallbutton-padding-right);
+    padding-top: var(--smallbutton-padding-top);
+    padding-bottom: var(--smallbutton-padding-bottom);
+    border-style: var(--input-border-style);
+    border-width: var(--input-border-width);
+    border-color: var(--input-border-color);
+    border-radius: var(--input-border-radius);
+    outline-style: var(--input-outline-style);
+    outline-width: var(--input-outline-width);
+    outline-color: var(--input-outline-color);
+    color: var(--input-color);
+    background-color: var(--input-background-color);
+}
+[widget-style=small-button]:hover {
+    color: var(--input-hover-color);
+    background-color: var(--input-hover-background-color);
+    border-style: var(--input-hover-border-style);
+    border-width: var(--input-hover-border-width);
+    border-color: var(--input-hover-border-color);
+}
+[widget-style=small-button]:focus {
+    border-color:  transparent;
+    outline-style: var(--input-focus-outline-style);
+    outline-width: var(--input-focus-outline-width);
+    outline-color: var(--input-focus-outline-color);
+}
+[widget-style=small-button]:invalid {
+    color: var(--input-invalid-color);
+    background-color: var(--input-invalid-background-color);
+    outline-style: none;
+    border-style: var(--input-invalid-border-style);
+    border-width: var(--input-invalid-border-width);
+    border-color: var(--input-invalid-border-color);
+}
+[widget-style=small-button]:disabled {
+    color: var(--input-invalid-color);
+    background-color: var(--input-invalid-background-color);
+    outline-style: none;
+    border-style: var(--input-disabled-border-style);
+    border-width: var(--input-disabled-border-width);
+    border-color: var(--input-disabled-border-color);
+    outline-style: var(--input-disabled-outline-style);
+    outline-width: var(--input-disabled-outline-width);
+    outline-color: var(--input-disabled-outline-color);
 }
 
 
@@ -930,142 +609,138 @@ ${styles}
  * Scalar
  ***********************************************/
 [widget-style=scalar] {
-    width: calc(100% - 15px);
-    font-family: inherit;
-    font-size: inherit;
+    width: calc(100%);
+    font-size: var(--input-font-size);
     text-decoration: none;
-    margin-top: 4px;
-    margin-bottom: 4px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    border-color: var(--widget-border-color);
+    margin-left: var(--input-margin-left);
+    margin-right: var(--input-margin-right);
+    margin-top: var(--input-margin-top);
+    margin-bottom: var(--input-margin-bottom);
+    padding-left: var(--input-padding-left);
+    padding-right: var(--input-padding-right);
+    padding-top: var(--input-padding-top);
+    padding-bottom: var(--input-padding-bottom);
+    border-style: var(--input-border-style);
+    border-width: var(--input-border-width);
+    border-color: var(--input-border-color);
+    border-radius: var(--input-border-radius);
+    outline-style: var(--input-outline-style);
+    outline-width: var(--input-outline-width);
+    outline-color: var(--input-outline-color);
+    color: var(--input-color);
+    background-color: var(--input-background-color);
 }
 [widget-style=scalar]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
+    color: var(--input-hover-color);
+    background-color: var(--input-hover-background-color);
+    border-style: var(--input-hover-border-style);
+    border-width: var(--input-hover-border-width);
+    border-color: var(--input-hover-border-color);
 }
 [widget-style=scalar]:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-color: var(--widget-focus-outline-color);
-    outline-width: var(--widget-outline-width);
+    border-color:  transparent;
+    outline-style: var(--input-focus-outline-style);
+    outline-width: var(--input-focus-outline-width);
+    outline-color: var(--input-focus-outline-color);
 }
 [widget-style=scalar]:invalid {
-    color: var(--widget-error-color);
-    background-color: var(--widget-error-background-color);
-    border-color: var(--widget-error-border-color);
-}
-[widget-style=scalardisabled] {
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
+    color: var(--input-invalid-color);
+    background-color: var(--input-invalid-background-color);
     outline-style: none;
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
-    border-color: var(--widget-disabled-border-color);
+    border-style: var(--input-invalid-border-style);
+    border-width: var(--input-invalid-border-width);
+    border-color: var(--input-invalid-border-color);
+}
+[widget-style=scalar]:disabled {
+    color: var(--input-invalid-color);
+    background-color: var(--input-invalid-background-color);
+    outline-style: none;
+    border-style: var(--input-disabled-border-style);
+    border-width: var(--input-disabled-border-width);
+    border-color: var(--input-disabled-border-color);
+    outline-style: var(--input-disabled-outline-style);
+    outline-width: var(--input-disabled-outline-width);
+    outline-color: var(--input-disabled-outline-color);
 }
 
 
 /***********************************************
- * Scalar Select
+ * Link
  ***********************************************/
-[widget-style=scalarselect] {
-    width: calc(100%);
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    margin-top: 4px;
-    margin-bottom: 4px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    border-color: var(--widget-border-color);
-}
-[widget-style=scalarselect]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-}
-[widget-style=scalarselect]:focus {
-    border-color: transparent;
-    outline-style: solid;
-    outline-color: var(--widget-focus-outline-color);
-    outline-width: var(--widget-outline-width);
-}
-[widget-style=scalarselectdisabled] {
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: var(--widget-border-width);
-    border-radius: var(--widget-border-radius);
-    outline-style: none;
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
-    border-color: var(--widget-disabledborder-color);
-}
-
-
-/***********************************************
- * Scalar Extra
- ***********************************************/
-[widget-style=scalar-extra] {
+[widget-style=link], [widget-style=link]:active, [widget-style=link]:visited {
     display: inline-block;
-    margin-left: 32px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border: solid 1px gray;
-    border-radius:  4px;
-    cursor: pointer;
+    text-decoration: none;
+    margin-left: var(--link-margin-left);
+    margin-right: var(--link-margin-right);
+    margin-top: var(--link-margin-top);
+    margin-bottom: var(--link-margin-bottom);
+    padding-left: var(--link-padding-left);
+    padding-right: var(--link-padding-right);
+    padding-top: var(--link-padding-top);
+    padding-bottom: var(--link-padding-bottom);
+    border-style: none;
+    outline-style: none;
+    border-radius: var(--link-hover-border-radius);
+    color: var(--link-color);
+    background-color: var(--link-background-color);
+}
+[widget-style=link]:hover {
+    color: var(--link-hover-color);
+    background-color: var(--link-hover-background-color);
+    border-style: var(--link-border-style);
+    border-width: var(--link-border-width);
+}
+[widget-style=link]:focus {
+    outline-style: var(--link-outline-style);
+    outline-width: var(--link-outline-width);
+    outline-color: var(--link-outline-color);
 }
 
 
 /***********************************************
- * Stack
+ * Hot Spot
  ***********************************************/
-[widget-style=stack] {
-    height: 100%;
-    width: 100%;
-    padding: 0px;
-    margin: 0px;
+[widget-style=hotspot] {
+    color: var(--input-color);
+    background-color: var(--input-background-color);
+    border-style: var(--input-border-style);
+    border-width: var(--input-border-width);
+    border-color: var(--input-border-color);
+    border-radius: var(--input-border-radius);
+    margin-left: var(--input-margin-left);
+    margin-right: var(--input-margin-right);
+    margin-top: var(--input-margin-top);
+    margin-bottom: var(--input-margin-bottom);
+    padding-left: var(--input-padding-left);
+    padding-right: var(--input-padding-right);
+    padding-top: var(--input-padding-top);
+    padding-bottom: var(--input-padding-bottom);
+    cursor:  pointer;
+}
+[widget-style=hotspot]:hover {
+    color: var(--input-hover-color);
+    background-color: var(--input-hover-background-color);
 }
 
 
 /***********************************************
- * Editor
+ * Cold Spot
  ***********************************************/
-[widget-style=editor] {
-    width: calc(100% - 4px);
-    padding: 0px;
-    /* margin-right: 4px; */
-    margin-left: 2px;
+[widget-style=coldspot] {
+    color: var(--input-color);
+    background-color: var(--input-background-color);
+    border-style: var(--input-border-style);
+    border-width: var(--input-border-width);
+    border-color: var(--input-border-color);
+    border-radius: var(--input-border-radius);
+    margin-left: var(--input-margin-left);
+    margin-right: var(--input-margin-right);
+    margin-top: var(--input-margin-top);
+    margin-bottom: var(--input-margin-bottom);
+    padding-left: var(--input-padding-left);
+    padding-right: var(--input-padding-right);
+    padding-top: var(--input-padding-top);
+    padding-bottom: var(--input-padding-bottom);
 }
 
 
@@ -1107,271 +782,6 @@ ${styles}
 
 
 /***********************************************
- * Hot Spot
- ***********************************************/
-[widget-style=hotspot] {
-    margin-top: 4px;
-    margin-bottom: 4px;
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: var(--widget-border-radius);
-    border-color: var(--widget-border-color);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    cursor:  pointer;
-}
-[widget-style=hotspot]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-}
-
-
-/***********************************************
- * Warm Spot
- ***********************************************/
-[widget-style=warmspot] {
-    margin-top: 4px;
-    margin-bottom: 4px;
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: var(--widget-border-radius);
-    border-color: var(--widget-border-color);
-    outline-style: none;
-    color: var(--widget-color);
-    background-color: var(--widget-background-color);
-    cursor:  pointer;
-}
-
-
-/***********************************************
- * Cold Spot
- ***********************************************/
-[widget-style=coldspot] {
-    margin-top: 4px;
-    margin-bottom: 4px;
-    font-family: inherit;
-    font-size: inherit;
-    text-decoration: none;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 6px;
-    padding-right: 6px;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: var(--widget-border-radius);
-    border-color: var(--widget-disabled-border-color);
-    outline-style: none;
-    color: var(--widget-disabled-color);
-    background-color: var(--widget-disabled-background-color);
-    cursor:  pointer;
-}
-
-
-/***********************************************
- * Ctls
- ***********************************************/
-[widget-style=ctls-horz] {
-    flex: 1;
-    margin: 0px;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    padding: 0px;
-    padding-right: 8px;
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: center;
-    user-select: none;
-}
-[widget-style=ctls-vert] {
-    flex: 1;
-    margin: 0px;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    padding: 0px;
-    padding-right: 8px;
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: center;
-    user-select: none;
-}
-[widget-style=ctls-horz-ctl] {
-    margin-left: 6px;
-    margin-right: 6px;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    cursor: pointer;
-    user-select: none;
-}
-[widget-style=ctls-vert-ctl] {
-    margin-left: 0px;
-    margin-right: 0px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    cursor: pointer;
-    user-select: none;
-}
-[widget-style=ctls-horz-ctl]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-    user-select: none;
-}
-[widget-style=ctls-vert-ctl]:hover {
-    color: var(--widget-hover-color);
-    background-color: var(--widget-hover-background-color);
-    user-select: none;
-}
-[widget-style=ctls-horz-ctl-disabled] {
-    color: var(--widget-disabled-color);
-    margin-left: 6px;
-    margin-right: 6px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    user-select: none;
-}
-[widget-style=ctls-vert-ctl-disabled] {
-    color: var(--widget-disabled-color);
-    margin-left: 6px;
-    margin-right: 6px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    user-select: none;
-}
-
-
-/***********************************************
- * Nav Bar
- ***********************************************/
-[widget-style=navbar-horz] {
-    display:  flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    margin: 0px;
-    padding: 0px;
-    color: var(--nav-color);
-    background-color: var(--nav-background-color);
-    border: var(--nav-border);
-    font-weight: bold;
-}
-[widget-style=navbar-vert] {
-    display:  flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    margin: 0px;
-    padding: 0px;
-    color: var(--nav-color);
-    background-color: var(--nav-background-color);
-    border: var(--nav-border);
-    font-weight: bold;
-}
-[widget-style=navbar-info-horz] {
-    flex: 3;
-    margin: 0px;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    padding: 0px;
-    padding-left: 8px;
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-}
-[widget-style=navbar-info-vert] {
-    flex: 3;
-    margin: 0px;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    padding: 0px;
-    padding-left: 8px;
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-}
-
-
-/***********************************************
- * Menu
- ***********************************************/
-[widget-style=popup-menu] {
-    position: absolute;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: var(--widget-border-radius);
-    border-color:  var(--widget-border-color);
-    padding: 10px;
-    color: var(--menu-color);
-    background-color: var(--menu-background-color);
-    user-select: none;
-}
-[widget-style=popup-menu-item] {
-    position: static;
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-    margin:  6px;
-    width: 100%;
-    height: 100%;
-    min-height: var(--menu-min-height);
-    cursor: pointer;
-    color: var(--menu-color);
-    background-color: var(--menu-background-color);
-    font-family: var(--menu-font-family);
-    font-size: var(--menu-font-size);
-    font-weight: var(--menu-font-weight);
-    user-select: none;
-}
-[widget-style=popup-menu-item]:hover {
-    color: var(--menu-hover-color);
-    background-color: var(--menu-hover-background-color);
-    user-select: none;
-}
-[widget-style=popup-menu-item-disabled] {
-    color: var(--menu-disabled-color);
-    position: static;
-    text-align: left;
-    border-radius: var(--widget-border-radius);
-    margin:  6px;
-    width: 100%;
-    height: 100%;
-    user-select: none;
-}
-[widget-style=menu-separator] {
-    border: var(--menu-separator);
-}
-[widget-style=menu-separator-lite] {
-    border: var(--menu-separator-lite);
-}
-
-
-/***********************************************
  * Dialog
  ***********************************************/
 [widget-style=dialog-shield] {
@@ -1382,11 +792,13 @@ ${styles}
     width: 100%;
     height: 100%;
     padding: 10px;
-    border: var(--dialog-border);
+    border-style: var(--dialog-border-style);
+    border-width: var(--dialog-border-width);
+    border-color: var(--dialog-border-color);
     border-radius: var(--dialog-border-radius);
-    font-size: var(--font-size-4);
     color: var(--dialog-color);
     background-color: var(--dialog-background-color);
+    font-size: var(--dialog-font-size);
     user-select: none;
     z-index: 10001;
 }
@@ -1405,10 +817,331 @@ ${styles}
 
 
 /***********************************************
+ * Menu
+ ***********************************************/
+[widget-style=popup-menu] {
+    position: absolute;
+    border-style: var(--menu-border-style);
+    border-width: var(--menu-border-width);
+    border-radius: var(--menu-border-radius);
+    border-color:  var(--menu-border-color);
+    padding-left: var(--menu-padding-left);
+    padding-right: var(--menu-padding-right);
+    padding-top: var(--menu-padding-top);
+    padding-bottom: var(--menu-padding-bottom);
+    margin-left: var(--menu-margin-left);
+    margin-right: var(--menu-margin-right);
+    margin-top: var(--menu-margin-top);
+    margin-bottom: var(--menu-margin-bottom);
+    color: var(--menu-color);
+    background-color: var(--menu-background-color);
+    user-select: none;
+}
+[widget-style=popup-menu-item] {
+    position: static;
+    width: 100%;
+    height: 100%;
+    color: var(--menu-color);
+    background-color: var(--menu-background-color);
+    font-family: var(--menu-font-family);
+    font-size: var(--menu-font-size);
+    font-weight: var(--menu-font-weight);
+    margin-left: var(--menuitem-margin-left);
+    margin-right: var(--menuitem-margin-right);
+    margin-top: var(--menuitem-margin-top);
+    margin-bottom: var(--menuitem-margin-bottom);
+    padding-left: var(--menuitem-padding-left);
+    padding-right: var(--menuitem-padding-right);
+    padding-top: var(--menuitem-padding-top);
+    padding-bottom: var(--menuitem-padding-bottom);
+    user-select: none;
+    cursor: pointer;
+
+}
+[widget-style=popup-menu-item]:hover {
+    color: var(--menu-hover-color);
+    background-color: var(--menu-hover-background-color);
+}
+[widget-style=popup-menu-item-disabled] {
+    position: static;
+    width: 100%;
+    height: 100%;
+    color: var(--menu-disabled-color);
+    background-color: var(--menu-disabled-background-color);
+    font-family: var(--menu-font-family);
+    font-size: var(--menu-font-size);
+    font-weight: var(--menu-font-weight);
+    margin-left: var(--menuitem-margin-left);
+    margin-right: var(--menuitem-margin-right);
+    margin-top: var(--menuitem-margin-top);
+    margin-bottom: var(--menuitem-margin-bottom);
+    padding-left: var(--menuitem-padding-left);
+    padding-right: var(--menuitem-padding-right);
+    padding-top: var(--menuitem-padding-top);
+    padding-bottom: var(--menuitem-padding-bottom);
+    user-select: none;
+}
+[widget-style=menu-separator] {
+    border-style: var(--menu-separator-style);
+    border-width: var(--menu-separator-width);
+    border-color: var(--menu-separator-color);
+}
+[widget-style=menu-separator-lite] {
+    border-style: var(--menu-separator-style);
+    border-width: var(--menu-separator-width);
+    border-color: var(--menu-separator-lite-color);
+}
+
+
+/***********************************************
+ * Ctls
+ ***********************************************/
+[widget-style=ctls-horz] {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    margin-left: var(--ctls-horz-margin-left);
+    margin-right: var(--ctls-horz-margin-right);
+    margin-top: var(--ctls-horz-margin-top);
+    margin-bottom: var(--ctls-horz-margin-bottom);
+    padding-left: var(--ctls-horz-padding-left);
+    padding-right: var(--ctls-horz-padding-right);
+    padding-top: var(--ctls-horz-padding-top);
+    padding-bottom: var(--ctls-horz-padding-bottom);
+    user-select: none;
+}
+[widget-style=ctls-vert] {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    margin-left: var(--ctls-vert-margin-left);
+    margin-right: var(--ctls-vert-margin-right);
+    margin-top: var(--ctls-vert-margin-top);
+    margin-bottom: var(--ctls-vert-margin-bottom);
+    padding-left: var(--ctls-vert-padding-left);
+    padding-right: var(--ctls-vert-padding-right);
+    padding-top: var(--ctls-vert-padding-top);
+    padding-bottom: var(--ctls-vert-padding-bottom);
+    user-select: none;
+}
+[widget-style=ctls-horz-ctl] {
+    color: var(--ctl-color);
+    background-color: var(--ctl-background-color);
+    margin-left: var(--ctl-horz-margin-left);
+    margin-right: var(--ctl-horz-margin-right);
+    margin-top: var(--ctl-horz-margin-top);
+    margin-bottom: var(--ctl-horz-margin-bottom);
+    padding-left: var(--ctl-horz-padding-left);
+    padding-right: var(--ctl-horz-padding-right);
+    padding-top: var(--ctl-horz-padding-top);
+    padding-bottom: var(--ctl-horz-padding-bottom);
+    cursor: pointer;
+    user-select: none;
+}
+[widget-style=ctls-vert-ctl] {
+    color: var(--ctl-color);
+    background-color: var(--ctl-background-color);
+    margin-left: var(--ctl-vert-margin-left);
+    margin-right: var(--ctl-vert-margin-right);
+    margin-top: var(--ctl-vert-margin-top);
+    margin-bottom: var(--ctl-vert-margin-bottom);
+    padding-left: var(--ctl-vert-padding-left);
+    padding-right: var(--ctl-vert-padding-right);
+    padding-top: var(--ctl-vert-padding-top);
+    padding-bottom: var(--ctl-vert-padding-bottom);
+    cursor: pointer;
+    user-select: none;
+}
+[widget-style=ctls-horz-ctl]:hover {
+    color: var(--ctl-hover-color);
+    background-color: var(--ctl-hover-background-color);
+}
+[widget-style=ctls-vert-ctl]:hover {
+    color: var(--ctl-hover-color);
+    background-color: var(--ctl-hover-background-color);
+}
+[widget-style=ctls-horz-ctl-disabled] {
+    color: var(--ctl-disabled-color);
+    background-color: var(--ctl-disabled-background-color);
+    margin-left: var(--ctl-horz-margin-left);
+    margin-right: var(--ctl-horz-margin-right);
+    margin-top: var(--ctl-horz-margin-top);
+    margin-bottom: var(--ctl-horz-margin-bottom);
+    padding-left: var(--ctl-horz-padding-left);
+    padding-right: var(--ctl-horz-padding-right);
+    padding-top: var(--ctl-horz-padding-top);
+    padding-bottom: var(--ctl-horz-padding-bottom);
+    user-select: none;
+}
+[widget-style=ctls-vert-ctl-disabled] {
+    color: var(--ctl-disabled-color);
+    background-color: var(--ctl-disabled-background-color);
+    margin-left: var(--ctl-vert-margin-left);
+    margin-right: var(--ctl-vert-margin-right);
+    margin-top: var(--ctl-vert-margin-top);
+    margin-bottom: var(--ctl-vert-margin-bottom);
+    padding-left: var(--ctl-vert-padding-left);
+    padding-right: var(--ctl-vert-padding-right);
+    padding-top: var(--ctl-vert-padding-top);
+    padding-bottom: var(--ctl-vert-padding-bottom);
+    user-select: none;
+}
+
+
+/***********************************************
+ * Nav Bar
+ ***********************************************/
+[widget-style=navbar-horz] {
+    display:  flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin-left: var(--navbar-horz-margin-left);
+    margin-right: var(--navbar-horz-margin-right);
+    margin-top: var(--navbar-horz-margin-top);
+    margin-bottom: var(--navbar-horz-margin-bottom);
+    padding-left: var(--navbar-horz-padding-left);
+    padding-right: var(--navbar-horz-padding-right);
+    padding-top: var(--navbar-horz-padding-top);
+    padding-bottom: var(--navbar-horz-padding-bottom);
+    color: var(--nav-color);
+    background-color: var(--nav-background-color);
+}
+[widget-style=navbar-vert] {
+    display:  flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin-left: var(--navbar-vert-margin-left);
+    margin-right: var(--navbar-vert-margin-right);
+    margin-top: var(--navbar-vert-margin-top);
+    margin-bottom: var(--navbar-vert-margin-bottom);
+    padding-left: var(--navbar-vert-padding-left);
+    padding-right: var(--navbar-vert-padding-right);
+    padding-top: var(--navbar-vert-padding-top);
+    padding-bottom: var(--navbar-vert-padding-bottom);
+    color: var(--nav-color);
+    background-color: var(--nav-background-color);
+}
+[widget-style=navbar-info-horz] {
+    flex: 3;
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    margin-left: var(--navinfo-horz-margin-left);
+    margin-right: var(--navinfo-horz-margin-right);
+    margin-top: var(--navinfo-horz-margin-top);
+    margin-bottom: var(--navinfo-horz-margin-bottom);
+    padding-left: var(--navinfo-horz-padding-left);
+    padding-right: var(--navinfo-horz-padding-right);
+    padding-top: var(--navinfo-horz-padding-top);
+    padding-bottom: var(--navinfo-horz-padding-bottom);
+}
+[widget-style=navbar-info-vert] {
+    flex: 3;
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    margin-left: var(--navinfo-vert-margin-left);
+    margin-right: var(--navinfo-vert-margin-right);
+    margin-top: var(--navinfo-vert-margin-top);
+    margin-bottom: var(--navinfo-vert-margin-bottom);
+    padding-left: var(--navinfo-vert-padding-left);
+    padding-right: var(--navinfo-vert-padding-right);
+    padding-top: var(--navinfo-vert-padding-top);
+    padding-bottom: var(--navinfo-vert-padding-bottom);
+}
+
+
+/***********************************************
+ * Tile
+ ***********************************************/
+[widget-style=tile] {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin:  0px;
+    padding: 0px;
+    border: none;
+}
+[widget-style=tile-frame] {
+    display: flex;
+    flex-direction: row;
+    flex-basis: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin:  0px;
+    padding:  0px;
+    border: none;
+}
+
+
+/***********************************************
  * Horizontal Rules
  ***********************************************/
 [widget-style=hr-lite] {
-    border: solid 1px var(--widget-disabled-border-color);
+    border: solid 1px var(--hrlite_border_color);
+}
+
+
+/***********************************************
+ * Label
+ ***********************************************/
+[widget-style=label] {
+    color: var(--label-color);
+    background-color: var(--label-background-color);
+    font-size: var(--label-font-size);
+    font-weight: var(--label-font-weight);
+}
+
+
+/***********************************************
+ * Box
+ ***********************************************/
+[widget-style=box] {
+    color: var(--box-color);
+    background-color: var(--box-background-color);
+    border-style: var(--box-border-style);
+    border-width: var(--box-border-width);
+    border-color: var(--box-border-color);
+    border-radius: var(--box-border-radius);
+}
+
+
+/***********************************************
+ * Stack
+ ***********************************************/
+[widget-style=stack] {
+    height: 100%;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+
+
+/***********************************************
+ * Editor
+ ***********************************************/
+[widget-style=editor] {
+    width: calc(100% - 4px);
+    padding: 0px;
+    margin-left: 2px;
 }
 
 
@@ -1419,50 +1152,32 @@ ${styles}
     display: inline-block;
     color: var(--framing-color);
     background-color: var(--framing-background-color);
-    border: var(--framing-border);
+    border-style: var(--framing-border-style);
+    border-width: var(--framing-border-width);
+    border-color: var(--framing-border-color);
     border-radius: var(--framing-border-radius);
-    padding-top: 15px;
+    margin-left: var(--framing-margin-left);
+    margin-right: var(--framing-margin-right);
+    margin-top: var(--framing-margin-top);
+    margin-bottom: var(--framing-margin-bottom);
+    padding-left: var(--framing-padding-left);
+    padding-right: var(--framing-padding-right);
+    padding-top: var(--framing-padding-top);
+    padding-bottom: var(--framing-padding-bottom);
+}
+
+
+/***********************************************
+ * User Extension Button
+ ***********************************************/
+[widget-style=user-extension-button] {
+    display: inline-block;
+    margin-left: 32px;
+    padding-top: 12px;
     padding-bottom: 12px;
-    padding-left: 12px;
-    padding-right: 12px;
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
-
-
-/***********************************************
- * Style Classes
- ***********************************************/
-.fmwk-container {
-    color: var(--nav-color);
-    background-color: var(--nav-background-color);
-    border: var(--nav-border);
-    font-weight: bold;
-}
-
-
-/***********************************************
- * Tile
- ***********************************************/
-[widget-style=tile] {
-    margin:  0px;
-    padding: 0px;
-    border: none;
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;;
-}
-[widget-style=tile-frame] {
-    margin:  0px;
-    padding:  0px;
-    border: none;
-    display: flex;
-    flex-direction: row;
-    flex-basis: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
+    padding-left: 6px;
+    padding-right: 6px;
+    border: solid 1px gray;
+    border-radius:  4px;
+    cursor: pointer;
 }

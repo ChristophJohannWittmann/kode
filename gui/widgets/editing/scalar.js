@@ -82,72 +82,77 @@
 
     define('ScalarColor', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
-        mkEditor: opts => mkIColor().setWidgetStyle('scalar'),
+        mkEditor: opts => mkIColor().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarDate', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot(dateStr) : mkWColdSpot(dateStr),
-        mkEditor: opts => mkIDate().setWidgetStyle('scalar'),
+        mkEditor: opts => mkIDate().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarDateTime', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot(dateTimeStr) : mkWColdSpot(dateTimeStr),
-        mkEditor: opts => mkIDateTime().setWidgetStyle('scalar'),
+        mkEditor: opts => mkIDateTime().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarEmail', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
-        mkEditor: opts => mkIEmail().setWidgetStyle('scalar'),
+        mkEditor: opts => mkIEmail().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarEnum', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
-        mkEditor: opts => mkWSelect().setWidgetStyle('scalarselect').setOptions(opts.choices),
+        mkEditor: opts => mkWSelect().setStyle('width', 'calc(100% - 7px)').setOptions(opts.choices),
     });
 
     define('ScalarHost', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
-        mkEditor: opts => mkIHost().setWidgetStyle('scalar'),
+        mkEditor: opts => mkIHost().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarIp', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
-        mkEditor: opts => mkIIp().setWidgetStyle('scalar'),
+        mkEditor: opts => mkIIp().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarMonth', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
-        mkEditor: opts => mkIMonth().setWidgetStyle('scalar'),
+        mkEditor: opts => mkIMonth().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarNumber', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
-        mkEditor: opts => mkINumber().setWidgetStyle('scalar'),
+        mkEditor: opts => mkINumber().setStyle('width', 'calc(100% - 15px)'),
+    });
+
+    define('ScalarPassword', {
+        mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
+        mkEditor: opts => mkIPassword().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarTel', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
-        mkEditor: opts => mkITel().setWidgetStyle('scalar'),
+        mkEditor: opts => mkITel().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarText', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
-        mkEditor: opts => mkIText().setWidgetStyle('scalar'),
+        mkEditor: opts => mkIText().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarTime', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot(timeStr) : mkWColdSpot(timeStr),
-        mkEditor: opts => mkITime().setWidgetStyle('scalar'),
+        mkEditor: opts => mkITime().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarUrl', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
-        mkEditor: opts => mkIUrl().setWidgetStyle('scalar'),
+        mkEditor: opts => mkIUrl().setStyle('width', 'calc(100% - 15px)'),
     });
 
     define('ScalarWeek', {
         mkViewer: opts => !opts.disabled ? mkWHotSpot() : mkWColdSpot(),
-        mkEditor: opts => mkIWeek().setWidgetStyle('scalar'),
+        mkEditor: opts => mkIWeek().setStyle('width', 'calc(100% - 15px)'),
     });
 })();
 
@@ -171,6 +176,10 @@ register(class WScalar extends Widget {
         this.extra = null;
         this.append(this.viewer, this.editor);
         opts.readonly ? this.setReadOnly() : this.setReadWrite();
+
+        if (this.viewer instanceof WHotSpot || this.viewer instanceof mkWColdSpot) {
+            this.viewer.setStyle('width', 'calc(100% - 15px)');
+        }
 
         if (opts.menu instanceof WPopupMenu) {
             opts.menu.attach(this, 'dom.click');

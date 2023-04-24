@@ -51,7 +51,6 @@ register(class WDialog extends WOverlay {
 
         this.shield = mkWOverlay(overlayOpts);
         this.shield.setWidgetStyle('dialog-shield');
-        this.shield.setClassNames('alt-colors');
         this.shield.show(html);
 
         super.show(this.shield);
@@ -99,6 +98,7 @@ register(class WAlertDialog extends WDialog {
                 .append(
                     mkIButton()
                     .setValue(txx.fwMiscOk)
+                    .setStyle('width', '100%')
                     .on('dom.click', message => this.hide())
                 )
             )

@@ -66,7 +66,12 @@ register(class WInput extends WEditable {
 register(class IButton extends WInput {
     constructor() {
         super('button');
-        this.setWidgetStyle('button');
+        this.enable();
+
+        this.setStyle({
+            appearance: 'none',
+            cursor: 'pointer',
+        });
     }
 });
 

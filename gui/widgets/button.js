@@ -30,10 +30,10 @@
  * Element.
 *****/
 register(class WButton extends Widget {
-    constructor() {
+    constructor(widgetStyle) {
         super('button');
         this.setButtonType();
-        this.setWidgetStyle('buttontag');
+        typeof widgetStyle == 'text' ? this.setWidgetStyle(widgetStyle) : false;
     }
 
     setButtonType() {

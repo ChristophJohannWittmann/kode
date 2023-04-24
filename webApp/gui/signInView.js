@@ -96,15 +96,15 @@ class AuthenticateForm extends WGrid {
         });
 
         this.controller = controller;
-        this.setClassNames('flex-h-cc alt-colors border-style-solid border-width-2 border-radius-2');
+        this.setWidgetStyle('box').setClassNames('flex-h-cc');
 
-        this.setAt(1, 0, mkWidget('div').setInnerHtml(txx.fwSignInUsername).setClassNames('flex-h-sc font-weight-bold font-size-4'));
+        this.setAt(1, 0, mkWLabel().setInnerHtml(txx.fwSignInUsername));
         this.setAt(3, 0, mkIEmail()
         .bind(this.controller, 'username', Binding.valueBinding))
         .setAttribute('autofocus')
-        .setAttribute('autocomplete', 'email');
+        .setAttribute('autocomplete', 'off');
 
-        this.setAt(5, 0, mkWidget('div').setInnerHtml(txx.fwSignInPassword).setClassNames('flex-h-sc font-weight-bold font-size-4'));
+        this.setAt(5, 0, mkWLabel('div').setInnerHtml(txx.fwSignInPassword));
         this.setAt(7, 0, mkIPassword()
         .bind(this.controller, 'password', Binding.valueBinding))
         .setAttribute('autocomplete', 'current-password');
@@ -140,11 +140,10 @@ class ForgotCredentialsForm extends WGrid {
         });
 
         this.controller = controller;
-        this.setClassNames('flex-h-cc alt-colors border-style-solid border-width-1 border-radius-2');
+        this.setWidgetStyle('box').setClassNames('flex-h-cc');
 
         this.setAt(1, 0, mkWidget('div').setInnerHtml(txx.fwForgotInstructions));
-
-        this.setAt(3, 0, mkWidget('div').setInnerHtml(txx.fwForgotEmail).setClassNames('flex-h-sc font-weight-bold font-size-4'));
+        this.setAt(3, 0, mkWLabel('div').setInnerHtml(txx.fwForgotEmail));
         this.setAt(5, 0, mkIEmail()
         .bind(this.controller, 'username', Binding.valueBinding))
         .setAttribute('autofocus')

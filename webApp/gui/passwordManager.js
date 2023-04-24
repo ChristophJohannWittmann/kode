@@ -39,11 +39,7 @@
                 marginRight: '8px',
             });
 
-            this.controller = mkActiveData({
-                code: '',
-                password1: '',
-                password2: '',
-            });
+            this.controller = mkActiveData({ code: '' });
 
             this.append(
                 this.verifier = mkVerificationForm()
@@ -62,10 +58,12 @@
         }
 
         async save() {
+            let password = this.entryForm.passwords.getValues().password1;
+
             let reply = await queryServer({
                 messageName: 'SelfSetPassword',
                 verificationCode: this.controller.verificationCode,
-                password: this.controller.password1,
+                password: password,
             });
 
             if (!reply) {
@@ -86,44 +84,34 @@
      * WEditor, will automatically listen to Change, Modify, Validity messagess
      * being sent by this form.
     *****/
-    class EntryForm extends WEditable {
+    class EntryForm extends WEditor {
         constructor(passwordManager) {
             super();
             this.passwordManager = passwordManager;
-            this.controller = this.passwordManager.controller;
+            this.on('Widget.Changed', message => this.validate());
 
             this.append(
                 mkWidget('h3')
                 .setInnerHtml(txx.fwPasswordTitle),
 
-                mkWGrid({
-                    rows: ['48px', '10px', '48px', '10px', '100px'],
-                    cols: ['auto', '20px', 'auto'],
-                })
-                .setAt(0, 0,
-                    mkWidget('div')
-                    .setClassNames('font-size-5 flex-h-sc')
-                    .setInnerHtml(txx.fwPasswordEnter)
-                )
-                .setAt(0, 2,
-                    (this.password1 = mkIPassword())
-                    .setClassNames('font-size-5 margin-right-8 flex-h-sc')
-                    .bind(this.controller, 'password1', Binding.valueBinding)
-                    .on('Widget.Changed', () => setTimeout(() => this.valueChanged(),10))
-                )
-                .setAt(2, 0,
-                    mkWidget('div')
-                    .setClassNames('font-size-5 flex-h-sc')
-                    .setInnerHtml(txx.fwPasswordConfirm)
-                )
-                .setAt(2, 2,
-                    (this.password2 = mkIPassword())
-                    .setClassNames('font-size-5 margin-right-8 flex-h-sc')
-                    .bind(this.controller, 'password2', Binding.valueBinding)
-                    .on('Widget.Changed', () => setTimeout(() => this.valueChanged(),10))
-                )
-                .setAt(4, 2, this.error = mkWFraming().conceal()),
+                (this.passwords = mkWObjectEditor())
+                .add({}, {
+                    password1: {
+                        label: txx.fwPasswordEnter,
+                        type: ScalarPassword,
+                        focus: true,
+                    },
+                    password2: {
+                        label: txx.fwPasswordConfirm,
+                        type: ScalarPassword,
+                    },
+
+                }),
+
+                (this.error = mkWFraming()),
             );
+
+            this.listen();
         }
 
         clearError() {
@@ -131,25 +119,14 @@
             return this;
         }
 
-        getValue() {
-            if (this.isValid()) {
-                return this.controller.password1;
-            }
-
-            return '';
+        setError(diagnostic) {
+            this.error.setInnerHtml(diagnostic).reveal();
+            return this;
         }
 
-        isModified() {
-            if (this.controller.password1 == '' && this.controller.password2 == '') {
-                return false;
-            }
-
-            return true;
-        }
-
-        isValid() {
-            let p1 = this.controller.password1;
-            let p2 = this.controller.password2;
+        validate() {
+            let p1 = this.passwords.getValues().password1;
+            let p2 = this.passwords.getValues().password2;
 
             if (p1.length || p2.length) {
                 if (p1.length < 8) {
@@ -175,68 +152,6 @@
 
             this.clearError();
             return true;
-        }
-
-        revert() {
-            if (this.modified) {
-                this.modified = false;
-                this.controller.password1 = '';
-                this.controller.password2 = '';
-
-                this.send({
-                    messageName: 'Widget.Modified',
-                    widget: this,
-                    modified: false,
-                });
-
-                if (!this.valid) {
-                    this.valid = !this.valid;
-
-                    this.send({
-                        messageName: 'Widget.Validity',
-                        widget: this,
-                        valid: this.valid,
-                    });
-                }
-            }
-        }
-
-        setError(diagnostic) {
-            this.error.setInnerHtml(diagnostic).reveal();
-            return this;
-        }
-
-        setValue(value) {
-            return this;
-        }
-
-        valueChanged() {
-            this.send({
-                messageName: 'Widget.Changed',
-                type: 'value',
-                widget: this,
-                value: this.getValue(),
-            });
-
-            if (this.isModified() != this.modified) {
-                this.modified = !this.modified;
-
-                this.send({
-                    messageName: 'Widget.Modified',
-                    widget: this,
-                    modified: this.modified,
-                });
-            }
-
-            if (this.isValid() != this.valid) {
-                this.valid = !this.valid;
-
-                this.send({
-                    messageName: 'Widget.Validity',
-                    widget: this,
-                    valid: this.valid,
-                });
-            }
         }
     }
 })();

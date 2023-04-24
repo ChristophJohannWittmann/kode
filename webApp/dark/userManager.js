@@ -63,7 +63,6 @@
                 })
                 .setAt(1, 1,
                     mkWidget()
-                    .setClassNames('font-size-4')
                     .setInnerHtml(txx.fwUserManagerSearch)
                 )
                 .setAt(3, 1,
@@ -288,8 +287,8 @@
 
                     if (editor) {
                         var extra = mkWHotSpot()
+                        .setWidgetStyle('user-extension-button')
                         .setInnerHtml(txx.fwPermissionContextAvailable)
-                        .setWidgetStyle('scalar-extra')
                         .bind(this.userEditor.getActiveData(), valueName, (widget, value) => {
                             value ? widget.reveal() : widget.conceal();
                         })

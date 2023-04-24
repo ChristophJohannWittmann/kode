@@ -126,7 +126,6 @@ register(class WGrid extends Widget {
             for (let j = 0; j < this.cols.length; j++) {
                 let placeholder = mkWidget('div');
                 placeholder[WGrid.PlaceholderKey] = true;
-                placeholder.setClassName('fill');
                 this.cells.push(placeholder);
                 this.append(placeholder);
             }

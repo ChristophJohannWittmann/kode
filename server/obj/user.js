@@ -270,7 +270,7 @@ register(class User extends DboUser {
     }
 
     async modify(dbc, userData) {
-        console.log('Users.modifyUser():  modify basis user record.')
+        console.log('TODO -- server/obj/user.js User.modify()')
     }
 
     async setGrants(dbc, modifiedGrants) {
