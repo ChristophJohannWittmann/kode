@@ -31,6 +31,38 @@
 singleton(class WebLibrary {
     constructor() {
         this.urls = {};
+        this.wait = {};
+
+        if (CLUSTER.isPrimary) {
+            Ipc.on('#WebLibraryGet', async message => {
+                if (message.url in this.urls) {
+                    Message.reply(
+                        message,
+                        await this.urls[message.url],
+                    );
+                }
+                else {
+                    Message.reply(message, false);
+                }
+            });
+
+            Ipc.on('#WebLibraryRegister', async message => {
+                this.register({
+                    url: message.url,
+                    mime: message.mime,
+                    blob: message.blob,
+                    tlsMode: message.tlsMode,
+                });
+            });
+
+            Ipc.on('#WebLibraryDeregister', async message => {
+                this.deregister(message.url);
+            });
+
+            Ipc.on('#WebLibraryWait', async message => {
+                this.wait[message.url] = message;
+            });
+        }
     }
 
     deregister(url) {
@@ -41,6 +73,11 @@ singleton(class WebLibrary {
     
     async get(url) {
         if (url in this.urls) {
+            if (url in this.wait) {
+                Message.reply(this.wait[url], true);
+                delete this.wait[url];
+            }
+
             return await this.urls[url];
         }
     }
@@ -81,33 +118,13 @@ register(class WebItem {
         return this;
     }
 
-    async register(primary) {
+    register() {
         if (!this.registered) {
-            if (primary) {
-                if (this instanceof WebBlob) {
-                    let url = await Ipc.queryPrimary({
-                        messageName: '#WebLibraryRegister',
-                        url: this.url,
-                        mime: this.mime,
-                        blob: this.blob,
-                        tlsMode: this.tlsMode,
-                    });
-
-                    this.registered = 'primary';
-                }
-            }
-            else {
-                WebLibrary.register(this.url, this);
-                this.registered = 'worker';
-            }
+            WebLibrary.register(this.url, this);
+            this.registered = 'worker';
         }
 
         return this;
-    }
-
-    requested() {
-        return new Promise(async (ok, fail) => {
-        });
     }
 });
 
@@ -216,5 +233,32 @@ register(class WebBlob extends WebItem {
             value: value[alg],
             error: false,
         };
+    }
+
+    async registerPrimary(wait) {
+        await Ipc.queryPrimary({
+            messageName: '#WebLibraryRegister',
+            url: this.url,
+            mime: this.mime,
+            blob: this.blob,
+            tlsMode: this.tlsMode,
+        });
+
+        this.registered = 'primary';
+
+        return this;
+    }
+
+    async requested() {
+        if (this.registered == 'primary') {
+            await Ipc.queryPrimary({
+                messageName: '#WebLibraryWait',
+                url: this.url,
+            });
+
+            return true;
+        }
+
+        return false;
     }
 });

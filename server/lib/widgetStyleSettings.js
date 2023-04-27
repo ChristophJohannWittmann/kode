@@ -310,7 +310,7 @@ global.widgetStyleSettings = {
         box_background_color: '#FBFBFF',
         box_border_color: '#AAAAAA',
 
-        label_color: 'steelblue',
+        label_color: '#4682B4',
         label_background_color: 'transparent',
 
         link_color: '#3A3A3A',
@@ -342,5 +342,81 @@ global.widgetStyleSettings = {
     },
 
     dark: {
+        /*
+        html_color: '#565656',
+        body_color: '#565656',
+        html_background_color: '#FCFCFC',
+        body_background_color: '#FCFCFC',
+
+        h1_color: '#3A3A3A',
+        h2_color: '#3A3A3A',
+        h3_color: '#3A3A3A',
+        h4_color: '#3A3A3A',
+        h5_color: '#3A3A3A',
+        h6_color: '#3A3A3A',
+
+        input_color: '#3A3A3A',
+        input_background_color: '#FCFCFC',
+        input_border_color: '#C0C0C0',
+        input_outline_color: '#FF8C00',
+
+        input_hover_color: '#3A3A3A',
+        input_hover_background_color: '#F7F7F7',
+        input_hover_border_color: '#BDB76B',
+        input_hover_outline_color: '#FF8C00',
+
+        input_focus_color: '#3A3A3A',
+        input_focus_background_color: '#FCFCFC',
+        input_focus_border_color: '#C0C0C0',
+        input_focus_outline_color: '#FF8C00',
+
+        input_disabled_color: '#787878',
+        input_disabled_background_color: '#FCFCFC',
+        input_disabled_border_color: '#C0C0C0',
+        input_disabled_outline_color: '#C0C0C0',
+
+        input_invalid_color: '#DC143C',
+        input_invalid_background_color: '#FFF9F9',
+        input_invalid_border_color: '#DC143C',
+        input_invalid_outline_color: '#DC143C',
+
+        dialog_color: '#828282',
+        dialog_border_color: '#B0C4DE',
+        dialog_background_color: '#FCFCFC',
+
+        box_color: '#3A3A3A',
+        box_background_color: '#FBFBFF',
+        box_border_color: '#AAAAAA',
+
+        label_color: '#4682B4',
+        label_background_color: 'transparent',
+
+        link_color: '#3A3A3A',
+        link_background_color: '#FCFCFC',
+        link_hover_color: '#3A3A3A',
+        link_hover_background_color: '#F7F7F7',
+        link_border_color: '#C0C0C0',
+        link_outline_color: '#FF8C00',
+
+        framing_color: '#565656',
+        framing_background_color: '#FBFBFF',
+        framing_border_color: '#C0C0C0',
+
+        menu_color: '#2F4F5F',
+        menu_background_color: '#F9F9F9',
+        menu_border_color: '#C0C0C0',
+        menu_hover_color: '#2F4F5F',
+        menu_hover_background_color: '#EEEEEE',
+
+        menu_separator_color: '#244F5F',
+        menu_separator_lite_color: '#DFDFDF',
+
+        ctl_color: '#3A3A3A',
+        ctl_background_color: '#FCFCFC',
+        ctl_hover_color: '#3A3A3A',
+        ctl_hover_background_color: '#EEEEEE',
+        ctl_disabled_color: '#AAAAAA',
+        ctl_disabled_background_color: '#FCFCFC',
+        */
     }
 };

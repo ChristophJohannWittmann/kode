@@ -106,6 +106,47 @@ register(class AcmeProvider {
                 let keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
                 let keyAuthorization = `${this.challenge.token}.${thumbprint}`;
 
+                let webItem = mkWebBlob(keyChallenge, 'text/plain', keyAuthorization, 'none');
+                await webItem.registerPrimary();
+                await webItem.requested();
+                await webItem.deregister();
+                reply = await this.post(this.challenge.url, {});
+
+                if (reply.status == 200) {
+                    if (await this.confirmChallenge(10)) {
+                        hook.clear();
+                        return true;
+                    }
+                }
+                else {
+                    this.failure = reply;
+                    return false;
+                }
+            }
+            else if (this.challenge.status == 'valid') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    /*
+    async authorize() {
+        this.challenge = null;
+        this.challengeType = 'http-01';
+        let reply = await this.post(this.authorizationUrl, 'PostAsGet');
+
+        if (reply.status == 200) {
+            this.challenge = reply.content.challenges.filter(challenge => {
+                return challenge.type == this.challengeType;
+            })[0];
+
+            if (this.challenge.status == 'pending') {
+                let hash = await Crypto.hash('sha256', `{"e":"${this.jwk.e}","kty":"${this.jwk.kty}","n":"${this.jwk.n}"}`);
+                let thumbprint = Crypto.encodeBase64Url(hash);
+                let keyChallenge = `/.well-known/acme-challenge/${this.challenge.token}`;
+                let keyAuthorization = `${this.challenge.token}.${thumbprint}`;
+
                 let hook = mkWebBlob(keyChallenge, 'text/plain', keyAuthorization, 'none')
                 await hook.register(true);
                 await Ipc.queryPrimary({ messageName: '#WebLibraryWait', url: keyChallenge });
@@ -136,6 +177,7 @@ register(class AcmeProvider {
 
         return false;
     }
+    */
 
     async certify(days) {
         let reply = await this.post(
