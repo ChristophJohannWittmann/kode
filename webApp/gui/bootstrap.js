@@ -167,9 +167,8 @@
     *****/
     register(async function signOut() {
         await queryServer({ messageName: 'SelfSignOut' });
-        
+
         if (webSocket) {
-            webSocket.close();
             webSocket = null;
         }
 
