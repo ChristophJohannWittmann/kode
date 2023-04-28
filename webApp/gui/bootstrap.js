@@ -165,7 +165,9 @@
      * be sending a SelfSignOut message.  This simply closes the GUI out and
      * reverts to the sign in view.
     *****/
-    register(function signOut() {
+    register(async function signOut() {
+        await queryServer({ messageName: 'SelfSignOut' });
+        
         if (webSocket) {
             webSocket.close();
             webSocket = null;

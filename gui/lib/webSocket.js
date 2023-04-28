@@ -65,9 +65,37 @@ register(class Websocket extends Emitter {
 
     connect() {
         this.ws = new WebSocket(this.url);
-        this.ws.onopen = event => this.sendPending();
-        this.ws.onerror = error => this.ws = null;
-        this.ws.onclose = () => this.ws = null;
+
+        this.ws.onopen = event => {
+            this.send({
+                messageName: 'open',
+                event: event,
+                websocket: this,
+            });
+
+            this.sendPending();
+        };
+
+        this.ws.onerror = error => {
+            this.send({
+                messageName: 'error',
+                event: event,
+                websocket: this,
+            });
+
+            this.ws = null;
+        }
+
+        this.ws.onclose = () => {
+            this.send({
+                messageName: 'close',
+                event: event,
+                websocket: this,
+            });
+
+            this.ws = null;
+        };
+
         this.ws.onmessage = event => this.onMessage(fromJson(event.data));
     }
 
@@ -117,11 +145,15 @@ register(class Websocket extends Emitter {
     }
 
     sendPending() {
-        if (!this.ws) {
-            this.connect();
-        }
-        else {
-            while (this.pending.length) {
+        while (this.pending.length) {
+            if (!this.ws) {
+                this.connect();
+                return;
+            }
+            else if (this.ws.readyState != 1) {
+                return;
+            }
+            else {
                 this.ws.send(toJson(this.pending.shift()));
             }
         }
