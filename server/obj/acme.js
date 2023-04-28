@@ -108,13 +108,14 @@ register(class AcmeProvider {
 
                 let webItem = mkWebBlob(keyChallenge, 'text/plain', keyAuthorization, 'none');
                 await webItem.registerPrimary();
-                await webItem.requested();
-                await webItem.deregister();
+                let promise = webItem.requested();
                 reply = await this.post(this.challenge.url, {});
 
                 if (reply.status == 200) {
+                    await promise;
+                    await webItem.deregister();
+
                     if (await this.confirmChallenge(10)) {
-                        hook.clear();
                         return true;
                     }
                 }
