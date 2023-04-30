@@ -376,15 +376,26 @@ ${geom}
     color: var(--input-color);
     background-color: var(--input-background-color);
     cursor: pointer;
+    transition: all .5s ease;
 }
+/*
+[widget-style=checkbox]:checked {
+    visibility: hidden;
+}
+[widget-style=checkbox]:checked::before {
+    visibility: visible;
+    content: url("/webbie");
+}
+*/
 [widget-style=checkbox]:hover {
     color: var(--input-hover-color);
     background-color: var(--input-hover-background-color);
     border-style: var(--input-hover-border-style);
     border-width: var(--input-hover-border-width);
-    border-color: var(--input-hover-border-color);
+    border-color: var(--checkbox-hover-border-color);
 }
 [widget-style=checkbox]:focus {
+    border-style: none;
     border-color:  transparent;
     outline-style: var(--input-focus-outline-style);
     outline-width: var(--input-focus-outline-width);

@@ -479,6 +479,8 @@ async function seedUser() {
 async function workerHook() {
     let dbc = await dbConnect();
 
+    mkWebBlob('/webbie', 'text/html', '<label>YES</label>', 'best').register();
+
     await dbc.commit();
     await dbc.free();
 }

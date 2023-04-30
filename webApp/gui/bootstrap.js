@@ -166,8 +166,6 @@
      * reverts to the sign in view.
     *****/
     register(async function signOut() {
-        await queryServer({ messageName: 'SelfSignOut' });
-
         if (webSocket) {
             webSocket = null;
         }

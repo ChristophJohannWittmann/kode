@@ -477,7 +477,12 @@
                 }
                 else if (value[SymbolJsonable]) {
                     let obj = new Object();
-                    obj['#CTOR'] = Reflect.getPrototypeOf(value).constructor[SymbolCtor];
+                    let ctor = Reflect.getPrototypeOf(value).constructor[SymbolCtor];
+
+                    if (ctor) {
+                        obj['#CTOR'] = ctor;
+                    }
+
                     Object.assign(obj, value);
                     delete obj[SymbolJsonable];
                     return obj;
