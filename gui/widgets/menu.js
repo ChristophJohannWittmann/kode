@@ -187,8 +187,9 @@ register(class WPopupMenu extends Widget {
         if (rect.width > win.innerWidth()) {
             finalX = 0;
         }
-        else if (x + rect.width > win.innerWidth()) {
+        else if (x + rect.width >= win.innerWidth()) {
             finalX -= (x + rect.width - win.innerWidth());
+            finalX -= 6;
         }
 
         if (rect.height > win.innerHeight()) {

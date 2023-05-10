@@ -225,7 +225,7 @@ register(class IWeek extends WInput {
 register(class IHost extends IText {
     constructor() {
         super();
-        this.setAttribute('pattern', '^[0-9A-Za-z-_]+(\\.[0-9A-Za-z-_]+)*$');
+        this.setAttribute('pattern', '^[0-9A-Za-z\\-_]+(\\.[0-9A-Za-z\\-_]+)*$');
     }
 });
 
@@ -270,69 +270,5 @@ register(class IDynamic extends IText {
             messageName: 'Input.Pause',
             input: this,
         });
-    }
-});
-
-
-/*****
-*****/
-register(class ICheckbox extends WInput {
-    constructor() {
-        super('checkbox');
-        this.setWidgetStyle('checkbox');
-    }
-
-    getValue() {
-        return this.node.checked;
-    }
-
-    setValue(bool) {
-        this.node.checked = bool;
-        super.setValue(bool);
-        return this;
-    }
-
-    subclassCheckValidity() {
-        return true;
-    }
-
-    subclassGetValue() {
-        return this.node.checked;
-    }
-
-    subclassSetValue(value) {
-        this.node.checked = value;
-    }
-});
-
-
-/*****
-*****/
-register(class IRadio extends WInput {
-    constructor() {
-        super('radio');
-        this.setWidgetStyle('radio');
-    }
-
-    getValue() {
-        return this.node.checked;
-    }
-
-    setValue(bool) {
-        this.node.checked = bool;
-        super.setValue(bool);
-        return this;
-    }
-
-    subclassCheckValidity() {
-        return true;
-    }
-
-    subclassGetValue() {
-        return this.node.checked;
-    }
-
-    subclassSetValue(value) {
-        this.node.checked = value;
     }
 });
