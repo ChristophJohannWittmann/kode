@@ -24,31 +24,3 @@
 
 /*****
 *****/
-register(class IRadio extends WInput {
-    constructor() {
-        super('radio');
-        this.setWidgetStyle('radio');
-    }
-
-    getValue() {
-        return this.node.checked;
-    }
-
-    setValue(bool) {
-        this.node.checked = bool;
-        super.setValue(bool);
-        return this;
-    }
-
-    subclassCheckValidity() {
-        return true;
-    }
-
-    subclassGetValue() {
-        return this.node.checked;
-    }
-
-    subclassSetValue(value) {
-        this.node.checked = value;
-    }
-});

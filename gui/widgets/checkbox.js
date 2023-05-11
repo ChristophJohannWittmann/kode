@@ -23,34 +23,5 @@
 
 
 /*****
- * Widget wrapper for the traitional checkbox.  Note that the framework checkbox
- * does NOT use 
+ * The checkbox 
 *****/
-register(class ICheckbox extends WInput {
-    constructor() {
-        super('checkbox');
-        this.setWidgetStyle('checkbox');
-    }
-
-    getValue() {
-        return this.node.checked;
-    }
-
-    setValue(bool) {
-        this.node.checked = bool;
-        super.setValue(bool);
-        return this;
-    }
-
-    subclassCheckValidity() {
-        return true;
-    }
-
-    subclassGetValue() {
-        return this.node.checked;
-    }
-
-    subclassSetValue(value) {
-        this.node.checked = value;
-    }
-});

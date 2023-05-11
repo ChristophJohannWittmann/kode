@@ -75,6 +75,36 @@ register(class IButton extends WInput {
     }
 });
 
+register(class ICheckbox extends WInput {
+    constructor() {
+        super('checkbox');
+        this.setClassName('flex-h-cc');
+        this.setWidgetStyle('checkbox');
+    }
+
+    getValue() {
+        return this.node.checked;
+    }
+
+    setValue(bool) {
+        this.node.checked = bool;
+        super.setValue(bool);
+        return this;
+    }
+
+    subclassCheckValidity() {
+        return true;
+    }
+
+    subclassGetValue() {
+        return this.node.checked;
+    }
+
+    subclassSetValue(value) {
+        this.node.checked = value;
+    }
+});
+
 register(class IColor extends WInput {
     constructor() {
         super('color');
@@ -150,6 +180,36 @@ register(class INumber extends WInput {
 register(class IPassword extends WInput {
     constructor() {
         super('password');
+    }
+});
+
+register(class IRadio extends WInput {
+    constructor() {
+        super('radio');
+        this.setClassName('flex-h-cc');
+        this.setWidgetStyle('radio');
+    }
+
+    getValue() {
+        return this.node.checked;
+    }
+
+    setValue(bool) {
+        this.node.checked = bool;
+        super.setValue(bool);
+        return this;
+    }
+
+    subclassCheckValidity() {
+        return true;
+    }
+
+    subclassGetValue() {
+        return this.node.checked;
+    }
+
+    subclassSetValue(value) {
+        this.node.checked = value;
     }
 });
 

@@ -290,28 +290,35 @@ global.widgetStyleSettings = {
         input_background_color: '#FFFFFF',
         input_border_color: '#CDCDCD',
         input_outline_color: '#FF8C00',
-        input_accent_color: '#4682B4',
 
         input_hover_color: '#2F4F5F',
         input_hover_background_color: '#F5F5F5',
         input_hover_border_color: '#CDCDCD',
         input_hover_outline_color: '#FF8C00',
-        input_hover_accent_color: '#FF8C00',
 
         input_focus_color: '#2F4F5F',
         input_focus_background_color: '#FBFBFB',
         input_focus_border_color: '#CDCDCD',
         input_focus_outline_color: '#FF8C00',
+        input_focus_symbol_color: '#FF8C00',
 
         input_disabled_color: '#CDCDCD',
         input_disabled_background_color: '#FFFFFF',
         input_disabled_border_color: '#CDCDCD',
         input_disabled_outline_color: '#CDCDCD',
+        input_disabled_symbol_color: '#CDCDCD',
 
         input_invalid_color: '#DC143C',
         input_invalid_background_color: '#FFF9F9',
         input_invalid_border_color: '#CDCDCD',
         input_invalid_outline_color: '#DC143C',
+        
+        input_symbol_color: '#4682B4',
+        input_symbol_background_color: '#FFFFFF',
+        input_checked_symbol_color: '#FFFFFF',
+        input_checked_symbol_background_color: '#4682B4',
+        input_hover_symbol_color: '#FF8C00',
+        input_focus_symbol_color: '#4682B4',
 
         dialog_color: '#2F4F5F',
         dialog_border_color: '#CDCDCD',
