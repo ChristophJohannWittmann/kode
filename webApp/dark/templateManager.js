@@ -379,22 +379,15 @@
                 )
                 .push(
                     mkWCtl()
-                    .append(
-                        mkIButton()
-                        .setValue(txx.fwTemplateEditorSectionCopy)
-                        .setWidgetStyle('small-button')
-                        .on('dom.click', message => this.templateEditor.copySection(sectionData))
-                    )
+                    .setInnerHtml(txx.fwTemplateEditorSectionCopy)
+                    .setWidgetStyle('ctls-horz-ctl')
+                    .on('dom.click', message => this.templateEditor.copySection(sectionData))
                 )
                 .push(
                     mkWCtl()
-                    .append(
-                        mkIButton()
-                        .setValue(txx.fwTemplateEditorSectionDelete)
-                        .setWidgetStyle('small-button')
-                        .setStyle('margin-left', '12px')
-                        .on('dom.click', message => this.templateEditor.eraseSection(sectionData))
-                    )
+                    .setInnerHtml(txx.fwTemplateEditorSectionDelete)
+                    .setWidgetStyle('ctls-horz-ctl')
+                    .on('dom.click', message => this.templateEditor.eraseSection(sectionData))
                 ),
 
                 (this.editBox = mkWTextArea(EssayEntryFilter))

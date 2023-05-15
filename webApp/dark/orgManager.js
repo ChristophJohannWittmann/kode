@@ -125,14 +125,11 @@
             );
 
             this.setAt(6, 1, 
-                mkWidget('span')
+                mkWidget('div')
                 .append(
-                    mkICheckbox().bind(this.controller, 'showList', Binding.valueBinding)
-                    .setStyle({
-                        height: '24px',
-                        width: '24px',
-                        marginRight: '12px',
-                    }),
+                    mkICheckbox()
+                    .setStyle('display', 'inline-block')
+                    .bind(this.controller, 'showList', Binding.valueBinding),
                     mkWidget('span').setInnerHtml(txx.fwOrgManagerShowList),
                 )
             );

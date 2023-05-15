@@ -567,66 +567,6 @@ ${geom}
 
 
 /***********************************************
- * Input (Small Button)
- ***********************************************/
-[widget-style=small-button] {
-    font-size: var(--smallbutton-font-size);
-    text-decoration: none;
-    margin-left: var(--input-margin-left);
-    margin-right: var(--input-margin-right);
-    margin-top: var(--input-margin-top);
-    margin-bottom: var(--input-margin-bottom);
-    padding-left: var(--smallbutton-padding-left);
-    padding-right: var(--smallbutton-padding-right);
-    padding-top: var(--smallbutton-padding-top);
-    padding-bottom: var(--smallbutton-padding-bottom);
-    border-style: var(--input-border-style);
-    border-width: var(--input-border-width);
-    border-color: var(--input-border-color);
-    border-radius: var(--input-border-radius);
-    outline-style: var(--input-outline-style);
-    outline-width: var(--input-outline-width);
-    outline-color: var(--input-outline-color);
-    color: var(--input-color);
-    background-color: var(--input-background-color);
-}
-[widget-style=small-button]:hover {
-    color: var(--input-hover-color);
-    background-color: var(--input-hover-background-color);
-    border-style: var(--input-hover-border-style);
-    border-width: var(--input-hover-border-width);
-    border-color: var(--input-hover-border-color);
-}
-[widget-style=small-button]:focus {
-    color: var(--input-focus-color);
-    background-color: var(--input-focus-background-color);
-    border-color:  transparent;
-    outline-style: var(--input-focus-outline-style);
-    outline-width: var(--input-focus-outline-width);
-    outline-color: var(--input-focus-outline-color);
-}
-[widget-style=small-button]:invalid {
-    color: var(--input-invalid-color);
-    background-color: var(--input-invalid-background-color);
-    outline-style: none;
-    border-style: var(--input-invalid-border-style);
-    border-width: var(--input-invalid-border-width);
-    border-color: var(--input-invalid-border-color);
-}
-[widget-style=small-button]:disabled {
-    color: var(--input-invalid-color);
-    background-color: var(--input-invalid-background-color);
-    outline-style: none;
-    border-style: var(--input-disabled-border-style);
-    border-width: var(--input-disabled-border-width);
-    border-color: var(--input-disabled-border-color);
-    outline-style: var(--input-disabled-outline-style);
-    outline-width: var(--input-disabled-outline-width);
-    outline-color: var(--input-disabled-outline-color);
-}
-
-
-/***********************************************
  * Scalar
  ***********************************************/
 [widget-style=scalar] {
@@ -840,87 +780,6 @@ ${geom}
 
 
 /***********************************************
- * Menu
- ***********************************************/
-[widget-style=popup-menu] {
-    position: absolute;
-    border-style: var(--menu-border-style);
-    border-width: var(--menu-border-width);
-    border-radius: var(--menu-border-radius);
-    border-color:  var(--menu-border-color);
-    padding-left: var(--menu-padding-left);
-    padding-right: var(--menu-padding-right);
-    padding-top: var(--menu-padding-top);
-    padding-bottom: var(--menu-padding-bottom);
-    margin-left: var(--menu-margin-left);
-    margin-right: var(--menu-margin-right);
-    margin-top: var(--menu-margin-top);
-    margin-bottom: var(--menu-margin-bottom);
-    color: var(--menu-color);
-    background-color: var(--menu-background-color);
-    user-select: none;
-}
-[widget-style=popup-menu-item] {
-    position: static;
-    width: calc(100% - 15px);
-    height: 100%;
-    color: var(--menu-color);
-    background-color: var(--menu-background-color);
-    font-family: var(--menu-font-family);
-    font-size: var(--menu-font-size);
-    font-weight: var(--menu-font-weight);
-    margin-left: var(--menuitem-margin-left);
-    margin-right: var(--menuitem-margin-right);
-    margin-top: var(--menuitem-margin-top);
-    margin-bottom: var(--menuitem-margin-bottom);
-    padding-left: var(--menuitem-padding-left);
-    padding-right: var(--menuitem-padding-right);
-    padding-top: var(--menuitem-padding-top);
-    padding-bottom: var(--menuitem-padding-bottom);
-    user-select: none;
-    cursor: pointer;
-
-}
-[widget-style=popup-menu-item]:hover {
-    color: var(--menu-hover-color);
-    background-color: var(--menu-hover-background-color);
-    border-style: var(--menuitem-border-style);
-    border-color: var(--menu-hover-border-color);
-    border-width: var(--menuitem-border-width);
-    border-radius: var(--menuitem-border-radius);
-}
-[widget-style=popup-menu-item-disabled] {
-    position: static;
-    width: 100%;
-    height: 100%;
-    color: var(--menu-disabled-color);
-    background-color: var(--menu-disabled-background-color);
-    font-family: var(--menu-font-family);
-    font-size: var(--menu-font-size);
-    font-weight: var(--menu-font-weight);
-    margin-left: var(--menuitem-margin-left);
-    margin-right: var(--menuitem-margin-right);
-    margin-top: var(--menuitem-margin-top);
-    margin-bottom: var(--menuitem-margin-bottom);
-    padding-left: var(--menuitem-padding-left);
-    padding-right: var(--menuitem-padding-right);
-    padding-top: var(--menuitem-padding-top);
-    padding-bottom: var(--menuitem-padding-bottom);
-    user-select: none;
-}
-[widget-style=menu-separator] {
-    border-style: var(--menu-separator-style);
-    border-width: var(--menu-separator-width);
-    border-color: var(--menu-separator-color);
-}
-[widget-style=menu-separator-lite] {
-    border-style: var(--menu-separator-style);
-    border-width: var(--menu-separator-width);
-    border-color: var(--menu-separator-lite-color);
-}
-
-
-/***********************************************
  * Ctls
  ***********************************************/
 [widget-style=ctls-horz] {
@@ -1097,6 +956,87 @@ ${geom}
     padding-right: var(--navinfo-vert-padding-right);
     padding-top: var(--navinfo-vert-padding-top);
     padding-bottom: var(--navinfo-vert-padding-bottom);
+}
+
+
+/***********************************************
+ * Menu
+ ***********************************************/
+[widget-style=popup-menu] {
+    position: absolute;
+    border-style: var(--menu-border-style);
+    border-width: var(--menu-border-width);
+    border-radius: var(--menu-border-radius);
+    border-color:  var(--menu-border-color);
+    padding-left: var(--menu-padding-left);
+    padding-right: var(--menu-padding-right);
+    padding-top: var(--menu-padding-top);
+    padding-bottom: var(--menu-padding-bottom);
+    margin-left: var(--menu-margin-left);
+    margin-right: var(--menu-margin-right);
+    margin-top: var(--menu-margin-top);
+    margin-bottom: var(--menu-margin-bottom);
+    color: var(--menu-color);
+    background-color: var(--menu-background-color);
+    user-select: none;
+}
+[widget-style=popup-menu-item] {
+    position: static;
+    width: calc(100% - 15px);
+    height: 100%;
+    color: var(--menu-color);
+    background-color: var(--menu-background-color);
+    font-family: var(--menu-font-family);
+    font-size: var(--menu-font-size);
+    font-weight: var(--menu-font-weight);
+    margin-left: var(--menuitem-margin-left);
+    margin-right: var(--menuitem-margin-right);
+    margin-top: var(--menuitem-margin-top);
+    margin-bottom: var(--menuitem-margin-bottom);
+    padding-left: var(--menuitem-padding-left);
+    padding-right: var(--menuitem-padding-right);
+    padding-top: var(--menuitem-padding-top);
+    padding-bottom: var(--menuitem-padding-bottom);
+    user-select: none;
+    cursor: pointer;
+
+}
+[widget-style=popup-menu-item]:hover {
+    color: var(--menu-hover-color);
+    background-color: var(--menu-hover-background-color);
+    border-style: var(--menuitem-border-style);
+    border-color: var(--menu-hover-border-color);
+    border-width: var(--menuitem-border-width);
+    border-radius: var(--menuitem-border-radius);
+}
+[widget-style=popup-menu-item-disabled] {
+    position: static;
+    width: 100%;
+    height: 100%;
+    color: var(--menu-disabled-color);
+    background-color: var(--menu-disabled-background-color);
+    font-family: var(--menu-font-family);
+    font-size: var(--menu-font-size);
+    font-weight: var(--menu-font-weight);
+    margin-left: var(--menuitem-margin-left);
+    margin-right: var(--menuitem-margin-right);
+    margin-top: var(--menuitem-margin-top);
+    margin-bottom: var(--menuitem-margin-bottom);
+    padding-left: var(--menuitem-padding-left);
+    padding-right: var(--menuitem-padding-right);
+    padding-top: var(--menuitem-padding-top);
+    padding-bottom: var(--menuitem-padding-bottom);
+    user-select: none;
+}
+[widget-style=menu-separator] {
+    border-style: var(--menu-separator-style);
+    border-width: var(--menu-separator-width);
+    border-color: var(--menu-separator-color);
+}
+[widget-style=menu-separator-lite] {
+    border-style: var(--menu-separator-style);
+    border-width: var(--menu-separator-width);
+    border-color: var(--menu-separator-lite-color);
 }
 
 
