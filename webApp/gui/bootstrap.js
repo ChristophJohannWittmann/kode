@@ -156,6 +156,9 @@
             webSocket = mkWebsocket(doc.location().href);
             webSocket.sendServer({ messageName: '#SocketSession' })
         }
+
+        html.setScrollTop(0);
+        html.setScrollLeft(0);
     });
 
 

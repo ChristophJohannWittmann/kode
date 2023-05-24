@@ -617,6 +617,22 @@
             return this.node.outerHTML;
         }
 
+        getScrollHeight() {
+            return this.node.scrollHeight;
+        }
+
+        getScrollLeft() {
+            return this.node.scrollLeft;
+        }
+
+        getScrollTop() {
+            return this.node.scrollTop;
+        }
+
+        getScrollWidth() {
+            return this.node.scrollWidth;
+        }
+
         hasAttribute(name) {
             return mkStringSet(this.node.getAttributeNames()).has(name);
         }
@@ -761,26 +777,6 @@
             return this;
         }
 
-        scroll(...args) {
-            this.node.scroll(...args);
-            return this;
-        }
-
-        scrollBy(...args) {
-            this.node.scrollBy(...args);
-            return this;
-        }
-
-        scrollIntoView(...args) {
-            this.node.scrollIntoView(...args);
-            return this;
-        }
-
-        scrollTo(...args) {
-            this.node.scrollTo(...args);
-            return this;
-        }
-
         setAttribute(name, value) {
             if (value === undefined) {
                 this.node.setAttribute(name, '');
@@ -820,6 +816,16 @@
 
         setOuterHtml(outerHtml) {
             this.node.outerHTML = outerHtml;
+            return this;
+        }
+
+        setScrollLeft(value) {
+            this.node.scrollLeft = value;
+            return this;
+        }
+
+        setScrollTop(value) {
+            this.node.scrollTop = value;
             return this;
         }
 
@@ -970,22 +976,6 @@
 
         hasData(key) {
             return key in this.node.dataset;
-        }
-
-        scrollHeight() {
-            return this.node.scrollHeight;
-        }
-
-        scrollLeft() {
-            return this.node.scrollLeft;
-        }
-
-        scrollTop() {
-            return this.node.scrollTop;
-        }
-
-        scrollWidth() {
-            return this.node.scrollWidth;
         }
 
         setData(name, value) {

@@ -68,7 +68,7 @@ register(class WTextArea extends WEditable {
     adjustHeight() {
         if (this.autoHeight) {
             this.setStyle('height', '0px');
-            this.setStyle('height', `${this.scrollHeight()}px`);
+            this.setStyle('height', `${this.getScrollHeight()}px`);
         }
 
         return this;

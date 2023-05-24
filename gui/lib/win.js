@@ -126,6 +126,10 @@ register(class Win extends Emitter {
         return frames;
     }
 
+    getScreen() {
+        return this.win.screen;
+    }
+
     innerHeight() {
         return this.win.innerHeight;
     }

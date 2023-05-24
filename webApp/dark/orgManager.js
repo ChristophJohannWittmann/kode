@@ -128,9 +128,8 @@
                 mkWidget('div')
                 .append(
                     mkICheckbox()
-                    .setStyle('display', 'inline-block')
                     .bind(this.controller, 'showList', Binding.valueBinding),
-                    mkWidget('span').setInnerHtml(txx.fwOrgManagerShowList),
+                    mkWidget('span').setInnerHtml(txx.fwOrgManagerShowList)
                 )
             );
 

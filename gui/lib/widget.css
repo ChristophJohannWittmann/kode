@@ -199,8 +199,8 @@ ${geom}
  * Basic
  ***********************************************/
 [widget-style=widget-html] {
-    height: 100%;
-    width: 100%;
+    height: 100vh;
+    width: 100wv;
     margin-left: var(--html-margin-left);
     margin-right: var(--html-margin-right);
     margin-top: var(--html-margin-top);
@@ -211,11 +211,12 @@ ${geom}
     padding-bottom: var(--html-padding-bottom);
     font-family: var(--html-font-family);
     font-size: var(--html-font-size);
+    color: var(--html-color);
+    background-color: var(--html-background-color);
 }
 
 [widget-style=widget-body] {
-    height: 100%;
-    width: 100%;
+    height: 100vh;
     margin-left: var(--body-margin-left);
     margin-right: var(--body-margin-right);
     margin-top: var(--body-margin-top);
@@ -225,6 +226,7 @@ ${geom}
     padding-top: var(--body-padding-top);
     padding-bottom: var(--body-padding-bottom);
     color: var(--body-color);
+    background-color: var(--body-background-color);
 }
 
 [widget-style=widget-h1] {
@@ -393,7 +395,7 @@ ${geom}
     border-style: var(--input-hover-border-style);
     border-width: var(--input-hover-border-width);
     border-color: var(--input-hover-border-color);
-    color: var(--input-hover-symbol-color);
+    background-color: var(--input-hover-background-color)
 }
 [widget-style=checkbox]:focus {
     border-style: none;
@@ -425,11 +427,9 @@ ${geom}
     padding-top: var(--radio-padding-top);
     padding-bottom: var(--radio-padding-bottom);
     border-style: none;
-    outline-style: var(--input-outline-style);
-    outline-width: var(--input-outline-width);
-    outline-color: var(--input-outline-color);
+    outline-style: none;
     color: var(--input-symbol-color);
-    background-color: var(--input-background-color);
+    background-color: var(--input-symbol-background-color);
     cursor: pointer;
 }
 [widget-style=radio]::before {
@@ -443,8 +443,7 @@ ${geom}
     font-weight: bold;
 }
 [widget-style=radio]:hover {
-    color: var(--input-hover-symbol-color);
-    background-color: var(--input-hover-symbol-background-color);
+    background-color: var(--input-hover-background-color);
 }
 [widget-style=radio]:disabled {
     cursor: default;

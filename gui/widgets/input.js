@@ -78,7 +78,7 @@ register(class IButton extends WInput {
 register(class ICheckbox extends WInput {
     constructor() {
         super('checkbox');
-        this.setClassName('flex-h-cc');
+        this.setStyle('text-align', 'center');
         this.setWidgetStyle('checkbox');
     }
 
@@ -186,7 +186,7 @@ register(class IPassword extends WInput {
 register(class IRadio extends WInput {
     constructor() {
         super('radio');
-        this.setClassName('flex-h-cc');
+        this.setStyle('text-align', 'center');
         this.setWidgetStyle('radio');
     }
 
