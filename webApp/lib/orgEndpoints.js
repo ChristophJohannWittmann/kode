@@ -90,7 +90,7 @@ register(class OrgEndpoints extends EndpointContainer {
         const pref = await selectOneDboPreference(dbc, `_name='Orgs'`);
         let org = await getDboOrg(await trx.connect(), trx.orgOid);
 
-        if (pref.value.on && typeof pref.value.dbName == 'string' && pref.value.dbName) {
+        if (pref.value.on && typeof pref.value.dbName == 'string' && pref.value.dbName != '*') {
             let dbName;
             eval('dbName=`' + pref.value.dbName + '`;');
 

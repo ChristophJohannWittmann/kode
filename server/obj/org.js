@@ -112,7 +112,13 @@ register(class Org extends DboOrg {
     }
 
     generateDatabaseName() {
-        return `@${this.generateDbmsName()}`;
+        let dbmsName = this.generateDbmsName();
+
+        if (dbmsName) {
+            dbmsName = `@${dbmsName}`;
+        }
+
+        return dbmsName;
     }
 
     generateDatabaseSettings() {
@@ -137,9 +143,13 @@ register(class Org extends DboOrg {
     }
 
     generateDbmsName() {
-        let name;
-        let org = this;
-        eval('name=`' + env.orgs.dbName + '`');
+        let name = '';
+
+        if (env.orgs.on && env.orgs.dbName != '*') {
+            let org = this;
+            eval('name=`' + env.orgs.dbName + '`');f
+        }
+
         return name;
     }
 
@@ -167,9 +177,11 @@ register(class Org extends DboOrg {
     async registerDatabase() {
         let dbName = this.generateDatabaseName();
 
-        if (!DbDatabase.hasDatabase(dbName)) {
-            let dbSettings = this.generateDatabaseSettings();
-            let dbDatabase = mkDbDatabase(dbName, dbSettings);
+        if (dbName) {
+            if (!DbDatabase.hasDatabase(dbName)) {
+                let dbSettings = this.generateDatabaseSettings();
+                let dbDatabase = mkDbDatabase(dbName, dbSettings);
+            }
         }
 
         return this;
@@ -178,12 +190,15 @@ register(class Org extends DboOrg {
     async upgradeDatabase() {
         let dbmsName = this.generateDbmsName();
 
-        if (!(await dbList()).has(dbmsName)) {
-            await dbCreate(null, dbmsName);
-        };
+        if (dbmsName) {
+            if (!(await dbList()).has(dbmsName)) {
+                await dbCreate(null, dbmsName);
+            };
 
-        let dbDatabase = this.getDatabase();
-        await dbDatabase.upgrade();
+            let dbDatabase = this.getDatabase();
+            await dbDatabase.upgrade();
+        }
+        
         return this;
     }
 });

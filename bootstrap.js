@@ -114,7 +114,31 @@ global.env = {
  * that users will belong to organizations, whiel false indicates that the
  * server will deactive the concept of user organizations.  This code deletes
  * the setting from the configuration JSON file once the server has been
- * initialized.
+ * initialized.  Here's an example of the preference setting showing a server
+ * the uses individual databases for each organization:
+ * 
+ * {
+ *     on: true,
+ *     dbName: 'org${fillNumber(org.oid, 5)}',
+ * }
+ * 
+ * In this example, the database name for Org 17 would be "org00017",  Here
+ * is an example w/o an additional org databases:
+ * 
+ * {
+ *     on: true,
+ *     dbName: '*',
+ * }
+ * 
+ * Of course, here's the example with orgs turned off:
+ * 
+ * {
+ *     on: false,
+ * }
+ * 
+ * This last example shows that if orgs are turned on but there is no dbName,
+ * we turn off the org-specific databases.
+
 *****/
 async function loadOrgPreference() {
     let dbc = await dbConnect();
@@ -127,6 +151,10 @@ async function loadOrgPreference() {
                 value: Config.orgs,
             });
 
+            if (preference.value.on && !('dbName' in preference.value)) {
+                preference.value.dbName = '*';
+            }
+
             let config = await loadConfigFile();
             delete config.orgs;
             await config.save();
@@ -135,8 +163,7 @@ async function loadOrgPreference() {
             preference = mkDboPreference({
                 name: 'Orgs',
                 value: {
-                    on: false,
-                    dbms: 'org${fillNumber(4, oid)}',
+                    on: false
                 }
             });
         }
