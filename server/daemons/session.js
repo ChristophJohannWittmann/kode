@@ -114,6 +114,28 @@ singleton(class SessionManager extends Daemon {
         }
     }
 
+    async onDeleteData(message) {
+        if ('session' in message) {
+            if (message.session in this.byKey) {
+                let session = this.byKey[message.session];
+                session.deleteData(message.name);
+            }
+        }
+
+        Message.reply(message, true);
+    }
+
+    async onGetData(message) {
+        if ('session' in message) {
+            if (message.session in this.byKey) {
+                let session = this.byKey[message.session];
+                Message.reply(message, session.getData(message.name));
+            }
+        }
+
+        Message.reply(message, null);
+    }
+
     async onGetGrants(message) {
         if ('session' in message) {
             if (message.session in this.byKey) {
@@ -147,6 +169,17 @@ singleton(class SessionManager extends Daemon {
         Message.reply(message, false);
     }
 
+    async onHasData(message) {
+        if ('session' in message) {
+            if (message.session in this.byKey) {
+                let session = this.byKey[message.session];
+                Message.reply(message, session.hasData(message.name));
+            }
+        }
+
+        Message.reply(message, false);
+    }
+
     async onNotifyClient(message) {
         const notification = {
             messageName: '#NotifyClient',
@@ -169,6 +202,17 @@ singleton(class SessionManager extends Daemon {
                 }
             }
         }
+    }
+
+    async onSetData(message) {
+        if ('session' in message) {
+            if (message.session in this.byKey) {
+                let session = this.byKey[message.session];
+                session.setData(message.name, message.value);
+            }
+        }
+
+        Message.reply(message, true);
     }
 
     async onSetOrg(message) {

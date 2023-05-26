@@ -75,6 +75,17 @@
             "apiKey": "<API-KEY-FROM-MAILGUN-ACCOUNT>"
         }
     },
+    "apis": {
+        "qualtrics": {
+            "all": {
+                "serverId": "",
+                "path": "/API/v3",
+                "scope": "manage:all",
+                "key": "",
+                "secret": ""
+            }
+        }
+    },
     "modules": [
     ]
 }

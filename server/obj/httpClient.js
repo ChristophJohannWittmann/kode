@@ -160,6 +160,10 @@
         'application/json': array => {
             return fromJson(array.map(el => el.toString()).join(''));
         },
+
+        'application/jso': array => {
+            return fromJson(array.map(el => el.toString()).join(''));
+        },
         
         'application/octet-stream': array => {
             let length = array.reduce((prev, curr) => prev + curr.length, 0);

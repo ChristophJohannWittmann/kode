@@ -43,6 +43,7 @@ register(class Session {
             this.verificationCode = '';
             this.verificationTime = null;
             this.verificationTimeout = null;
+            this.data = {};
 
             let seed = `${(new Date()).toString()}${this.user.userName}`;
             this.key = await Crypto.digestUnsalted('sha512', `${seed}${Math.random()}`);
@@ -111,10 +112,23 @@ register(class Session {
         return digits;
     }
 
+    deleteData(name) {
+        delete this.data[name];
+        return this;
+    }
+
+    getData(name) {
+        return this.data[name];
+    }
+
     getGrants() {
         let scrubbed = clone(this.grants.getPermissions());
         delete scrubbed.self;
         return scrubbed;
+    }
+
+    hasData(name) {
+        return name in this.data;
     }
 
     hasSocket() {
@@ -123,6 +137,11 @@ register(class Session {
 
     queue(message) {
         this.pendingMessages.push(message);
+    }
+
+    setData(name, value) {
+        this.data[name] = value;
+        return this;
     }
 
     setOrgOid(orgOid) {

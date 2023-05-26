@@ -477,10 +477,14 @@ async function seedUser() {
  * hook is disabled.
 *****/
 async function workerHook() {
+    /*
     let dbc = await dbConnect();
-
-    mkWebBlob('/webbie', 'text/html', '<label>YES</label>', 'best').register();
-
     await dbc.commit();
     await dbc.free();
+    */
+
+    /*
+    let qualtrics = mkQualtrics('all');
+    console.log(await qualtrics.call('whoami'))
+    */
 }
