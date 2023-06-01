@@ -72,6 +72,11 @@
             "url": "/api/mg",
             "webx": "SmtpApiMailGun",
             "apiKey": "<API-KEY-FROM-MAILGUN-ACCOUNT>"
+        },
+        "qualtrics": {
+            "title": "Qualtrics SMTP Agent",
+            "agent": "QualtricsSmtp",
+            "name": "all"
         }
     },
     "apis": {
