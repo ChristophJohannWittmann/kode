@@ -137,6 +137,7 @@ register(class Http extends Emitter {
         this.setTimeout(timeoutMillis);
         this.trap = mkTrap();
         Trap.setExpected(this.trap.id, 1);
+        this.headers = {};
     }
 
     cancel() {
@@ -214,6 +215,7 @@ register(class Http extends Emitter {
         };
   
         this.req.open(method, url, true);
+        Object.entries(this.headers).forEach(entry => this.req.setRequestHeader(entry[0], entry[1]));
 
         if (method == 'GET') {
             this.req.send();
@@ -222,6 +224,11 @@ register(class Http extends Emitter {
             this.req.setRequestHeader('content-type', mime);
             this.req.send(body);
         }
+    }
+
+    setHeader(header, value) {
+        this.headers[header] = value;
+        return this;
     }
 
     setTimeout(timeoutMillis) {

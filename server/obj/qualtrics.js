@@ -120,18 +120,19 @@ register(class Qualtrics {
                 {
                     Authorization: 'Basic ' + mkBuffer(`${this.config.key}:${this.config.secret}`).toString('base64'),
                 }
-            );
+            )
 
             if (result.status == 200 && typeof result.content == 'object') {
                 if (result.content.token_type.toLowerCase() == 'bearer') {
                     this.bearerToken = result.content.access_token;
                     setTimeout(() => this.bearerToken = '', (result.content.expires_in - 40) * 1000);
-                    return;
+                    return this.bearerToken;
                 }
             }
 
             this.valid = false;
         }
         catch (e) {}
+        return '';
     }
 });
