@@ -29,12 +29,23 @@ register(class OAuth2 extends Webx {
         super(thunk, reference);
     }
 
+    async dump(req) {
+        console.log('\n*********************');
+        console.log(req.header('host'));
+        console.log(req.method());
+        console.log(req.pathname());
+        console.log(req.mime());
+        console.log(req.headers());
+        req.method() == 'POST' ? console.log(req.body()) : false;
+    }
+
     async handleGET(req, rsp) {
-        console.log(req);
+        await this.dump(req);
         rsp.end(200, 'text/plain', 'Hello OAuth2 Stub GET ...');
     }
 
     async handlePost(req, rsp) {
+        await this.dump(req);
         rsp.end(200, 'text/plain', 'Hello OAuth2 Stub POST ...');
     }
 });
