@@ -331,7 +331,7 @@ async function seedUser() {
     logPrimary('[ Loading Framework Object API ]');
     require('./server/lib/schema.js');
 
-    for (let directory of ['server/obj', 'server/smtp']) {
+    for (let directory of ['server/obj', 'server/smtp', 'server/webx']) {
         for (let filePath of await recurseFiles(PATH.join(env.kodePath, directory))) {
             if (filePath.endsWith('.js')) {
                 require(filePath);

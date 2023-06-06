@@ -29,23 +29,34 @@ register(class OAuth2 extends Webx {
         super(thunk, reference);
     }
 
-    async dump(req) {
-        console.log('\n*********************');
-        console.log(req.header('host'));
-        console.log(req.method());
-        console.log(req.pathname());
-        console.log(req.mime());
-        console.log(req.headers());
-        req.method() == 'POST' ? console.log(req.body()) : false;
+    async generateAccessToken(params) {
+        return 'ieIU439Guek7383KkRfdekRkk383849keiekOEKEWldkjdOELLWMdf';
     }
 
     async handleGET(req, rsp) {
-        await this.dump(req);
-        rsp.end(200, 'text/plain', 'Hello OAuth2 Stub GET ...');
+        let params = req.parameters();
+
+        if (params.client_id === this.reference.clientId) {
+            if (params.response_type == 'code') {
+                if (params.redirect_url) {
+                    if (params.state) {
+                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_url}?code=${await this.generateAccessToken(params)}&state=${params.state}`);
+                        rsp.endStatus(302);
+                        return;
+                    }
+                    else {
+                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_url}?code=${await this.generateAccessToken(params)}`);
+                        rsp.endStatus(302);
+                        return;
+                    }
+                }
+            }
+        }
+
+        rsp.end(400);
     }
 
     async handlePost(req, rsp) {
-        await this.dump(req);
         rsp.end(200, 'text/plain', 'Hello OAuth2 Stub POST ...');
     }
 });

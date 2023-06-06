@@ -79,6 +79,8 @@ if (CLUSTER.isWorker) {
                 this.https.on('upgrade', (...args) => this.upgrade(...args));
             }
 
+            env.scheme = this.https ? 'https' :  'http';
+
             (async () => {
                 if (this.http) {
                     await waitFor(() => this.http.listening === true, 100);
