@@ -140,7 +140,7 @@ global.env = {
  * we turn off the org-specific databases.
 
 *****/
-async function loadOrgPreference() {
+async function loadOrgsPreference() {
     let dbc = await dbConnect();
     let preference = await selectOneDboPreference(dbc, `_name='Orgs'`);
 
@@ -158,6 +158,14 @@ async function loadOrgPreference() {
             let config = await loadConfigFile();
             delete config.orgs;
             await config.save();
+        }
+        else if (typeof Config.orgs == 'boolean') {
+            preference = mkDboPreference({
+                name: 'Orgs',
+                value: {
+                    on: Config.orgs,
+                }
+            });
         }
         else {
             preference = mkDboPreference({
@@ -430,7 +438,7 @@ async function seedUser() {
      * Loading Server Preferences
      *******************************************/
     logPrimary('[ Configuring Preferences ]');
-    await loadOrgPreference();
+    await loadOrgsPreference();
     await seedUser();
 
     /********************************************
