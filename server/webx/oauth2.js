@@ -38,14 +38,14 @@ register(class OAuth2 extends Webx {
 
         if (params.client_id === this.reference.clientId) {
             if (params.response_type == 'code') {
-                if (params.redirect_url) {
+                if (params.redirect_uri) {
                     if (params.state) {
-                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_url}?code=${await this.generateAccessToken(params)}&state=${params.state}`);
+                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_uri}?code=${await this.generateAccessToken(params)}&state=${params.state}`);
                         rsp.endStatus(302);
                         return;
                     }
                     else {
-                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_url}?code=${await this.generateAccessToken(params)}`);
+                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_uri}?code=${await this.generateAccessToken(params)}`);
                         rsp.endStatus(302);
                         return;
                     }
