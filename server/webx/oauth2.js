@@ -22,18 +22,22 @@
 *****/
 
 
+const ac = 'ieIU439Guek7383KkRfdekRkk383849keiekOEKEWldkjdOELLWMdf';
+
 /*****
 *****/
 register(class OAuth2 extends Webx {
+    static authorizations = {};
+
     constructor(thunk, reference) {
         super(thunk, reference);
     }
 
-    async genAccessToken() {
+    async generateAccessToken() {
     }
 
-    async genAuthorizationCode(settings, params) {
-        return 'ieIU439Guek7383KkRfdekRkk383849keiekOEKEWldkjdOELLWMdf';
+    async generateAuthorizationCode(settings, params) {
+        return ac;
     }
 
     async handleGET(req, rsp) {
@@ -45,7 +49,7 @@ register(class OAuth2 extends Webx {
 
                 if (params.response_type == 'code' && typeof params.redirect_uri == 'string') {
                     if ((!settings && !params.scope) || (settings && params.scope == settings.scope)) {
-                        let authCode = await this.genAuthorizationCode(settings, params);
+                        let authCode = await this.generateAuthorizationCode(settings, params);
 
                         if (params.state) {
                             rsp.setHeader('Location', `${env.scheme}://${params.redirect_uri}?code=${authCode}&state=${params.state}`);
