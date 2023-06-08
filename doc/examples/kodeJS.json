@@ -79,6 +79,14 @@
             "name": "all"
         }
     },
+    "oauth2": {
+        "clientId": {
+            "clientName": "",
+            "clientSecret": "",
+            "scope": "",
+            "expires": 10
+        }
+    },
     "apis": {
         "qualtrics": {
             "all": {

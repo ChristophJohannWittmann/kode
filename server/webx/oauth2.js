@@ -29,23 +29,30 @@ register(class OAuth2 extends Webx {
         super(thunk, reference);
     }
 
-    async generateAccessToken(params) {
+    async genAccessToken() {
+    }
+
+    async genAuthorizationCode(settings, params) {
         return 'ieIU439Guek7383KkRfdekRkk383849keiekOEKEWldkjdOELLWMdf';
     }
 
     async handleGET(req, rsp) {
         let params = req.parameters();
 
-        if (params.client_id === this.reference.clientId) {
-            if (params.response_type == 'code') {
-                if (params.redirect_uri) {
+        if ('oauth2' in Config) {
+            if (params.client_id in Config.oauth2) {
+                let settings = Config.oauth2[params.client_id];
+
+                if (params.response_type == 'code' && typeof params.redirect_uri == 'string') {
+                    let authCode = await this.genAuthorizationCode(settings, params);
+
                     if (params.state) {
-                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_uri}?code=${await this.generateAccessToken(params)}&state=${params.state}`);
+                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_uri}?code=${authCode}&state=${params.state}`);
                         rsp.endStatus(302);
                         return;
                     }
                     else {
-                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_uri}?code=${await this.generateAccessToken(params)}`);
+                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_uri}?code=${authCode}`);
                         rsp.endStatus(302);
                         return;
                     }
@@ -53,7 +60,8 @@ register(class OAuth2 extends Webx {
             }
         }
 
-        rsp.end(400);
+        rsp.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        rsp.end(200, 'text/plain', `error=access_denied&state=${params.state}`);
     }
 
     async handlePost(req, rsp) {
