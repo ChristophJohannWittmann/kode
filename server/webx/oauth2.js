@@ -44,17 +44,19 @@ register(class OAuth2 extends Webx {
                 let settings = Config.oauth2[params.client_id];
 
                 if (params.response_type == 'code' && typeof params.redirect_uri == 'string') {
-                    let authCode = await this.genAuthorizationCode(settings, params);
+                    if ((!settings && !params.scope) || (settings && params.scope == settings.scope)) {
+                        let authCode = await this.genAuthorizationCode(settings, params);
 
-                    if (params.state) {
-                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_uri}?code=${authCode}&state=${params.state}`);
-                        rsp.endStatus(302);
-                        return;
-                    }
-                    else {
-                        rsp.setHeader('Location', `${env.scheme}://${params.redirect_uri}?code=${authCode}`);
-                        rsp.endStatus(302);
-                        return;
+                        if (params.state) {
+                            rsp.setHeader('Location', `${env.scheme}://${params.redirect_uri}?code=${authCode}&state=${params.state}`);
+                            rsp.endStatus(302);
+                            return;
+                        }
+                        else {
+                            rsp.setHeader('Location', `${env.scheme}://${params.redirect_uri}?code=${authCode}`);
+                            rsp.endStatus(302);
+                            return;
+                        }
                     }
                 }
             }
