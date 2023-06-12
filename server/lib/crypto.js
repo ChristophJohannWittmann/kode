@@ -290,6 +290,26 @@ register(class Crypto {
     }
     
     /*****
+    *****/
+    static privateDecrypt(encryptedText, pem) {
+    }
+    
+    /*****
+    *****/
+    static privateEncrypt(plainText, pem) {
+    }
+    
+    /*****
+    *****/
+    static publicDecrypt(encryptedText, pem) {
+    }
+    
+    /*****
+    *****/
+    static publicEncrypt(plainText, pem) {
+    }
+    
+    /*****
      * A simplified wrapper for the builtin nodeJS crypto.Sign() class.  Note
      * that unless otherwise specified, there are two assumptions in the code:
      * (a) the provided value is either a string or a Buffer and (b) that the

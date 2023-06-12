@@ -142,8 +142,13 @@ register(class Win extends Emitter {
         return this.win.isSecureContext;
     }
 
-    location() {
-        return this.win.location;
+    location(url) {
+        if (url) {
+            this.win.location.assign(url);
+        }
+        else {
+            return this.win.location;
+        }
     }
 
     name() {

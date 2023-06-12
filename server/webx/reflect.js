@@ -57,7 +57,7 @@ register(class ReflectRequest extends Webx {
                         ),
                         htmlElement(
                             'tr',
-                            htmlElement('td', htmlText('PAth')),
+                            htmlElement('td', htmlText('Path')),
                             htmlElement('td', htmlText(req.pathname()))
                         ),
                         htmlElement(

@@ -80,6 +80,9 @@
         }
     },
     "oauth2": {
+        "/oauth2/authorize": "authorize",
+        "/oauth2/token": "token",
+        "/oauth2/user": "user",
         "clientId": {
             "clientName": "",
             "clientSecret": "",

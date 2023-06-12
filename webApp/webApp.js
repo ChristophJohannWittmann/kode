@@ -74,6 +74,14 @@ register(class WebApp extends Webx {
             html.push(`    <script src="${this.thunk.getClientCodeUrl()}"></script>`);
         }
 
+        let action = '';
+
+        if (Object.keys(req.parameters()).length) {
+            if (req.parameters().action && req.parameters.code) {
+                action = req.parameters();
+            }
+        }
+
         let script = [
             `        const webAppSettings = {`,
             '            verify: () => false,',
@@ -88,6 +96,7 @@ register(class WebApp extends Webx {
             `            websocket: () => ${this.reference.webSocket && Config.sockets},`,
             '            grants: () => {},',
             `            lang: () => '${language}',`,
+            `            parameters: () => fromJson('${toJson(req.parameters())}'),`,
             '        };',
             `        const txx = ${appText};`,
             '        Object.freeze(txx);',

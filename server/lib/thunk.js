@@ -143,7 +143,17 @@ register(class Thunk {
                 let webx;
                 eval(`webx = ${makerName}(this, reference);`);
                 await webx.init();
-                WebLibrary.register(webx.reference.url, webx);
+
+                if (!webx.selfRegister) {
+                    if (typeof webx.reference.url == 'string') {
+                        WebLibrary.register(webx.reference.url, webx);
+                    }
+                    else if (Array.isArray(webx.reference.url)) {
+                        for (let url of webx.reference.url) {
+                            WebLibrary.register(url.path, webx);
+                        }
+                    }
+                }
             }
         }
 

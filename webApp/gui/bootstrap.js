@@ -127,38 +127,51 @@
      * to the server.
     *****/
     register(async function signIn(sessionState) {
-        if (booted != await queryServer({ messageName: 'PublicGetBootHash' })) {
-            doc.location().reload();
-            return;
+            webAppSettings.session = () => sessionState.sessionKey;
+            webAppSettings.grants = () => sessionState.grants;
+            webAppSettings.password = () => sessionState.setPassword;
+            webAppSettings.verify = () => sessionState.verifyEmail;
+            webAppSettings.user = () => sessionState.user;
+            webAppSettings.org = () => sessionState.org;
+
+        if (webAppSettings.parameters().action) {
+            let url = `${webAppSettings.parameters().action}?session=${webAppSettings.session()}`;
+
+            for (let key in webAppSettings.parameters()) {
+                if (key != 'action') {
+                    url = `${url}&${key}=${webAppSettings.parameters()[key]}`;
+                }
+            }
+
+            win.location(url);
         }
+        else {
+            if (booted != await queryServer({ messageName: 'PublicGetBootHash' })) {
+                doc.location().reload();
+                return;
+            }
 
-        stack.pop();
+            stack.pop();
+            
+            window.home = webAppSettings.homeView();
+            stack.push(window.home);
 
-        webAppSettings.session = () => sessionState.sessionKey;
-        webAppSettings.grants = () => sessionState.grants;
-        webAppSettings.password = () => sessionState.setPassword;
-        webAppSettings.verify = () => sessionState.verifyEmail;
-        webAppSettings.user = () => sessionState.user;
-        webAppSettings.org = () => sessionState.org;
-        
-        window.home = webAppSettings.homeView();
-        stack.push(window.home);
+            if (webAppSettings.password()) {
+                stack.push(mkFWPasswordView());
+            }
 
-        if (webAppSettings.password()) {
-            stack.push(mkFWPasswordView());
+            if (webAppSettings.verify()) {
+                stack.push(mkFWVerifyEmailView());
+            }
+
+            if (webAppSettings.websocket()) {
+                webSocket = mkWebsocket(doc.location().href);
+                webSocket.sendServer({ messageName: '#SocketSession' })
+            }
+
+            html.setScrollTop(0);
+            html.setScrollLeft(0);
         }
-
-        if (webAppSettings.verify()) {
-            stack.push(mkFWVerifyEmailView());
-        }
-
-        if (webAppSettings.websocket()) {
-            webSocket = mkWebsocket(doc.location().href);
-            webSocket.sendServer({ messageName: '#SocketSession' })
-        }
-
-        html.setScrollTop(0);
-        html.setScrollLeft(0);
     });
 
 
