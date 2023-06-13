@@ -104,15 +104,10 @@ register(class HttpResponse {
             this.status = 200;
             this.mime = mkMime('text/plain');
             this.charset = 'UTF-8';
-            this.httpHeaders = {};
             this.setEncoding();
             this.setLanguage();
             ok(this);
         });
-    }
-
-    clearHeader(headerName) {
-        delete this.httpHeaders[headerName.toLowerCase()];
     }
 
     async end(...args) {
@@ -146,18 +141,47 @@ register(class HttpResponse {
             this.setHeader('Content-Encoding', this.encoding);
         }
 
-        Object.values(this.httpHeaders).forEach(header => headerMap[header.name] = header.value);
-
         if (content) {
             headerMap['Content-Length'] = content.length;
         }
         
         this.httpRsp.writeHead(this.status, headerMap);
         this.httpRsp.end(content);
+        return this;
     }
 
     endStatus(status) {
         this.end(status, 'text/plain', HttpResponse.statusCodes[status].text);
+        return this;
+    }
+
+    getHeader(headerName) {
+        return this.httpRsp.getHeader(headerName);
+    }
+
+    getHeaderArray() {
+        return this.httpRsp.getHeaderNames().map(headerName => {
+            return { name: headerName, value: this.httpRsp.getHeader(headerName) };
+        });
+    }
+
+    getHeaderNames() {
+        return this.httpRsp.getHeaderNames();
+    }
+
+    getHeaderObject() {
+        let obj = {};
+
+        for (let headerName of this.httpRsp.getHeaderNames()) {
+            obj[headerName] = this.httpRsp.getHeader(headerName);
+        }
+
+        return obj;
+    }
+
+    removeHeader(headerName) {
+        this.httpRsp.removeHeader(headerName);
+        return this;
     }
 
     setEncoding() {
@@ -175,11 +199,12 @@ register(class HttpResponse {
 
         this.encoding = '';
         this.quality = '';
+        return this;
     }
 
     setHeader(headerName, value) {
-        let key = headerName.toLowerCase();
-        this.httpHeaders[key] = { name: headerName, value: value.toString() };
+        this.httpRsp.setHeader(headerName, value);
+        return this;
     }
 
     setLanguage(language) {
@@ -194,5 +219,7 @@ register(class HttpResponse {
                 this.language = Object.keys(acceptLanguage)[0];
             }
         }
+
+        return this;
     }
 });

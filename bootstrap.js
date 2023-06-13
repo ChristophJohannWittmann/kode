@@ -51,19 +51,20 @@ require('./framework/utility.js');
  * NodeJS builtin module.
 *****/
 if (CLUSTER.isPrimary) console.log(`[ Loading nodeJS Modules ]`);
-global.BUFFER    = require('buffer').Buffer;
-global.CHILDPROC = require('child_process');
-global.CRYPTO    = require('crypto');
-global.DNS       = require('dns');
-global.FILES     = require('fs').promises;
-global.FS        = require('fs');
-global.HTTP      = require('http');
-global.HTTPS     = require('https');
-global.NET       = require('net');
-global.OS        = require('os');
-global.PATH      = require('path');
-global.PROC      = require('process');
-global.URL       = require('url');
+global.BUFFER      = require('buffer').Buffer;
+global.CHILDPROC   = require('child_process');
+global.CRYPTO      = require('crypto');
+global.DNS         = require('dns');
+global.FILES       = require('fs').promises;
+global.FS          = require('fs');
+global.HTTP        = require('http');
+global.HTTPS       = require('https');
+global.NET         = require('net');
+global.OS          = require('os');
+global.PATH        = require('path');
+global.PROC        = require('process');
+global.QUERYSTRING = require('node:querystring');
+global.URL         = require('url');
 
 
 if (CLUSTER.isPrimary) console.log(`[ Loading NPM Modules ]`);

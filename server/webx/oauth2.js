@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
 *****/
-// http://localhost/oauth2/authorize?scope=scope&response_type=code&redirect_uri=localhost/reflect&state=123&nonce=123&client_id=abc
+// http://localhost/oauth2/authorize?scope=scope&response_type=code&redirect_uri=http://localhost/reflect&state=123&nonce=123&client_id=abc
 
 
 /*****
@@ -49,11 +49,11 @@ if (CLUSTER.isWorker) {
         }
 
         async handleAuthorize(req, rsp) {
-            let params = req.parameters();
+            let params = req.getVariables();
 
-            if ('oauth2' in Config) {
-                if (params.client_id in Config.oauth2) {
-                    let settings = Config.oauth2[params.client_id];
+            if ('oauth2server' in Config) {
+                if (params.client_id in Config.oauth2server) {
+                    let settings = Config.oauth2server[params.client_id];
 
                     if (params.response_type == 'code' && typeof params.redirect_uri == 'string') {
                         if (!params.scope || params.scope == settings.scope) {
@@ -65,9 +65,7 @@ if (CLUSTER.isWorker) {
                                 request: params,
                             });
 
-                            let action = `action=${this.authenticatedUrl}` +
-                                         `&code=${Crypto.encodeBase64Url(mkBuffer(oauth2RequestCode).toString('base64'))}`;
-
+                            let action = `action=${env.scheme}://${req.header('host')}${this.authenticatedUrl}&code=${Crypto.encodeBase64Url(mkBuffer(oauth2RequestCode).toString('base64'))}`;
                             rsp.setHeader('Location', `${this.reference.signin}?${action}`);
                             rsp.endStatus(302);
                             return;
@@ -81,7 +79,7 @@ if (CLUSTER.isWorker) {
         }
 
         async handleAuthenticated(req, rsp) {
-            let params = req.parameters();
+            let params = req.getVariables();
 
             if ('code' in params) {
                 let request = await Ipc.queryPrimary({
@@ -98,12 +96,12 @@ if (CLUSTER.isWorker) {
 
                     if (authCode) {
                         if (request.state) {
-                            rsp.setHeader('Location', `${env.scheme}://${request.redirect_uri}?code=${authCode}&state=${request.state}`);
+                            rsp.setHeader('Location', `${request.redirect_uri}?code=${authCode}&state=${request.state}`);
                             rsp.endStatus(302);
                             return;
                         }
                         else {
-                            rsp.setHeader('Location', `${env.scheme}://${request.redirect_uri}?code=${authCode}`);
+                            rsp.setHeader('Location', `${request.redirect_uri}?code=${authCode}`);
                             rsp.endStatus(302);
                             return;
                         }
@@ -115,7 +113,24 @@ if (CLUSTER.isWorker) {
         }
 
         async handleGET(req, rsp) {
-            if ('oauth2' in Config) {
+            if ('oauth2server' in Config) {
+                if (req.pathname() == this.authorizeUrl) {
+                    await this.handleAuthorize(req, rsp);
+                }
+                else if (req.pathname() == this.authenticatedUrl) {
+                    await this.handleAuthenticated(req, rsp);
+                }
+                else if (req.pathname() == this.tokenUrl) {
+                    await this.handleToken(req, rsp);
+                }
+                else {
+                    rsp.endStatus(404);
+                }
+            }
+        }
+
+        async handlePOST(req, rsp) {
+            if ('oauth2server' in Config) {
                 if (req.pathname() == this.authorizeUrl) {
                     await this.handleAuthorize(req, rsp);
                 }
@@ -133,7 +148,8 @@ if (CLUSTER.isWorker) {
 
         async handleToken(req, rsp) {
             console.log(`\n******* handleToken()`);
-            console.log(req.parameters());
+            let params = req.getVariables();
+            console.log(params);
             console.log(req.headers());
         }
 

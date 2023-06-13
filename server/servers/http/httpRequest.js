@@ -35,7 +35,11 @@ register(class HttpRequest {
             this.httpServer = httpServer;
             this.httpReq = httpReq;
             this.isTls = isTls;
-            this.method() == 'POST' ? await this.loadBody() : false;
+            this.vars = {};
+
+            if (this.method() == 'POST') {
+                await this.loadBody();
+            }
 
             this.params = {};
             this.parsedUrl = URL.parse(this.httpReq.url);
@@ -109,6 +113,15 @@ register(class HttpRequest {
         return `${this.scheme()}://${this.httpReq.headers.host}${this.httpReq.url}`;
     }
 
+    getVariables() {
+        if (this.method() == 'POST') {
+            return this.vars;
+        }
+        else {
+            return this.parameters();
+        }
+    }
+
     hash() {
         return this.parsedUrl.hash;
     }
@@ -119,6 +132,10 @@ register(class HttpRequest {
 
     hasHeader(headerName) {
         return headerName.toLowerCase() in this.httpReq.headers;
+    }
+
+    hasVars() {
+        return Object.entries(this.vars).length > 0;
     }
 
     header(headerName) {
@@ -142,12 +159,11 @@ register(class HttpRequest {
     }
 
     isMessage() {
-        if (this.requestBody.mime.code === 'application/json') {
+        if (this.requestBody && this.requestBody.mime.code === 'application/json') {
             return true;
         }
-        else {
-            return false;
-        }
+
+        return false;
     }
     
     async loadBody() {
@@ -194,11 +210,15 @@ register(class HttpRequest {
                     
                     if (mimeCode == 'application/json') {
                         try {
-                            this.requestMessage = fromJson(this.requestBody.value);
+                            this.vars = fromJson(this.requestBody.value);
                         }
-                        catch (e) {
-                            this.requestMessage = new Object({ messageName: '#DUMMY' });
+                        catch (e) {}
+                    }
+                    else if (mimeCode == 'application/x-www-form-urlencoded') {
+                        try {
+                            this.vars = QUERYSTRING.parse(this.requestBody.value);
                         }
+                        catch (e) {}
                     }
                 }
                 else {
@@ -214,9 +234,11 @@ register(class HttpRequest {
     }
 
     message() {
-        if (this.requestBody.mime.code === 'application/json') {
-            return this.requestMessage;
+        if (this.requestBody && this.requestBody.mime.code === 'application/json') {
+            return this.vars;
         }
+
+        return null;
     }
 
     method() {
