@@ -149,14 +149,14 @@ if (CLUSTER.isWorker) {
         }
 
         async handleToken(req, rsp) {
-            console.log(`\n******* handleToken()`);
             let params = req.getVariables();
 
             let token = await Ipc.queryPrimary(
-                Object.assign(new Object({ messageName: '#OAuth2DaemonGetAuthorization' }), params)
+                Object.assign(new Object({ messageName: '#OAuth2DaemonToken' }), params)
             );
 
             if (token) {
+                delete token.auth;
                 rsp.end(200, 'application/json', toJson(token));
             }
             else {
@@ -165,9 +165,12 @@ if (CLUSTER.isWorker) {
         }
 
         async handleUser(req, rsp) {
-            console.log(`\n******* handleUser()`);
-            let params = req.getVariables();
-            console.log(params);
+            if (req.hasHeader('bearer')) {
+                let user = await Ipc.queryPrimary({
+                    messageName: '#OAuth2DaemonGetUser',
+                    bearer: req.header('bearer'),
+                });
+            }
         }
 
         async init() {
@@ -237,6 +240,7 @@ if (CLUSTER.isPrimary) {
                     tokens: {},
                 };
 
+                this.authsByKey[authCode] = authorization;
                 Message.reply(message, authorization);
             }
 
@@ -244,20 +248,20 @@ if (CLUSTER.isPrimary) {
         }
 
         async onGetToken(message) {
-            console.log(message);
             if (message.grant_type == 'authorization_code') {
                 if (message.code in this.authsByKey) {
                     let auth = this.authsByKey[message.code];
-                    console.log(auth);
 
                     if (message.redirect_uri == auth.request.redirect_uri) {
                         if (message.client_id == auth.settings.clientId) {
                             if (message.client_secret == auth.settings.clientSecret) {
-                                let seed = `${auth.code}:${mkTime().toISOString()}`;
-                                let token = Crypto.encodeBase64Url(await Crypto.digestUnsalted(seed));
-                                let expiresIn = auth.settings.exipiresIn * 1000;
-                                console.log(token);
-                                Message.reply(message, { access_token: token, expires_in: expiresIn });
+                                let seed = `${auth.authCode}:${mkTime().toISOString()}`;
+                                let token = Crypto.encodeBase64Url(await Crypto.digestUnsalted(auth.settings.algorithm, seed));
+                                let expiresIn = auth.settings.expiresIn * 1000;
+                                let tokenObj = { access_token: bearer, expires_in: expiresIn, auth: auth };
+                                auth.tokens[bearer] = tokenObj;
+                                this.authsByTok[bearer] = tokenObj;
+                                Message.reply(message, tokenObj);
                             }
                         }
                     }
@@ -269,10 +273,19 @@ if (CLUSTER.isPrimary) {
 
         async onGetUser(message) {
             console.log('OAuth2Daemon.onGetUser()');
-            Message.reply(message, 'chris.wittmann@infosearch.online');
-            // ********************************************************
-            // ** TODO
-            // ********************************************************
+
+            if (message.bearer in this.authsByTok) {
+                let tokenObj = this.authsByTok[message.bearer];
+                //Message.reply(message. tokenObj.auth.userEmail);
+                
+                // ********************************************************
+                // ********************************************************
+                Message.reply(message, 'chris.wittmann@infosearch.online');
+                // ********************************************************
+                // ********************************************************
+            }
+
+            Message.reply(messsage, false);
         }
 
         async onRequestAuthorization(message) {
