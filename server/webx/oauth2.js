@@ -166,22 +166,23 @@ if (CLUSTER.isWorker) {
         async handleUser(req, rsp) {
             if (req.hasHeader('authorization')) {
                 let auth = req.header('authorization');
-                let match = auth.match(/^ *bearer *()/i);
+                let match = auth.match(/^ *bearer *(.+)/i);
 
                 if (match) {
-                    let email = await Ipc.queryPrimary({
+                    let user = await Ipc.queryPrimary({
                         messageName: '#OAuth2DaemonGetUser',
                         bearer: match[1],
                     });
 
-                    if (email) {
-                        rsp.end(200, 'text/plain', email);
+                    if (user) {
+                        console.log(user);
+                        rsp.end(200, 'application/json', toJson(user));
                         return;
                     }
                 }
             }
 
-            rsp.endStatus(404);
+            rsp.end(400, 'text/plain', 'Unable to complete OAuth2 call.');
         }
 
         async init() {
@@ -285,14 +286,18 @@ if (CLUSTER.isPrimary) {
         }
 
         async onGetUser(message) {
-            console.log('OAuth2Daemon.onGetUser()');
-
             if (message.bearer in this.authsByTok) {
                 let tokenObj = this.authsByTok[message.bearer];
                 // ********************************************************
                 // ********************************************************
-                console.log(tokenObj);
-                Message.reply(message, 'chris.wittmann@infosearch.online');
+                Message.reply(message, {
+                    name: 'Christoph Wittmann',
+                    given_name: 'Christoph',
+                    family_name: 'Wittmann',
+                    username: 'chris.wittmann@infosearch.online',
+                    preferred_username: 'chris.wittmann@infosearch.online',
+                    email: 'chris.wittmann@infosearch.online',
+                });
                 // ********************************************************
                 // ********************************************************
 
@@ -300,7 +305,7 @@ if (CLUSTER.isPrimary) {
                 return;
             }
 
-            Message.reply(messsage, false);
+            Message.reply(message, false);
         }
 
         async onRequestAuthorization(message) {
