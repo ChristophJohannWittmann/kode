@@ -151,13 +151,12 @@ if (CLUSTER.isWorker) {
         async handleToken(req, rsp) {
             let params = req.getVariables();
 
-            let token = await Ipc.queryPrimary(
-                Object.assign(new Object({ messageName: '#OAuth2DaemonToken' }), params)
+            let tokenObj = await Ipc.queryPrimary(
+                Object.assign(new Object({ messageName: '#OAuth2DaemonGetToken' }), params)
             );
 
-            if (token) {
-                delete token.auth;
-                rsp.end(200, 'application/json', toJson(token));
+            if (tokenObj) {
+                rsp.end(200, 'application/json', toJson(tokenObj));
             }
             else {
                 rsp.end(200, 'application/json', toJson({ error: 'invalid_request' }));
@@ -258,10 +257,12 @@ if (CLUSTER.isPrimary) {
                                 let seed = `${auth.authCode}:${mkTime().toISOString()}`;
                                 let token = Crypto.encodeBase64Url(await Crypto.digestUnsalted(auth.settings.algorithm, seed));
                                 let expiresIn = auth.settings.expiresIn * 1000;
-                                let tokenObj = { access_token: bearer, expires_in: expiresIn, auth: auth };
-                                auth.tokens[bearer] = tokenObj;
-                                this.authsByTok[bearer] = tokenObj;
-                                Message.reply(message, tokenObj);
+                                let tokenObj = { access_token: token, expires_in: expiresIn, authCode: auth.authCode };
+                                auth.tokens[token] = tokenObj;
+                                this.authsByTok[token] = tokenObj;
+                                let copy = clone(tokenObj);
+                                delete copy.authCode;
+                                Message.reply(message, copy);
                             }
                         }
                     }
@@ -277,7 +278,7 @@ if (CLUSTER.isPrimary) {
             if (message.bearer in this.authsByTok) {
                 let tokenObj = this.authsByTok[message.bearer];
                 //Message.reply(message. tokenObj.auth.userEmail);
-                
+
                 // ********************************************************
                 // ********************************************************
                 Message.reply(message, 'chris.wittmann@infosearch.online');
