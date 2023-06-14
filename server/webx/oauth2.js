@@ -152,29 +152,16 @@ if (CLUSTER.isWorker) {
             console.log(`\n******* handleToken()`);
             let params = req.getVariables();
 
-            /*
-            if ('oauth2server' in Config) {
-                if (params.client_id in Config.oauth2server) {
-                    let settings = Config.oauth2server[params.client_id];
+            let token = await Ipc.queryPrimary(
+                Object.assign(new Object({ messageName: '#OAuth2DaemonGetAuthorization' }), params)
+            );
 
-                    if ('client_secret' in params && params.client_secret == settings.clientSecret) {
-                        let token = await Ipc.queryPrimary({
-                            messageName: '#OAuth2DaemonGetToken',
-                            authorizationCode: params.code,
-                        });
-
-                        //console.log(token);
-
-                        if (token) {
-                            rsp.end(200, 'application/json', toJson(token));
-                            return;
-                        }
-                    }
-                }
+            if (token) {
+                rsp.end(200, 'application/json', toJson(token));
             }
-            */
-
-            rsp.end(200, 'application/json', '{"error":"invalid_request"}');
+            else {
+                rsp.end(200, 'application/json', toJson({ error: 'invalid_request' }));
+            }
         }
 
         async handleUser(req, rsp) {
@@ -202,7 +189,10 @@ if (CLUSTER.isWorker) {
  * The OAuth2Daemon is responsible for handling server-wide requests for storing
  * and retrieving data associated with the OAuth server feature set.  The reason
  * for this is that multiple associated OAuth HTTP requests will come in over
- * more than one worker process.
+ * more than one worker process.  Hence, we need the ability to centralize info
+ * reqarding users, requests, authorizations, and tokens.  That's the purpose of
+ * this Daemon.  It's also the place where any browser cookies will be managed
+ * as well.
 *****/
 if (CLUSTER.isPrimary) {
     singleton(class OAuth2Daemon extends Daemon {
@@ -235,6 +225,7 @@ if (CLUSTER.isPrimary) {
 
                 let authorization = {
                     authCode: authCode,
+                    issued: false,
                     request: request.request,
                     settings: request.settings,
                     session: message.session,
@@ -253,20 +244,24 @@ if (CLUSTER.isPrimary) {
         }
 
         async onGetToken(message) {
-            if ('authorizationCode' in message) {
-                if (message.authorizationCode in this.authsByKey) {
-                    let authorization = this.authsByKey[message.authorizationCode];
-                    let seed = `${authorization.authCode}:${mkTime().toISOString()}`;
+            console.log(message);
+            if (message.grant_type == 'authorization_code') {
+                if (message.code in this.authsByKey) {
+                    let auth = this.authsByKey[message.code];
+                    console.log(auth);
 
-                    let token = {
-                        access_token: `${Crypto.encodeBase64Url(await Crypto.digestUnsalted(seed))}`,
-                        expires_in: authorization.settings.exipiresIn * 1000,
-                    };
-
-                    Message.reply(message, token);
+                    if (message.redirect_uri == auth.request.redirect_uri) {
+                        if (message.client_id == auth.settings.clientId) {
+                            if (message.client_secret == auth.settings.clientSecret) {
+                                let seed = `${auth.code}:${mkTime().toISOString()}`;
+                                let token = Crypto.encodeBase64Url(await Crypto.digestUnsalted(seed));
+                                let expiresIn = auth.settings.exipiresIn * 1000;
+                                console.log(token);
+                                Message.reply(message, { access_token: token, expires_in: expiresIn });
+                            }
+                        }
+                    }
                 }
-            }
-            else {
             }
 
             Message.reply(message, false);
@@ -275,6 +270,9 @@ if (CLUSTER.isPrimary) {
         async onGetUser(message) {
             console.log('OAuth2Daemon.onGetUser()');
             Message.reply(message, 'chris.wittmann@infosearch.online');
+            // ********************************************************
+            // ** TODO
+            // ********************************************************
         }
 
         async onRequestAuthorization(message) {
@@ -298,8 +296,10 @@ if (CLUSTER.isPrimary) {
 
 
 /*****
- * This extension webx is responsible implementing the a Client on OAuth2
- * protocol.
+ * ****************************************************************************
+ * ****************************************************************************
+ * ****************************************************************************
+ * ****************************************************************************
 *****/
 if (CLUSTER.isWorker) {
     register(class OAuth2Client extends Webx {
