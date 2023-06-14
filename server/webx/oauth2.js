@@ -63,9 +63,10 @@ if (CLUSTER.isWorker) {
                             let oauth2RequestCode = await Ipc.queryPrimary({
                                 messageName: '#OAuth2DaemonRequestAuthorization',
                                 request: params,
+                                settings: settings,
                             });
 
-                            let action = `action=${env.scheme}://${req.header('host')}${this.authenticatedUrl}&code=${Crypto.encodeBase64Url(mkBuffer(oauth2RequestCode).toString('base64'))}`;
+                            let action = `action=${env.scheme}://${req.header('host')}${this.authenticatedUrl}&code=${percentEncode(oauth2RequestCode)}`;
                             rsp.setHeader('Location', `${this.reference.signin}?${action}`);
                             rsp.endStatus(302);
                             return;
@@ -82,29 +83,24 @@ if (CLUSTER.isWorker) {
             let params = req.getVariables();
 
             if ('code' in params) {
-                let request = await Ipc.queryPrimary({
-                    messageName: '#OAuth2DaemonGetRequest',
-                    requestCode: mkBuffer(Crypto.decodeBase64Url(params.code), 'base64').toString(),
+                let authorization = await Ipc.queryPrimary({
+                    messageName: '#OAuth2DaemonConfirmAuthorization',
+                    session: params.session,
+                    requestCode: params.code,
                 });
 
-                if (request) {
-                    let authCode = await Ipc.queryPrimary({
-                        messageName: '#OAuth2DaemonSetAuthorizationCode',
-                        session: request.session,
-                        data: request,
-                    });
+                if (authorization) {
+                    let request = authorization.request;
 
-                    if (authCode) {
-                        if (request.state) {
-                            rsp.setHeader('Location', `${request.redirect_uri}?code=${authCode}&state=${request.state}`);
-                            rsp.endStatus(302);
-                            return;
-                        }
-                        else {
-                            rsp.setHeader('Location', `${request.redirect_uri}?code=${authCode}`);
-                            rsp.endStatus(302);
-                            return;
-                        }
+                    if (authorization.request.state) {
+                        rsp.setHeader('Location', `${request.redirect_uri}?code=${authorization.authCode}&state=${request.state}`);
+                        rsp.endStatus(302);
+                        return;
+                    }
+                    else {
+                        rsp.setHeader('Location', `${request.redirect_uri}?code=${authorization.authCode}`);
+                        rsp.endStatus(302);
+                        return;
                     }
                 }
             }
@@ -123,6 +119,9 @@ if (CLUSTER.isWorker) {
                 else if (req.pathname() == this.tokenUrl) {
                     await this.handleToken(req, rsp);
                 }
+                else if (req.pathname() == this.userUrl) {
+                    await this.handleUser(req, rsp);
+                }
                 else {
                     rsp.endStatus(404);
                 }
@@ -140,6 +139,9 @@ if (CLUSTER.isWorker) {
                 else if (req.pathname() == this.tokenUrl) {
                     await this.handleToken(req, rsp);
                 }
+                else if (req.pathname() == this.userUrl) {
+                    await this.handleUser(req, rsp);
+                }
                 else {
                     rsp.endStatus(404);
                 }
@@ -149,8 +151,36 @@ if (CLUSTER.isWorker) {
         async handleToken(req, rsp) {
             console.log(`\n******* handleToken()`);
             let params = req.getVariables();
+
+            /*
+            if ('oauth2server' in Config) {
+                if (params.client_id in Config.oauth2server) {
+                    let settings = Config.oauth2server[params.client_id];
+
+                    if ('client_secret' in params && params.client_secret == settings.clientSecret) {
+                        let token = await Ipc.queryPrimary({
+                            messageName: '#OAuth2DaemonGetToken',
+                            authorizationCode: params.code,
+                        });
+
+                        //console.log(token);
+
+                        if (token) {
+                            rsp.end(200, 'application/json', toJson(token));
+                            return;
+                        }
+                    }
+                }
+            }
+            */
+
+            rsp.end(200, 'application/json', '{"error":"invalid_request"}');
+        }
+
+        async handleUser(req, rsp) {
+            console.log(`\n******* handleUser()`);
+            let params = req.getVariables();
             console.log(params);
-            console.log(req.headers());
         }
 
         async init() {
@@ -158,9 +188,11 @@ if (CLUSTER.isWorker) {
             this.authorizeUrl = `${this.reference.url}/authorize`;
             this.authenticatedUrl = `${this.reference.url}/authenticated`;
             this.tokenUrl = `${this.reference.url}/token`;
+            this.userUrl = `${this.reference.url}/user`;
             WebLibrary.register(this.authorizeUrl, this);
             WebLibrary.register(this.authenticatedUrl, this);
             WebLibrary.register(this.tokenUrl, this);
+            WebLibrary.register(this.userUrl, this);
         }
     });
 }
@@ -181,14 +213,68 @@ if (CLUSTER.isPrimary) {
             this.authsByTok = {};
         }
 
-        async onGetRequest(message) {
+        async onConfirmAuthorization(message) {
             if (message.requestCode in this.requests) {
                 let request = this.requests[message.requestCode];
                 delete this.requests[message.requestCode];
-                Message.reply(message, request);
+                let authCode = mkBuffer(await Crypto.digestUnsalted('sha256', `${message.session}${mkTime().toISOString()}`)).toString('hex');
+
+                while (authCode in this.authsByKey) {
+                    authCode = mkBuffer(await Crypto.digestUnsalted('sha256', `${message.session}${mkTime().toISOString()}`)).toString('hex');
+                }
+
+                let session = await Ipc.queryPrimary({
+                    messageName: '#SessionManagerGetSession',
+                    session: message.session,
+                });
+
+                let dbc = await dbConnect();
+                let email = await Users.getEmail(dbc, session.user.oid);
+                await dbc.rollback();
+                await dbc.free();
+
+                let authorization = {
+                    authCode: authCode,
+                    request: request.request,
+                    settings: request.settings,
+                    session: message.session,
+                    userOid: session.user.oid,
+                    userFirstName: session.user.firstName,
+                    userLastName: session.user.lastName,
+                    userEmailOid: email.oid,
+                    userEmail: email.addr,
+                    tokens: {},
+                };
+
+                Message.reply(message, authorization);
             }
 
-            Message.reply(message);
+            Message.reply(message, false);
+        }
+
+        async onGetToken(message) {
+            if ('authorizationCode' in message) {
+                if (message.authorizationCode in this.authsByKey) {
+                    let authorization = this.authsByKey[message.authorizationCode];
+                    let seed = `${authorization.authCode}:${mkTime().toISOString()}`;
+
+                    let token = {
+                        access_token: `${Crypto.encodeBase64Url(await Crypto.digestUnsalted(seed))}`,
+                        expires_in: authorization.settings.exipiresIn * 1000,
+                    };
+
+                    Message.reply(message, token);
+                }
+            }
+            else {
+            }
+
+            Message.reply(message, false);
+        }
+
+        async onGetUser(message) {
+            console.log('OAuth2Daemon.onGetUser()');
+            Message.reply(message, 'chris.wittmann@infosearch.online');
         }
 
         async onRequestAuthorization(message) {
@@ -199,24 +285,13 @@ if (CLUSTER.isPrimary) {
                 requestCode = await Crypto.digestUnsalted('sha256', mkTime().toISOString());
             }
 
-            this.requests[requestCode] = Object.assign(new Object(), message.request);
-            Message.reply(message, requestCode);
-        }
-
-        async onSetAuthorizationCode(message) {
-            let authCode = mkBuffer(await Crypto.digestUnsalted('sha256', `${message.session}${mkTime().toISOString()}`)).toString('hex');
-
-            while (authCode in this.authsByKey) {
-                authCode = mkBuffer(await Crypto.digestUnsalted('sha256', `${message.session}${mkTime().toISOString()}`)).toString('hex');
-            }
-
-            this.authsByKey[authCode] = {
-                authCode: authCode,
-                session: message.session,
-                data: message.data,
+            this.requests[requestCode] = {
+                requestCode: requestCode,
+                request: clone(message.request),
+                settings: clone(message.settings),
             };
 
-            Message.reply(message, authCode);
+            Message.reply(message, requestCode);
         }
     });
 }

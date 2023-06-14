@@ -429,6 +429,51 @@ register(async function pauseFor(interval) {
 
 
 /*****
+ * A very simple implementation of the percent-encoding algorithm used for URI
+ * values in the query portion of the URI.
+*****/
+register(function percentEncode(str) {
+    let encoded = [];
+
+    const map = {
+        ':': '%3A',
+        '/': '%2F',
+        '?': '%3F',
+        '#': '%23',
+        '[': '%5B',
+        ']': '%5D',
+        '@': '%40',
+        '!': '%21',
+        '$': '%24',
+        '&': '%26',
+        "'": '%27',
+        '(': '%28',
+        ')': '%29',
+        '*': '%2A',
+        '+': '%2B',
+        ',': '%2C',
+        ';': '%3B',
+        '=': '%3D',
+        '%': '%25',
+        ' ': '%20',
+    };
+
+    for (let i = 0; i < str.length; i++) {
+        let char = str[i];
+
+        if (char in map) {
+            encoded.push(map[char]);
+        }
+        else {
+            encoded.push(char);
+        }
+    }
+
+    return encoded.join('');
+});
+
+
+/*****
  * In general, it's useful to be able to convert characters between camelCase,
  * PascalCase, and snake_case.  In our world, PascalCase is just a special case
  * of camelCase.  This function takes a programming word and splits it apart

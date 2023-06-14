@@ -125,7 +125,7 @@ singleton(class SessionManager extends Daemon {
         Message.reply(message, true);
     }
 
-    async onGetData(message) {
+    async onGetData(message) {;
         if ('session' in message) {
             if (message.session in this.byKey) {
                 let session = this.byKey[message.session];

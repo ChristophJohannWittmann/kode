@@ -113,13 +113,15 @@ register(class HttpRequest {
         return `${this.scheme()}://${this.httpReq.headers.host}${this.httpReq.url}`;
     }
 
+    getVars() {
+        return this.vars;
+    }
+
     getVariables() {
-        if (this.method() == 'POST') {
-            return this.vars;
-        }
-        else {
-            return this.parameters();
-        }
+        let variables = new Object();
+        Object.assign(variables, this.parameters());
+        Object.assign(variables, this.vars);
+        return variables;
     }
 
     hash() {
@@ -204,7 +206,7 @@ register(class HttpRequest {
                     else {
                         this.requestBody = {
                             mime: mime,
-                            value: chunks.map(chunk => chunk.toString()).join('')
+                            value: chunks.map(chunk => chunk.toString()).join(''),
                         };
                     }
                     

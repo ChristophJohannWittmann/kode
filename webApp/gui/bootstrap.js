@@ -135,11 +135,11 @@
             webAppSettings.org = () => sessionState.org;
 
         if (webAppSettings.parameters().action) {
-            let url = `${webAppSettings.parameters().action}?session=${webAppSettings.session()}`;
+            let url = `${webAppSettings.parameters().action}?session=${percentEncode(webAppSettings.session())}`;
 
             for (let key in webAppSettings.parameters()) {
                 if (key != 'action') {
-                    url = `${url}&${key}=${webAppSettings.parameters()[key]}`;
+                    url = `${url}&${key}=${percentEncode(webAppSettings.parameters()[key])}`;
                 }
             }
 

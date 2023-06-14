@@ -85,7 +85,7 @@
             "clientId": "<client-id>",
             "clientSecret": "<client-secret>",
             "scope": "<scope>",
-            "expires": 10,
+            "expiresIn": 10,
             "algorithm": "sha256"
         }
     },
