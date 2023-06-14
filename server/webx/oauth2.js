@@ -164,12 +164,24 @@ if (CLUSTER.isWorker) {
         }
 
         async handleUser(req, rsp) {
-            if (req.hasHeader('bearer')) {
-                let user = await Ipc.queryPrimary({
-                    messageName: '#OAuth2DaemonGetUser',
-                    bearer: req.header('bearer'),
-                });
+            if (req.hasHeader('authorization')) {
+                let auth = req.header('authorization');
+                let match = auth.match(/^ *bearer *()/i);
+
+                if (match) {
+                    let email = await Ipc.queryPrimary({
+                        messageName: '#OAuth2DaemonGetUser',
+                        bearer: match[1],
+                    });
+
+                    if (email) {
+                        rsp.end(200, 'text/plain', email);
+                        return;
+                    }
+                }
             }
+
+            rsp.endStatus(404);
         }
 
         async init() {
@@ -277,13 +289,15 @@ if (CLUSTER.isPrimary) {
 
             if (message.bearer in this.authsByTok) {
                 let tokenObj = this.authsByTok[message.bearer];
-                //Message.reply(message. tokenObj.auth.userEmail);
-
                 // ********************************************************
                 // ********************************************************
+                console.log(tokenObj);
                 Message.reply(message, 'chris.wittmann@infosearch.online');
                 // ********************************************************
                 // ********************************************************
+
+                //Message.reply(message. tokenObj.auth.userEmail);
+                return;
             }
 
             Message.reply(messsage, false);
