@@ -520,7 +520,35 @@ async function workerHook() {
     */
 
     /*
-    let qualtrics = mkQualtrics('all');
-    console.log(await qualtrics.call('whoami'))
+    let response = await Ipc.queryPrimary({
+        messageName: '#EmailSpoolerSpool',
+        bulk: false,
+        reason: 'Test',
+        reasonType: '',
+        reasonOid: 0n,
+        from: 'webmaster@infosearch.online',
+        subject: 'Email Verification',
+        to: 'chris.wittmann@icloud.com',
+        html: `<!DOCTYPE html>
+<html>
+    <head>
+        <title>Email Verification</title>
+    </head>
+    <body>
+        <h1<Please verify your email addresss</h1>
+        <div>
+            Thanks for subscribing to Kide Programmings's product.  This message is to verify your subscription and to
+            ensure that will always honor your privacy and notification preferences.
+        </div>
+        <hr>
+        <div>
+            The Kode Programming Team
+        </div>
+    </body>
+</html>
+        `,
+    });
+
+    console.log(response);
     */
 }

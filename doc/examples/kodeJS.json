@@ -60,23 +60,27 @@
             "workers": 2
         }
     },
-    "smtp": {
+    "email": {
         "agentKey": "null",
         "null": {
-            "title": "Null SMTP Stub",
+            "title": "Null SMTP Agent",
             "agent": "SmtpAgentNull"
         },
+        "smtp": {
+            "title": "SMTP Agent",
+            "agent": "SmtpAgent",
+            "host": "smtp.gmail.com",
+            "port": 465,
+            "username": "someuser@gmail.com",
+            "password": "password",
+            "secure": true
+        },
         "mailgun": {
-            "title": "Mail Gun",
+            "title": "Mail Gun Agent",
             "agent": "SmtpAgentMailGun",
             "url": "/api/mg",
             "webx": "SmtpApiMailGun",
             "apiKey": "<API-KEY-FROM-MAILGUN-ACCOUNT>"
-        },
-        "qualtrics": {
-            "title": "Qualtrics SMTP Agent",
-            "agent": "QualtricsSmtp",
-            "name": "all"
         }
     },
     "oauth2server": {

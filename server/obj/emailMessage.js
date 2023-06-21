@@ -56,8 +56,8 @@ register(class EmailMessage extends DboMsg {
                     await this.buildContent(arg);
 
                     if (arg.category == 'smtprecv') {
-                        const agentKey = Config.smtp.agentKey
-                        const agentConf = Config.smtp[agentKey];
+                        const agentKey = Config.email.agentKey
+                        const agentConf = Config.email[agentKey];
                         this.status = 'closed';
                         this.msgid = arg.msgId;
                         this.agent = `SMTP/${agentKey}; ${agentConf.title}`;

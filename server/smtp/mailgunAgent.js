@@ -33,7 +33,7 @@
 if (CLUSTER.isPrimary) {
     register(class SmtpAgentMailGun {
         constructor() {
-            this.config = Config.smtp.mailgun;
+            this.config = Config.email.mailgun;
             
             return new Promise(async (ok, fail) => {
                 ok(this);
@@ -250,6 +250,6 @@ register(class SmtpApiMailGun extends Webx {
 *****/
 (() => {
     if (CLUSTER.isWorker) {
-        thunk.opts.references.push(Config.smtp.mailgun);
+        thunk.opts.references.push(Config.email.mailgun);
     }
 })();

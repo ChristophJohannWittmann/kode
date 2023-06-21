@@ -175,7 +175,6 @@ if (CLUSTER.isWorker) {
                     });
 
                     if (user) {
-                        console.log(user);
                         rsp.end(200, 'application/json', toJson(user));
                         return;
                     }
@@ -288,20 +287,15 @@ if (CLUSTER.isPrimary) {
         async onGetUser(message) {
             if (message.bearer in this.authsByTok) {
                 let tokenObj = this.authsByTok[message.bearer];
-                // ********************************************************
-                // ********************************************************
-                Message.reply(message, {
-                    name: 'Christoph Wittmann',
-                    given_name: 'Christoph',
-                    family_name: 'Wittmann',
-                    username: 'chris.wittmann@infosearch.online',
-                    preferred_username: 'chris.wittmann@infosearch.online',
-                    email: 'chris.wittmann@infosearch.online',
-                });
-                // ********************************************************
-                // ********************************************************
+                let auth = this.authsByKey[tokenObj.authCode];
 
-                //Message.reply(message. tokenObj.auth.userEmail);
+                Message.reply(message, {
+                    email: `${auth.userEmail}`,
+                    username: `${auth.userFirstName} ${auth.userLastName}`,
+                    firstname: `${auth.userFirstName}`,
+                    lastname: `${auth.userLastName}`,
+                });
+
                 return;
             }
 

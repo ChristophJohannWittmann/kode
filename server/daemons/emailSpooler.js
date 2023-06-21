@@ -41,7 +41,7 @@ singleton(class EmailSpooler extends Daemon {
         this.apiRunning = false;
         this.filterRunning = false;
         this.senderRunning = false;
-        Ipc.on('#ServerReady', message => this.initialize());
+        Ipc.on('#ApplicationHostReady', message => this.initialize());
     }
 
     async apiClicked(dbc, data) {
@@ -138,42 +138,6 @@ singleton(class EmailSpooler extends Daemon {
         });
     }
 
-    async initialize() {
-        this.filters = [
-            await mkSmtpStatusFilter(),
-            await mkSmtpDomainFilter(),
-            await mkSmtpPrivacyDirectFilter(),
-            await mkSmtpNeverBounceFilter(),
-        ];
-
-        this.agentKey = Config.smtp.agentKey
-        this.agentConf = Config.smtp[this.agentKey];
-        await eval(`(async () => this.agentObj = await mk${this.agentConf.agent}())()`);
-
-        let dbc = await dbConnect();
-
-        for (let dboMsg of await selectDboMsg(
-            dbc,
-            `_category='smtpsend' AND _status IN ('spooled', 'filtered')`,
-            `_oid ASC`))
-        {
-            let msg = await mkEmailMessage(dbc, dboMsg);
-
-            if (msg.status == 'spooled') {
-                msg.bulk ? this.spooledBulk.push(msg) : this.spooledFast.push(msg);
-            }
-            else if (msg.status == 'filtered') {
-                msg.bulk ? this.filteredBulk.push(msg) : this.filteredFast.push(msg);
-            }
-        }
-
-        await dbc.rollback();
-        await dbc.free();
-
-        this.touchFiltering();
-        this.touchDelivery();
-    }
-
     async deliver() {
         this.senderRunning = true;
 
@@ -245,6 +209,42 @@ singleton(class EmailSpooler extends Daemon {
         }
 
         this.filterRunning = false;
+    }
+
+    async initialize() {
+        this.filters = [
+            await mkSmtpStatusFilter(),
+            await mkSmtpDomainFilter(),
+            await mkSmtpPrivacyDirectFilter(),
+            await mkSmtpNeverBounceFilter(),
+        ];
+
+        this.agentKey = Config.email.agentKey
+        this.agentConf = Config.email[this.agentKey];
+        await eval(`(async () => this.agentObj = await mk${this.agentConf.agent}())()`);
+
+        let dbc = await dbConnect();
+
+        for (let dboMsg of await selectDboMsg(
+            dbc,
+            `_category='smtpsend' AND _status IN ('spooled', 'filtered')`,
+            `_oid ASC`))
+        {
+            let msg = await mkEmailMessage(dbc, dboMsg);
+
+            if (msg.status == 'spooled') {
+                msg.bulk ? this.spooledBulk.push(msg) : this.spooledFast.push(msg);
+            }
+            else if (msg.status == 'filtered') {
+                msg.bulk ? this.filteredBulk.push(msg) : this.filteredFast.push(msg);
+            }
+        }
+
+        await dbc.rollback();
+        await dbc.free();
+
+        this.touchFiltering();
+        this.touchDelivery();
     }
 
     async onApi(message) {
