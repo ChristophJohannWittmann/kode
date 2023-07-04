@@ -32,7 +32,12 @@
 *****/
 singleton(class Templates {
     async getTemplate(dbc, orgOid, oid) {
-        let dboTemplate = await getDboTemplate(dbc, oid);
+        if (typeof oid == 'bigint' || typeof oid == 'number') {
+            var dboTemplate = await getDboTemplate(dbc, oid);
+        }
+        else if (typeof oid == 'string') {
+            var dboTemplate = await selectOneDboTemplate(dbc, `_name='${oid}'`);
+        }
 
         if (dboTemplate && dboTemplate.ownerOid == orgOid) {
             return mkTemplateObject(dboTemplate);
@@ -104,6 +109,11 @@ register(class TemplateObject extends DboTemplate {
     getSectionContent(name) {
         let section = this.getSections().filter(section => section.name == name)[0];
         return section ? mkBuffer(section.b64, 'base64').toString() : '';
+    }
+
+    getSectionTextTemplate(name) {
+        let section = this.getSections().filter(section => section.name == name)[0];
+        return section ? mkTextTemplate(mkBuffer(section.b64, 'base64').toString()) : '';
     }
 
     getSections() {

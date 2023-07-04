@@ -89,6 +89,10 @@ register(class TextTemplate {
         return this.symbols[symbol];
     }
 
+    getSymbols() {
+        return Object.keys(this.symbols);
+    }
+
     set(symbol, value) {
         if (typeof symbol == 'object') {
             Object.keys(symbol).forEach(key => {
@@ -102,6 +106,10 @@ register(class TextTemplate {
         }
 
         return this;
+    }
+
+    [Symbol.iterator]() {
+        return Object.keys(this.symnbols)[Symbol.iterator]();
     }
 
     toString() {

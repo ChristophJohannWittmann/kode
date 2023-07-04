@@ -112,6 +112,13 @@ singleton(class Users {
     }
 
     async createUser(dbc, userData) {
+        let verifyUserTemplate = await Templates.getTemplate(dbc, 0n, 'Verify Email');
+        console.log(verifyUserTemplate.getSectionTextTemplate('Html'));
+        console.log(verifyUserTemplate.getSectionTextTemplate('Html').getSymbols());
+
+        return new Promise(()=>{});
+        // **********************************************************************************
+        // **********************************************************************************
         if (!userData.email.trim()) {
             return { ok: false, feedback: 'fwUserEditorNoEmail' };
         }
@@ -270,7 +277,13 @@ register(class User extends DboUser {
     }
 
     async modify(dbc, userData) {
-        console.log('TODO -- server/obj/user.js User.modify()')
+        this.firstName = userData.firstName;
+        this.lastName = userData.lastName;
+        this.title = userData.title;
+        this.suffix = userData.suffix;
+        this.status = userData.status;
+        this.authType = userData.authType;
+        await this.save(dbc);
     }
 
     async setGrants(dbc, modifiedGrants) {
